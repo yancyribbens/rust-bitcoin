@@ -68,14 +68,9 @@ impl FeeRate {
         self.0
     }
 
-    /// Converts to sat/vB rounding down.
-    pub const fn to_sat_per_vb_floor(self) -> u64 {
-        self.0 / (1000 / 4)
-    }
-
-    /// Converts to sat/vB rounding up.
-    pub const fn to_sat_per_vb_ceil(self) -> u64 {
-        (self.0 + (1000 / 4 - 1)) / (1000 / 4)
+    /// Converts to sat/vB.
+    pub const fn to_sat_per_vb(self) -> u64 {
+        self.0 * (1000 / 4)
     }
 
     /// Checked multiplication.
