@@ -79,6 +79,8 @@ cargo update -p serde --precise 1.0.156
 cargo update -p half --precise 1.7.1
 ```
 
+This information is sourced from `./bitcoin/contrib/test.sh`.
+
 ## External dependencies
 
 We integrate with a few external libraries, most notably `serde`. These
@@ -122,6 +124,15 @@ You can run tests with:
 ```
 cargo test
 ```
+
+To build the MSRV:
+
+```
+cp Cargo-recent.lock ./Cargo.lock
+cargo +1.48 build
+```
+
+See `contrib/test.sh` for more details about build instructions.
 
 Please refer to the [`cargo` documentation](https://doc.rust-lang.org/stable/cargo/) for more
 detailed instructions.
