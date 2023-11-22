@@ -143,16 +143,16 @@ mod tests {
 
     #[test]
     fn from_vb() {
-        let vb = Weight::from_vb(1).expect("expected weight unit");
+        let wu = Weight::from_vb(1).expect("expected weight unit");
         assert_eq!(Weight(4), vb);
 
-        let vb = Weight::from_vb(u64::MAX);
+        let wu = Weight::from_vb(u64::MAX);
         assert_eq!(None, vb);
     }
 
     #[test]
     fn from_vb_unchecked() {
-        let vb = Weight::from_vb_unchecked(1);
+        let wu = Weight::from_vb_unchecked(1);
         assert_eq!(Weight(4), vb);
     }
 
