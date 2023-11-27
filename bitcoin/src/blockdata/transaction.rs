@@ -22,6 +22,7 @@ use crate::blockdata::locktime::absolute::{self, Height, Time};
 use crate::blockdata::locktime::relative;
 use crate::blockdata::script::{Script, ScriptBuf};
 use crate::blockdata::witness::Witness;
+use crate::blockdata::FeeRate;
 use crate::consensus::{encode, Decodable, Encodable};
 use crate::hash_types::{Txid, Wtxid};
 use crate::internal_macros::impl_consensus_encoding;
@@ -31,7 +32,7 @@ use crate::script::Push;
 #[cfg(doc)]
 use crate::sighash::{EcdsaSighashType, TapSighashType};
 use crate::string::FromHexStr;
-use crate::{Amount, VarInt};
+use crate::{Amount, SignedAmount, VarInt};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[cfg(feature = "bitcoinconsensus")]
@@ -214,8 +215,6 @@ impl TxIn {
     /// Returns the input base weight.
     ///
     /// Base weight excludes the witness and script.
-    // to be used in up-coming commit to add effective_value()
-    #[allow(dead_code)]
     const BASE_WEIGHT: Weight =
         Weight::from_vb_unwrap(OutPoint::SIZE as u64 + Sequence::SIZE as u64);
 
@@ -1149,6 +1148,27 @@ impl From<&Transaction> for Wtxid {
     fn from(tx: &Transaction) -> Wtxid { tx.wtxid() }
 }
 
+/// Returns the effective_value `Amount` returning `None` on overflow.
+///
+/// The effective value is the value of this output minus the amount to spend it.  That is,
+/// the effective_value can be calculated as value - (fee_rate * weight).
+///
+/// # Arguments
+///
+/// * `fee_rate` - `FeeRate`in sat/kwu
+/// * `satisfaction_weight` - output weight once the spending conditions are satisfied
+// Note, this method could return Result instead of Option for richer errors.
+pub fn effective_value(
+    fee_rate: FeeRate,
+    satisfaction_weight: Weight,
+    value: Amount
+) -> Option<SignedAmount> {
+    let weight = satisfaction_weight.checked_add(TxIn::BASE_WEIGHT)?;
+    let signed_input_fee = fee_rate.checked_mul_by_weight(weight)?.to_signed().ok()?;
+    value.to_signed().ok()?.checked_sub(signed_input_fee)
+}
+
+
 /// Predicts the weight of a to-be-constructed transaction.
 ///
 /// This function computes the weight of a transaction which is not fully known. All that is needed
@@ -1966,6 +1986,41 @@ mod tests {
         let hex = "0xzb93";
         let result = Sequence::from_hex_str(hex);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn effective_value_happy_path() {
+        let value = Amount::from_str("1 cBTC").unwrap();
+        let fee_rate = FeeRate::from_sat_per_kwu(10);
+        let satisfaction_weight = Weight::from_wu(204);
+        let effective_value = effective_value(
+            fee_rate, 
+            satisfaction_weight,
+            value
+        ).unwrap();
+
+        // 10 sat/kwu * (204wu + BASE_WEIGHT) = 4 sats
+        let expected_fee = SignedAmount::from_str("4 sats").unwrap();
+        let expected_effective_value = value.to_signed().unwrap() - expected_fee;
+        assert_eq!(effective_value, expected_effective_value);
+    }
+
+    #[test]
+    fn effective_value_fee_rate_does_not_overflow() {
+        let eff_value = effective_value(FeeRate::MAX, Weight::ZERO, Amount::ZERO);
+        assert!(eff_value.is_none());
+    }
+
+    #[test]
+    fn effective_value_weight_does_not_overflow() {
+        let eff_value = effective_value(FeeRate::ZERO, Weight::MAX, Amount::ZERO);
+        assert!(eff_value.is_none());
+    }
+
+    #[test]
+    fn effective_value_value_does_not_overflow() {
+        let eff_value = effective_value(FeeRate::ZERO, Weight::ZERO, Amount::MAX);
+        assert!(eff_value.is_none());
     }
 
     #[test]
