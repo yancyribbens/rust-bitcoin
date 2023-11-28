@@ -211,6 +211,14 @@ pub struct TxIn {
 }
 
 impl TxIn {
+    /// Returns the input base weight.
+    ///
+    /// Base weight excludes the witness and script.
+    // to be used in up-coming commit to add effective_value()
+    #[allow(dead_code)]
+    const BASE_WEIGHT: Weight =
+        Weight::from_vb_unwrap(OutPoint::SIZE as u64 + Sequence::SIZE as u64);
+
     /// Returns true if this input enables the [`absolute::LockTime`] (aka `nLockTime`) of its
     /// [`Transaction`].
     ///
