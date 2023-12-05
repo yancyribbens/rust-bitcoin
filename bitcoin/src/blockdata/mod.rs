@@ -20,5 +20,6 @@ pub mod witness;
 #[doc(inline)]
 pub use self::{
     fee_rate::FeeRate,
-    weight::Weight
+    weight::Weight,
+    transaction::effective_value
 };
