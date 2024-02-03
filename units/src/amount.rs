@@ -864,6 +864,20 @@ impl Amount {
     /// Returns [None] if overflow occurred.
     pub fn checked_rem(self, rhs: u64) -> Option<Amount> { self.0.checked_rem(rhs).map(Amount) }
 
+    /// Unchecked addition.
+    ///
+    /// Panics in debug mode, wraps in release mode.
+    pub fn unchecked_add(self, rhs: Amount) -> Amount {
+        Self(self.0 + rhs.0)
+    }
+
+    /// Unchecked subtraction.
+    ///
+    /// Panics in debug mode, wraps in release mode.
+    pub fn unchecked_sub(self, rhs: Amount) -> Amount {
+        Self(self.0 - rhs.0)
+    }
+
     /// Convert to a signed amount.
     pub fn to_signed(self) -> Result<SignedAmount, ParseAmountError> {
         if self.to_sat() > SignedAmount::MAX.to_sat() as u64 {
@@ -1227,6 +1241,20 @@ impl SignedAmount {
     /// Returns [None] if overflow occurred.
     pub fn checked_rem(self, rhs: i64) -> Option<SignedAmount> {
         self.0.checked_rem(rhs).map(SignedAmount)
+    }
+
+    /// Unchecked addition.
+    ///
+    /// Panics in debug mode, wraps in release mode.
+    pub fn unchecked_add(self, rhs: SignedAmount) -> SignedAmount {
+        Self(self.0 + rhs.0)
+    }
+
+    /// Unchecked subtraction.
+    ///
+    /// Panics in debug mode, wraps in release mode.
+    pub fn unchecked_sub(self, rhs: SignedAmount) -> SignedAmount {
+        Self(self.0 - rhs.0)
     }
 
     /// Subtraction that doesn't allow negative [SignedAmount]s.
