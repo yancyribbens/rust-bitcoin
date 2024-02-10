@@ -110,6 +110,16 @@ impl Weight {
     /// Computes `self - rhs` returning `None` if an overflow occurred.
     pub fn checked_sub(self, rhs: Self) -> Option<Self> { self.0.checked_sub(rhs.0).map(Self) }
 
+    /// Unchecked addition.
+    ///
+    /// Computes `self + rhs`.  Panics in debug mode, wraps in release mode.
+    pub fn unchecked_add(self, rhs: Self) -> Self { Self(self.0 + rhs.0) }
+
+    /// Unchecked subtraction.
+    ///
+    /// Computes `self - rhs`.  Panics in debug mode, wraps in release mode.
+    pub fn unchecked_sub(self, rhs: Self) -> Self { Self(self.0 - rhs.0) }
+
     /// Checked multiplication.
     ///
     /// Computes `self * rhs` returning `None` if an overflow occurred.
@@ -258,6 +268,18 @@ mod tests {
         let result = Weight::MAX.scale_by_witness_factor();
         assert_eq!(None, result);
     }
+
+    #[test]
+    #[cfg(not(debug_assertions))]
+    fn unchecked_add() {
+        let r = Weight(1).unchecked_add(Weight(1));
+        assert_eq!(r, Weight(2))
+    }
+
+    //#[test]
+    //#[cfg(not(debug_assertions))]
+    //fn unchecked_sub() {
+    //}
 }
 
 impl From<Weight> for u64 {
