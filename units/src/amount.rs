@@ -1906,6 +1906,15 @@ mod tests {
         assert_eq!(ssat(-6).checked_div(2), Some(ssat(-3)));
     }
 
+    #[test]
+    fn unchecked_arithmetic() {
+        let sat = Amount::from_sat;
+        let ssat = SignedAmount::from_sat;
+
+        assert_eq!(SignedAmount::MAX.unchecked_add(ssat(1)), None);
+        assert_eq!(SignedAmount::MIN.unchecked_sub(ssat(1)), None);
+    }
+
     #[cfg(feature = "alloc")]
     #[test]
     fn floating_point() {
