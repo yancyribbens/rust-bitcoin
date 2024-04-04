@@ -2412,6 +2412,14 @@ mod tests {
     }
 
     #[test]
+    fn tx_in_weight_predict() {
+        let tx_in = TxIn::default();
+        let input_script_len = tx_in.script_sig.len();
+        let witness_element_lengths = tx_in.witness.witness_element_lengths; // how to compute?
+        let i = InputWeightPrediction::new(input_script_len, witness_content);
+    }
+
+    #[test]
     fn sequence_debug_output() {
         let seq = Sequence::from_seconds_floor(1000);
         println!("{:?}", seq)
