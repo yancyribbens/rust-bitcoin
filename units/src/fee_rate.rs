@@ -11,11 +11,14 @@ use serde::{Deserialize, Serialize};
 use crate::amount::Amount;
 use crate::weight::Weight;
 
+use arbitrary::Arbitrary;
+
 /// Represents fee rate.
 ///
 /// This is an integer newtype representing fee rate in `sat/kwu`. It provides protection against mixing
 /// up the types as well as basic formatting features.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Arbitrary)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(transparent))]
 pub struct FeeRate(u64);

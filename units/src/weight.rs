@@ -8,6 +8,8 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use arbitrary::Arbitrary;
+
 /// The factor that non-witness serialization data is multiplied by during weight calculation.
 pub const WITNESS_SCALE_FACTOR: usize = 4;
 
@@ -18,6 +20,7 @@ pub const WITNESS_SCALE_FACTOR: usize = 4;
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(transparent))]
+#[derive(Arbitrary)]
 pub struct Weight(u64);
 
 impl Weight {

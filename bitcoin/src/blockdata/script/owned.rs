@@ -19,6 +19,8 @@ use crate::key::{
 use crate::prelude::*;
 use crate::taproot::TapNodeHash;
 
+use arbitrary::Arbitrary;
+
 /// An owned, growable script.
 ///
 /// `ScriptBuf` is the most common script type that has the ownership over the contents of the
@@ -29,6 +31,7 @@ use crate::taproot::TapNodeHash;
 ///
 /// [deref coercions]: https://doc.rust-lang.org/std/ops/trait.Deref.html#more-on-deref-coercion
 #[derive(Default, Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
+#[derive(Arbitrary)]
 pub struct ScriptBuf(pub(in crate::blockdata::script) Vec<u8>);
 
 impl ScriptBuf {

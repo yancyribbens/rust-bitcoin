@@ -18,6 +18,8 @@ use ::serde::{Deserialize, Serialize};
 use internals::error::InputString;
 use internals::write_err;
 
+use arbitrary::Arbitrary;
+
 /// A set of denominations in which amounts can be expressed.
 ///
 /// # Examples
@@ -853,6 +855,7 @@ fn fmt_satoshi_in(
 ///
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Arbitrary)]
 pub struct Amount(u64);
 
 impl Amount {

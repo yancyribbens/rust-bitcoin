@@ -18,19 +18,23 @@ use internals::write_err;
 use io::{BufRead, Write};
 use units::parse;
 
-use super::Weight;
+use units::Weight;
 use crate::blockdata::locktime::absolute::{self, Height, Time};
 use crate::blockdata::locktime::relative::{self, TimeOverflowError};
 use crate::blockdata::script::{Script, ScriptBuf};
 use crate::blockdata::witness::Witness;
-use crate::blockdata::FeeRate;
+use units::FeeRate;
 use crate::consensus::{encode, Decodable, Encodable};
 use crate::error::{ContainsPrefixError, MissingPrefixError, PrefixedHexError, UnprefixedHexError};
 use crate::internal_macros::{impl_consensus_encoding, impl_hashencode};
 use crate::prelude::*;
 #[cfg(doc)]
 use crate::sighash::{EcdsaSighashType, TapSighashType};
-use crate::{Amount, SignedAmount, VarInt};
+use units::Amount;
+use units::SignedAmount;
+use crate::VarInt;
+
+use arbitrary::Arbitrary;
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[cfg(feature = "bitcoinconsensus")]
@@ -540,7 +544,7 @@ units::impl_parse_str_from_int_infallible!(Sequence, u32, from_consensus);
 /// ### Bitcoin Core References
 ///
 /// * [CTxOut definition](https://github.com/bitcoin/bitcoin/blob/345457b542b6a980ccfbc868af0970a6f91d1b82/src/primitives/transaction.h#L148)
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Arbitrary)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(crate = "actual_serde"))]
 pub struct TxOut {
@@ -1309,10 +1313,10 @@ impl From<&Transaction> for Wtxid {
 /// * `fee_rate` - the fee rate of the transaction being created.
 /// * `satisfaction_weight` - satisfied spending conditions weight.
 pub fn effective_value(
-    fee_rate: FeeRate,
-    satisfaction_weight: Weight,
-    value: Amount,
-) -> Option<SignedAmount> {
+    fee_rate: units::FeeRate,
+    satisfaction_weight: units::Weight,
+    value: units::Amount,
+) -> Option<units::SignedAmount> {
     let weight = satisfaction_weight.checked_add(TxIn::BASE_WEIGHT)?;
     let signed_input_fee = fee_rate.checked_mul_by_weight(weight)?.to_signed().ok()?;
     value.to_signed().ok()?.checked_sub(signed_input_fee)
