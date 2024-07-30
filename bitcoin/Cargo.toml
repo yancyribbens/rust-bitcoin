@@ -39,6 +39,7 @@ ordered = { version = "0.2.0", optional = true }
 bitcoinconsensus = { version = "0.106.0+26", default-features = false, optional = true }
 
 serde = { version = "1.0.103", default-features = false, features = [ "derive", "alloc" ], optional = true }
+proptest = "=1.2.0"
 
 [dev-dependencies]
 internals = { package = "bitcoin-internals", version = "0.3.0", features = ["test-serde"] }
