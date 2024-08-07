@@ -851,6 +851,22 @@ fn fmt_satoshi_in(
 /// zero is considered an underflow and will cause a panic if you're not using
 /// the checked arithmetic methods.
 ///
+use proptest::prelude::Arbitrary;
+use proptest::prelude::*;
+use proptest::strategy;
+use proptest::strategy::Map;
+
+use proptest::arbitrary;
+
+impl Arbitrary for Amount {
+    type Parameters = <u64 as Arbitrary>::Parameters;
+    type Strategy = Map<<u64 as Arbitrary>::Strategy, fn(u64) -> Amount>;
+
+    fn arbitrary_with(p: Self::Parameters) -> Self::Strategy {
+        any_with::<u64> (p).prop_map(|a| Amount { 0: a })
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Amount(u64);
