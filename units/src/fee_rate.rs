@@ -11,6 +11,21 @@ use serde::{Deserialize, Serialize};
 use crate::amount::Amount;
 use crate::weight::Weight;
 
+use proptest::arbitrary;
+use proptest::prelude::*;
+use proptest::strategy;
+use proptest::strategy::Map;
+
+impl Arbitrary for FeeRate {
+    type Parameters = <u64 as Arbitrary>::Parameters;
+    type Strategy = Map<<u64 as Arbitrary>::Strategy, fn(u64) -> FeeRate>;
+
+    #[inline(always)]
+    fn arbitrary_with(p: Self::Parameters) -> Self::Strategy {
+        any_with::<u64> (p).prop_map(|a| FeeRate { 0: a })
+    }
+}
+
 /// Represents fee rate.
 ///
 /// This is an integer newtype representing fee rate in `sat/kwu`. It provides protection against mixing
