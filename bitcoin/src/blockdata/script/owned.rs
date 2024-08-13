@@ -19,6 +19,22 @@ use crate::key::{
 use crate::prelude::*;
 use crate::taproot::TapNodeHash;
 
+use proptest::prelude::Arbitrary;
+use proptest::prelude::*;
+use proptest::strategy;
+use proptest::strategy::Map;
+
+use proptest::arbitrary;
+
+impl Arbitrary for ScriptBuf {
+    type Parameters = <Vec<u8> as Arbitrary>::Parameters;
+    type Strategy = Map<<Vec<u8> as Arbitrary>::Strategy, fn(Vec<u8>) -> ScriptBuf>;
+
+    fn arbitrary_with(p: Self::Parameters) -> Self::Strategy {
+        any_with::<Vec<u8>> (p).prop_map(|a| ScriptBuf { 0: a })
+    }
+}
+
 /// An owned, growable script.
 ///
 /// `ScriptBuf` is the most common script type that has the ownership over the contents of the

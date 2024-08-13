@@ -851,7 +851,6 @@ fn fmt_satoshi_in(
 /// zero is considered an underflow and will cause a panic if you're not using
 /// the checked arithmetic methods.
 ///
-use proptest::prelude::Arbitrary;
 use proptest::prelude::*;
 use proptest::strategy;
 use proptest::strategy::Map;
