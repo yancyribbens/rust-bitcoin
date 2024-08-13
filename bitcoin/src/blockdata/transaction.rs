@@ -37,6 +37,10 @@ use crate::{Amount, SignedAmount, VarInt};
 #[doc(inline)]
 pub use crate::consensus::validation::TxVerifyError;
 
+use proptest::prelude::*;
+use proptest::strategy;
+use proptest::strategy::Map;
+
 hashes::hash_newtype! {
     /// A bitcoin transaction hash/transaction ID.
     ///
@@ -528,6 +532,17 @@ impl fmt::Debug for Sequence {
 }
 
 units::impl_parse_str_from_int_infallible!(Sequence, u32, from_consensus);
+
+impl Arbitrary for TxOut {
+    type Parameters =(<Amount as Arbitrary>::Parameters, <ScriptBuf as Arbitrary>::Parameters);
+    type Strategy = Map<(<Amount as Arbitrary>::Strategy, <ScriptBuf as Arbitrary>::Strategy), fn((Amount, ScriptBuf)) -> TxOut>;
+
+    #[inline(always)]
+    fn arbitrary_with((p0, p1): Self::Parameters) -> Self::Strategy {
+        Strategy::prop_map(
+            (any_with::<Amount> (p0), any_with::<ScriptBuf> (p1)), | (t0, t1) | TxOut { value : t0, script_pubkey : t1 })
+        }
+}
 
 /// Bitcoin transaction output.
 ///
