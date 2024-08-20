@@ -21,6 +21,9 @@ use internals::write_err;
 #[cfg(feature = "alloc")]
 use crate::{FeeRate, Weight};
 
+#[cfg(feature = "arbitrary")]
+use arbitrary::{Arbitrary, Unstructured};
+
 /// A set of denominations in which amounts can be expressed.
 ///
 /// # Examples
@@ -1911,6 +1914,14 @@ pub mod serde {
                 d.deserialize_option(VisitOptAmt::<A>(PhantomData))
             }
         }
+    }
+}
+
+#[cfg(feature = "arbitrary")]
+impl<'a> Arbitrary<'a> for Amount {
+    fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
+        let a = u64::arbitrary(u)?;
+        Ok(Amount(a))
     }
 }
 
