@@ -1042,19 +1042,31 @@ impl Amount {
     /// Returns [None] if overflow occurred.
     pub fn checked_div(self, rhs: u64) -> Option<Amount> { self.0.checked_div(rhs).map(Amount) }
 
-    /// Checked weight division.
+    /// Checked weight ceiling division.
     ///
     /// Be aware that integer division loses the remainder if no exact division
     /// can be made.  This method rounds up ensuring the transaction fee-rate is
-    /// sufficient.  If you wish to round-down, use the unchecked version instead.
+    /// sufficient.  See also [`Amount::checked_div_by_weight_floor`].
     ///
     /// [`None`] is returned if an overflow occurred.
     #[cfg(feature = "alloc")]
-    pub fn checked_div_by_weight(self, rhs: Weight) -> Option<FeeRate> {
-        let sats = self.0.checked_mul(1000)?;
+    pub fn checked_div_by_weight_ceil(self, rhs: Weight) -> Option<FeeRate> {
+        let sats = self.0.checked_mul(1_000)?;
         let wu = rhs.to_wu();
 
         let fee_rate = sats.checked_add(wu.checked_sub(1)?)?.checked_div(wu)?;
+        Some(FeeRate::from_sat_per_kwu(fee_rate))
+    }
+
+    /// Checked weight floor division.
+    ///
+    /// Be aware that integer division loses the remainder if no exact division
+    /// can be made.  See also [`Amount::checked_div_by_weight_ceil`].
+    ///
+    /// Returns [`None`] if overflow occurred.
+    #[cfg(feature = "alloc")]
+    pub fn checked_div_by_weight_floor(self, rhs: Weight) -> Option<FeeRate> {
+        let fee_rate = self.0.checked_mul(1_000)?.checked_div(rhs.to_wu())?;
         Some(FeeRate::from_sat_per_kwu(fee_rate))
     }
 
@@ -2138,26 +2150,44 @@ mod tests {
 
     #[cfg(feature = "alloc")]
     #[test]
-    fn amount_checked_div_by_weight() {
+    fn amount_checked_div_by_weight_ceil() {
         let weight = Weight::from_kwu(1).unwrap();
         let fee_rate = Amount::from_sat(1)
-            .checked_div_by_weight(weight)
+            .checked_div_by_weight_ceil(weight)
             .unwrap();
         // 1 sats / 1,000 wu = 1 sats/kwu
         assert_eq!(fee_rate, FeeRate::from_sat_per_kwu(1));
 
         let weight = Weight::from_wu(381);
         let fee_rate = Amount::from_sat(329)
-            .checked_div_by_weight(weight)
+            .checked_div_by_weight_ceil(weight)
             .unwrap();
         // 329 sats / 381 wu = 863.5 sats/kwu
         // round up to 864
         assert_eq!(fee_rate, FeeRate::from_sat_per_kwu(864));
 
-        let fee_rate = Amount::MAX.checked_div_by_weight(weight);
+        let fee_rate = Amount::MAX.checked_div_by_weight_ceil(weight);
         assert!(fee_rate.is_none());
 
-        let fee_rate = Amount::ONE_SAT.checked_div_by_weight(Weight::ZERO);
+        let fee_rate = Amount::ONE_SAT.checked_div_by_weight_ceil(Weight::ZERO);
+        assert!(fee_rate.is_none());
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn amount_checked_div_by_weight_floor() {
+        let weight = Weight::from_kwu(1).unwrap();
+        let fee_rate = Amount::from_sat(1).checked_div_by_weight_floor(weight).unwrap();
+        // 1 sats / 1,000 wu = 1 sats/kwu
+        assert_eq!(fee_rate, FeeRate::from_sat_per_kwu(1));
+        let weight = Weight::from_wu(381);
+        let fee_rate = Amount::from_sat(329).checked_div_by_weight_floor(weight).unwrap();
+        // 329 sats / 381 wu = 863.5 sats/kwu
+        // round down to 863
+        assert_eq!(fee_rate, FeeRate::from_sat_per_kwu(863));
+        let fee_rate = Amount::MAX.checked_div_by_weight_floor(weight);
+        assert!(fee_rate.is_none());
+        let fee_rate = Amount::ONE_SAT.checked_div_by_weight_floor(Weight::ZERO);
         assert!(fee_rate.is_none());
     }
 
