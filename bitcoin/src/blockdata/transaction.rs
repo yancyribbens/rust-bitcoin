@@ -147,6 +147,9 @@ crate::internal_macros::define_extension_trait! {
         ///
         /// Total size includes the witness data (for base size see [`Self::base_size`]).
         fn total_size(&self) -> usize { self.base_size() + self.witness.size() }
+
+        /// Return the corresponding TxOut value to this TxIn.
+        fn output_value(&self) -> Amount { Amount::ZERO }
     }
 }
 
