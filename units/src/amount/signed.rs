@@ -209,7 +209,7 @@ impl SignedAmount {
     pub fn abs(self) -> SignedAmount { SignedAmount(self.0.abs()) }
 
     /// Gets the absolute value of this [`SignedAmount`] returning [`Amount`].
-    pub fn unsigned_abs(self) -> Amount { Amount::from_sat(self.0.unsigned_abs()) }
+    pub fn unsigned_abs(self) -> Amount { Amount::from_sat_unchecked(self.0.unsigned_abs()) }
 
     /// Returns a number representing sign of this [`SignedAmount`].
     ///
@@ -334,7 +334,7 @@ impl SignedAmount {
         if self.is_negative() {
             Err(OutOfRangeError::negative())
         } else {
-            Ok(Amount::from_sat(self.to_sat() as u64))
+            Ok(Amount::from_sat_unchecked(self.to_sat() as u64))
         }
     }
 }

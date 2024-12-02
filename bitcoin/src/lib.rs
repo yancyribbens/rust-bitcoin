@@ -219,7 +219,7 @@ pub mod amount {
     impl Decodable for Amount {
         #[inline]
         fn consensus_decode<R: BufRead + ?Sized>(r: &mut R) -> Result<Self, encode::Error> {
-            Ok(Amount::from_sat(Decodable::consensus_decode(r)?))
+            Ok(Amount::from_sat_unchecked(Decodable::consensus_decode(r)?))
         }
     }
 

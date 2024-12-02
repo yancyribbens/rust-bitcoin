@@ -79,7 +79,7 @@ impl SerdeAmount for Amount {
         u64::serialize(&self.to_sat(), s)
     }
     fn des_sat<'d, D: Deserializer<'d>>(d: D, _: private::Token) -> Result<Self, D::Error> {
-        Ok(Amount::from_sat(u64::deserialize(d)?))
+        Ok(Amount::from_sat_unchecked(u64::deserialize(d)?))
     }
     #[cfg(feature = "alloc")]
     fn ser_btc<S: Serializer>(self, s: S, _: private::Token) -> Result<S::Ok, S::Error> {
