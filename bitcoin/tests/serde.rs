@@ -107,18 +107,6 @@ fn serde_regression_txin() {
     assert_eq!(got, want)
 }
 
-// TODO fix
-//#[test]
-//fn serde_regression_txout() {
-    //let txout = TxOut {
-        //value: Amount::from_sat_unchecked(0xDEADBEEFCAFEBABE),
-        //script_pubkey: ScriptBuf::from(vec![0u8, 1u8, 2u8]),
-    //};
-    //let got = serialize(&txout).unwrap();
-    //let want = include_bytes!("data/serde/txout_bincode") as &[_];
-    //assert_eq!(got, want)
-//}
-
 #[test]
 fn serde_regression_transaction() {
     let ser = include_bytes!("data/serde/transaction_ser");
