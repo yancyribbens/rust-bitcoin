@@ -626,7 +626,17 @@ fn to_from_string_in() {
 
     assert_eq!(sa_str(&sa_sat(-1).to_string_in(D::MicroBitcoin), D::MicroBitcoin), Ok(sa_sat(-1)));
 
-    //TODO fix
+    // This now panics because SignedAmount::unsigned_abs() calls from_sats_unchecked which panics
+    // due to lowering the MAX to 21 mill
+    //
+    //bitcoin_units::amount::unsigned::Amount::from_sat_unchecked
+    //at ./src/amount/unsigned.rs:87:13
+    //bitcoin_units::amount::signed::SignedAmount::unsigned_abs
+    //at ./src/amount/signed.rs:212:43
+    //bitcoin_units::amount::signed::SignedAmount::display_in
+    //at ./src/amount/signed.rs:175:23
+    //bitcoin_units::amount::signed::SignedAmount::to_string_in
+    //at ./src/amount/signed.rs:197:64
     //assert_eq!(
         //sa_str(&sa_sat(i64::MAX).to_string_in(D::Satoshi), D::MicroBitcoin),
         //Err(OutOfRangeError::too_big(true).into())
