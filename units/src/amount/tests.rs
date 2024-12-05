@@ -225,10 +225,17 @@ fn floating_point() {
         Err(OutOfRangeError::too_big(false).into())
     );
 
-    // TODO fix
+    // Should now panic,
+    // calls:
+    // 1 to_float_in
+    // 2 to_string_in
+    // 3 display_in
+    // 4) unsigned_abs
+    // now unsigned_abs will panic if greater than 21million where before it only panics if abouve
+    // u64 MAX
     //assert_eq!(
         //sf(SignedAmount::MAX.to_float_in(D::Satoshi) + 1.0, D::Satoshi),
-        //Err(OutOfRangeError::too_big(true).into())
+        //Err(OutOfRangeError::too_big(false).into())
     //);
 
     let btc = move |f| SignedAmount::from_btc(f).unwrap();
@@ -496,7 +503,6 @@ check_format_non_negative_show_denom! {
     btc_check_fmt_non_negative_show_denom_align_2, 1, "{:^16}", " 0.00000001";
 }
 
-// TODO fix
 //#[test]
 //fn test_unsigned_signed_conversion() {
     //let sa = SignedAmount::from_sat;
