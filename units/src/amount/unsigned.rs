@@ -72,8 +72,13 @@ impl Amount {
     pub const SIZE: usize = 8; // Serialized length of a u64.
 
     /// Constructs a new [`Amount`] with satoshi precision and the given number of satoshis.
-    #[deprecated(since = "TBD", note = "use `Amount::from_sat_unchecked` instead")]
-    pub const fn from_sat(satoshi: u64) -> Amount { Amount(satoshi) }
+    pub const fn from_sat(satoshi: u64) -> Option<Amount> {
+        if satoshi <= Self::MAX.0 {
+            Some(Amount(satoshi))
+        } else {
+            None
+        }
+    }
 
     /// Constructs a new [`Amount`] with satoshi precision and the given number of satoshis.
     ///
