@@ -503,19 +503,18 @@ check_format_non_negative_show_denom! {
     btc_check_fmt_non_negative_show_denom_align_2, 1, "{:^16}", " 0.00000001";
 }
 
-//#[test]
-//fn test_unsigned_signed_conversion() {
-    //let sa = SignedAmount::from_sat;
-    //let ua = Amount::from_sat_unchecked;
-    //let max_sats: u64 = Amount::MAX.to_sat();
+#[test]
+fn test_unsigned_signed_conversion() {
+    let sa = SignedAmount::from_sat;
+    let ua = Amount::from_sat_unchecked;
+    let max_sats: u64 = Amount::MAX.to_sat();
 
-    //assert_eq!(ua(max_sats).to_signed(), Ok(sa(max_sats as i64)));
-    //assert_eq!(ua(i64::MAX as u64 + 1).to_signed(), Err(OutOfRangeError::too_big(true)));
+    assert_eq!(ua(max_sats).to_signed(), Ok(sa(max_sats as i64)));
 
-    //assert_eq!(sa(max_sats as i64).to_unsigned(), Ok(ua(max_sats)));
+    assert_eq!(sa(max_sats as i64).to_unsigned(), Ok(ua(max_sats)));
 
-    //assert_eq!(sa(max_sats as i64).to_unsigned().unwrap().to_signed(), Ok(sa(max_sats as i64)));
-//}
+    assert_eq!(sa(max_sats as i64).to_unsigned().unwrap().to_signed(), Ok(sa(max_sats as i64)));
+}
 
 #[test]
 #[allow(clippy::inconsistent_digit_grouping)] // Group to show 100,000,000 sats per bitcoin.
