@@ -171,9 +171,8 @@ impl SignedAmount {
 
     /// Constructs a new object that implements [`fmt::Display`] using specified denomination.
     ///
-    /// # Panics
-    ///
-    /// On values greater than [`Amount::MAX_MONEY`].
+    /// TODO this currently panics but it shouldn't because now SignedAmount is greater than Amount
+    /// because Amount::MAX is not MAX_MONEY
     pub fn display_in(self, denomination: Denomination) -> Display {
         Display {
             sats_abs: self.unsigned_abs().to_sat(),
@@ -187,9 +186,8 @@ impl SignedAmount {
     /// This will use BTC for values greater than or equal to 1 BTC and satoshis otherwise. To
     /// avoid confusion the denomination is always shown.
     ///
-    /// # Panics
-    ///
-    /// On values greater than [`Amount::MAX_MONEY`].
+    /// TODO this currently panics but it shouldn't because now SignedAmount is greater than Amount
+    /// because Amount::MAX is not MAX_MONEY
     pub fn display_dynamic(self) -> Display {
         Display {
             sats_abs: self.unsigned_abs().to_sat(),
