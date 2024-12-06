@@ -225,14 +225,9 @@ fn floating_point() {
         Err(OutOfRangeError::too_big(false).into())
     );
 
-    // Should now panic,
-    // calls:
-    // 1 to_float_in
-    // 2 to_string_in
-    // 3 display_in
-    // 4) unsigned_abs
-    // now unsigned_abs will panic if greater than 21million where before it only panics if abouve
-    // u64 MAX
+    // TODO
+    // 1) Change SignedAmount::MAX to MAX_MONEY
+    // 2) Change SignedAmount::from_str_in() to validate SignedAmount::MAX  
     //assert_eq!(
         //sf(SignedAmount::MAX.to_float_in(D::Satoshi) + 1.0, D::Satoshi),
         //Err(OutOfRangeError::too_big(false).into())
