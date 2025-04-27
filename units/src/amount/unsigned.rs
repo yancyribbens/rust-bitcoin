@@ -16,8 +16,6 @@ use super::{
     OutOfRangeError, ParseAmountError, ParseError, SignedAmount,
 };
 
-use crate::{FeeRate, Weight};
-
 mod encapsulate {
     use super::OutOfRangeError;
 
@@ -236,7 +234,7 @@ impl Amount {
     #[cfg(feature = "alloc")]
     pub fn to_btc(self) -> f64 { self.to_float_in(Denomination::Bitcoin) }
 
-    /// Computes the value of an output accounting for the cost of spending it.
+    /// Computes the effective value of an [`Amount`].
     ///
     /// The effective value is the value of an output value minus the amount to spend it. That is, the
     /// effective_value can be calculated as: value - (fee_rate * weight).
@@ -251,11 +249,17 @@ impl Amount {
     /// * `input_weight_prediction` - the predicted input weight.
     pub fn to_effective_value(
         &self,
-        fee_rate: FeeRate,
-        weight: Weight,
-    ) -> Option<SignedAmount> {
-        let signed_input_fee = fee_rate.to_fee(weight)?.to_signed();
-        self.to_signed().checked_sub(signed_input_fee)
+        fee_rate: crate::FeeRate,
+        weight: crate::Weight
+    ) -> Result<SignedAmount, OutOfRangeError> {
+        let signed_input_fee = fee_rate.to_fee(weight).ok_or(
+            OutOfRangeError { is_signed: false, is_greater_than_max: true }
+        )?.to_signed();
+
+        // it's not possible to overflow when subtracted by the smallest givem:
+        // Amount::MIN - SignedAmount::MAX = SignedAmount::MIN
+        let eff_val = (self.to_signed() - signed_input_fee).unwrap();  //unwrap ok
+        Ok(eff_val)
     }
 
     /// Converts this [`Amount`] in floating-point notation in the given [`Denomination`].
