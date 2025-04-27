@@ -16,6 +16,8 @@ use super::{
     OutOfRangeError, ParseAmountError, ParseError, SignedAmount,
 };
 
+use crate::{FeeRate, Weight};
+
 mod encapsulate {
     use super::OutOfRangeError;
 
@@ -233,6 +235,28 @@ impl Amount {
     /// ```
     #[cfg(feature = "alloc")]
     pub fn to_btc(self) -> f64 { self.to_float_in(Denomination::Bitcoin) }
+
+    /// Computes the value of an output accounting for the cost of spending it.
+    ///
+    /// The effective value is the value of an output value minus the amount to spend it. That is, the
+    /// effective_value can be calculated as: value - (fee_rate * weight).
+    ///
+    /// Note: the effective value of a [`Transaction`] may increase less than the effective value of
+    /// a [`TxOut`] when adding another [`TxOut`] to the transaction. This happens when the new
+    /// [`TxOut`] added causes the output length `VarInt` to increase its encoding length.
+    ///
+    /// # Parameters
+    ///
+    /// * `fee_rate` - the fee rate of the transaction being created.
+    /// * `input_weight_prediction` - the predicted input weight.
+    pub fn to_effective_value(
+        &self,
+        fee_rate: FeeRate,
+        weight: Weight,
+    ) -> Option<SignedAmount> {
+        let signed_input_fee = fee_rate.to_fee(weight)?.to_signed();
+        self.to_signed().checked_sub(signed_input_fee)
+    }
 
     /// Converts this [`Amount`] in floating-point notation in the given [`Denomination`].
     ///
