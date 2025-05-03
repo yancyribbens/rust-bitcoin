@@ -814,44 +814,58 @@ pub fn effective_value(
 /// Additionally, some protocols may require calculating the amounts before knowing various parts
 /// of the transaction (assuming their length is known).
 ///
-/// # Notes on integer overflow
-///
-/// Overflows are intentionally not checked because one of the following holds:
-///
-/// * The transaction is valid (obeys the block size limit) and the code feeds correct values to
-///   this function - no overflow can happen.
-/// * The transaction will be so large it doesn't fit in the memory - overflow will happen but
-///   then the transaction will fail to construct and even if one serialized it on disk directly
-///   it'd be invalid anyway so overflow doesn't matter.
-/// * The values fed into this function are inconsistent with the actual lengths the transaction
-///   will have - the code is already broken and checking overflows doesn't help. Unfortunately
-///   this probably cannot be avoided.
-pub fn predict_weight<I, O>(inputs: I, output_script_lens: O) -> Weight
+/// # Returns
+/// Some(Weight) if the predicted weight is not greater than Transaction::MAX_STANDARD_WEIGHT.
+/// Otherwise, None is returned.
+pub fn predict_weight<I, O>(inputs: I, output_script_lens: O) -> Option<Weight>
 where
     I: IntoIterator<Item = InputWeightPrediction>,
     O: IntoIterator<Item = usize>,
 {
-    let (input_count, input_weight, inputs_with_witnesses) =
-        inputs.into_iter().fold((0, 0, 0), |(count, weight, with_witnesses), prediction| {
-            (
-                count + 1,
-                weight + prediction.total_weight().to_wu() as usize,
-                with_witnesses + (prediction.witness_size > 0) as usize,
-            )
-        });
+    let mut result = None;
 
-    let (output_count, output_scripts_size) =
-        output_script_lens.into_iter().fold((0, 0), |(count, scripts_size), script_len| {
-            (count + 1, scripts_size + script_len + compact_size::encoded_size(script_len))
-        });
+    //inputs.into_iter().try_fold((0, 0, 0), |(count, weight, with_witnesses), prediction| {
+    if let Some((input_count, input_weight, inputs_with_witnesses)) =
+        inputs.into_iter().try_fold((0, 0, 0), |acc, prediction| {
+            let count = acc.0 + 1; // no overflow
+            let weight = acc.1 as usize;
+            let with_witnesses = acc.2 + (prediction.witness_size > 0) as usize; // no overflow
 
-    predict_weight_internal(
-        input_count,
-        input_weight,
-        inputs_with_witnesses,
-        output_count,
-        output_scripts_size,
-    )
+            if let Some(weight) = weight.checked_add(prediction.total_weight().to_wu() as usize) {
+                return Some((count, weight, with_witnesses))
+            }
+
+            None
+        })
+    {
+        if let Some((output_count, output_scripts_size)) =
+            output_script_lens.into_iter().try_fold((0, 0), |acc, script_len| {
+                let count = acc.0 + 1; // no overflow
+                let scripts_size = acc.1 as usize;
+
+                if let Some(size) = scripts_size.checked_add(script_len) {
+                    if let Some(encoded_size) = size.checked_add(compact_size::encoded_size(script_len) as usize) {
+                        return Some((count, encoded_size))
+                    }
+                }
+
+                None
+            }) {
+                result = predict_weight_internal(
+                    input_count,
+                    input_weight,
+                    inputs_with_witnesses,
+                    output_count,
+                    output_scripts_size,
+                )
+            }
+    }
+
+    if result.unwrap() > Transaction::MAX_STANDARD_WEIGHT {
+        None
+    } else {
+        result
+    }
 }
 
 const fn predict_weight_internal(
@@ -860,22 +874,41 @@ const fn predict_weight_internal(
     inputs_with_witnesses: usize,
     output_count: usize,
     output_scripts_size: usize,
-) -> Weight {
+) -> Option<Weight> {
+    let mut result = None;
     // The value field of a TxOut is 8 bytes.
-    let output_size = 8 * output_count + output_scripts_size;
-    let non_input_size = 4 // version
-        + compact_size::encoded_size_const(input_count as u64) // Can't use ToU64 in const context.
-        + compact_size::encoded_size_const(output_count as u64)
-        + output_size
-        + 4; // locktime
+    if let Some(count) = output_count.checked_mul(8) {
+        if let Some(output_size) = count.checked_add(output_scripts_size) {
 
-    let weight = non_input_size * 4 + input_weight;
-    if inputs_with_witnesses == 0 {
-        Weight::from_wu(weight as u64)
-    } else {
-        let weight_w_witness = weight + input_count - inputs_with_witnesses + 2;
-        Weight::from_wu(weight_w_witness as u64)
+            // these are fixed sizes and can not overflow on addition.
+            let non_variable_size = 4 // version
+                + compact_size::encoded_size_const(input_count as u64) // Can't use ToU64 in const context.
+                + compact_size::encoded_size_const(output_count as u64)
+                + 4; // locktime
+
+            if let Some(non_input_size) = non_variable_size.checked_add(output_size) {
+                if let Some(size) = non_input_size.checked_mul(4) {
+                    if let Some(weight) = size.checked_add(input_weight) {
+
+                        if inputs_with_witnesses == 0 {
+                            result = Some(Weight::from_wu(weight as u64))
+                        } else {
+
+                            if let Some(weight_add_two) = weight.checked_add(2) { // weight = non_input_size * 4 + input_weight 
+                                if let Some(input_delta) = input_count.checked_sub(inputs_with_witnesses) {
+                                    if let Some(weight_w_witness) = weight_add_two.checked_add(input_delta) {
+                                        result = Some(Weight::from_wu(weight_w_witness as u64))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
+
+    result
 }
 
 /// Predicts the weight of a to-be-constructed transaction in const context.
@@ -885,38 +918,56 @@ const fn predict_weight_internal(
 /// `predict_weight` and thus is intended to be only used in `const` context.
 ///
 /// Please see the documentation of `predict_weight` to learn more about this function.
-pub const fn predict_weight_from_slices(
+pub fn predict_weight_from_slices(
     inputs: &[InputWeightPrediction],
     output_script_lens: &[usize],
-) -> Weight {
-    let mut input_weight = 0;
+) -> Option<Weight> {
+    let mut input_weight:usize = 0;
     let mut inputs_with_witnesses = 0;
 
     // for loops not supported in const fn
     let mut i = 0;
     while i < inputs.len() {
         let prediction = inputs[i];
-        input_weight += prediction.total_weight().to_wu() as usize;
-        inputs_with_witnesses += (prediction.witness_size > 0) as usize;
-        i += 1;
+
+        match input_weight.checked_add(prediction.total_weight().to_wu() as usize) {
+            Some(weight) => input_weight = weight,
+            None => return None
+        }
+
+        inputs_with_witnesses += (prediction.witness_size > 0) as usize; // no overflow
+        i += 1; // no overflow
     }
 
     let mut output_scripts_size = 0;
-
     i = 0;
     while i < output_script_lens.len() {
         let script_len = output_script_lens[i];
-        output_scripts_size += script_len + compact_size::encoded_size_const(script_len as u64);
+
+        match script_len.checked_add(compact_size::encoded_size_const(script_len as u64)) {
+            Some(with_encoded) => match with_encoded.checked_add(output_scripts_size) {
+                Some(size) => output_scripts_size = size,
+                None => return None
+            },
+            None => return None
+        }
+
         i += 1;
     }
 
-    predict_weight_internal(
+    let weight_prediction = predict_weight_internal(
         inputs.len(),
         input_weight,
         inputs_with_witnesses,
         output_script_lens.len(),
         output_scripts_size,
-    )
+    );
+
+    if weight_prediction.unwrap() > Transaction::MAX_STANDARD_WEIGHT {
+        None
+    } else {
+        weight_prediction
+    }
 }
 
 /// Weight prediction of an individual input.
@@ -1898,7 +1949,7 @@ mod tests {
         // Outputs: [P2SH, P2WPKH]
 
         // Confirm the transaction's predicted weight matches its actual weight.
-        let predicted = predict_weight(input_weights, tx.script_pubkey_lens());
+        let predicted = predict_weight(input_weights, tx.script_pubkey_lens()).unwrap();
         let expected = tx.weight();
         assert_eq!(predicted, expected);
 
@@ -1928,7 +1979,7 @@ mod tests {
             InputWeightPrediction::P2TR_KEY_NON_DEFAULT_SIGHASH,
         ];
 
-        let weight = predict_weight_from_slices(&predict, &[1]);
+        let weight = predict_weight_from_slices(&predict, &[1]).unwrap();
         assert_eq!(weight, Weight::from_wu(2493));
     }
 
