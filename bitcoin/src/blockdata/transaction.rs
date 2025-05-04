@@ -868,12 +868,14 @@ const fn predict_weight_internal(
         + compact_size::encoded_size_const(output_count as u64)
         + output_size
         + 4; // locktime
-    let weight = if inputs_with_witnesses == 0 {
-        non_input_size * 4 + input_weight
+
+    let weight = non_input_size * 4 + input_weight;
+    if inputs_with_witnesses == 0 {
+        Weight::from_wu(weight as u64)
     } else {
-        non_input_size * 4 + input_weight + input_count - inputs_with_witnesses + 2
-    };
-    Weight::from_wu(weight as u64)
+        let weight_w_witness = weight + input_count - inputs_with_witnesses + 2;
+        Weight::from_wu(weight_w_witness as u64)
+    }
 }
 
 /// Predicts the weight of a to-be-constructed transaction in const context.
