@@ -1968,6 +1968,12 @@ mod tests {
         );
     }
 
+    // test predict_weight using values that overflow
+    // test preddic_weight with values greater than max transaction
+    //
+    // test predict_weight_from_slices using values that overflow
+    // test preddic_weight_from_slices with values greater than max transaction
+
     #[test]
     fn weight_prediction_const_from_slices() {
         let predict = [
