@@ -1051,24 +1051,46 @@ impl InputWeightPrediction {
     }
 
     /// Computes the prediction for a single input.
-    pub fn new<T>(input_script_len: usize, witness_element_lengths: T) -> Self
+    pub fn new<T>(input_script_len: usize, witness_element_lengths: T) -> Option<Self>
     where
         T: IntoIterator,
         T::Item: Borrow<usize>,
     {
-        let (count, total_size) = witness_element_lengths.into_iter().fold(
-            (0usize, 0),
-            |(count, total_size), elem_len| {
-                let elem_len = *elem_len.borrow();
-                let elem_size = elem_len + compact_size::encoded_size(elem_len);
-                (count + 1, total_size + elem_size)
-            },
-        );
-        let witness_size =
-            if count > 0 { total_size + compact_size::encoded_size(count) } else { 0 };
-        let script_size = input_script_len + compact_size::encoded_size(input_script_len);
+        let mut result = None;
 
-        InputWeightPrediction { script_size, witness_size }
+        if let Some((count, total_size)) = witness_element_lengths.into_iter().try_fold(
+            (0usize, 0usize),
+            |(count, total_size), elem_len| {
+
+                let elem_len = *elem_len.borrow();
+                let elem_size_opt = elem_len.checked_add(compact_size::encoded_size(elem_len));
+
+                if let Some(elem_size) = elem_size_opt {
+                    if let Some(new_size) = total_size.checked_add(elem_size) {
+                        return Some((count + 1, new_size))
+                    }
+                }
+
+                None
+            },
+        ) {
+            let witness_size_opt =
+                if count > 0 {
+                    total_size.checked_add(compact_size::encoded_size(count))
+                } else {
+                    Some(0)
+                };
+
+            let script_size_opt = input_script_len.checked_add(compact_size::encoded_size(input_script_len));
+
+            if let Some(witness_size) = witness_size_opt {
+                if let Some(script_size) = script_size_opt {
+                    result = Some(InputWeightPrediction { script_size, witness_size });
+                }
+            }
+        }
+
+        result
     }
 
     /// Computes the prediction for a single input in `const` context.
