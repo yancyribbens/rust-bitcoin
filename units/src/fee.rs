@@ -152,10 +152,7 @@ impl FeeRate {
         // No `?` operator in const context.
         match self.to_sat_per_kwu().checked_mul(weight.to_wu()) {
             Some(mul_res) => match mul_res.checked_add(999) {
-                Some(add_res) => match Amount::from_sat(add_res / 1000) {
-                    Ok(fee) => Some(fee),
-                    Err(_) => None,
-                },
+                Some(add_res) => Some(Amount::from_sat(add_res / 1000)),
                 None => None,
             },
             None => None,

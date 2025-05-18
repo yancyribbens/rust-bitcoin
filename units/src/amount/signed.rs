@@ -90,14 +90,8 @@ mod encapsulate {
         /// assert_eq!(amount.to_sat(), sat);
         /// # Ok::<_, amount::OutOfRangeError>(())
         /// ```
-        pub const fn from_sat(satoshi: i64) -> Result<SignedAmount, OutOfRangeError> {
-            if satoshi < Self::MIN.to_sat() {
-                Err(OutOfRangeError { is_signed: true, is_greater_than_max: false })
-            } else if satoshi > Self::MAX_MONEY.to_sat() {
-                Err(OutOfRangeError { is_signed: true, is_greater_than_max: true })
-            } else {
-                Ok(Self(satoshi))
-            }
+        pub const fn from_sat(satoshi: i64) -> SignedAmount {
+            Self(satoshi)
         }
     }
 }
@@ -150,10 +144,7 @@ impl SignedAmount {
         let btc = whole_bitcoin as i64; // Can't call `into` in const context.
         let sats = btc * 100_000_000;
 
-        match SignedAmount::from_sat(sats) {
-            Ok(amount) => amount,
-            Err(_) => panic!("unreachable - 65536 BTC is within range"),
-        }
+        SignedAmount::from_sat(sats)
     }
 
     /// Parses a decimal string as a value in the given [`Denomination`].
@@ -317,10 +308,7 @@ impl SignedAmount {
     #[must_use]
     pub const fn abs(self) -> SignedAmount {
         // `i64::abs()` can never overflow because SignedAmount::MIN == -MAX_MONEY.
-        match Self::from_sat(self.to_sat().abs()) {
-            Ok(amount) => amount,
-            Err(_) => panic!("a positive signed amount is always valid"),
-        }
+        Self::from_sat(self.to_sat().abs())
     }
 
     /// Gets the absolute value of this [`SignedAmount`] returning [`Amount`].
@@ -367,10 +355,7 @@ impl SignedAmount {
     pub const fn checked_add(self, rhs: SignedAmount) -> Option<SignedAmount> {
         // No `map()` in const context.
         match self.to_sat().checked_add(rhs.to_sat()) {
-            Some(res) => match SignedAmount::from_sat(res) {
-                Ok(amount) => Some(amount),
-                Err(_) => None,
-            },
+            Some(res) => Some(SignedAmount::from_sat(res)),
             None => None,
         }
     }
@@ -383,10 +368,7 @@ impl SignedAmount {
     pub const fn checked_sub(self, rhs: SignedAmount) -> Option<SignedAmount> {
         // No `map()` in const context.
         match self.to_sat().checked_sub(rhs.to_sat()) {
-            Some(res) => match Self::from_sat(res) {
-                Ok(amount) => Some(amount),
-                Err(_) => None,
-            },
+            Some(res) => Some(Self::from_sat(res)),
             None => None,
         }
     }
@@ -399,10 +381,7 @@ impl SignedAmount {
     pub const fn checked_mul(self, rhs: i64) -> Option<SignedAmount> {
         // No `map()` in const context.
         match self.to_sat().checked_mul(rhs) {
-            Some(res) => match Self::from_sat(res) {
-                Ok(amount) => Some(amount),
-                Err(_) => None,
-            },
+            Some(res) => Some(Self::from_sat(res)),
             None => None,
         }
     }
@@ -416,10 +395,7 @@ impl SignedAmount {
     pub const fn checked_div(self, rhs: i64) -> Option<SignedAmount> {
         // No `map()` in const context.
         match self.to_sat().checked_div(rhs) {
-            Some(res) => match Self::from_sat(res) {
-                Ok(amount) => Some(amount),
-                Err(_) => None, // Unreachable because of checked_div above.
-            },
+            Some(res) => Some(Self::from_sat(res)),
             None => None,
         }
     }
@@ -431,10 +407,7 @@ impl SignedAmount {
     pub const fn checked_rem(self, rhs: i64) -> Option<SignedAmount> {
         // No `map()` in const context.
         match self.to_sat().checked_rem(rhs) {
-            Some(res) => match Self::from_sat(res) {
-                Ok(amount) => Some(amount),
-                Err(_) => None, // Unreachable because of checked_rem above.
-            },
+            Some(res) => Some(Self::from_sat(res)),
             None => None,
         }
     }
@@ -461,9 +434,7 @@ impl SignedAmount {
         if self.is_negative() {
             Err(OutOfRangeError::negative())
         } else {
-            // Cast ok, checked not negative above.
-            Ok(Amount::from_sat(self.to_sat() as u64)
-                .expect("a positive signed amount is always valid"))
+            Ok(Amount::from_sat(self.to_sat() as u64))
         }
     }
 }
@@ -513,7 +484,7 @@ impl FromStr for SignedAmount {
 impl From<Amount> for SignedAmount {
     fn from(value: Amount) -> Self {
         let v = value.to_sat() as i64; // Cast ok, signed amount and amount share positive range.
-        Self::from_sat(v).expect("all amounts are valid signed amounts")
+        Self::from_sat(v)
     }
 }
 
@@ -521,6 +492,6 @@ impl From<Amount> for SignedAmount {
 impl<'a> Arbitrary<'a> for SignedAmount {
     fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
         let sats = u.int_in_range(Self::MIN.to_sat()..=Self::MAX.to_sat())?;
-        Ok(Self::from_sat(sats).expect("range is valid"))
+        Ok(Self::from_sat(sats))
     }
 }

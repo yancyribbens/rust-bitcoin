@@ -329,7 +329,7 @@ impl ops::Neg for SignedAmount {
     type Output = Self;
 
     fn neg(self) -> Self::Output {
-        Self::from_sat(self.to_sat().neg()).expect("all +ve and -ve values are valid")
+        Self::from_sat(self.to_sat().neg())
     }
 }
 

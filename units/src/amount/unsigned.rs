@@ -90,12 +90,8 @@ mod encapsulate {
         /// assert_eq!(amount.to_sat(), sat);
         /// # Ok::<_, amount::OutOfRangeError>(())
         /// ```
-        pub const fn from_sat(satoshi: u64) -> Result<Amount, OutOfRangeError> {
-            if satoshi > Self::MAX_MONEY.to_sat() {
-                Err(OutOfRangeError { is_signed: false, is_greater_than_max: true })
-            } else {
-                Ok(Self(satoshi))
-            }
+        pub const fn from_sat(satoshi: u64) -> Amount {
+            Self(satoshi)
         }
     }
 }
@@ -150,10 +146,7 @@ impl Amount {
         let btc = whole_bitcoin as u64; // Can't call `into` in const context.
         let sats = btc * 100_000_000;
 
-        match Amount::from_sat(sats) {
-            Ok(amount) => amount,
-            Err(_) => panic!("unreachable - 65536 BTC is within range"),
-        }
+        Amount::from_sat(sats)
     }
 
     /// Parses a decimal string as a value in the given [`Denomination`].
@@ -323,10 +316,7 @@ impl Amount {
     pub const fn checked_add(self, rhs: Amount) -> Option<Amount> {
         // No `map()` in const context.
         // Unchecked add ok, adding two values less than `MAX_MONEY` cannot overflow an `i64`.
-        match Self::from_sat(self.to_sat() + rhs.to_sat()) {
-            Ok(amount) => Some(amount),
-            Err(_) => None,
-        }
+        Some(Self::from_sat(self.to_sat() + rhs.to_sat()))
     }
 
     /// Checked subtraction.
@@ -336,10 +326,7 @@ impl Amount {
     pub const fn checked_sub(self, rhs: Amount) -> Option<Amount> {
         // No `map()` in const context.
         match self.to_sat().checked_sub(rhs.to_sat()) {
-            Some(res) => match Self::from_sat(res) {
-                Ok(amount) => Some(amount),
-                Err(_) => None, // Unreachable because of checked_sub above.
-            },
+            Some(res) => Some(Self::from_sat(res)),
             None => None,
         }
     }
@@ -351,10 +338,7 @@ impl Amount {
     pub const fn checked_mul(self, rhs: u64) -> Option<Amount> {
         // No `map()` in const context.
         match self.to_sat().checked_mul(rhs) {
-            Some(res) => match Self::from_sat(res) {
-                Ok(amount) => Some(amount),
-                Err(_) => None,
-            },
+            Some(res) => Some(Self::from_sat(res)),
             None => None,
         }
     }
@@ -368,10 +352,7 @@ impl Amount {
     pub const fn checked_div(self, rhs: u64) -> Option<Amount> {
         // No `map()` in const context.
         match self.to_sat().checked_div(rhs) {
-            Some(res) => match Self::from_sat(res) {
-                Ok(amount) => Some(amount),
-                Err(_) => None, // Unreachable because of checked_div above.
-            },
+            Some(res) => Some(Self::from_sat(res)),
             None => None,
         }
     }
@@ -383,10 +364,7 @@ impl Amount {
     pub const fn checked_rem(self, rhs: u64) -> Option<Amount> {
         // No `map()` in const context.
         match self.to_sat().checked_rem(rhs) {
-            Some(res) => match Self::from_sat(res) {
-                Ok(amount) => Some(amount),
-                Err(_) => None, // Unreachable because of checked_div above.
-            },
+            Some(res) => Some(Self::from_sat(res)),
             None => None,
         }
     }
@@ -394,9 +372,12 @@ impl Amount {
     /// Converts to a signed amount.
     #[rustfmt::skip] // Moves code comments to the wrong line.
     #[allow(clippy::missing_panics_doc)]
-    pub fn to_signed(self) -> SignedAmount {
-        SignedAmount::from_sat(self.to_sat() as i64) // Cast ok, signed amount and amount share positive range.
-            .expect("range of Amount is within range of SignedAmount")
+    pub fn to_signed(self) -> Result<SignedAmount, OutOfRangeError> {
+        if self.to_sat() > SignedAmount::MAX.to_sat() as u64 { // Cast ok, signed max is positive and fits in u64.
+            Err(OutOfRangeError::too_big(true))
+        } else {
+            Ok(SignedAmount::from_sat(self.to_sat() as i64)) // Cast ok, checked not too big above.
+        }
     }
 }
 
@@ -452,6 +433,6 @@ impl TryFrom<SignedAmount> for Amount {
 impl<'a> Arbitrary<'a> for Amount {
     fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
         let sats = u.int_in_range(Self::MIN.to_sat()..=Self::MAX.to_sat())?;
-        Ok(Self::from_sat(sats).expect("range is valid"))
+        Ok(Self::from_sat(sats))
     }
 }

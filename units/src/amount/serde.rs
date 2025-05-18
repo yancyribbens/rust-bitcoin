@@ -93,7 +93,7 @@ impl SerdeAmount for Amount {
     }
     fn des_sat<'d, D: Deserializer<'d>>(d: D, _: private::Token) -> Result<Self, D::Error> {
         use serde::de::Error;
-        Amount::from_sat(u64::deserialize(d)?).map_err(D::Error::custom)
+        Ok(Amount::from_sat(u64::deserialize(d)?))
     }
     #[cfg(feature = "alloc")]
     fn ser_btc<S: Serializer>(self, s: S, _: private::Token) -> Result<S::Ok, S::Error> {
@@ -139,7 +139,7 @@ impl SerdeAmount for SignedAmount {
     }
     fn des_sat<'d, D: Deserializer<'d>>(d: D, _: private::Token) -> Result<Self, D::Error> {
         use serde::de::Error;
-        SignedAmount::from_sat(i64::deserialize(d)?).map_err(D::Error::custom)
+        Ok(SignedAmount::from_sat(i64::deserialize(d)?))
     }
     #[cfg(feature = "alloc")]
     fn ser_btc<S: Serializer>(self, s: S, _: private::Token) -> Result<S::Ok, S::Error> {

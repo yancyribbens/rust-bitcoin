@@ -304,7 +304,7 @@ fn parse_signed_to_satoshi(
     }
 
     let mut ret =
-        SignedAmount::from_sat(value).map_err(|_| InnerParseError::Overflow { is_negative })?;
+        SignedAmount::from_sat(value);
     if is_negative {
         ret = -ret;
     }
