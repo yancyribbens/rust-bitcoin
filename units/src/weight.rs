@@ -241,6 +241,29 @@ impl ops::RemAssign<u64> for Weight {
     fn rem_assign(&mut self, rhs: u64) { *self = Weight::from_wu(self.to_wu() % rhs); }
 }
 
+mod sealed {
+    use crate::Weight;
+
+    /// Used to seal the `CheckedSum` trait
+    pub trait Sealed<A> {}
+
+    impl<T> Sealed<Weight> for T where T: Iterator<Item = Weight> {}
+}
+
+/// Calculates the sum over the iterator using checked arithmetic.
+pub trait CheckedSum<R>: sealed::Sealed<R> {
+    /// Calculates the sum over the iterator using checked arithmetic. If an
+    /// overflow happens it returns [`None`].
+    fn checked_sum(self) -> Option<R>;
+}
+
+impl<T> CheckedSum<Weight> for T
+where
+    T: Iterator<Item = Weight>,
+{
+    fn checked_sum(mut self) -> Option<Weight> { self.try_fold(Weight::ZERO, Weight::checked_add) }
+}
+
 impl core::iter::Sum for Weight {
     fn sum<I>(iter: I) -> Self
     where
