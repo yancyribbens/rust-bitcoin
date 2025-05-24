@@ -1408,17 +1408,15 @@ mod tests {
             Err(ABSURD_FEE_RATE)
         );
         assert_eq!(
-            psbt.clone()
-                .extract_tx_with_fee_rate_limit(JUST_BELOW_ABSURD_FEE_RATE)
-                .map_err(|e| match e {
+            psbt.clone().extract_tx_with_fee_rate_limit(JUST_BELOW_ABSURD_FEE_RATE).map_err(|e| {
+                match e {
                     ExtractTxError::AbsurdFeeRate { fee_rate, .. } => fee_rate,
                     _ => panic!(""),
-                }),
+                }
+            }),
             Err(ABSURD_FEE_RATE)
         );
-        assert!(psbt
-            .extract_tx_with_fee_rate_limit(ABSURD_FEE_RATE)
-            .is_ok());
+        assert!(psbt.extract_tx_with_fee_rate_limit(ABSURD_FEE_RATE).is_ok());
 
         // Testing that extract_tx will error at 25k sat/vbyte (6250000 sat/kwu)
         assert_eq!(
