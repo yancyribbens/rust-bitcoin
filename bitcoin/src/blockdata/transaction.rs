@@ -1146,9 +1146,20 @@ mod sealed {
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for InputWeightPrediction {
     fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
-        let input_script_len: usize = u.int_in_range(0..=1024)?;
+        // limit script size to 1MB block size.
+        let input_script_len = u.int_in_range(0..=1024)?;
         let remaining = 1024 - input_script_len;
-        let witness_element_lengths = u.int_in_range(0..=remaining * 4)?;
+
+        // create witness data if there is remaining space.
+        let mut witness_length = u.int_in_range(0..=remaining * 4)?;
+        let mut witness_element_lengths = Vec::new();
+
+        // build vec of random witness element lengths.
+        while witness_length != 0 {
+            let elem = u.int_in_range(0..=witness_length)?;
+            witness_element_lengths.push(elem);
+            witness_length -= elem;
+        }
 
         match u.int_in_range(0..=7)? {
             0 => Ok(InputWeightPrediction::P2WPKH_MAX),
