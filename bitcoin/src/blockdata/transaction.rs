@@ -930,7 +930,7 @@ pub const fn predict_weight_from_slices(
 /// This helper type collects information about an input to be used in [`predict_weight`] function.
 /// It can only be created using the [`new`](InputWeightPrediction::new) function or using other
 /// associated constants/methods.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct InputWeightPrediction {
     script_size: usize,
     witness_size: usize,
@@ -1155,8 +1155,8 @@ impl<'a> Arbitrary<'a> for InputWeightPrediction {
         let mut witness_element_lengths = Vec::new();
 
         // build vec of random witness element lengths.
-        while witness_length != 0 {
-            let elem = u.int_in_range(0..=witness_length)?;
+        while witness_length > 0 {
+            let elem = u.int_in_range(1..=witness_length)?;
             witness_element_lengths.push(elem);
             witness_length -= elem;
         }
