@@ -204,6 +204,7 @@ pub mod amount {
 
     #[rustfmt::skip]            // Keep public re-exports separate.
     #[doc(inline)]
+    #[deprecated(since = "TBD", note = "use `units::CheckedSum` instead")]
     pub use units::CheckedSum;
     #[cfg(feature = "serde")]
     pub use units::amount::serde;
