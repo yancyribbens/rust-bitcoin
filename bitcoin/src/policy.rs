@@ -14,9 +14,10 @@
 use core::cmp;
 
 use super::constants::{MAX_BLOCK_SIGOPS_COST, WITNESS_SCALE_FACTOR};
+use units::Weight;
 
 /// Maximum weight of a transaction for it to be relayed by most nodes on the network
-pub const MAX_STANDARD_TX_WEIGHT: u32 = 400_000;
+pub const MAX_STANDARD_TX_WEIGHT: Weight = Weight::from_wu(400_000);
 
 /// Minimum non-witness size for a standard transaction, set to 65 bytes.
 pub const MIN_STANDARD_TX_NONWITNESS_SIZE: u32 = 65;
