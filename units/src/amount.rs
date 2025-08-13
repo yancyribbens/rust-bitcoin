@@ -13,6 +13,9 @@ use core::fmt::Write as _;
 use core::str::FromStr;
 use core::{default, fmt, ops};
 
+#[cfg(feature = "alloc")]
+use crate::{FeeRate, Weight};
+
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
 
@@ -1041,6 +1044,18 @@ impl Amount {
     /// can be made.
     /// Returns [None] if overflow occurred.
     pub fn checked_div(self, rhs: u64) -> Option<Amount> { self.0.checked_div(rhs).map(Amount) }
+
+    /// Checked weight floor division.
+    ///
+    /// Be aware that integer division loses the remainder if no exact division
+    /// can be made.  See also [`Amount::checked_div_by_weight_ceil`].
+    ///
+    /// Returns [`None`] if overflow occurred.
+    #[cfg(feature = "alloc")]
+    pub fn checked_div_by_weight_floor(self, rhs: Weight) -> Option<FeeRate> {
+        let fee_rate = self.0.checked_mul(1_000)?.checked_div(rhs.to_wu())?;
+        Some(FeeRate::from_sat_per_kwu(fee_rate))
+    }
 
     /// Checked remainder.
     ///
