@@ -13,6 +13,9 @@ use core::fmt::Write as _;
 use core::str::FromStr;
 use core::{default, fmt, ops};
 
+#[cfg(feature = "arbitrary")]
+use arbitrary::{Arbitrary, Unstructured};
+
 #[cfg(feature = "serde")]
 use ::serde::{Deserialize, Serialize};
 use internals::error::InputString;
@@ -2002,6 +2005,23 @@ mod verification {
                 None
             },
         );
+    }
+}
+
+#[cfg(feature = "arbitrary")]
+impl<'a> Arbitrary<'a> for Amount {
+    fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
+        let sats = u.int_in_range(Self::MIN.to_sat()..=Self::MAX.to_sat())?;
+        Ok(Self::from_sat(sats))
+    }
+}
+
+
+#[cfg(feature = "arbitrary")]
+impl<'a> Arbitrary<'a> for SignedAmount {
+    fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
+        let sats = u.int_in_range(Self::MIN.to_sat()..=Self::MAX.to_sat())?;
+        Ok(Self::from_sat(sats))
     }
 }
 
