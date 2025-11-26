@@ -161,7 +161,7 @@ impl std::error::Error for CommandStringError {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RawNetworkMessage {
     magic: Magic,
-    payload: NetworkMessage,
+    payload: V2NetworkMessage,
     payload_len: u32,
     checksum: [u8; 4],
 }
@@ -348,7 +348,7 @@ impl NetworkMessage {
 
 impl RawNetworkMessage {
     /// Constructs a new [RawNetworkMessage]
-    pub fn new(magic: Magic, payload: NetworkMessage) -> Self {
+    pub fn new(magic: Magic, payload: V2NetworkMessage) -> Self {
         let mut engine = sha256d::Hash::engine();
         let payload_len = payload.consensus_encode(&mut engine).expect("engine doesn't error");
         let payload_len = u32::try_from(payload_len).expect("network message use u32 as length");
@@ -359,10 +359,10 @@ impl RawNetworkMessage {
     }
 
     /// Consumes the [RawNetworkMessage] instance and returns the inner payload.
-    pub fn into_payload(self) -> NetworkMessage { self.payload }
+    pub fn into_payload(self) -> V2NetworkMessage { self.payload }
 
     /// The actual message data
-    pub fn payload(&self) -> &NetworkMessage { &self.payload }
+    pub fn payload(&self) -> &V2NetworkMessage { &self.payload }
 
     /// Magic bytes to identify the network these messages are meant for
     pub fn magic(&self) -> &Magic { &self.magic }
@@ -677,7 +677,8 @@ impl Decodable for RawNetworkMessage {
             "sendaddrv2" => NetworkMessage::SendAddrV2,
             _ => NetworkMessage::Unknown { command: cmd, payload: raw_payload },
         };
-        Ok(Self { magic, payload, payload_len, checksum })
+        let v2: V2NetworkMessage = V2NetworkMessage::new(payload); 
+        Ok(Self { magic, payload: v2, payload_len, checksum })
     }
 
     #[inline]
