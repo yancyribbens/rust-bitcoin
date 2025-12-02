@@ -305,6 +305,46 @@ pub struct Reject {
 
 impl_consensus_encoding!(Reject, message, ccode, reason, hash);
 
+impl Encodable for Alert {
+    fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
+        //w.write_all(&[*self as u8])?;
+        Ok(1)
+    }
+}
+
+impl Decodable for Alert {
+    fn consensus_decode_from_finite_reader<R: io::BufRead + ?Sized>(
+        r: &mut R,
+    ) -> core::result::Result<Self, bitcoin::consensus::encode::Error> {
+        std::println!("hi");
+        let len = r.read_compact_size()?;
+        // Limit the initial vec allocation to at most 8,000 bytes, which is
+        // sufficient for most use cases. We don't allocate more space upfront
+        // than this, since `len` is an untrusted allocation capacity. If the
+        // vector does overflow the initial capacity `push` will just reallocate.
+        // Note: OOM protection relies on reader eventually running out of
+        // data to feed us.
+        let max_init_capacity = 8000 / core::mem::size_of::<u8>();
+        let mut ret = Vec::with_capacity(core::cmp::min(len as usize, max_init_capacity));
+        for _ in 0..len {
+            ret.push(Decodable::consensus_decode_from_finite_reader(r)?);
+        }
+        Ok(Alert(ret))
+    }
+}
+
+// a first draft
+//impl Decodable for Alert {
+    //#[inline]
+    //fn consensus_decode<R: BufRead + ?Sized>(r: &mut R) -> Result<Self, encode::Error> {
+        //std::println!("decode alert msg");
+        //let rawbytes: [u8; 12] = Decodable::consensus_decode(r)?;
+        //let v:Vec<u8> = rawbytes.to_vec();
+        //let a = Alert(v);
+        //Ok(a)
+    //}
+//}
+
 /// A deprecated message type that was used to notify users of system changes. Due to a number of
 /// vulnerabilities, alerts are no longer used. A final alert was sent as of Bitcoin Core 0.14.0,
 /// and is sent to any node that is advertising a potentially vulnerable protocol version.
@@ -320,6 +360,12 @@ impl Alert {
         100, 101, 32, 114, 101, 113, 117, 105, 114, 101, 100, 0,
     ];
 
+    pub unsafe fn print_alert() {
+        let s = String::from_utf8_unchecked(Self::FINAL_ALERT.to_vec());
+        std::println!("s {:?}", s);
+        ()
+    }
+
     /// Builds the final alert to send to a potentially vulnerable peer.
     pub fn final_alert() -> Self { Self(Self::FINAL_ALERT.into()) }
 
@@ -328,7 +374,7 @@ impl Alert {
     pub fn is_final_alert(&self) -> bool { self.0.eq(&Self::FINAL_ALERT) }
 }
 
-impl_vec_wrapper!(Alert, Vec<u8>);
+//impl_vec_wrapper!(Alert, Vec<u8>);
 
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for ClientSoftwareVersion {

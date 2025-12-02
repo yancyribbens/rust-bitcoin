@@ -647,8 +647,13 @@ impl Decodable for RawNetworkMessage {
             ),
             "reject" =>
                 NetworkMessage::Reject(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "alert" =>
-                NetworkMessage::Alert(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "alert" => {
+                // interestingly consnses_decode() alsor works here, even though Decode only
+                // implements finite reader..
+                // why does finite_reader get run?
+                NetworkMessage::Alert(Decodable::consensus_decode(&mut mem_d)?)
+                //NetworkMessage::Alert(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            },
             "feefilter" => {
                 NetworkMessage::FeeFilter(
                     u64::consensus_decode_from_finite_reader(&mut mem_d)?
