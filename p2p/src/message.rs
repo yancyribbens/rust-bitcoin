@@ -290,7 +290,7 @@ impl Decoder for V1MessageHeaderDecoder {
     }
 
     #[inline]
-    fn read_limit(&self) -> usize { self.0.read_limit() }
+    fn read_limit(&self) -> usize { 4 + 12 + 4 + 4 }
 }
 
 impl Decodeable for V1MessageHeader {
