@@ -170,6 +170,7 @@ impl encoding::Decoder for CommandStringDecoder {
             rawbytes.iter().rposition(|&b| b != 0).map_or(&rawbytes[..0], |i| &rawbytes[..=i]);
 
         if !trimmed.is_ascii() {
+            std::println!("not ascii: {:?}", trimmed);
             return Err(CommandStringDecodeError::NotAscii);
         }
 
@@ -270,7 +271,12 @@ impl encoding::Decoder for V1MessageHeaderDecoder {
 
     #[inline]
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        self.0.push_bytes(bytes).map_err(V1MessageHeaderDecoderError)
+        std::println!("message header push_bytes()");
+        let r = self.0.push_bytes(bytes).map_err(V1MessageHeaderDecoderError);
+        if r.is_err() {
+            std::println!("* error")
+        }
+        r
     }
 
     #[inline]
@@ -470,6 +476,42 @@ impl<'a> Arbitrary<'a> for FeeFilter {
         }
     }
 }
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct Ping(u64);
+
+/// The Decoder for [`Ping`]
+pub struct PingDecoder(encoding::ArrayDecoder<8>);
+
+impl encoding::Decoder for PingDecoder {
+    type Output = Ping;
+    type Error = PingDecoderError;
+
+    #[inline]
+    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
+        self.0.push_bytes(bytes).map_err(PingDecoderError)
+    }
+
+    #[inline]
+    fn end(self) -> Result<Self::Output, Self::Error> {
+        let nonce = self.0.end().map_err(PingDecoderError)?;
+        Ok(Ping(u64::from_le_bytes(nonce)))
+    }
+
+    #[inline]
+    fn read_limit(&self) -> usize { self.0.read_limit() }
+}
+
+impl encoding::Decodable for Ping {
+    type Decoder = PingDecoder;
+    fn decoder() -> Self::Decoder {
+        PingDecoder(encoding::ArrayDecoder::<8>::new())
+    }
+}
+
+/// An error consensus decoding a [`PingDecoderError`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PingDecoderError(<encoding::ArrayDecoder<8> as encoding::Decoder>::Error);
 
 /// A Network message payload. Proper documentation is available at
 /// [Bitcoin Wiki: Protocol Specification](https://en.bitcoin.it/wiki/Protocol_specification)
@@ -822,6 +864,7 @@ impl encoding::Decoder for NetworkMessageDecoder {
     type Error = RawNetworkMessageDecodeError;
 
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
+        //std::println!("{:?}", bytes);
         let remaining = self.payload_len - self.buffer.len();
         let copy_len = bytes.len().min(remaining);
 
