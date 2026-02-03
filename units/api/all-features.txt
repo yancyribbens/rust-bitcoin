@@ -5876,6 +5876,8 @@ impl core::cmp::PartialEq for bitcoin_units::pow::CompactTarget
 pub fn bitcoin_units::pow::CompactTarget::eq(&self, other: &bitcoin_units::pow::CompactTarget) -> bool
 impl core::cmp::PartialOrd for bitcoin_units::pow::CompactTarget
 pub fn bitcoin_units::pow::CompactTarget::partial_cmp(&self, other: &bitcoin_units::pow::CompactTarget) -> core::option::Option<core::cmp::Ordering>
+impl core::convert::From<bitcoin_units::pow::CompactTarget> for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from(c: bitcoin_units::pow::CompactTarget) -> Self
 impl core::convert::TryFrom<&str> for bitcoin_units::pow::CompactTarget
 pub type bitcoin_units::pow::CompactTarget::Error = bitcoin_units::parse_int::error::ParseIntError
 pub fn bitcoin_units::pow::CompactTarget::try_from(s: &str) -> core::result::Result<Self, Self::Error>
@@ -6071,6 +6073,254 @@ impl<T> core::clone::CloneToUninit for bitcoin_units::pow::CompactTargetEncoder<
 pub unsafe fn bitcoin_units::pow::CompactTargetEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_units::pow::CompactTargetEncoder<'e>
 pub fn bitcoin_units::pow::CompactTargetEncoder<'e>::from(t: T) -> T
+pub struct bitcoin_units::pow::ParseTargetError(_)
+impl core::clone::Clone for bitcoin_units::pow::ParseTargetError
+pub fn bitcoin_units::pow::ParseTargetError::clone(&self) -> bitcoin_units::pow::ParseTargetError
+impl core::cmp::Eq for bitcoin_units::pow::ParseTargetError
+impl core::cmp::PartialEq for bitcoin_units::pow::ParseTargetError
+pub fn bitcoin_units::pow::ParseTargetError::eq(&self, other: &bitcoin_units::pow::ParseTargetError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::pow::ParseTargetError
+pub fn bitcoin_units::pow::ParseTargetError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::pow::ParseTargetError
+pub fn bitcoin_units::pow::ParseTargetError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::pow::ParseTargetError
+pub fn bitcoin_units::pow::ParseTargetError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::ParseTargetError
+pub fn bitcoin_units::pow::ParseTargetError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::ParseTargetError
+impl core::marker::Freeze for bitcoin_units::pow::ParseTargetError
+impl core::marker::Send for bitcoin_units::pow::ParseTargetError
+impl core::marker::Sync for bitcoin_units::pow::ParseTargetError
+impl core::marker::Unpin for bitcoin_units::pow::ParseTargetError
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::ParseTargetError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::ParseTargetError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::ParseTargetError
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::ParseTargetError where U: core::convert::From<T>
+pub fn bitcoin_units::pow::ParseTargetError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::ParseTargetError where U: core::convert::Into<T>
+pub type bitcoin_units::pow::ParseTargetError::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::ParseTargetError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::ParseTargetError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::ParseTargetError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::ParseTargetError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::ParseTargetError where T: core::clone::Clone
+pub type bitcoin_units::pow::ParseTargetError::Owned = T
+pub fn bitcoin_units::pow::ParseTargetError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::ParseTargetError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::ParseTargetError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::ParseTargetError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::ParseTargetError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::ParseTargetError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::ParseTargetError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::ParseTargetError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::ParseTargetError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::ParseTargetError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::ParseTargetError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::ParseTargetError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::ParseTargetError
+pub fn bitcoin_units::pow::ParseTargetError::from(t: T) -> T
+pub struct bitcoin_units::pow::ParseWorkError(_)
+impl core::clone::Clone for bitcoin_units::pow::ParseWorkError
+pub fn bitcoin_units::pow::ParseWorkError::clone(&self) -> bitcoin_units::pow::ParseWorkError
+impl core::cmp::Eq for bitcoin_units::pow::ParseWorkError
+impl core::cmp::PartialEq for bitcoin_units::pow::ParseWorkError
+pub fn bitcoin_units::pow::ParseWorkError::eq(&self, other: &bitcoin_units::pow::ParseWorkError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::pow::ParseWorkError
+pub fn bitcoin_units::pow::ParseWorkError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::pow::ParseWorkError
+pub fn bitcoin_units::pow::ParseWorkError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::pow::ParseWorkError
+pub fn bitcoin_units::pow::ParseWorkError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::ParseWorkError
+pub fn bitcoin_units::pow::ParseWorkError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::ParseWorkError
+impl core::marker::Freeze for bitcoin_units::pow::ParseWorkError
+impl core::marker::Send for bitcoin_units::pow::ParseWorkError
+impl core::marker::Sync for bitcoin_units::pow::ParseWorkError
+impl core::marker::Unpin for bitcoin_units::pow::ParseWorkError
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::ParseWorkError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::ParseWorkError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::ParseWorkError
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::ParseWorkError where U: core::convert::From<T>
+pub fn bitcoin_units::pow::ParseWorkError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::ParseWorkError where U: core::convert::Into<T>
+pub type bitcoin_units::pow::ParseWorkError::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::ParseWorkError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::ParseWorkError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::ParseWorkError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::ParseWorkError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::ParseWorkError where T: core::clone::Clone
+pub type bitcoin_units::pow::ParseWorkError::Owned = T
+pub fn bitcoin_units::pow::ParseWorkError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::ParseWorkError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::ParseWorkError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::ParseWorkError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::ParseWorkError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::ParseWorkError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::ParseWorkError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::ParseWorkError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::ParseWorkError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::ParseWorkError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::ParseWorkError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::ParseWorkError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::ParseWorkError
+pub fn bitcoin_units::pow::ParseWorkError::from(t: T) -> T
+pub struct bitcoin_units::pow::Target(_)
+impl bitcoin_units::pow::Target
+pub const bitcoin_units::pow::Target::MAX: Self
+pub const bitcoin_units::pow::Target::MAX_ATTAINABLE_MAINNET: Self
+pub const bitcoin_units::pow::Target::MAX_ATTAINABLE_REGTEST: Self
+pub const bitcoin_units::pow::Target::MAX_ATTAINABLE_SIGNET: Self
+pub const bitcoin_units::pow::Target::MAX_ATTAINABLE_TESTNET: Self
+pub const bitcoin_units::pow::Target::ZERO: Self
+pub fn bitcoin_units::pow::Target::from_compact(c: bitcoin_units::pow::CompactTarget) -> Self
+pub fn bitcoin_units::pow::Target::to_compact_lossy(self) -> bitcoin_units::pow::CompactTarget
+pub fn bitcoin_units::pow::Target::to_work(self) -> bitcoin_units::pow::Work
+impl bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from_be_bytes(bytes: [u8; 32]) -> bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from_hex(s: &str) -> core::result::Result<Self, bitcoin_units::parse_int::error::PrefixedHexError>
+pub fn bitcoin_units::pow::Target::from_le_bytes(bytes: [u8; 32]) -> bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from_unprefixed_hex(s: &str) -> core::result::Result<Self, bitcoin_units::parse_int::error::UnprefixedHexError>
+pub fn bitcoin_units::pow::Target::to_be_bytes(self) -> [u8; 32]
+pub fn bitcoin_units::pow::Target::to_le_bytes(self) -> [u8; 32]
+impl core::clone::Clone for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::clone(&self) -> bitcoin_units::pow::Target
+impl core::cmp::Eq for bitcoin_units::pow::Target
+impl core::cmp::Ord for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::cmp(&self, other: &bitcoin_units::pow::Target) -> core::cmp::Ordering
+impl core::cmp::PartialEq for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::eq(&self, other: &bitcoin_units::pow::Target) -> bool
+impl core::cmp::PartialOrd for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::partial_cmp(&self, other: &bitcoin_units::pow::Target) -> core::option::Option<core::cmp::Ordering>
+impl core::convert::From<bitcoin_units::pow::CompactTarget> for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from(c: bitcoin_units::pow::CompactTarget) -> Self
+impl core::fmt::Debug for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::LowerHex for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::UpperHex for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::Copy for bitcoin_units::pow::Target
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::Target
+impl core::str::traits::FromStr for bitcoin_units::pow::Target
+pub type bitcoin_units::pow::Target::Err = bitcoin_units::pow::ParseTargetError
+pub fn bitcoin_units::pow::Target::from_str(s: &str) -> core::result::Result<Self, Self::Err>
+impl serde::ser::Serialize for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::serialize<__S>(&self, __serializer: __S) -> core::result::Result<<__S as serde::ser::Serializer>::Ok, <__S as serde::ser::Serializer>::Error> where __S: serde::ser::Serializer
+impl<'de> serde::de::Deserialize<'de> for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::deserialize<__D>(__deserializer: __D) -> core::result::Result<Self, <__D as serde::de::Deserializer>::Error> where __D: serde::de::Deserializer<'de>
+impl core::marker::Freeze for bitcoin_units::pow::Target
+impl core::marker::Send for bitcoin_units::pow::Target
+impl core::marker::Sync for bitcoin_units::pow::Target
+impl core::marker::Unpin for bitcoin_units::pow::Target
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::Target
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::Target
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::Target
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::Target where U: core::convert::From<T>
+pub fn bitcoin_units::pow::Target::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::Target where U: core::convert::Into<T>
+pub type bitcoin_units::pow::Target::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::Target::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::Target where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::Target::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::Target::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::Target where T: core::clone::Clone
+pub type bitcoin_units::pow::Target::Owned = T
+pub fn bitcoin_units::pow::Target::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::Target::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::Target where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::Target::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::Target where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::Target::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::Target where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::Target::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::Target where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::Target::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::Target where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::Target::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from(t: T) -> T
+impl<T> serde::de::DeserializeOwned for bitcoin_units::pow::Target where T: for<'de> serde::de::Deserialize<'de>
+pub struct bitcoin_units::pow::Work(_)
+impl bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::from_be_bytes(bytes: [u8; 32]) -> bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::from_hex(s: &str) -> core::result::Result<Self, bitcoin_units::parse_int::error::PrefixedHexError>
+pub fn bitcoin_units::pow::Work::from_le_bytes(bytes: [u8; 32]) -> bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::from_unprefixed_hex(s: &str) -> core::result::Result<Self, bitcoin_units::parse_int::error::UnprefixedHexError>
+pub fn bitcoin_units::pow::Work::to_be_bytes(self) -> [u8; 32]
+pub fn bitcoin_units::pow::Work::to_le_bytes(self) -> [u8; 32]
+impl bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::to_target(self) -> bitcoin_units::pow::Target
+impl core::clone::Clone for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::clone(&self) -> bitcoin_units::pow::Work
+impl core::cmp::Eq for bitcoin_units::pow::Work
+impl core::cmp::Ord for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::cmp(&self, other: &bitcoin_units::pow::Work) -> core::cmp::Ordering
+impl core::cmp::PartialEq for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::eq(&self, other: &bitcoin_units::pow::Work) -> bool
+impl core::cmp::PartialOrd for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::partial_cmp(&self, other: &bitcoin_units::pow::Work) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::LowerHex for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::UpperHex for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::Copy for bitcoin_units::pow::Work
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::Work
+impl core::ops::arith::Add for bitcoin_units::pow::Work
+pub type bitcoin_units::pow::Work::Output = bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::add(self, rhs: Self) -> Self
+impl core::ops::arith::Sub for bitcoin_units::pow::Work
+pub type bitcoin_units::pow::Work::Output = bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::sub(self, rhs: Self) -> Self
+impl core::str::traits::FromStr for bitcoin_units::pow::Work
+pub type bitcoin_units::pow::Work::Err = bitcoin_units::pow::ParseWorkError
+pub fn bitcoin_units::pow::Work::from_str(s: &str) -> core::result::Result<Self, Self::Err>
+impl serde::ser::Serialize for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::serialize<__S>(&self, __serializer: __S) -> core::result::Result<<__S as serde::ser::Serializer>::Ok, <__S as serde::ser::Serializer>::Error> where __S: serde::ser::Serializer
+impl<'de> serde::de::Deserialize<'de> for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::deserialize<__D>(__deserializer: __D) -> core::result::Result<Self, <__D as serde::de::Deserializer>::Error> where __D: serde::de::Deserializer<'de>
+impl core::marker::Freeze for bitcoin_units::pow::Work
+impl core::marker::Send for bitcoin_units::pow::Work
+impl core::marker::Sync for bitcoin_units::pow::Work
+impl core::marker::Unpin for bitcoin_units::pow::Work
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::Work
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::Work
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::Work
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::Work where U: core::convert::From<T>
+pub fn bitcoin_units::pow::Work::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::Work where U: core::convert::Into<T>
+pub type bitcoin_units::pow::Work::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::Work::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::Work where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::Work::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::Work::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::Work where T: core::clone::Clone
+pub type bitcoin_units::pow::Work::Owned = T
+pub fn bitcoin_units::pow::Work::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::Work::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::Work where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::Work::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::Work where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::Work::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::Work where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::Work::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::Work where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::Work::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::Work where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::Work::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::from(t: T) -> T
+impl<T> serde::de::DeserializeOwned for bitcoin_units::pow::Work where T: for<'de> serde::de::Deserialize<'de>
 pub mod bitcoin_units::relative
 pub mod bitcoin_units::relative::error
 pub enum bitcoin_units::relative::error::IsSatisfiedByError
@@ -9912,6 +10162,8 @@ impl core::cmp::PartialEq for bitcoin_units::pow::CompactTarget
 pub fn bitcoin_units::pow::CompactTarget::eq(&self, other: &bitcoin_units::pow::CompactTarget) -> bool
 impl core::cmp::PartialOrd for bitcoin_units::pow::CompactTarget
 pub fn bitcoin_units::pow::CompactTarget::partial_cmp(&self, other: &bitcoin_units::pow::CompactTarget) -> core::option::Option<core::cmp::Ordering>
+impl core::convert::From<bitcoin_units::pow::CompactTarget> for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from(c: bitcoin_units::pow::CompactTarget) -> Self
 impl core::convert::TryFrom<&str> for bitcoin_units::pow::CompactTarget
 pub type bitcoin_units::pow::CompactTarget::Error = bitcoin_units::parse_int::error::ParseIntError
 pub fn bitcoin_units::pow::CompactTarget::try_from(s: &str) -> core::result::Result<Self, Self::Error>
@@ -10525,6 +10777,86 @@ impl<T> core::clone::CloneToUninit for bitcoin_units::SignedAmount where T: core
 pub unsafe fn bitcoin_units::SignedAmount::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_units::SignedAmount
 pub fn bitcoin_units::SignedAmount::from(t: T) -> T
+pub struct bitcoin_units::Target(_)
+impl bitcoin_units::pow::Target
+pub const bitcoin_units::pow::Target::MAX: Self
+pub const bitcoin_units::pow::Target::MAX_ATTAINABLE_MAINNET: Self
+pub const bitcoin_units::pow::Target::MAX_ATTAINABLE_REGTEST: Self
+pub const bitcoin_units::pow::Target::MAX_ATTAINABLE_SIGNET: Self
+pub const bitcoin_units::pow::Target::MAX_ATTAINABLE_TESTNET: Self
+pub const bitcoin_units::pow::Target::ZERO: Self
+pub fn bitcoin_units::pow::Target::from_compact(c: bitcoin_units::pow::CompactTarget) -> Self
+pub fn bitcoin_units::pow::Target::to_compact_lossy(self) -> bitcoin_units::pow::CompactTarget
+pub fn bitcoin_units::pow::Target::to_work(self) -> bitcoin_units::pow::Work
+impl bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from_be_bytes(bytes: [u8; 32]) -> bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from_hex(s: &str) -> core::result::Result<Self, bitcoin_units::parse_int::error::PrefixedHexError>
+pub fn bitcoin_units::pow::Target::from_le_bytes(bytes: [u8; 32]) -> bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from_unprefixed_hex(s: &str) -> core::result::Result<Self, bitcoin_units::parse_int::error::UnprefixedHexError>
+pub fn bitcoin_units::pow::Target::to_be_bytes(self) -> [u8; 32]
+pub fn bitcoin_units::pow::Target::to_le_bytes(self) -> [u8; 32]
+impl core::clone::Clone for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::clone(&self) -> bitcoin_units::pow::Target
+impl core::cmp::Eq for bitcoin_units::pow::Target
+impl core::cmp::Ord for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::cmp(&self, other: &bitcoin_units::pow::Target) -> core::cmp::Ordering
+impl core::cmp::PartialEq for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::eq(&self, other: &bitcoin_units::pow::Target) -> bool
+impl core::cmp::PartialOrd for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::partial_cmp(&self, other: &bitcoin_units::pow::Target) -> core::option::Option<core::cmp::Ordering>
+impl core::convert::From<bitcoin_units::pow::CompactTarget> for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from(c: bitcoin_units::pow::CompactTarget) -> Self
+impl core::fmt::Debug for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::LowerHex for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::UpperHex for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::Copy for bitcoin_units::pow::Target
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::Target
+impl core::str::traits::FromStr for bitcoin_units::pow::Target
+pub type bitcoin_units::pow::Target::Err = bitcoin_units::pow::ParseTargetError
+pub fn bitcoin_units::pow::Target::from_str(s: &str) -> core::result::Result<Self, Self::Err>
+impl serde::ser::Serialize for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::serialize<__S>(&self, __serializer: __S) -> core::result::Result<<__S as serde::ser::Serializer>::Ok, <__S as serde::ser::Serializer>::Error> where __S: serde::ser::Serializer
+impl<'de> serde::de::Deserialize<'de> for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::deserialize<__D>(__deserializer: __D) -> core::result::Result<Self, <__D as serde::de::Deserializer>::Error> where __D: serde::de::Deserializer<'de>
+impl core::marker::Freeze for bitcoin_units::pow::Target
+impl core::marker::Send for bitcoin_units::pow::Target
+impl core::marker::Sync for bitcoin_units::pow::Target
+impl core::marker::Unpin for bitcoin_units::pow::Target
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::Target
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::Target
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::Target
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::Target where U: core::convert::From<T>
+pub fn bitcoin_units::pow::Target::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::Target where U: core::convert::Into<T>
+pub type bitcoin_units::pow::Target::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::Target::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::Target where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::Target::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::Target::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::Target where T: core::clone::Clone
+pub type bitcoin_units::pow::Target::Owned = T
+pub fn bitcoin_units::pow::Target::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::Target::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::Target where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::Target::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::Target where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::Target::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::Target where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::Target::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::Target where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::Target::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::Target where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::Target::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::from(t: T) -> T
+impl<T> serde::de::DeserializeOwned for bitcoin_units::pow::Target where T: for<'de> serde::de::Deserialize<'de>
 pub struct bitcoin_units::Weight(_)
 impl bitcoin_units::Weight
 pub const bitcoin_units::Weight::MAX: Self
@@ -10828,3 +11160,79 @@ pub unsafe fn bitcoin_units::Weight::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_units::Weight
 pub fn bitcoin_units::Weight::from(t: T) -> T
 impl<T> serde::de::DeserializeOwned for bitcoin_units::Weight where T: for<'de> serde::de::Deserialize<'de>
+pub struct bitcoin_units::Work(_)
+impl bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::from_be_bytes(bytes: [u8; 32]) -> bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::from_hex(s: &str) -> core::result::Result<Self, bitcoin_units::parse_int::error::PrefixedHexError>
+pub fn bitcoin_units::pow::Work::from_le_bytes(bytes: [u8; 32]) -> bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::from_unprefixed_hex(s: &str) -> core::result::Result<Self, bitcoin_units::parse_int::error::UnprefixedHexError>
+pub fn bitcoin_units::pow::Work::to_be_bytes(self) -> [u8; 32]
+pub fn bitcoin_units::pow::Work::to_le_bytes(self) -> [u8; 32]
+impl bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::to_target(self) -> bitcoin_units::pow::Target
+impl core::clone::Clone for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::clone(&self) -> bitcoin_units::pow::Work
+impl core::cmp::Eq for bitcoin_units::pow::Work
+impl core::cmp::Ord for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::cmp(&self, other: &bitcoin_units::pow::Work) -> core::cmp::Ordering
+impl core::cmp::PartialEq for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::eq(&self, other: &bitcoin_units::pow::Work) -> bool
+impl core::cmp::PartialOrd for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::partial_cmp(&self, other: &bitcoin_units::pow::Work) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::LowerHex for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::UpperHex for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::Copy for bitcoin_units::pow::Work
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::Work
+impl core::ops::arith::Add for bitcoin_units::pow::Work
+pub type bitcoin_units::pow::Work::Output = bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::add(self, rhs: Self) -> Self
+impl core::ops::arith::Sub for bitcoin_units::pow::Work
+pub type bitcoin_units::pow::Work::Output = bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::sub(self, rhs: Self) -> Self
+impl core::str::traits::FromStr for bitcoin_units::pow::Work
+pub type bitcoin_units::pow::Work::Err = bitcoin_units::pow::ParseWorkError
+pub fn bitcoin_units::pow::Work::from_str(s: &str) -> core::result::Result<Self, Self::Err>
+impl serde::ser::Serialize for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::serialize<__S>(&self, __serializer: __S) -> core::result::Result<<__S as serde::ser::Serializer>::Ok, <__S as serde::ser::Serializer>::Error> where __S: serde::ser::Serializer
+impl<'de> serde::de::Deserialize<'de> for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::deserialize<__D>(__deserializer: __D) -> core::result::Result<Self, <__D as serde::de::Deserializer>::Error> where __D: serde::de::Deserializer<'de>
+impl core::marker::Freeze for bitcoin_units::pow::Work
+impl core::marker::Send for bitcoin_units::pow::Work
+impl core::marker::Sync for bitcoin_units::pow::Work
+impl core::marker::Unpin for bitcoin_units::pow::Work
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::Work
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::Work
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::Work
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::Work where U: core::convert::From<T>
+pub fn bitcoin_units::pow::Work::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::Work where U: core::convert::Into<T>
+pub type bitcoin_units::pow::Work::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::Work::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::Work where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::Work::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::Work::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::Work where T: core::clone::Clone
+pub type bitcoin_units::pow::Work::Owned = T
+pub fn bitcoin_units::pow::Work::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::Work::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::Work where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::Work::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::Work where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::Work::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::Work where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::Work::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::Work where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::Work::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::Work where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::Work::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::from(t: T) -> T
+impl<T> serde::de::DeserializeOwned for bitcoin_units::pow::Work where T: for<'de> serde::de::Deserialize<'de>
