@@ -431,7 +431,7 @@ impl Psbt {
                     let (sighash, sighash_type) = self.sighash_taproot(input_index, cache, None)?;
                     let key_pair = Keypair::from_secret_key(sk.as_inner())
                         .tap_tweak(input.tap_merkle_root)
-                        .to_keypair();
+                        .into_keypair();
 
                     let signature = key_pair.raw_bip340_sign(&sighash.to_byte_array());
 
