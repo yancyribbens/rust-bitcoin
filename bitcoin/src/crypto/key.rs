@@ -139,7 +139,7 @@ mod encapsulate {
     }
 
     /// A Bitcoin ECDSA private key.
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[derive(Debug, Clone, PartialEq, Eq)]
     pub struct PrivateKey {
         /// Whether this private key should be serialized as compressed.
         compressed: bool,
@@ -714,7 +714,7 @@ impl PublicKey {
     }
 
     /// Computes the public key as supposed to be used with this secret.
-    pub fn from_private_key(sk: PrivateKey) -> Self { sk.to_public_key() }
+    pub fn from_private_key(sk: &PrivateKey) -> Self { sk.to_public_key() }
 
     /// Extracts the public key from a Keypair
     pub fn from_keypair(pair: &Keypair) -> Self { CompressedPublicKey::from_keypair(pair).into() }
@@ -996,13 +996,13 @@ impl PrivateKey {
 
     /// Serializes the private key to bytes.
     #[deprecated(since = "TBD", note = "use to_secret_vec instead")]
-    pub fn to_bytes(self) -> Vec<u8> { self.to_secret_vec() }
+    pub fn to_bytes(&self) -> Vec<u8> { self.to_secret_vec() }
 
     /// Serializes the private key to bytes.
-    pub fn to_secret_vec(self) -> Vec<u8> { self.to_secret_bytes().to_vec() }
+    pub fn to_secret_vec(&self) -> Vec<u8> { self.to_secret_bytes().to_vec() }
 
     /// Serializes the private key to bytes.
-    pub fn to_secret_bytes(self) -> [u8; 32] { self.as_inner().to_secret_bytes() }
+    pub fn to_secret_bytes(&self) -> [u8; 32] { self.as_inner().to_secret_bytes() }
 
     /// Deserializes a private key from a byte array.
     ///
@@ -1101,7 +1101,6 @@ impl WifKey {
     }
 
     /// Gets the WIF encoding of this private key.
-    #[allow(clippy::missing_panics_doc)]
     pub fn to_wif(&self) -> String {
         let mut buf = String::new();
         let _ = self.fmt_wif(&mut buf);
@@ -1971,7 +1970,7 @@ mod tests {
         ];
 
         let wk = KEY_WIF.parse::<WifKey>().unwrap();
-        let pk = PublicKey::from_private_key(wk.private_key);
+        let pk = PublicKey::from_private_key(&wk.private_key);
         let pk_u = PublicKey::from_secp_uncompressed(pk.to_inner());
 
         assert_tokens(&wk, &[Token::BorrowedStr(KEY_WIF)]);
