@@ -1064,7 +1064,7 @@ mod test {
     use std::net::IpAddr;
 
     use bitcoin::consensus::encode::{deserialize, serialize};
-    use hex_lit::hex;
+    use hex_unstable::hex;
 
     use super::*;
     use crate::hex;
