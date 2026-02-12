@@ -7,6 +7,7 @@ REPO_DIR=$(git rev-parse --show-toplevel)
 # can't find the file because of the ENV var
 # shellcheck source=/dev/null
 source "$REPO_DIR/fuzz/fuzz-util.sh"
+source "$REPO_DIR/fuzz/generate-encoding-roundtrip.sh"
 
 # 1. Generate fuzz/Cargo.toml
 cat > "$REPO_DIR/fuzz/Cargo.toml" <<EOF
@@ -41,6 +42,10 @@ unexpected_cfgs = { level = "deny", check-cfg = ['cfg(fuzzing)'] }
 [lints.clippy]
 redundant_clone = "warn"
 use_self = "warn"
+
+[lib]
+name = "bitcoin_fuzz"
+path = "src/lib.rs"
 
 [package.metadata.rbmt.lint]
 allowed_duplicates = [
