@@ -27,7 +27,6 @@ use bitcoin::hashes::{hash160, ripemd160, sha256, sha256d};
 use bitcoin::hex;
 use bitcoin::locktime::{absolute, relative};
 use bitcoin::psbt::{raw, Input, Output, Psbt, PsbtSighashType};
-use bitcoin::script::ScriptBufExt as _;
 use bitcoin::sighash::{EcdsaSighashType, TapSighashType};
 use bitcoin::taproot::{self, ControlBlock, LeafVersion, TapTree, TaprootBuilder};
 use bitcoin::witness::Witness;

@@ -9,7 +9,7 @@ use bitcoin::consensus::encode::{deserialize, serialize_hex};
 use bitcoin::hex;
 use bitcoin::opcodes::all::OP_0;
 use bitcoin::psbt::{Psbt, PsbtSighashType};
-use bitcoin::script::{PushBytes, ScriptBuf, ScriptBufExt as _};
+use bitcoin::script::{PushBytes, ScriptBuf};
 use bitcoin::{
     absolute, script, transaction, NetworkKind, OutPoint, PrivateKey, PublicKey, ScriptPubKeyBuf,
     ScriptSigBuf, Sequence, Transaction, TxIn, TxOut, Witness,
