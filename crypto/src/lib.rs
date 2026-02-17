@@ -15,5 +15,10 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
+/// Re-export the `hex-conservative` crate.
+pub extern crate hex_stable as hex;
+
+#[cfg(feature = "alloc")]
+pub mod ecdsa;
 #[cfg(feature = "alloc")]
 pub mod sighash;
