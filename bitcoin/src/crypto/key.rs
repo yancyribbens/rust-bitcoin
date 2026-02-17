@@ -19,7 +19,7 @@ use io::{Read, Write};
 
 use crate::crypto::ecdsa;
 use crate::hex::{self, DecodeFixedLengthBytesError};
-use crate::internal_macros::impl_asref_push_bytes;
+use crate::internal_macros::{define_extension_trait, impl_asref_push_bytes};
 use crate::network::NetworkKind;
 use crate::prelude::{DisplayHex, String, Vec};
 use crate::script::{self, PushBytes, WitnessScriptBuf};
@@ -651,20 +651,6 @@ impl LegacyPublicKey {
         }
     }
 
-    /// Returns the script code used to spend a P2WPKH input.
-    ///
-    /// While the type returned is [`WitnessScriptBuf`], this is **not** a witness script and
-    /// should not be used as one. It is a special template defined in BIP 143 which is used
-    /// in place of a witness script for purposes of sighash computation.
-    ///
-    /// # Errors
-    ///
-    /// Errors if this key is not compressed.
-    pub fn p2wpkh_script_code(&self) -> Result<WitnessScriptBuf, UncompressedPublicKeyError> {
-        let key = FullPublicKey::try_from(*self)?;
-        Ok(key.p2wpkh_script_code())
-    }
-
     /// Converts this [`LegacyPublicKey`] into a [`FullPublicKey`] infallibly.
     ///
     /// Unlike the `TryFrom` implementation, this function will discard compressedness
@@ -707,15 +693,6 @@ impl LegacyPublicKey {
             };
             io::Error::new(io::ErrorKind::InvalidData, reason)
         })
-    }
-
-    /// Serializes the public key to bytes.
-    pub fn to_bytes(self) -> SerializedLegacyPublicKey {
-        if self.compressed() {
-            SerializedLegacyPublicKey::new_compressed(&self.serialize_compressed())
-        } else {
-            SerializedLegacyPublicKey::new_uncompressed(&self.serialize_uncompressed())
-        }
     }
 
     /// Serializes the public key to bytes.
@@ -833,6 +810,34 @@ impl LegacyPublicKey {
     }
 }
 
+define_extension_trait! {
+    /// Extension functionality for the [`LegacyPublicKey`] type.
+    pub trait LegacyPublicKeyExt impl for LegacyPublicKey {
+        /// Returns the script code used to spend a P2WPKH input.
+        ///
+        /// While the type returned is [`WitnessScriptBuf`], this is **not** a witness script and
+        /// should not be used as one. It is a special template defined in BIP 143 which is used
+        /// in place of a witness script for purposes of sighash computation.
+        ///
+        /// # Errors
+        ///
+        /// Errors if this key is not compressed.
+        fn p2wpkh_script_code(&self) -> Result<WitnessScriptBuf, UncompressedPublicKeyError> {
+            let key = FullPublicKey::try_from(*self)?;
+            Ok(key.p2wpkh_script_code())
+        }
+
+        /// Serializes the public key to bytes.
+        fn to_bytes(self) -> SerializedLegacyPublicKey {
+            if self.compressed() {
+                SerializedLegacyPublicKey::new_compressed(&self.serialize_compressed())
+            } else {
+                SerializedLegacyPublicKey::new_uncompressed(&self.serialize_uncompressed())
+            }
+        }
+    }
+}
+
 impl From<secp256k1::PublicKey> for LegacyPublicKey {
     fn from(pk: secp256k1::PublicKey) -> Self { Self::from_secp(pk) }
 }
@@ -913,15 +918,6 @@ impl FullPublicKey {
     /// Returns bitcoin 160-bit hash of the public key for witness program.
     pub fn wpubkey_hash(&self) -> WPubkeyHash {
         WPubkeyHash::from_byte_array(hash160::Hash::hash(&self.to_bytes()).to_byte_array())
-    }
-
-    /// Returns the script code used to spend a P2WPKH input.
-    ///
-    /// While the type returned is [`WitnessScriptBuf`], this is **not** a witness script and
-    /// should not be used as one. It is a special template defined in BIP 143 which is used
-    /// in place of a witness script for purposes of sighash computation.
-    pub fn p2wpkh_script_code(&self) -> WitnessScriptBuf {
-        script::p2wpkh_script_code(self.wpubkey_hash())
     }
 
     /// Writes the public key into a writer.
@@ -1015,6 +1011,20 @@ impl FullPublicKey {
     }
 }
 
+define_extension_trait! {
+    /// Extension functionality for the [`FullPublicKey`] type.
+    pub trait FullPublicKeyExt impl for FullPublicKey {
+        /// Returns the script code used to spend a P2WPKH input.
+        ///
+        /// While the type returned is [`WitnessScriptBuf`], this is **not** a witness script and
+        /// should not be used as one. It is a special template defined in BIP 143 which is used
+        /// in place of a witness script for purposes of sighash computation.
+        fn p2wpkh_script_code(&self) -> WitnessScriptBuf {
+            script::p2wpkh_script_code(self.wpubkey_hash())
+        }
+    }
+}
+
 impl fmt::Display for FullPublicKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         fmt::Display::fmt(&self.to_bytes().as_hex(), f)
@@ -1073,6 +1083,12 @@ impl From<FullPublicKey> for WPubkeyHash {
 
 impl From<&FullPublicKey> for WPubkeyHash {
     fn from(key: &FullPublicKey) -> Self { key.wpubkey_hash() }
+}
+
+mod sealed {
+    pub trait Sealed {}
+    impl Sealed for super::FullPublicKey {}
+    impl Sealed for super::LegacyPublicKey {}
 }
 
 impl PrivateKey {
