@@ -165,9 +165,12 @@ where
     T: Encodable + ?Sized,
     W: std::io::Write,
 {
+    std::println!("encode to writer");
     let mut encoder = object.encoder();
     loop {
-        writer.write_all(encoder.current_chunk())?;
+        let chunk = encoder.current_chunk();
+        std::println!("{:?}", chunk);
+        writer.write_all(chunk)?;
         if !encoder.advance() {
             break;
         }
