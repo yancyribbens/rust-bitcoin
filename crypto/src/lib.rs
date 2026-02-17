@@ -21,4 +21,9 @@ pub extern crate hex_stable as hex;
 #[cfg(feature = "alloc")]
 pub mod ecdsa;
 #[cfg(feature = "alloc")]
+pub mod key;
+#[cfg(feature = "alloc")]
 pub mod sighash;
+
+#[cfg(feature = "alloc")]
+include!("../include/newtype.rs"); // Explained in `REPO_DIR/docs/README.md`.
