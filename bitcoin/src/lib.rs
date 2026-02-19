@@ -175,6 +175,9 @@ pub use units::{
     time::{self, BlockTime, BlockTimeDecoder, BlockTimeDecoderError},
     weight::Weight,
 };
+#[doc(inline)]
+#[cfg(feature = "serde")]
+pub use primitives::serde_as_consensus;
 
 #[deprecated(since = "TBD", note = "use `BlockHeightInterval` instead")]
 #[doc(hidden)]
