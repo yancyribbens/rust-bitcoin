@@ -60,6 +60,7 @@ dependencies = [
  "bitcoin-io",
  "bitcoin-network-kind",
  "bitcoin-primitives",
+ "bitcoin-taproot-primitives",
  "bitcoin-units",
  "bitcoin_hashes",
  "bitcoinconsensus",
@@ -189,6 +190,14 @@ dependencies = [
 [[package]]
 name = "bitcoin-taproot-primitives"
 version = "0.1.0"
+dependencies = [
+ "arbitrary",
+ "bitcoin-crypto",
+ "bitcoin-internals",
+ "bitcoin_hashes",
+ "secp256k1",
+ "serde",
+]
 
 [[package]]
 name = "bitcoin-units"
