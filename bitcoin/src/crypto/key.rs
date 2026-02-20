@@ -446,6 +446,26 @@ impl Keypair {
     /// This is equivalent to using [`XOnlyPublicKey::from_keypair`].
     #[inline]
     pub fn to_x_only_public_key(self) -> XOnlyPublicKey { XOnlyPublicKey::from_keypair(&self) }
+
+    /// Schnorr sign a message slice with this keypair.
+    ///
+    /// If the `rand` and `std` features are enabled, this function will randomly seed auxiliary
+    /// data. Otherwise, this will use no auxiliary data.
+    #[inline]
+    pub fn raw_bip340_sign(&self, msg: &[u8]) -> secp256k1::schnorr::Signature {
+        #[cfg(not(all(feature = "rand", feature = "std")))] {
+            secp256k1::schnorr::sign_no_aux_rand(msg, self.as_inner())
+        }
+        #[cfg(all(feature = "rand", feature = "std"))] {
+            secp256k1::schnorr::sign(msg, self.as_inner())
+        }
+    }
+
+    /// Schnorr sign a message slice with this keypair, using provided auxiliary random data.
+    #[inline]
+    pub fn raw_bip340_sign_with_aux_randomness(&self, msg: &[u8], aux_rand: &[u8; 32]) -> secp256k1::schnorr::Signature {
+        secp256k1::schnorr::sign_with_aux_rand(msg, self.as_inner(), aux_rand)
+    }
 }
 
 impl FromStr for Keypair {
