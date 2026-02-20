@@ -25,15 +25,22 @@ use crate::{internal_macros, BlockTime, Target, Weight, Work};
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
 pub use primitives::block::{
-    Block, Checked, Unchecked, Validation, Version, BlockHash, Header,
-    WitnessCommitment, compute_merkle_root, compute_witness_root,
+    Block, BlockDecoder, BlockEncoder, BlockHash, BlockHashDecoder, BlockHashEncoder,
+    Checked, Unchecked, Validation, Version, VersionDecoder, VersionEncoder, Header,
+    HeaderDecoder, HeaderEncoder, WitnessCommitment, compute_merkle_root, compute_witness_root,
 };
 #[doc(no_inline)]
-pub use primitives::block::{InvalidBlockError, ParseBlockError, ParseHeaderError};
+pub use primitives::block::{
+    BlockDecoderError, BlockHashDecoderError, HeaderDecoderError, InvalidBlockError,
+    ParseBlockError, ParseHeaderError, VersionDecoderError,
+};
 #[doc(inline)]
-pub use units::block::{BlockHeight, BlockHeightInterval, BlockMtp, BlockMtpInterval};
+pub use units::block::{
+    BlockHeight, BlockHeightDecoder, BlockHeightEncoder, BlockHeightInterval, BlockMtp,
+    BlockMtpInterval,
+};
 #[doc(no_inline)]
-pub use units::block::TooBigForRelativeHeightError;
+pub use units::block::{BlockHeightDecoderError, TooBigForRelativeHeightError};
 
 #[deprecated(since = "TBD", note = "use `BlockHeightInterval` instead")]
 #[doc(hidden)]
