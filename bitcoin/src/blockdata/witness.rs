@@ -9,7 +9,7 @@ use io::{BufRead, Write};
 use crate::consensus::encode::{self, Error, ParseError, WriteExt};
 use crate::consensus::{Decodable, Encodable};
 use crate::crypto::ecdsa;
-use crate::crypto::key::SerializedXOnlyPublicKey;
+use crate::crypto::key::{CompressedPublicKey, SerializedXOnlyPublicKey};
 use crate::taproot::{self, ControlBlock, LeafScript, TaprootMerkleBranch, TAPROOT_ANNEX_PREFIX};
 use crate::{internal_macros, TapScript, WitnessScript};
 
@@ -49,10 +49,10 @@ internal_macros::define_extension_trait! {
         /// serialized public key. Also useful for spending a P2SH-P2WPKH output.
         ///
         /// It is expected that `pubkey` is related to the secret key used to create `signature`.
-        fn p2wpkh(signature: ecdsa::Signature, pubkey: secp256k1::PublicKey) -> Self {
+        fn p2wpkh(signature: ecdsa::Signature, pubkey: CompressedPublicKey) -> Self {
             let mut witness = Witness::new();
             witness.push(signature.serialize());
-            witness.push(pubkey.serialize());
+            witness.push(pubkey.to_bytes());
             witness
         }
 
