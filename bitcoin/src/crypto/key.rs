@@ -924,7 +924,10 @@ impl PrivateKey {
     pub fn to_bytes(self) -> Vec<u8> { self.to_secret_vec() }
 
     /// Serializes the private key to bytes.
-    pub fn to_secret_vec(self) -> Vec<u8> { self.as_inner()[..].to_vec() }
+    pub fn to_secret_vec(self) -> Vec<u8> { self.to_secret_bytes().to_vec() }
+
+    /// Serializes the private key to bytes.
+    pub fn to_secret_bytes(self) -> [u8; 32] { self.as_inner().to_secret_bytes() }
 
     /// Deserializes a private key from a byte array.
     ///
