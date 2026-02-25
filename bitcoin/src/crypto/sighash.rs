@@ -2035,8 +2035,7 @@ mod tests {
             let key_spend_sig = tweaked_keypair
                 .raw_bip340_sign_with_aux_randomness(&sighash.to_byte_array(), &[0u8; 32]);
 
-            // Only compare the inner key, not the parity
-            assert_eq!(expected.internal_pubkey.to_inner(), internal_key.to_inner());
+            assert_eq!(expected.internal_pubkey.with_parity(internal_key.parity()), internal_key);
             assert_eq!(expected.sig_msg, sig_msg.to_lower_hex_string());
             assert_eq!(expected.sig_hash, sighash);
             assert_eq!(expected_hash_ty, hash_ty);
