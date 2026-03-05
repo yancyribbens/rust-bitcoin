@@ -15,7 +15,6 @@
 use core::fmt;
 
 use super::{Encodable, Encoder, ExactSizeEncoder};
-pub use crate::compact_size::CompactSizeEncoder;
 
 /// An encoder for a single byte slice.
 #[derive(Debug, Clone)]

@@ -60,7 +60,7 @@ mod compact_size;
 mod decode;
 mod encode;
 
-pub use self::compact_size::{CompactSizeDecoder, CompactSizeDecoderError};
+pub use self::compact_size::{CompactSizeDecoder, CompactSizeDecoderError, CompactSizeEncoder};
 #[cfg(feature = "alloc")]
 pub use self::compact_size::LengthPrefixExceedsMaxError;
 pub use self::decode::decoders::{
@@ -75,8 +75,8 @@ pub use self::decode::{
 };
 pub use self::decode::{decode_from_slice, decode_from_slice_unbounded, Decodable, Decoder, DecodeError};
 pub use self::encode::encoders::{
-    ArrayEncoder, ArrayRefEncoder, BytesEncoder, CompactSizeEncoder, Encoder2, Encoder3, Encoder4,
-    Encoder6, SliceEncoder,
+    ArrayEncoder, ArrayRefEncoder, BytesEncoder, Encoder2, Encoder3, Encoder4, Encoder6,
+    SliceEncoder,
 };
 #[cfg(feature = "alloc")]
 pub use self::encode::{encode_to_vec, flush_to_vec};
