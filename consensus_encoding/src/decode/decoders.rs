@@ -4,7 +4,6 @@
 
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
-#[cfg(feature = "alloc")]
 use core::convert::Infallible;
 use core::{fmt, mem};
 
@@ -777,6 +776,10 @@ where
 pub struct UnexpectedEofError {
     /// Number of bytes missing to complete decoder.
     missing: usize,
+}
+
+impl From<Infallible> for UnexpectedEofError {
+    fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl fmt::Display for UnexpectedEofError {

@@ -1229,6 +1229,10 @@ impl encoding::Decodable for OutPoint {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OutPointDecoderError(UnexpectedEofError);
 
+impl From<Infallible> for OutPointDecoderError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
 impl core::fmt::Display for OutPointDecoderError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write_err!(f, "out point decoder error"; self.0)
