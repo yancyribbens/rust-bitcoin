@@ -304,7 +304,7 @@ impl encoding::Encodable for V1MessageHeader {
     }
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder for the [`V1MessageHeader`] type.
     pub struct V1MessageHeaderEncoder<'e>(
         encoding::Encoder4<
@@ -1510,7 +1510,7 @@ impl NetworkHeader {
     pub const fn from_header(header: block::Header) -> Self { Self { header, length: 0 } }
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder type for a [`NetworkHeader`].
     pub struct NetworkHeaderEncoder<'e>(Encoder2<HeaderEncoder<'e>, ArrayEncoder<1>>);
 }
