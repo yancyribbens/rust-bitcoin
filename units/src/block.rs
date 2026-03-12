@@ -212,40 +212,20 @@ impl encoding::Encodable for BlockHeight {
     }
 }
 
-/// The decoder for the [`BlockHeight`] type.
 #[cfg(feature = "encoding")]
-#[derive(Debug, Clone)]
-pub struct BlockHeightDecoder(encoding::ArrayDecoder<4>);
+crate::decoder_newtype! {
+    /// The decoder for the [`BlockHeight`] type.
+    #[derive(Debug, Clone)]
+    pub struct BlockHeightDecoder(encoding::ArrayDecoder<4>);
 
-#[cfg(feature = "encoding")]
-impl Default for BlockHeightDecoder {
-    fn default() -> Self { Self::new() }
-}
-
-#[cfg(feature = "encoding")]
-impl BlockHeightDecoder {
     /// Constructs a new [`BlockHeight`] decoder.
     pub const fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
-}
 
-#[cfg(feature = "encoding")]
-impl encoding::Decoder for BlockHeightDecoder {
-    type Output = BlockHeight;
-    type Error = BlockHeightDecoderError;
-
-    #[inline]
-    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        self.0.push_bytes(bytes).map_err(BlockHeightDecoderError)
-    }
-
-    #[inline]
-    fn end(self) -> Result<Self::Output, Self::Error> {
-        let n = u32::from_le_bytes(self.0.end().map_err(BlockHeightDecoderError)?);
+    fn end(result: Result<[u8; 4], encoding::UnexpectedEofError>) -> Result<BlockHeight, BlockHeightDecoderError> {
+        let value = result.map_err(BlockHeightDecoderError)?;
+        let n = u32::from_le_bytes(value);
         Ok(BlockHeight::from_u32(n))
     }
-
-    #[inline]
-    fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
 #[cfg(feature = "encoding")]
