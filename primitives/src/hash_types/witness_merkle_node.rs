@@ -72,38 +72,18 @@ encoding::encoder_newtype_exact! {
     pub struct WitnessMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
 }
 
-/// The decoder for the [`WitnessMerkleNode`] type.
-#[derive(Debug, Clone)]
-pub struct WitnessMerkleNodeDecoder(encoding::ArrayDecoder<32>);
+crate::decoder_newtype! {
+    /// The decoder for the [`WitnessMerkleNode`] type.
+    #[derive(Debug, Clone)]
+    pub struct WitnessMerkleNodeDecoder(encoding::ArrayDecoder<32>);
 
-impl WitnessMerkleNodeDecoder {
     /// Constructs a new [`WitnessMerkleNode`] decoder.
-    #[inline]
     pub const fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
-}
 
-impl Default for WitnessMerkleNodeDecoder {
-    #[inline]
-    fn default() -> Self { Self::new() }
-}
-
-impl encoding::Decoder for WitnessMerkleNodeDecoder {
-    type Output = WitnessMerkleNode;
-    type Error = WitnessMerkleNodeDecoderError;
-
-    #[inline]
-    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        self.0.push_bytes(bytes).map_err(WitnessMerkleNodeDecoderError)
+    fn end(result: Result<[u8; 32], encoding::UnexpectedEofError>) -> Result<WitnessMerkleNode, WitnessMerkleNodeDecoderError> {
+        let bytes = result.map_err(WitnessMerkleNodeDecoderError)?;
+        Ok(WitnessMerkleNode::from_byte_array(bytes))
     }
-
-    #[inline]
-    fn end(self) -> Result<Self::Output, Self::Error> {
-        let a = self.0.end().map_err(WitnessMerkleNodeDecoderError)?;
-        Ok(WitnessMerkleNode::from_byte_array(a))
-    }
-
-    #[inline]
-    fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
 /// An error consensus decoding an `WitnessMerkleNode`.
