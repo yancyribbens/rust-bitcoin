@@ -260,6 +260,44 @@ pub struct V1MessageHeader {
     pub checksum: [u8; 4],
 }
 
+impl V1MessageHeader {
+    /// Constructs a new [`V1NetworkMessage`]
+    ///
+    /// # Panics
+    ///
+    /// Panics if message encoding fails or if the payload length exceeds `u32::MAX`.
+    pub fn new(magic: Magic, payload: &Pong) -> Self {
+        let mut engine = sha256d::Hash::engine();
+        let payload_len = payload.0.consensus_encode(&mut engine).expect("engine doesn't error");
+        let payload_len = u32::try_from(payload_len).expect("network message use u32 as length");
+        let checksum = sha256d::Hash::from_engine(engine);
+        let checksum = checksum.to_byte_array();
+        let checksum = [checksum[0], checksum[1], checksum[2], checksum[3]];
+
+        let command: CommandString = CommandString::try_from_static("pong").unwrap();
+        Self { magic, command, length: payload_len, checksum }
+    }
+
+    // Consumes the [`V1NetworkMessage`] instance and returns the inner payload.
+    //pub fn into_payload(self) -> NetworkMessage { self.payload }
+
+    // The actual message data
+    //pub fn payload(&self) -> &NetworkMessage { &self.payload }
+
+    // Magic bytes to identify the network these messages are meant for
+    //pub fn magic(&self) -> &Magic { &self.magic }
+
+    // Returns the message command as a static string reference.
+    //
+    // This returns `"unknown"` for [`NetworkMessage::Unknown`],
+    // regardless of the actual command in the unknown message.
+    // Use the [`Self::command`] method to get the command for unknown messages.
+    //pub fn cmd(&self) -> &'static str { self.payload.cmd() }
+
+    // Returns the `CommandString` for the message command.
+    //pub fn command(&self) -> CommandString { self.payload.command() }
+}
+
 encoding::encoder_newtype! {
     /// The encoder for the [`V1MessageHeader`] type.
     pub struct V1MessageHeaderEncoder<'e>(
