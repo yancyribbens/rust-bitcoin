@@ -260,6 +260,39 @@ pub struct V1MessageHeader {
     pub checksum: [u8; 4],
 }
 
+impl V1MessageHeader {
+    /// Constructs a new [`V1MessageHeader`] with computed 4 byte checksum.
+    ///
+    /// # Parameters
+    ///
+    /// * `magic` - the network magic bytes
+    /// * `message` - the message described by header
+    /// * `cmd` - the character str which defines the transmitted command
+    ///
+    /// # Panics
+    ///
+    /// Panics if command creation or if the payload length exceeds `u32::MAX`.
+    pub fn new<T: encoding::Encodable>(
+        magic: Magic,
+        message: &T,
+        cmd: &'static str,
+    ) -> Self {
+        let bytes = encoding::encode_to_vec(message);
+        let checksum = Self::compute_checksum(&bytes);
+        let payload_len = u32::try_from(bytes.len()).expect("network message use u32 as length");
+        let command: CommandString = CommandString::try_from_static(cmd).unwrap();
+        Self { magic, command, length: payload_len, checksum }
+    }
+
+    fn compute_checksum(bytes: &[u8]) -> [u8; 4] {
+        let mut engine = sha256d::Hash::engine();
+        let _ = engine.write(bytes);
+        let checksum = sha256d::Hash::from_engine(engine);
+        let checksum = checksum.to_byte_array();
+        [checksum[0], checksum[1], checksum[2], checksum[3]]
+    }
+}
+
 encoding::encoder_newtype! {
     /// The encoder for the [`V1MessageHeader`] type.
     pub struct V1MessageHeaderEncoder<'e>(
@@ -2181,6 +2214,22 @@ mod test {
     use crate::{ProtocolVersion, ServiceFlags};
 
     fn hash(array: [u8; 32]) -> sha256d::Hash { sha256d::Hash::from_byte_array(array) }
+
+    #[test]
+    fn v1_message_header() {
+        let magic = Magic::BITCOIN;
+        let payload = Pong(314);
+
+        let header = V1MessageHeader::new(magic, &payload, "pong");
+
+        let target_header = V1MessageHeader {
+            magic: Magic::BITCOIN,
+            command: CommandString::try_from_static("pong").unwrap(),
+            length: 8,
+            checksum: [198, 34, 189, 120],
+        };
+        assert_eq!(header, target_header);
+    }
 
     #[test]
     #[allow(clippy::too_many_lines)]
