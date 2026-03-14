@@ -260,15 +260,18 @@ pub struct V1MessageHeader {
     pub checksum: [u8; 4],
 }
 
+use encoding::Encoder;
+
 impl V1MessageHeader {
     /// Constructs a new [`V1NetworkMessage`]
     ///
     /// # Panics
     ///
     /// Panics if message encoding fails or if the payload length exceeds `u32::MAX`.
-    pub fn new(magic: Magic, payload: &Pong) -> Self {
+    pub fn new<T: encoding::Encodable>(magic: Magic, payload: &T) -> Self {
         let mut engine = sha256d::Hash::engine();
-        let payload_len = payload.0.consensus_encode(&mut engine).expect("engine doesn't error");
+        let payload_len = encoding::encode_to_vec(payload).len();
+        std::println!("len {}", payload_len);
         let payload_len = u32::try_from(payload_len).expect("network message use u32 as length");
         let checksum = sha256d::Hash::from_engine(engine);
         let checksum = checksum.to_byte_array();
@@ -682,7 +685,7 @@ impl std::error::Error for PingDecoderError {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Pong(pub u64);
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder for the [`Pong`] type.
     pub struct PongEncoder<'e>(encoding::ArrayEncoder<8>);
 }
