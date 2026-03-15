@@ -2152,6 +2152,22 @@ mod test {
     fn hash(array: [u8; 32]) -> sha256d::Hash { sha256d::Hash::from_byte_array(array) }
 
     #[test]
+    fn v1_message_header() {
+        let magic = Magic::BITCOIN;
+        let payload = Pong(314);
+
+        let header = V1MessageHeader::new(magic, &payload);
+
+        let target_header = V1MessageHeader {
+            magic: Magic::BITCOIN,
+            command: CommandString::try_from_static("pong").unwrap(),
+            length: 8,
+            checksum: [198, 34, 189, 120]
+        };
+        assert_eq!(header, target_header);
+    }
+
+    #[test]
     #[allow(clippy::too_many_lines)]
     fn full_round_ser_der_raw_network_message() {
         let version_msg: VersionMessage = deserialize(&hex!("721101000100000000000000e6e0845300000000010000000000000000000000000000000000ffff0000000000000100000000000000fd87d87eeb4364f22cf54dca59412db7208d47d920cffce83ee8102f5361746f7368693a302e392e39392f2c9f040001")).unwrap();
