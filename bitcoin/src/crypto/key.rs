@@ -52,9 +52,6 @@ mod encapsulate {
 
     impl XOnlyPublicKey {
         /// Constructs a new x-only public key from the provided secp256k1 x-only public key.
-        ///
-        /// This constructor sets an even parity. Use [`XOnlyPublicKey::with_parity`] if you need
-        /// a different parity value.
         pub fn from_secp(key: impl Into<secp256k1::XOnlyPublicKey>, parity: Parity) -> Self {
             Self { inner: key.into(), parity }
         }
