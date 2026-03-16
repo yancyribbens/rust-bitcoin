@@ -4,8 +4,6 @@
 //!
 //! This crate can be used in a no-std environment but requires an allocator.
 
-// NB: This crate is empty if `alloc` is not enabled.
-#![cfg(feature = "alloc")]
 #![no_std]
 // Experimental features we need.
 #![cfg_attr(bench, feature(test))]
@@ -19,6 +17,7 @@
 // Exclude lints we don't think are valuable.
 #![allow(clippy::incompatible_msrv)] // Has FPs and we're testing it which is more reliable anyway.
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
 #[cfg(bench)]
@@ -27,29 +26,39 @@ extern crate test;
 #[cfg(feature = "std")]
 extern crate std;
 
+#[cfg(feature = "alloc")]
 static BASE58_CHARS: &[u8] = b"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
+#[cfg(feature = "alloc")]
 pub mod error;
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 pub use alloc::{string::String, vec::Vec};
+#[cfg(feature = "alloc")]
 use core::fmt;
 #[cfg(feature = "std")]
 pub use std::{string::String, vec::Vec};
 
+#[cfg(feature = "alloc")]
 use hashes::sha256d;
+#[cfg(feature = "alloc")]
 use internals::array::ArrayExt;
+#[cfg(feature = "alloc")]
 use internals::array_vec::ArrayVec;
 #[allow(unused)] // MSRV polyfill
+#[cfg(feature = "alloc")]
 use internals::slice::SliceExt;
 
+#[cfg(feature = "alloc")]
 use crate::error::{IncorrectChecksumError, TooShortError};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
+#[cfg(feature = "alloc")]
 #[doc(inline)]
 pub use self::error::{Error, InvalidCharacterError};
 
 #[rustfmt::skip]
+#[cfg(feature = "alloc")]
 static BASE58_DIGITS: [Option<u8>; 128] = [
     None,     None,     None,     None,     None,     None,     None,     None,     // 0-7
     None,     None,     None,     None,     None,     None,     None,     None,     // 8-15
@@ -75,6 +84,7 @@ static BASE58_DIGITS: [Option<u8>; 128] = [
 ///
 /// Returns an error if the input contains an invalid base58 character (not in the base58 alphabet).
 #[allow(clippy::missing_panics_doc)] // Internal assertion, not user-controllable.
+#[cfg(feature = "alloc")]
 pub fn decode(data: &str) -> Result<Vec<u8>, InvalidCharacterError> {
     // 11/15 is just over log_256(58)
     let mut scratch = Vec::with_capacity(1 + data.len() * 11 / 15);
@@ -119,6 +129,7 @@ pub fn decode(data: &str) -> Result<Vec<u8>, InvalidCharacterError> {
 /// * The input contains an invalid base58 character.
 /// * The decoded data is less than 4 bytes (too short for checksum verification).
 /// * The checksum does not match the expected value.
+#[cfg(feature = "alloc")]
 pub fn decode_check(data: &str) -> Result<Vec<u8>, Error> {
     let mut ret: Vec<u8> = decode(data)?;
     let (remaining, &data_check) =
@@ -137,10 +148,12 @@ pub fn decode_check(data: &str) -> Result<Vec<u8>, Error> {
     Ok(ret)
 }
 
+#[cfg(feature = "alloc")]
 const SHORT_OPT_BUFFER_LEN: usize = 128;
 
 /// Encodes `data` as a base58 string (see also `base58::encode_check()`).
 #[allow(clippy::missing_panics_doc)] // fmt::Write returns Result but String is infallible.
+#[cfg(feature = "alloc")]
 pub fn encode(data: &[u8]) -> String {
     let reserve_len = encoded_reserve_len(data.len());
     let mut res = String::with_capacity(reserve_len);
@@ -161,6 +174,7 @@ pub fn encode(data: &[u8]) -> String {
 ///
 /// The checksum is the first four bytes of the sha256d of the data, concatenated onto the end.
 #[allow(clippy::missing_panics_doc)] // fmt::Write returns Result but String is infallible.
+#[cfg(feature = "alloc")]
 pub fn encode_check(data: &[u8]) -> String {
     let mut res = String::with_capacity(encoded_check_reserve_len(data.len()));
     encode_check_to_writer(&mut res, data).expect("string doesn't fail");
@@ -174,10 +188,12 @@ pub fn encode_check(data: &[u8]) -> String {
 /// # Errors
 ///
 /// Returns an error if the formatter fails to write the encoded string.
+#[cfg(feature = "alloc")]
 pub fn encode_check_to_fmt(fmt: &mut fmt::Formatter, data: &[u8]) -> fmt::Result {
     encode_check_to_writer(fmt, data)
 }
 
+#[cfg(feature = "alloc")]
 fn encode_check_to_writer(fmt: &mut impl fmt::Write, data: &[u8]) -> fmt::Result {
     let checksum = sha256d::Hash::hash(data);
     let iter = data.iter().copied().chain(checksum.as_byte_array()[0..4].iter().copied());
@@ -190,22 +206,26 @@ fn encode_check_to_writer(fmt: &mut impl fmt::Write, data: &[u8]) -> fmt::Result
 }
 
 /// Returns the length to reserve when encoding base58 without checksum
+#[cfg(feature = "alloc")]
 const fn encoded_reserve_len(unencoded_len: usize) -> usize {
     // log2(256) / log2(58) ~ 1.37 = 137 / 100
     unencoded_len * 137 / 100
 }
 
 /// Returns the length to reserve when encoding base58 with checksum
+#[cfg(feature = "alloc")]
 const fn encoded_check_reserve_len(unencoded_len: usize) -> usize {
     encoded_reserve_len(unencoded_len + 4)
 }
 
+#[cfg(feature = "alloc")]
 trait Buffer: Sized {
     fn push(&mut self, val: u8);
     fn slice(&self) -> &[u8];
     fn slice_mut(&mut self) -> &mut [u8];
 }
 
+#[cfg(feature = "alloc")]
 impl Buffer for Vec<u8> {
     fn push(&mut self, val: u8) { Self::push(self, val) }
 
@@ -214,6 +234,7 @@ impl Buffer for Vec<u8> {
     fn slice_mut(&mut self) -> &mut [u8] { self }
 }
 
+#[cfg(feature = "alloc")]
 impl<const N: usize> Buffer for ArrayVec<u8, N> {
     fn push(&mut self, val: u8) { Self::push(self, val) }
 
@@ -222,6 +243,7 @@ impl<const N: usize> Buffer for ArrayVec<u8, N> {
     fn slice_mut(&mut self) -> &mut [u8] { self.as_mut_slice() }
 }
 
+#[cfg(feature = "alloc")]
 fn format_iter<I, W>(writer: &mut W, data: I, buf: &mut impl Buffer) -> fmt::Result
 where
     I: Iterator<Item = u8> + Clone,
@@ -263,6 +285,7 @@ where
 }
 
 #[cfg(test)]
+#[cfg(feature = "alloc")]
 mod tests {
     use alloc::vec;
 
