@@ -87,7 +87,15 @@ impl Key {
             0x10000..=0xFFFF_FFFF => 5,
             _ => 9,
         };
-        let key_byte_size = byte_size - type_size;
+
+        // This may cause an underflow/panic if the byte count is insufficient to even capture
+        // the key type CompactSize value. So we use a checked_sub here.
+        let key_byte_size = match byte_size.checked_sub(type_size) {
+            Some(val) => val,
+            None => {
+                return Err(Error::InvalidKey(Self { type_value, key_data: vec![] }));
+            }
+        };
 
         if key_byte_size > MAX_VEC_SIZE {
             return Err(encode::Error::Parse(encode::ParseError::OversizedVectorAllocation {
