@@ -27,9 +27,10 @@
 use core::fmt;
 
 crate::internal_macros::general_hash_type! {
-    256,
-    false,
-    "Output of the SHA3-256 hash function."
+    /// Output of the SHA3-256 hash function.
+    pub struct Hash([u8; 32]);
+
+    const DISPLAY_BACKWARD: bool = false;
 }
 // The number of rows or columns.
 const B: usize = 5;

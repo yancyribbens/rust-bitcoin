@@ -12,9 +12,10 @@ mod tests;
 use crate::incomplete_block_len;
 
 crate::internal_macros::general_hash_type! {
-    160,
-    false,
-    "Output of the RIPEMD160 hash function."
+    /// Output of the RIPEMD160 hash function.
+    pub struct Hash([u8; 20]);
+
+    const DISPLAY_BACKWARD: bool = false;
 }
 
 impl Hash {

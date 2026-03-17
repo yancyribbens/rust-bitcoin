@@ -17,9 +17,10 @@ use crate::{incomplete_block_len, sha256d};
 use crate::{sha256t, sha256t_tag};
 
 crate::internal_macros::general_hash_type! {
-    256,
-    false,
-    "Output of the SHA256 hash function."
+    /// Output of the SHA256 hash function.
+    pub struct Hash([u8; 32]);
+
+    const DISPLAY_BACKWARD: bool = false;
 }
 
 impl Hash {
