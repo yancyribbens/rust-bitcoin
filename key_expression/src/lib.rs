@@ -5,8 +5,6 @@
 //! This library provides types and functionality for key expressions and deterministic key
 //! derivation.
 
-// NB: This crate is empty if `alloc` is not enabled.
-#![cfg(feature = "alloc")]
 #![no_std]
 // Experimental features we need.
 #![doc(test(attr(warn(unused))))]
@@ -14,6 +12,7 @@
 #![warn(deprecated_in_future)]
 #![warn(missing_docs)]
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
 #[cfg(feature = "std")]
