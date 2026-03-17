@@ -15,7 +15,7 @@ const CHACHA_BLOCKSIZE: usize = 64;
 
 /// A 256-bit secret key shared by the parties communicating.
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Key([u8; 32]);
+pub struct Key(pub(super) [u8; 32]);
 
 impl Key {
     /// Constructs a new key.
@@ -278,6 +278,7 @@ impl ChaCha20 {
     }
 
     /// Gets the keystream for a specific block.
+    #[cfg(not(chacha20_poly1305_fuzz))]
     #[inline(always)]
     fn keystream_at_block(&self, block: u32) -> [u8; 64] {
         let mut state = State::new(self.key, self.nonce, block);
@@ -285,7 +286,12 @@ impl ChaCha20 {
         state.keystream()
     }
 
+    /// Gets the keystream for a specific block.
+    #[cfg(chacha20_poly1305_fuzz)]
+    fn keystream_at_block(&self, _block: u32) -> [u8; 64] { [0u8; 64] }
+
     /// Apply the keystream to a buffer updating the cipher block state as necessary.
+    #[cfg(not(chacha20_poly1305_fuzz))]
     pub fn apply_keystream(&mut self, buffer: &mut [u8]) {
         // If we have an initial offset, handle the first partial block to get back to alignment.
         let remaining_buffer = if self.seek_offset_bytes != 0 {
@@ -331,6 +337,10 @@ impl ChaCha20 {
             self.seek_offset_bytes = remainder.len();
         }
     }
+
+    /// Apply the keystream to a buffer updating the cipher block state as necessary.
+    #[cfg(chacha20_poly1305_fuzz)]
+    pub fn apply_keystream(&mut self, _buffer: &mut [u8]) {}
 
     /// Gets the keystream for specified block.
     pub fn get_keystream(&self, block: u32) -> [u8; 64] { self.keystream_at_block(block) }

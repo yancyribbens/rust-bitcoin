@@ -12,6 +12,7 @@
 #![doc(test(attr(warn(unused))))]
 // Exclude lints we don't think are valuable.
 #![allow(clippy::inline_always)] // Not sure yet if we should give up the inline always, possible that the LLVM knows better.
+#![cfg_attr(chacha20_poly1305_fuzz, allow(dead_code, unused_imports))]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -79,9 +80,15 @@ impl ChaCha20Poly1305 {
     pub fn encrypt(self, content: &mut [u8], aad: Option<&[u8]>) -> [u8; 16] {
         let mut chacha = ChaCha20::new_from_block(self.key, self.nonce, 1);
         chacha.apply_keystream(content);
-        let keystream = chacha.get_keystream(0);
-        let mut poly_key = [0u8; 32];
-        poly_key.copy_from_slice(&keystream[..32]);
+        #[cfg(not(chacha20_poly1305_fuzz))]
+        let poly_key = {
+            let keystream = chacha.get_keystream(0);
+            let mut k = [0u8; 32];
+            k.copy_from_slice(&keystream[..32]);
+            k
+        };
+        #[cfg(chacha20_poly1305_fuzz)]
+        let poly_key = self.key.0;
         let mut poly = Poly1305::new(poly_key);
         let aad = aad.unwrap_or(&[]);
         // AAD and ciphertext are padded if not 16-byte aligned.
@@ -120,10 +127,16 @@ impl ChaCha20Poly1305 {
         tag: [u8; 16],
         aad: Option<&[u8]>,
     ) -> Result<(), Error> {
-        let chacha = ChaCha20::new_from_block(self.key, self.nonce, 0);
-        let keystream = chacha.get_keystream(0);
-        let mut poly_key = [0u8; 32];
-        poly_key.copy_from_slice(&keystream[..32]);
+        #[cfg(not(chacha20_poly1305_fuzz))]
+        let poly_key = {
+            let chacha = ChaCha20::new_from_block(self.key, self.nonce, 0);
+            let keystream = chacha.get_keystream(0);
+            let mut k = [0u8; 32];
+            k.copy_from_slice(&keystream[..32]);
+            k
+        };
+        #[cfg(chacha20_poly1305_fuzz)]
+        let poly_key = self.key.0;
         let mut poly = Poly1305::new(poly_key);
         let aad = aad.unwrap_or(&[]);
         poly.input(aad);

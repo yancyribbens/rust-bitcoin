@@ -29,6 +29,7 @@ pub struct Poly1305 {
 
 impl Poly1305 {
     /// Initializes authenticator with a 32-byte one-time secret key.
+    #[cfg(not(chacha20_poly1305_fuzz))]
     pub const fn new(key: [u8; 32]) -> Self {
         // Taken from Donna. Assigns r to a 26-bit 5-limb number while simultaneously 'clamping' r.
         let r0 = u32::from_le_bytes([key[0], key[1], key[2], key[3]]) & 0x03ff_ffff;
@@ -51,7 +52,20 @@ impl Poly1305 {
         }
     }
 
+    /// Initializes authenticator with a 32-byte one-time secret key.
+    #[cfg(chacha20_poly1305_fuzz)]
+    pub const fn new(key: [u8; 32]) -> Self {
+        let mut tag = [0u8; 16];
+        let mut i = 0;
+        while i < 16 {
+            tag[i] = key[i];
+            i += 1;
+        }
+        Self { r: [0; 5], s: [0; 4], acc: [0; 5], leftovers: tag, leftovers_len: 0 }
+    }
+
     /// Adds message to be authenticated, can be called multiple times before creating tag.
+    #[cfg(not(chacha20_poly1305_fuzz))]
     pub fn input(&mut self, message: &[u8]) {
         // Process previous leftovers if the message is long enough to fill the leftovers buffer. If
         // the message is too short then it will just be added to the leftovers at the end. Now if there
@@ -96,7 +110,12 @@ impl Poly1305 {
         }
     }
 
+    /// Adds message to be authenticated, can be called multiple times before creating tag.
+    #[cfg(chacha20_poly1305_fuzz)]
+    pub fn input(&mut self, _message: &[u8]) {}
+
     /// Generates authentication tag.
+    #[cfg(not(chacha20_poly1305_fuzz))]
     pub fn tag(mut self) -> [u8; 16] {
         // Add any remaining leftovers to accumulator.
         if self.leftovers_len > 0 {
@@ -159,6 +178,10 @@ impl Poly1305 {
         }
         ret
     }
+
+    /// Generates authentication tag.
+    #[cfg(chacha20_poly1305_fuzz)]
+    pub fn tag(self) -> [u8; 16] { self.leftovers }
 
     fn r_times_a(&mut self) {
         // Multiply and reduce.
