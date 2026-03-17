@@ -1019,6 +1019,22 @@ impl PrivateKey {
             self.compressed(),
         )
     }
+
+    /// ECDSA signs a [`Message`] with this private key.
+    ///
+    /// This functions grinds the nonce to produce a signature less than 71 bytes and compatible
+    /// with the low r signature implementation of bitcoin core.
+    ///
+    /// See [`secp256k1::ecdsa::sign_low_r`] for details.
+    ///
+    /// [`Message`]: secp256k1::Message
+    #[inline]
+    pub fn raw_ecdsa_sign(
+        &self,
+        msg: impl Into<secp256k1::Message>,
+    ) -> secp256k1::ecdsa::Signature {
+        secp256k1::ecdsa::sign_low_r(msg, self.as_inner())
+    }
 }
 
 /// A Bitcoin ECDSA private key with known network for WIF.
