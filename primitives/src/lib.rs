@@ -32,7 +32,6 @@ pub extern crate serde;
 #[cfg(feature = "arbitrary")]
 pub extern crate arbitrary;
 
-/// Re-export of the `encoding` crate.
 pub extern crate encoding;
 
 #[cfg(feature = "hex")]
