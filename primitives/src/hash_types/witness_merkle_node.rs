@@ -50,11 +50,6 @@ impl WitnessMerkleNode {
     }
 }
 
-encoding::encoder_newtype_exact! {
-    /// The encoder for the [`WitnessMerkleNode`] type.
-    pub struct WitnessMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
-}
-
 impl encoding::Encodable for WitnessMerkleNode {
     type Encoder<'e> = WitnessMerkleNodeEncoder<'e>;
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -62,6 +57,16 @@ impl encoding::Encodable for WitnessMerkleNode {
             self.as_byte_array(),
         ))
     }
+}
+
+impl encoding::Decodable for WitnessMerkleNode {
+    type Decoder = WitnessMerkleNodeDecoder;
+    fn decoder() -> Self::Decoder { WitnessMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
+}
+
+encoding::encoder_newtype_exact! {
+    /// The encoder for the [`WitnessMerkleNode`] type.
+    pub struct WitnessMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
 }
 
 /// The decoder for the [`WitnessMerkleNode`] type.
@@ -93,11 +98,6 @@ impl encoding::Decoder for WitnessMerkleNodeDecoder {
 
     #[inline]
     fn read_limit(&self) -> usize { self.0.read_limit() }
-}
-
-impl encoding::Decodable for WitnessMerkleNode {
-    type Decoder = WitnessMerkleNodeDecoder;
-    fn decoder() -> Self::Decoder { WitnessMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
 }
 
 /// An error consensus decoding an `WitnessMerkleNode`.
