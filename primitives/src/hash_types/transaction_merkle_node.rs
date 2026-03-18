@@ -52,6 +52,7 @@ impl TxMerkleNode {
 
 impl encoding::Encodable for TxMerkleNode {
     type Encoder<'e> = TxMerkleNodeEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         TxMerkleNodeEncoder::new(encoding::ArrayRefEncoder::without_length_prefix(
             self.as_byte_array(),
@@ -61,6 +62,7 @@ impl encoding::Encodable for TxMerkleNode {
 
 impl encoding::Decodable for TxMerkleNode {
     type Decoder = TxMerkleNodeDecoder;
+    #[inline]
     fn decoder() -> Self::Decoder { TxMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
 }
 
@@ -74,10 +76,12 @@ pub struct TxMerkleNodeDecoder(encoding::ArrayDecoder<32>);
 
 impl TxMerkleNodeDecoder {
     /// Constructs a new [`TxMerkleNode`] decoder.
+    #[inline]
     pub const fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
 }
 
 impl Default for TxMerkleNodeDecoder {
+    #[inline]
     fn default() -> Self { Self::new() }
 }
 

@@ -52,6 +52,7 @@ impl WitnessMerkleNode {
 
 impl encoding::Encodable for WitnessMerkleNode {
     type Encoder<'e> = WitnessMerkleNodeEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         WitnessMerkleNodeEncoder::new(encoding::ArrayRefEncoder::without_length_prefix(
             self.as_byte_array(),
@@ -61,6 +62,7 @@ impl encoding::Encodable for WitnessMerkleNode {
 
 impl encoding::Decodable for WitnessMerkleNode {
     type Decoder = WitnessMerkleNodeDecoder;
+    #[inline]
     fn decoder() -> Self::Decoder { WitnessMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
 }
 
@@ -74,10 +76,12 @@ pub struct WitnessMerkleNodeDecoder(encoding::ArrayDecoder<32>);
 
 impl WitnessMerkleNodeDecoder {
     /// Constructs a new [`WitnessMerkleNode`] decoder.
+    #[inline]
     pub const fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
 }
 
 impl Default for WitnessMerkleNodeDecoder {
+    #[inline]
     fn default() -> Self { Self::new() }
 }
 
