@@ -1401,6 +1401,14 @@ mod tests {
     }
 
     #[test]
+    fn psbt_insufficient_byte_size() {
+        // construct a key where the key byte size (0x02) is less than even the type value length (in this case, 3)
+        let key_data = hex!("02fd07ffababababab");
+        let got = super::raw::Key::decode(&mut key_data.as_slice()).unwrap_err();
+        assert!(matches!(got, Error::InvalidKey(_)));
+    }
+
+    #[test]
     fn psbt_high_fee_checks() {
         let psbt = psbt_with_amounts(Amount::MAX.to_sat(), 1000);
 
