@@ -185,6 +185,7 @@ mod tests {
 
     use super::*;
 
+    #[cfg(not(chacha20_poly1305_fuzz))]
     #[test]
     fn rfc7539() {
         let mut message = *b"Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";

@@ -442,6 +442,7 @@ mod tests {
         assert_eq!([8; 64], binding);
     }
 
+    #[cfg(not(chacha20_poly1305_fuzz))]
     #[test]
     fn rfc_standard() {
         let key =
@@ -462,6 +463,7 @@ mod tests {
         assert_eq!(binding, to);
     }
 
+    #[cfg(not(chacha20_poly1305_fuzz))]
     #[test]
     fn new_from_block() {
         let key =
