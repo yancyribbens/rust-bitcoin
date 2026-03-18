@@ -290,3 +290,4 @@ impl fmt::Display for MidstateError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for MidstateError {}
+
