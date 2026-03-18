@@ -17,11 +17,11 @@ use core::{cmp, mem};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-use encoding::{ArrayEncoder, BytesEncoder, Encodable, Encoder2, UnexpectedEofError};
+use encoding::{ArrayEncoder, BytesEncoder, Encoder2, UnexpectedEofError};
 #[cfg(feature = "alloc")]
 use encoding::{
-    CompactSizeEncoder, Decodable, Decoder, Decoder2, Decoder3, Encoder, Encoder3, Encoder6,
-    SliceEncoder, VecDecoder, VecDecoderError,
+    CompactSizeEncoder, Decoder2, Decoder3, Encodable as _, Encoder3, Encoder6, SliceEncoder,
+    VecDecoder, VecDecoderError,
 };
 #[cfg(feature = "alloc")]
 use hashes::sha256d;
@@ -341,7 +341,7 @@ encoding::encoder_newtype! {
 }
 
 #[cfg(feature = "alloc")]
-impl Encodable for Transaction {
+impl encoding::Encodable for Transaction {
     type Encoder<'e>
         = TransactionEncoder<'e>
     where
@@ -453,7 +453,7 @@ impl Default for TransactionDecoder {
 
 #[cfg(feature = "alloc")]
 #[allow(clippy::too_many_lines)] // TODO: Can we clean this up?
-impl Decoder for TransactionDecoder {
+impl encoding::Decoder for TransactionDecoder {
     type Output = Transaction;
     type Error = TransactionDecoderError;
 
@@ -662,7 +662,7 @@ impl Decoder for TransactionDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl Decodable for Transaction {
+impl encoding::Decodable for Transaction {
     type Decoder = TransactionDecoder;
     fn decoder() -> Self::Decoder { TransactionDecoder::new() }
 }
@@ -868,7 +868,7 @@ encoding::encoder_newtype_exact! {
 }
 
 #[cfg(feature = "alloc")]
-impl Encodable for TxIn {
+impl encoding::Encodable for TxIn {
     type Encoder<'e>
         = Encoder3<OutPointEncoder<'e>, ScriptEncoder<'e>, SequenceEncoder<'e>>
     where
@@ -900,7 +900,7 @@ impl<'e> WitnessesEncoder<'e> {
 }
 
 #[cfg(feature = "alloc")]
-impl Encoder for WitnessesEncoder<'_> {
+impl encoding::Encoder for WitnessesEncoder<'_> {
     #[inline]
     fn current_chunk(&self) -> &[u8] {
         self.cur_enc.as_ref().map(WitnessEncoder::current_chunk).unwrap_or_default()
@@ -960,7 +960,7 @@ impl Default for TxInDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl Decoder for TxInDecoder {
+impl encoding::Decoder for TxInDecoder {
     type Output = TxIn;
     type Error = TxInDecoderError;
 
@@ -980,7 +980,7 @@ impl Decoder for TxInDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl Decodable for TxIn {
+impl encoding::Decodable for TxIn {
     type Decoder = TxInDecoder;
     fn decoder() -> Self::Decoder {
         TxInDecoder(Decoder3::new(
@@ -994,7 +994,7 @@ impl Decodable for TxIn {
 /// An error consensus decoding a `TxIn`.
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TxInDecoderError(<TxInInnerDecoder as Decoder>::Error);
+pub struct TxInDecoderError(<TxInInnerDecoder as encoding::Decoder>::Error);
 
 #[cfg(feature = "alloc")]
 impl From<Infallible> for TxInDecoderError {
@@ -1041,7 +1041,7 @@ encoding::encoder_newtype_exact! {
 }
 
 #[cfg(feature = "alloc")]
-impl Encodable for TxOut {
+impl encoding::Encodable for TxOut {
     type Encoder<'e>
         = Encoder2<AmountEncoder<'e>, ScriptEncoder<'e>>
     where
@@ -1073,7 +1073,7 @@ impl Default for TxOutDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl Decoder for TxOutDecoder {
+impl encoding::Decoder for TxOutDecoder {
     type Output = TxOut;
     type Error = TxOutDecoderError;
 
@@ -1093,7 +1093,7 @@ impl Decoder for TxOutDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl Decodable for TxOut {
+impl encoding::Decodable for TxOut {
     type Decoder = TxOutDecoder;
     fn decoder() -> Self::Decoder {
         TxOutDecoder(Decoder2::new(AmountDecoder::new(), ScriptPubKeyBufDecoder::new()))
@@ -1103,7 +1103,7 @@ impl Decodable for TxOut {
 /// An error consensus decoding a `TxOut`.
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TxOutDecoderError(<TxOutInnerDecoder as Decoder>::Error);
+pub struct TxOutDecoderError(<TxOutInnerDecoder as encoding::Decoder>::Error);
 
 #[cfg(feature = "alloc")]
 impl From<Infallible> for TxOutDecoderError {
@@ -1151,7 +1151,7 @@ encoding::encoder_newtype_exact! {
     pub struct OutPointEncoder<'e>(Encoder2<BytesEncoder<'e>, ArrayEncoder<4>>);
 }
 
-impl Encodable for OutPoint {
+impl encoding::Encodable for OutPoint {
     type Encoder<'e>
         = OutPointEncoder<'e>
     where
@@ -1649,7 +1649,7 @@ mod tests {
     #[cfg(feature = "hex")]
     use core::str::FromStr as _;
 
-    use encoding::Encoder as _;
+    use encoding::{Decodable as _, Decoder as _, Encoder as _};
     #[cfg(feature = "hex")]
     use hex_unstable::hex;
 

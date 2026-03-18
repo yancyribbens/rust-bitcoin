@@ -14,7 +14,7 @@ use core::marker::PhantomData;
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-use encoding::{ArrayDecoder, Decodable, Decoder, Decoder6, Encodable};
+use encoding::{ArrayDecoder, Decoder6};
 #[cfg(feature = "alloc")]
 use encoding::{CompactSizeEncoder, Decoder2, Encoder2, SliceEncoder, VecDecoder};
 use hashes::{sha256d, HashEngine as _};
@@ -275,7 +275,7 @@ mod sealed {
 #[cfg(all(feature = "hex", feature = "alloc"))]
 impl core::str::FromStr for Block<Unchecked>
 where
-    Self: Decodable,
+    Self: encoding::Decodable,
 {
     type Err = ParseBlockError;
 
@@ -287,7 +287,7 @@ where
 #[cfg(all(feature = "hex", feature = "alloc"))]
 impl<V: Validation> fmt::Display for Block<V>
 where
-    Self: Encodable,
+    Self: encoding::Encodable,
 {
     #[allow(clippy::use_self)]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -344,7 +344,7 @@ encoding::encoder_newtype! {
 }
 
 #[cfg(feature = "alloc")]
-impl<V> Encodable for Block<V>
+impl<V> encoding::Encodable for Block<V>
 where
     V: Validation,
 {
@@ -385,7 +385,7 @@ impl Default for BlockDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl Decoder for BlockDecoder {
+impl encoding::Decoder for BlockDecoder {
     type Output = Block;
     type Error = BlockDecoderError;
 
@@ -405,7 +405,7 @@ impl Decoder for BlockDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl Decodable for Block<Unchecked> {
+impl encoding::Decodable for Block<Unchecked> {
     type Decoder = BlockDecoder;
     fn decoder() -> Self::Decoder {
         BlockDecoder(Decoder2::new(Header::decoder(), VecDecoder::<Transaction>::new()))
@@ -415,7 +415,7 @@ impl Decodable for Block<Unchecked> {
 /// An error consensus decoding a [`Block`].
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BlockDecoderError(<BlockInnerDecoder as Decoder>::Error);
+pub struct BlockDecoderError(<BlockInnerDecoder as encoding::Decoder>::Error);
 
 #[cfg(feature = "alloc")]
 impl From<Infallible> for BlockDecoderError {
@@ -656,7 +656,7 @@ encoding::encoder_newtype_exact! {
     );
 }
 
-impl Encodable for Header {
+impl encoding::Encodable for Header {
     type Encoder<'e> = HeaderEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -696,7 +696,7 @@ impl HeaderDecoder {
         ))
     }
 
-    fn from_inner(e: <HeaderInnerDecoder as Decoder>::Error) -> HeaderDecoderError {
+    fn from_inner(e: <HeaderInnerDecoder as encoding::Decoder>::Error) -> HeaderDecoderError {
         match e {
             encoding::Decoder6Error::First(e) => HeaderDecoderError::Version(e),
             encoding::Decoder6Error::Second(e) => HeaderDecoderError::PrevBlockhash(e),
@@ -712,7 +712,7 @@ impl Default for HeaderDecoder {
     fn default() -> Self { Self::new() }
 }
 
-impl Decoder for HeaderDecoder {
+impl encoding::Decoder for HeaderDecoder {
     type Output = Header;
     type Error = HeaderDecoderError;
 
@@ -733,7 +733,7 @@ impl Decoder for HeaderDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl Decodable for Header {
+impl encoding::Decodable for Header {
     type Decoder = HeaderDecoder;
     fn decoder() -> Self::Decoder {
         HeaderDecoder(Decoder6::new(
@@ -908,7 +908,7 @@ encoding::encoder_newtype_exact! {
     pub struct VersionEncoder<'e>(encoding::ArrayEncoder<4>);
 }
 
-impl Encodable for Version {
+impl encoding::Encodable for Version {
     type Encoder<'e> = VersionEncoder<'e>;
     fn encoder(&self) -> Self::Encoder<'_> {
         VersionEncoder::new(encoding::ArrayEncoder::without_length_prefix(
@@ -1019,7 +1019,9 @@ mod tests {
     #[cfg(all(feature = "alloc", feature = "hex"))]
     use core::str::FromStr as _;
 
-    use encoding::{Decoder, Encoder};
+    #[cfg(feature = "alloc")]
+    use encoding::Decodable as _;
+    use encoding::{Decoder as _, Encodable as _, Encoder as _};
     #[cfg(all(feature = "serde", feature = "hex", feature = "alloc"))]
     use serde::{Deserialize, Serialize};
 
