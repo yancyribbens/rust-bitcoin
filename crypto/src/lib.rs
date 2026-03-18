@@ -32,5 +32,11 @@ pub mod key;
 #[cfg(feature = "alloc")]
 pub mod sighash;
 
+#[doc(inline)]
+#[cfg(feature = "alloc")]
+pub use self::{
+    key::{FullPublicKey, Keypair, PrivateKey, LegacyPublicKey, XOnlyPublicKey},
+};
+
 #[cfg(feature = "alloc")]
 include!("../include/newtype.rs"); // Explained in `REPO_DIR/docs/README.md`.
