@@ -74,7 +74,7 @@ pub struct WitnessMerkleNodeDecoder(encoding::ArrayDecoder<32>);
 
 impl WitnessMerkleNodeDecoder {
     /// Constructs a new [`WitnessMerkleNode`] decoder.
-    pub fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
+    pub const fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
 }
 
 impl Default for WitnessMerkleNodeDecoder {
