@@ -82,10 +82,8 @@ fn psbt_sign_taproot() {
         //
         // Step 2: sign psbt.
         //
-        let keystore = Keystore {
-            mfp: mfp.parse::<Fingerprint>().unwrap(),
-            sk: PrivateKey::from_secp(kp.to_secret_key()),
-        };
+        let keystore =
+            Keystore { mfp: mfp.parse::<Fingerprint>().unwrap(), sk: kp.to_private_key() };
         let _ = psbt_key_path_spend.sign(&keystore);
 
         let sig = "92864dc9e56b6260ecbd54ec16b94bb597a2e6be7cca0de89d75e17921e0e1528cba32dd04217175c237e1835b5db1c8b384401718514f9443dce933c6ba9c87";
@@ -112,10 +110,8 @@ fn psbt_sign_taproot() {
         let x_only_pubkey = kp.to_x_only_public_key().with_parity(secp256k1::Parity::Even);
         let signing_key_path = sk_path[1].1;
 
-        let keystore = Keystore {
-            mfp: mfp.parse::<Fingerprint>().unwrap(),
-            sk: PrivateKey::from_secp(kp.to_secret_key()),
-        };
+        let keystore =
+            Keystore { mfp: mfp.parse::<Fingerprint>().unwrap(), sk: kp.to_private_key() };
 
         //
         // Step 1: create psbt for script path spend.

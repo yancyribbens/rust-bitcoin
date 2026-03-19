@@ -408,18 +408,16 @@ impl Keypair {
         Self::from_secp(kp)
     }
 
-    /// Constructs a [`Keypair`] directly from a secp256k1 secret key.
+    /// Constructs a [`Keypair`] from a [`PrivateKey`].
     #[inline]
-    pub fn from_secret_key(sk: &secp256k1::SecretKey) -> Self {
-        Self::from(secp256k1::Keypair::from_secret_key(sk))
+    pub fn from_private_key(pk: &PrivateKey) -> Self {
+        Self::from(secp256k1::Keypair::from_secret_key(pk.as_inner()))
     }
 
-    /// Returns the [`secp256k1::SecretKey`] for this [`Keypair`].
-    ///
-    /// This is equivalent to using [`secp256k1::SecretKey::from_keypair`] on the inner value.
+    /// Returns a compressed [`PrivateKey`] for this [`Keypair`].
     #[inline]
-    pub fn to_secret_key(&self) -> secp256k1::SecretKey {
-        secp256k1::SecretKey::from_keypair(self.as_inner())
+    pub fn to_private_key(&self) -> PrivateKey {
+        PrivateKey::from_secp(secp256k1::SecretKey::from_keypair(self.as_inner()))
     }
 
     /// Returns the secret bytes for this [`Keypair`].
@@ -480,6 +478,10 @@ impl From<secp256k1::Keypair> for Keypair {
 
 impl From<Keypair> for secp256k1::PublicKey {
     fn from(kp: Keypair) -> Self { kp.to_public_key().to_inner() }
+}
+
+impl From<PrivateKey> for Keypair {
+    fn from(pk: PrivateKey) -> Self { Self::from_private_key(&pk) }
 }
 
 impl PublicKey {
@@ -2298,7 +2300,7 @@ mod tests {
             )
             .unwrap();
             let sk = PrivateKey::from_secret_bytes(bytes).unwrap();
-            Keypair::from_secret_key(sk.as_inner())
+            Keypair::from_private_key(&sk)
         };
 
         // Use secp256k1::DisplaySecret, since no key type implements Display
