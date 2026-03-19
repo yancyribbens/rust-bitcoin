@@ -6,10 +6,10 @@
 //! library is used with the `secp-recovery` feature.
 
 use hashes::{sha256d, HashEngine};
-#[cfg(feature = "secp-recovery")]
-use secp256k1::SecretKey;
 
 use crate::consensus::encode::WriteExt;
+#[cfg(feature = "secp-recovery")]
+use crate::PrivateKey;
 
 #[rustfmt::skip]
 #[doc(inline)]
@@ -210,13 +210,10 @@ pub fn signed_msg_hash(msg: impl AsRef<[u8]>) -> sha256d::Hash {
 
 /// Sign message using Bitcoin's message signing format.
 #[cfg(feature = "secp-recovery")]
-pub fn sign(msg: impl AsRef<[u8]>, privkey: SecretKey) -> MessageSignature {
-    use secp256k1::ecdsa::RecoverableSignature;
-
+pub fn sign(msg: impl AsRef<[u8]>, privkey: &PrivateKey) -> MessageSignature {
     let msg_hash = signed_msg_hash(msg);
     let msg_to_sign = secp256k1::Message::from_digest(msg_hash.to_byte_array());
-    let secp_sig = RecoverableSignature::sign_ecdsa_recoverable(msg_to_sign, &privkey);
-    MessageSignature { signature: secp_sig, compressed: true }
+    privkey.raw_ecdsa_sign_recoverable(msg_to_sign)
 }
 
 #[cfg(test)]
@@ -237,18 +234,15 @@ mod tests {
     #[test]
     #[cfg(all(feature = "secp-recovery", feature = "base64", feature = "rand", feature = "std"))]
     fn message_signature() {
-        use secp256k1::ecdsa::RecoverableSignature;
-
-        use crate::{Address, AddressType, Network, NetworkKind};
+        use crate::{Address, AddressType, CompressedPublicKey, Network, NetworkKind, PrivateKey};
 
         let message = "rust-bitcoin MessageSignature test";
         let msg_hash = super::signed_msg_hash(message);
         let msg = secp256k1::Message::from_digest(msg_hash.to_byte_array());
-        let privkey = secp256k1::SecretKey::new(&mut secp256k1::rand::rng());
-        let secp_sig = RecoverableSignature::sign_ecdsa_recoverable(msg, &privkey);
-        let signature = super::MessageSignature { signature: secp_sig, compressed: true };
+        let privkey = PrivateKey::generate();
+        let signature = privkey.raw_ecdsa_sign_recoverable(msg);
 
-        assert_eq!(signature.to_string(), super::sign(message, privkey).to_string());
+        assert_eq!(signature.to_string(), super::sign(message, &privkey).to_string());
         assert_eq!(signature.to_base64(), signature.to_string());
         let signature2 = &signature.to_string().parse::<super::MessageSignature>().unwrap();
         let pubkey = signature2
@@ -272,7 +266,7 @@ mod tests {
         let p2pkh = Address::p2pkh(pubkey, Network::Bitcoin);
         assert_eq!(signature2.is_signed_by_address(&p2pkh, msg_hash), Ok(true));
 
-        assert_eq!(pubkey.to_inner(), secp256k1::PublicKey::from_secret_key(&privkey));
+        assert_eq!(pubkey, CompressedPublicKey::from_private_key(privkey).unwrap());
         let signature_base64 = signature.to_base64();
         let signature_round_trip =
             super::MessageSignature::from_base64(&signature_base64).expect("message signature");
