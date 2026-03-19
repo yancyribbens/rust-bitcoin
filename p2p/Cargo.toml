@@ -37,6 +37,10 @@ serde = { version = "1.0.195", default-features = false, features = ["derive", "
 name = "handshake"
 required-features = ["std"]
 
+[[example]]
+name = "ping-pong"
+required-features = ["std"]
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
