@@ -40,6 +40,10 @@ hex_lit = "0.1.1"
 name = "handshake"
 required-features = ["std"]
 
+[[example]]
+name = "ping-pong"
+required-features = ["std"]
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
