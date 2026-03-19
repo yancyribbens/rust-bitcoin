@@ -59,6 +59,9 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
+#[cfg(feature = "arbitrary")]
+pub extern crate arbitrary;
+
 /// Encodes and decodes base64 as bytes or utf8.
 #[cfg(feature = "base64")]
 pub extern crate base64;
@@ -92,7 +95,7 @@ pub extern crate secp256k1;
 
 #[cfg(feature = "serde")]
 #[macro_use]
-extern crate serde;
+pub extern crate serde;
 
 mod internal_macros;
 
