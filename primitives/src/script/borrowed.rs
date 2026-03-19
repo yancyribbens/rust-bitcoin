@@ -129,9 +129,8 @@ impl<T> Script<T> {
     pub fn to_hex_string_prefixed(&self) -> String {
         use hex_unstable::{BytesToHexIter, Case};
 
-        // TODO: Can we remove allocation and use an iterator (like in `hex_codec`)?
-        let v = encoding::encode_to_vec(self);
-        BytesToHexIter::new(v.iter(), Case::Lower).collect()
+        let iter = encoding::EncodableByteIter::new(self);
+        BytesToHexIter::new(iter, Case::Lower).collect()
     }
 
     /// Encodes the script as lower-case hex.
