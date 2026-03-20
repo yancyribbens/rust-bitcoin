@@ -46,8 +46,10 @@ impl bitcoin_primitives::WitnessMerkleNode
 impl bitcoin_primitives::Wtxid
 impl bitcoin_primitives::block::Block<bitcoin_primitives::block::Checked>
 impl bitcoin_primitives::block::Block<bitcoin_primitives::block::Unchecked>
+impl bitcoin_primitives::block::BlockDecoder
 impl bitcoin_primitives::block::BlockHashDecoder
 impl bitcoin_primitives::block::Header
+impl bitcoin_primitives::block::HeaderDecoder
 impl bitcoin_primitives::block::Validation for bitcoin_primitives::block::Checked
 impl bitcoin_primitives::block::Validation for bitcoin_primitives::block::Unchecked
 impl bitcoin_primitives::block::Version
@@ -69,6 +71,8 @@ impl bitcoin_primitives::transaction::OutPointDecoder
 impl bitcoin_primitives::transaction::Transaction
 impl bitcoin_primitives::transaction::TransactionDecoder
 impl bitcoin_primitives::transaction::TxIn
+impl bitcoin_primitives::transaction::TxInDecoder
+impl bitcoin_primitives::transaction::TxOutDecoder
 impl bitcoin_primitives::transaction::Version
 impl bitcoin_primitives::transaction::VersionDecoder
 impl bitcoin_primitives::witness::Witness
@@ -313,12 +317,16 @@ impl core::convert::From<core::convert::Infallible> for bitcoin_primitives::witn
 impl core::convert::TryFrom<&bitcoin_primitives::script::Script<bitcoin_primitives::script::WitnessScriptTag>> for bitcoin_primitives::script::WScriptHash
 impl core::convert::TryFrom<&bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::WitnessScriptTag>> for bitcoin_primitives::script::WScriptHash
 impl core::convert::TryFrom<bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::WitnessScriptTag>> for bitcoin_primitives::script::WScriptHash
+impl core::default::Default for bitcoin_primitives::block::BlockDecoder
 impl core::default::Default for bitcoin_primitives::block::BlockHashDecoder
+impl core::default::Default for bitcoin_primitives::block::HeaderDecoder
 impl core::default::Default for bitcoin_primitives::block::Version
 impl core::default::Default for bitcoin_primitives::block::VersionDecoder
 impl core::default::Default for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
 impl core::default::Default for bitcoin_primitives::transaction::OutPointDecoder
 impl core::default::Default for bitcoin_primitives::transaction::TransactionDecoder
+impl core::default::Default for bitcoin_primitives::transaction::TxInDecoder
+impl core::default::Default for bitcoin_primitives::transaction::TxOutDecoder
 impl core::default::Default for bitcoin_primitives::transaction::VersionDecoder
 impl core::default::Default for bitcoin_primitives::witness::Witness
 impl core::default::Default for bitcoin_primitives::witness::WitnessDecoder
@@ -1152,7 +1160,9 @@ pub const fn bitcoin_primitives::WitnessMerkleNode::to_byte_array(self) -> [u8; 
 pub const fn bitcoin_primitives::Wtxid::as_byte_array(&self) -> &[u8; 32]
 pub const fn bitcoin_primitives::Wtxid::from_byte_array(bytes: [u8; 32]) -> Self
 pub const fn bitcoin_primitives::Wtxid::to_byte_array(self) -> [u8; 32]
+pub const fn bitcoin_primitives::block::BlockDecoder::new() -> Self
 pub const fn bitcoin_primitives::block::BlockHashDecoder::new() -> Self
+pub const fn bitcoin_primitives::block::HeaderDecoder::new() -> Self
 pub const fn bitcoin_primitives::block::Version::from_consensus(v: i32) -> Self
 pub const fn bitcoin_primitives::block::Version::to_consensus(self) -> i32
 pub const fn bitcoin_primitives::block::VersionDecoder::new() -> Self
@@ -1173,6 +1183,8 @@ pub const fn bitcoin_primitives::script::WScriptHash::from_byte_array(bytes: [u8
 pub const fn bitcoin_primitives::script::WScriptHash::to_byte_array(self) -> [u8; 32]
 pub const fn bitcoin_primitives::transaction::OutPointDecoder::new() -> Self
 pub const fn bitcoin_primitives::transaction::TransactionDecoder::new() -> Self
+pub const fn bitcoin_primitives::transaction::TxInDecoder::new() -> Self
+pub const fn bitcoin_primitives::transaction::TxOutDecoder::new() -> Self
 pub const fn bitcoin_primitives::transaction::Version::is_standard(self) -> bool
 pub const fn bitcoin_primitives::transaction::Version::maybe_non_standard(version: u32) -> Self
 pub const fn bitcoin_primitives::transaction::Version::to_u32(self) -> u32
@@ -1315,6 +1327,7 @@ pub fn bitcoin_primitives::block::Block<bitcoin_primitives::block::Unchecked>::d
 pub fn bitcoin_primitives::block::Block<bitcoin_primitives::block::Unchecked>::into_parts(self) -> (bitcoin_primitives::block::Header, alloc::vec::Vec<bitcoin_primitives::transaction::Transaction>)
 pub fn bitcoin_primitives::block::Block<bitcoin_primitives::block::Unchecked>::new_unchecked(header: bitcoin_primitives::block::Header, transactions: alloc::vec::Vec<bitcoin_primitives::transaction::Transaction>) -> Self
 pub fn bitcoin_primitives::block::Block<bitcoin_primitives::block::Unchecked>::validate(self) -> core::result::Result<bitcoin_primitives::block::Block<bitcoin_primitives::block::Checked>, bitcoin_primitives::block::InvalidBlockError>
+pub fn bitcoin_primitives::block::BlockDecoder::default() -> Self
 pub fn bitcoin_primitives::block::BlockDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::block::BlockDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::block::BlockDecoder::read_limit(&self) -> usize
@@ -1350,6 +1363,7 @@ pub fn bitcoin_primitives::block::Header::eq(&self, other: &bitcoin_primitives::
 pub fn bitcoin_primitives::block::Header::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_primitives::block::Header::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 pub fn bitcoin_primitives::block::Header::partial_cmp(&self, other: &bitcoin_primitives::block::Header) -> core::option::Option<core::cmp::Ordering>
+pub fn bitcoin_primitives::block::HeaderDecoder::default() -> Self
 pub fn bitcoin_primitives::block::HeaderDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::block::HeaderDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::block::HeaderDecoder::read_limit(&self) -> usize
@@ -1588,6 +1602,7 @@ pub fn bitcoin_primitives::transaction::TxIn::eq(&self, other: &bitcoin_primitiv
 pub fn bitcoin_primitives::transaction::TxIn::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_primitives::transaction::TxIn::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 pub fn bitcoin_primitives::transaction::TxIn::partial_cmp(&self, other: &bitcoin_primitives::transaction::TxIn) -> core::option::Option<core::cmp::Ordering>
+pub fn bitcoin_primitives::transaction::TxInDecoder::default() -> Self
 pub fn bitcoin_primitives::transaction::TxInDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::transaction::TxInDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::transaction::TxInDecoder::read_limit(&self) -> usize
@@ -1605,6 +1620,7 @@ pub fn bitcoin_primitives::transaction::TxOut::eq(&self, other: &bitcoin_primiti
 pub fn bitcoin_primitives::transaction::TxOut::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_primitives::transaction::TxOut::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 pub fn bitcoin_primitives::transaction::TxOut::partial_cmp(&self, other: &bitcoin_primitives::transaction::TxOut) -> core::option::Option<core::cmp::Ordering>
+pub fn bitcoin_primitives::transaction::TxOutDecoder::default() -> Self
 pub fn bitcoin_primitives::transaction::TxOutDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::transaction::TxOutDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::transaction::TxOutDecoder::read_limit(&self) -> usize
