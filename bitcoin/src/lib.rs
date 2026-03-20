@@ -149,6 +149,9 @@ pub mod taproot;
 // Re-export the type from where it is defined but the module from the highest place up the stack
 // that it is available in the event that we add some functionality there.
 #[doc(inline)]
+#[cfg(feature = "serde")]
+pub use primitives::serde_as_consensus;
+#[doc(inline)]
 pub use primitives::{
     block::{
         compute_merkle_root, compute_witness_root, Block, BlockHash, Checked as BlockChecked,
@@ -178,9 +181,6 @@ pub use units::{
     time::{self, BlockTime, BlockTimeDecoder, BlockTimeDecoderError},
     weight::Weight,
 };
-#[doc(inline)]
-#[cfg(feature = "serde")]
-pub use primitives::serde_as_consensus;
 
 #[deprecated(since = "TBD", note = "use `BlockHeightInterval` instead")]
 #[doc(hidden)]

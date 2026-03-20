@@ -214,8 +214,7 @@ impl Midstate {
     /// Constructs a new [`HashEngine`] from this [`Midstate`].
     pub fn to_engine(self) -> HashEngine {
         let mut ret = [0; 8];
-        for (ret_val, midstate_bytes) in ret.iter_mut().zip(self.as_ref().bitcoin_as_chunks().0)
-        {
+        for (ret_val, midstate_bytes) in ret.iter_mut().zip(self.as_ref().bitcoin_as_chunks().0) {
             *ret_val = u32::from_be_bytes(*midstate_bytes);
         }
 
