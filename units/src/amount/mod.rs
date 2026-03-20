@@ -356,7 +356,10 @@ impl InnerParseError {
     fn convert(self, is_signed: bool) -> ParseAmountError {
         match self {
             Self::Overflow { is_negative } =>
-                OutOfRangeError { is_signed, is_greater_than_max: !is_negative }.into(),
+                ParseAmountError(ParseAmountErrorInner::OutOfRange(OutOfRangeError {
+                    is_signed,
+                    is_greater_than_max: !is_negative,
+                })),
             Self::TooPrecise(e) => ParseAmountError(ParseAmountErrorInner::TooPrecise(e)),
             Self::MissingDigits(e) => ParseAmountError(ParseAmountErrorInner::MissingDigits(e)),
             Self::InputTooLarge(len) =>
@@ -377,7 +380,7 @@ fn split_amount_and_denomination(s: &str) -> Result<(&str, Denomination), ParseE
             .ok_or(ParseError(ParseErrorInner::MissingDenomination(MissingDenominationError)))?;
         (i, i)
     };
-    Ok((&s[..i], s[j..].parse()?))
+    Ok((&s[..i], s[j..].parse().map_err(|e| ParseError(ParseErrorInner::Denomination(e)))?))
 }
 
 /// Options given by `fmt::Formatter`

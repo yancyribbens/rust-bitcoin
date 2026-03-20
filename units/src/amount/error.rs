@@ -33,38 +33,6 @@ impl From<Infallible> for ParseErrorInner {
     fn from(never: Infallible) -> Self { match never {} }
 }
 
-impl From<ParseAmountError> for ParseError {
-    fn from(e: ParseAmountError) -> Self { Self(ParseErrorInner::Amount(e)) }
-}
-
-impl From<ParseDenominationError> for ParseError {
-    fn from(e: ParseDenominationError) -> Self { Self(ParseErrorInner::Denomination(e)) }
-}
-
-impl From<OutOfRangeError> for ParseError {
-    fn from(e: OutOfRangeError) -> Self { Self(ParseErrorInner::Amount(e.into())) }
-}
-
-impl From<TooPreciseError> for ParseError {
-    fn from(e: TooPreciseError) -> Self { Self(ParseErrorInner::Amount(e.into())) }
-}
-
-impl From<MissingDigitsError> for ParseError {
-    fn from(e: MissingDigitsError) -> Self { Self(ParseErrorInner::Amount(e.into())) }
-}
-
-impl From<InputTooLargeError> for ParseError {
-    fn from(e: InputTooLargeError) -> Self { Self(ParseErrorInner::Amount(e.into())) }
-}
-
-impl From<InvalidCharacterError> for ParseError {
-    fn from(e: InvalidCharacterError) -> Self { Self(ParseErrorInner::Amount(e.into())) }
-}
-
-impl From<BadPositionError> for ParseError {
-    fn from(e: BadPositionError) -> Self { Self(ParseErrorInner::Amount(e.into())) }
-}
-
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.0 {
@@ -111,36 +79,6 @@ pub(crate) enum ParseAmountErrorInner {
     PrefixedHex(PrefixedHexError),
     /// An error parsing an unprefixed hex amount.
     UnprefixedHex(UnprefixedHexError),
-}
-
-impl From<TooPreciseError> for ParseAmountError {
-    fn from(value: TooPreciseError) -> Self { Self(ParseAmountErrorInner::TooPrecise(value)) }
-}
-
-impl From<MissingDigitsError> for ParseAmountError {
-    fn from(value: MissingDigitsError) -> Self { Self(ParseAmountErrorInner::MissingDigits(value)) }
-}
-
-impl From<InputTooLargeError> for ParseAmountError {
-    fn from(value: InputTooLargeError) -> Self { Self(ParseAmountErrorInner::InputTooLarge(value)) }
-}
-
-impl From<InvalidCharacterError> for ParseAmountError {
-    fn from(value: InvalidCharacterError) -> Self {
-        Self(ParseAmountErrorInner::InvalidCharacter(value))
-    }
-}
-
-impl From<BadPositionError> for ParseAmountError {
-    fn from(value: BadPositionError) -> Self { Self(ParseAmountErrorInner::BadPosition(value)) }
-}
-
-impl From<PrefixedHexError> for ParseAmountError {
-    fn from(value: PrefixedHexError) -> Self { Self(ParseAmountErrorInner::PrefixedHex(value)) }
-}
-
-impl From<UnprefixedHexError> for ParseAmountError {
-    fn from(value: UnprefixedHexError) -> Self { Self(ParseAmountErrorInner::UnprefixedHex(value)) }
 }
 
 impl From<Infallible> for ParseAmountError {
@@ -245,10 +183,6 @@ impl fmt::Display for OutOfRangeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for OutOfRangeError {}
-
-impl From<OutOfRangeError> for ParseAmountError {
-    fn from(value: OutOfRangeError) -> Self { Self(ParseAmountErrorInner::OutOfRange(value)) }
-}
 
 /// Error returned when the input string has higher precision than satoshis.
 #[derive(Debug, Clone, Eq, PartialEq)]

@@ -10,7 +10,7 @@ use core::{default, fmt};
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
 
-use super::error::ParseErrorInner;
+use super::error::{ParseAmountErrorInner, ParseErrorInner};
 use super::{
     parse_signed_to_satoshi, split_amount_and_denomination, Amount, Denomination, Display,
     DisplayStyle, OutOfRangeError, ParseAmountError, ParseError,
@@ -131,9 +131,14 @@ impl SignedAmount {
     #[allow(clippy::missing_panics_doc)]
     fn from_sat_u64(satoshi: u64) -> Result<Self, ParseAmountError> {
         // u64 -> i64 only fails if value is greater than i64::MAX, which is also > Self::MAX_MONEY.
-        let amount = i64::try_from(satoshi)
-            .map_err(|_| OutOfRangeError { is_signed: true, is_greater_than_max: true })?;
-        Ok(Self::from_sat(amount)?)
+        let amount = i64::try_from(satoshi).map_err(|_| {
+            ParseAmountError(ParseAmountErrorInner::OutOfRange(OutOfRangeError {
+                is_signed: true,
+                is_greater_than_max: true,
+            }))
+        })?;
+        Ok(Self::from_sat(amount)
+            .map_err(|e| ParseAmountError(ParseAmountErrorInner::OutOfRange(e)))?)
     }
 
     /// Converts from a value expressing a decimal number of bitcoin to a [`SignedAmount`].
@@ -204,12 +209,12 @@ impl SignedAmount {
     /// ```
     /// # use bitcoin_units::{amount, SignedAmount};
     /// let amount = SignedAmount::from_str_with_denomination("0.1 BTC")?;
-    /// assert_eq!(amount, SignedAmount::from_sat(10_000_000)?);
+    /// assert_eq!(amount, SignedAmount::from_sat_i32(10_000_000));
     /// # Ok::<_, amount::ParseError>(())
     /// ```
     pub fn from_str_with_denomination(s: &str) -> Result<Self, ParseError> {
         let (amt, denom) = split_amount_and_denomination(s)?;
-        Self::from_str_in(amt, denom).map_err(Into::into)
+        Self::from_str_in(amt, denom).map_err(|e| ParseError(ParseErrorInner::Amount(e)))
     }
 
     /// Expresses this [`SignedAmount`] as a floating-point value in the given [`Denomination`].
@@ -240,7 +245,8 @@ impl SignedAmount {
     /// include the `0x` prefix.
     #[inline]
     pub fn from_sat_hex(s: &str) -> Result<Self, ParseAmountError> {
-        let amount = parse_int::hex_u64_prefixed(s)?;
+        let amount = parse_int::hex_u64_prefixed(s)
+            .map_err(|e| ParseAmountError(ParseAmountErrorInner::PrefixedHex(e)))?;
         Self::from_sat_u64(amount)
     }
 
@@ -254,7 +260,8 @@ impl SignedAmount {
     /// includes the `0x` prefix.
     #[inline]
     pub fn from_sat_unprefixed_hex(s: &str) -> Result<Self, ParseAmountError> {
-        let amount = parse_int::hex_u64_unprefixed(s)?;
+        let amount = parse_int::hex_u64_unprefixed(s)
+            .map_err(|e| ParseAmountError(ParseAmountErrorInner::UnprefixedHex(e)))?;
         Self::from_sat_u64(amount)
     }
 

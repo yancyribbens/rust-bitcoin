@@ -201,12 +201,12 @@ impl Amount {
     /// ```
     /// # use bitcoin_units::{amount, Amount};
     /// let amount = Amount::from_str_with_denomination("0.1 BTC")?;
-    /// assert_eq!(amount, Amount::from_sat(10_000_000)?);
+    /// assert_eq!(amount, Amount::from_sat_u32(10_000_000));
     /// # Ok::<_, amount::ParseError>(())
     /// ```
     pub fn from_str_with_denomination(s: &str) -> Result<Self, ParseError> {
         let (amt, denom) = split_amount_and_denomination(s)?;
-        Self::from_str_in(amt, denom).map_err(Into::into)
+        Self::from_str_in(amt, denom).map_err(|e| ParseError(ParseErrorInner::Amount(e)))
     }
 
     /// Expresses this [`Amount`] as a floating-point value in the given [`Denomination`].
@@ -219,7 +219,7 @@ impl Amount {
     /// # use bitcoin_units::amount::{self, Amount, Denomination};
     /// let amount = Amount::from_sat(100_000)?;
     /// assert_eq!(amount.to_float_in(Denomination::Bitcoin), 0.001);
-    /// # Ok::<_, amount::ParseError>(())
+    /// # Ok::<_, amount::OutOfRangeError>(())
     /// ```
     #[cfg(feature = "alloc")]
     #[allow(clippy::missing_panics_doc)]
@@ -237,7 +237,7 @@ impl Amount {
     /// # use bitcoin_units::amount::{self, Amount, Denomination};
     /// let amount = Amount::from_sat(100_000)?;
     /// assert_eq!(amount.to_btc(), amount.to_float_in(Denomination::Bitcoin));
-    /// # Ok::<_, amount::ParseError>(())
+    /// # Ok::<_, amount::OutOfRangeError>(())
     /// ```
     #[cfg(feature = "alloc")]
     pub fn to_btc(self) -> f64 { self.to_float_in(Denomination::Bitcoin) }
@@ -252,7 +252,9 @@ impl Amount {
     #[cfg(feature = "alloc")]
     pub fn from_float_in(value: f64, denom: Denomination) -> Result<Self, ParseAmountError> {
         if value < 0.0 {
-            return Err(OutOfRangeError::negative().into());
+            return Err(ParseAmountError(ParseAmountErrorInner::OutOfRange(
+                OutOfRangeError::negative(),
+            )));
         }
         // This is inefficient, but the safest way to deal with this. The parsing logic is safe.
         // Any performance-critical application should not be dealing with floats.
@@ -267,8 +269,10 @@ impl Amount {
     /// include the `0x` prefix.
     #[inline]
     pub fn from_sat_hex(s: &str) -> Result<Self, ParseAmountError> {
-        let amount = parse_int::hex_u64_prefixed(s)?;
-        Ok(Self::from_sat(amount)?)
+        let amount = parse_int::hex_u64_prefixed(s)
+            .map_err(|e| ParseAmountError(ParseAmountErrorInner::PrefixedHex(e)))?;
+        Ok(Self::from_sat(amount)
+            .map_err(|e| ParseAmountError(ParseAmountErrorInner::OutOfRange(e)))?)
     }
 
     /// Constructs a new `Amount` from an unprefixed hex string.
@@ -279,8 +283,10 @@ impl Amount {
     /// includes the `0x` prefix.
     #[inline]
     pub fn from_sat_unprefixed_hex(s: &str) -> Result<Self, ParseAmountError> {
-        let amount = parse_int::hex_u64_unprefixed(s)?;
-        Ok(Self::from_sat(amount)?)
+        let amount = parse_int::hex_u64_unprefixed(s)
+            .map_err(|e| ParseAmountError(ParseAmountErrorInner::UnprefixedHex(e)))?;
+        Ok(Self::from_sat(amount)
+            .map_err(|e| ParseAmountError(ParseAmountErrorInner::OutOfRange(e)))?)
     }
 
     /// Constructs a new object that implements [`fmt::Display`] in the given [`Denomination`].

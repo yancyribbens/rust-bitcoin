@@ -201,11 +201,13 @@ impl<T> Decoder for ScriptBufDecoder<T> {
 
     #[inline]
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        Ok(self.0.push_bytes(bytes)?)
+        Ok(self.0.push_bytes(bytes).map_err(ScriptBufDecoderError)?)
     }
 
     #[inline]
-    fn end(self) -> Result<Self::Output, Self::Error> { Ok(ScriptBuf::from_bytes(self.0.end()?)) }
+    fn end(self) -> Result<Self::Output, Self::Error> {
+        Ok(ScriptBuf::from_bytes(self.0.end().map_err(ScriptBufDecoderError)?))
+    }
 
     #[inline]
     fn read_limit(&self) -> usize { self.0.read_limit() }
@@ -222,10 +224,6 @@ pub struct ScriptBufDecoderError(ByteVecDecoderError);
 
 impl From<Infallible> for ScriptBufDecoderError {
     fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl From<ByteVecDecoderError> for ScriptBufDecoderError {
-    fn from(e: ByteVecDecoderError) -> Self { Self(e) }
 }
 
 impl fmt::Display for ScriptBufDecoderError {

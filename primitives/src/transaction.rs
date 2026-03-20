@@ -467,13 +467,13 @@ impl Decoder for TransactionDecoder {
             // Attempt to push to the currently-active decoder and return early on success.
             match &mut self.state {
                 State::Version(decoder) => {
-                    if decoder.push_bytes(bytes)? {
+                    if decoder.push_bytes(bytes).map_err(|e| E(Inner::Version(e)))? {
                         // Still more bytes required.
                         return Ok(true);
                     }
                 }
                 State::Inputs(_, _, decoder) =>
-                    if decoder.push_bytes(bytes)? {
+                    if decoder.push_bytes(bytes).map_err(|e| E(Inner::Inputs(e)))? {
                         return Ok(true);
                     },
                 State::SegwitFlag(_) =>
@@ -481,15 +481,15 @@ impl Decoder for TransactionDecoder {
                         return Ok(true);
                     },
                 State::Outputs(_, _, _, decoder) =>
-                    if decoder.push_bytes(bytes)? {
+                    if decoder.push_bytes(bytes).map_err(|e| E(Inner::Outputs(e)))? {
                         return Ok(true);
                     },
                 State::Witnesses(_, _, _, _, decoder) =>
-                    if decoder.push_bytes(bytes)? {
+                    if decoder.push_bytes(bytes).map_err(|e| E(Inner::Witness(e)))? {
                         return Ok(true);
                     },
                 State::LockTime(_, _, _, decoder) =>
-                    if decoder.push_bytes(bytes)? {
+                    if decoder.push_bytes(bytes).map_err(|e| E(Inner::LockTime(e)))? {
                         return Ok(true);
                     },
                 State::Done(..) => return Ok(false),
@@ -499,11 +499,11 @@ impl Decoder for TransactionDecoder {
             // If the above failed, end the current decoder and go to the next state.
             match mem::replace(&mut self.state, State::Errored) {
                 State::Version(decoder) => {
-                    let version = decoder.end()?;
+                    let version = decoder.end().map_err(|e| E(Inner::Version(e)))?;
                     self.state = State::Inputs(version, Attempt::First, VecDecoder::<TxIn>::new());
                 }
                 State::Inputs(version, attempt, decoder) => {
-                    let inputs = decoder.end()?;
+                    let inputs = decoder.end().map_err(|e| E(Inner::Inputs(e)))?;
 
                     if Attempt::First == attempt {
                         if inputs.is_empty() {
@@ -535,7 +535,7 @@ impl Decoder for TransactionDecoder {
                     self.state = State::Inputs(version, Attempt::Second, VecDecoder::<TxIn>::new());
                 }
                 State::Outputs(version, inputs, is_segwit, decoder) => {
-                    let outputs = decoder.end()?;
+                    let outputs = decoder.end().map_err(|e| E(Inner::Outputs(e)))?;
                     // Handle the zero-input case described in the `Transaction` docs.
                     if is_segwit == IsSegwit::Yes && !inputs.is_empty() {
                         self.state = State::Witnesses(
@@ -553,7 +553,7 @@ impl Decoder for TransactionDecoder {
                 State::Witnesses(version, mut inputs, outputs, iteration, decoder) => {
                     let iteration = iteration.0;
 
-                    inputs[iteration].witness = decoder.end()?;
+                    inputs[iteration].witness = decoder.end().map_err(|e| E(Inner::Witness(e)))?;
                     if iteration < inputs.len() - 1 {
                         self.state = State::Witnesses(
                             version,
@@ -572,7 +572,7 @@ impl Decoder for TransactionDecoder {
                     }
                 }
                 State::LockTime(version, inputs, outputs, decoder) => {
-                    let lock_time = decoder.end()?;
+                    let lock_time = decoder.end().map_err(|e| E(Inner::LockTime(e)))?;
                     self.state = State::Done(Transaction { version, lock_time, inputs, outputs });
                     return Ok(false);
                 }
@@ -756,35 +756,6 @@ enum TransactionDecoderErrorInner {
 #[cfg(feature = "alloc")]
 impl From<Infallible> for TransactionDecoderError {
     fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-impl From<VersionDecoderError> for TransactionDecoderError {
-    fn from(e: VersionDecoderError) -> Self { Self(TransactionDecoderErrorInner::Version(e)) }
-}
-
-#[cfg(feature = "alloc")]
-impl From<VecDecoderError<TxInDecoderError>> for TransactionDecoderError {
-    fn from(e: VecDecoderError<TxInDecoderError>) -> Self {
-        Self(TransactionDecoderErrorInner::Inputs(e))
-    }
-}
-
-#[cfg(feature = "alloc")]
-impl From<VecDecoderError<TxOutDecoderError>> for TransactionDecoderError {
-    fn from(e: VecDecoderError<TxOutDecoderError>) -> Self {
-        Self(TransactionDecoderErrorInner::Outputs(e))
-    }
-}
-
-#[cfg(feature = "alloc")]
-impl From<WitnessDecoderError> for TransactionDecoderError {
-    fn from(e: WitnessDecoderError) -> Self { Self(TransactionDecoderErrorInner::Witness(e)) }
-}
-
-#[cfg(feature = "alloc")]
-impl From<LockTimeDecoderError> for TransactionDecoderError {
-    fn from(e: LockTimeDecoderError) -> Self { Self(TransactionDecoderErrorInner::LockTime(e)) }
 }
 
 #[cfg(feature = "alloc")]
