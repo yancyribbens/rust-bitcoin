@@ -972,6 +972,23 @@ type TxInInnerDecoder = Decoder3<OutPointDecoder, ScriptSigBufDecoder, SequenceD
 pub struct TxInDecoder(TxInInnerDecoder);
 
 #[cfg(feature = "alloc")]
+impl TxInDecoder {
+    /// Constructs a new [`TxIn`] decoder.
+    pub const fn new() -> Self {
+        Self(Decoder3::new(
+            OutPointDecoder::new(),
+            ScriptSigBufDecoder::new(),
+            SequenceDecoder::new(),
+        ))
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl Default for TxInDecoder {
+    fn default() -> Self { Self::new() }
+}
+
+#[cfg(feature = "alloc")]
 impl Decoder for TxInDecoder {
     type Output = TxIn;
     type Error = TxInDecoderError;
@@ -1070,6 +1087,19 @@ type TxOutInnerDecoder = Decoder2<AmountDecoder, ScriptPubKeyBufDecoder>;
 /// The decoder for the [`TxOut`] type.
 #[cfg(feature = "alloc")]
 pub struct TxOutDecoder(TxOutInnerDecoder);
+
+#[cfg(feature = "alloc")]
+impl TxOutDecoder {
+    /// Constructs a new [`TxOut`] decoder.
+    pub const fn new() -> Self {
+        Self(Decoder2::new(AmountDecoder::new(), ScriptPubKeyBufDecoder::new()))
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl Default for TxOutDecoder {
+    fn default() -> Self { Self::new() }
+}
 
 #[cfg(feature = "alloc")]
 impl Decoder for TxOutDecoder {

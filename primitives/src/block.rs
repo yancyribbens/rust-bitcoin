@@ -14,9 +14,9 @@ use core::marker::PhantomData;
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
+use encoding::{ArrayDecoder, Decodable, Decoder, Decoder6, Encodable};
 #[cfg(feature = "alloc")]
 use encoding::{CompactSizeEncoder, Decoder2, Encoder2, SliceEncoder, VecDecoder};
-use encoding::{Decodable, Decoder, Decoder6, Encodable};
 use hashes::{sha256d, HashEngine as _};
 use internals::write_err;
 
@@ -374,6 +374,17 @@ type BlockInnerDecoder = Decoder2<HeaderDecoder, VecDecoder<Transaction>>;
 pub struct BlockDecoder(BlockInnerDecoder);
 
 #[cfg(feature = "alloc")]
+impl BlockDecoder {
+    /// Constructs a new [`Block`] decoder.
+    pub const fn new() -> Self { Self(Decoder2::new(HeaderDecoder::new(), VecDecoder::new())) }
+}
+
+#[cfg(feature = "alloc")]
+impl Default for BlockDecoder {
+    fn default() -> Self { Self::new() }
+}
+
+#[cfg(feature = "alloc")]
 impl Decoder for BlockDecoder {
     type Output = Block;
     type Error = BlockDecoderError;
@@ -673,6 +684,18 @@ type HeaderInnerDecoder = Decoder6<
 pub struct HeaderDecoder(HeaderInnerDecoder);
 
 impl HeaderDecoder {
+    /// Constructs a new [`Header`] decoder.
+    pub const fn new() -> Self {
+        Self(Decoder6::new(
+            VersionDecoder::new(),
+            BlockHashDecoder::new(),
+            TxMerkleNodeDecoder::new(),
+            BlockTimeDecoder::new(),
+            CompactTargetDecoder::new(),
+            ArrayDecoder::new(),
+        ))
+    }
+
     fn from_inner(e: <HeaderInnerDecoder as Decoder>::Error) -> HeaderDecoderError {
         match e {
             encoding::Decoder6Error::First(e) => HeaderDecoderError::Version(e),
@@ -683,6 +706,10 @@ impl HeaderDecoder {
             encoding::Decoder6Error::Sixth(e) => HeaderDecoderError::Nonce(e),
         }
     }
+}
+
+impl Default for HeaderDecoder {
+    fn default() -> Self { Self::new() }
 }
 
 impl Decoder for HeaderDecoder {
