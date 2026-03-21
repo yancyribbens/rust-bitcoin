@@ -56,25 +56,33 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
+mod compact_size;
 mod decode;
 mod encode;
 
+#[cfg(feature = "alloc")]
+pub use self::compact_size::LengthPrefixExceedsMaxError;
+pub use self::compact_size::{
+    CompactSizeDecoder, CompactSizeDecoderError, CompactSizeEncoder, CompactSizeU64Decoder,
+};
 pub use self::decode::decoders::{
-    ArrayDecoder, CompactSizeDecoder, CompactSizeDecoderError, Decoder2, Decoder2Error, Decoder3,
-    Decoder3Error, Decoder4, Decoder4Error, Decoder6, Decoder6Error, UnexpectedEofError,
+    ArrayDecoder, Decoder2, Decoder2Error, Decoder3, Decoder3Error, Decoder4, Decoder4Error,
+    Decoder6, Decoder6Error, UnexpectedEofError,
 };
 #[cfg(feature = "alloc")]
 pub use self::decode::decoders::{
-    ByteVecDecoder, ByteVecDecoderError, LengthPrefixExceedsMaxError, VecDecoder, VecDecoderError,
+    ByteVecDecoder, ByteVecDecoderError, VecDecoder, VecDecoderError,
 };
 #[cfg(feature = "std")]
 pub use self::decode::{
     decode_from_read, decode_from_read_unbuffered, decode_from_read_unbuffered_with, ReadError,
 };
-pub use self::decode::{decode_from_slice, decode_from_slice_unbounded, Decodable, Decoder, DecodeError};
+pub use self::decode::{
+    decode_from_slice, decode_from_slice_unbounded, Decodable, DecodeError, Decoder,
+};
 pub use self::encode::encoders::{
-    ArrayEncoder, ArrayRefEncoder, BytesEncoder, CompactSizeEncoder, Encoder2, Encoder3, Encoder4,
-    Encoder6, SliceEncoder,
+    ArrayEncoder, ArrayRefEncoder, BytesEncoder, Encoder2, Encoder3, Encoder4, Encoder6,
+    SliceEncoder,
 };
 #[cfg(feature = "alloc")]
 pub use self::encode::{encode_to_vec, flush_to_vec};
