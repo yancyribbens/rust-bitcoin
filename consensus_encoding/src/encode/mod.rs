@@ -123,26 +123,26 @@ macro_rules! encoder_newtype_exact {
 
 /// Yields bytes from any [`Encodable`] instance.
 #[derive(Debug)]
-pub struct EncodableByteIter<'e, T: Encodable + 'e> {
+pub struct EncodableByteIter<'e, T: Encodable + ?Sized + 'e> {
     enc: T::Encoder<'e>,
     position: usize,
 }
 
-impl<'e, T: Encodable + 'e> EncodableByteIter<'e, T> {
+impl<'e, T: Encodable + ?Sized + 'e> EncodableByteIter<'e, T> {
     /// Constructs a new byte iterator around a provided encodable.
     pub fn new(encodable: &'e T) -> Self { Self { enc: encodable.encoder(), position: 0 } }
 }
 
 // Manual impl rather than #[derive(Clone)] because derive would constrain `where T: Clone`,
 // but `T` itself is never cloned, only the associated type `T::Encoder<'e>`.
-impl<'e, T: Encodable + 'e> Clone for EncodableByteIter<'e, T>
+impl<'e, T: Encodable + ?Sized + 'e> Clone for EncodableByteIter<'e, T>
 where
     T::Encoder<'e>: Clone,
 {
     fn clone(&self) -> Self { Self { enc: self.enc.clone(), position: self.position } }
 }
 
-impl<'e, T: Encodable + 'e> Iterator for EncodableByteIter<'e, T> {
+impl<'e, T: Encodable + ?Sized + 'e> Iterator for EncodableByteIter<'e, T> {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -160,7 +160,7 @@ impl<'e, T: Encodable + 'e> Iterator for EncodableByteIter<'e, T> {
 
 impl<'e, T> ExactSizeIterator for EncodableByteIter<'e, T>
 where
-    T: Encodable + 'e,
+    T: Encodable + ?Sized + 'e,
     T::Encoder<'e>: ExactSizeEncoder,
 {
     fn len(&self) -> usize { self.enc.len() - self.position }
