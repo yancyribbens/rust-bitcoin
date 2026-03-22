@@ -16,7 +16,7 @@
 extern crate std;
 
 #[cfg(feature = "serde")]
-extern crate serde;
+pub extern crate serde;
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};

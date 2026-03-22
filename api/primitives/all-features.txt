@@ -1363,8 +1363,10 @@ pub enum bitcoin_primitives::script::ScriptPubKeyTag
 pub enum bitcoin_primitives::script::ScriptSigTag
 pub enum bitcoin_primitives::script::TapScriptTag
 pub enum bitcoin_primitives::script::WitnessScriptTag
+pub extern crate bitcoin_primitives::arbitrary
 pub extern crate bitcoin_primitives::encoding
 pub extern crate bitcoin_primitives::hex
+pub extern crate bitcoin_primitives::serde
 pub fn &'a bitcoin_primitives::script::Script<T>::arbitrary(u: &mut arbitrary::unstructured::Unstructured<'a>) -> arbitrary::error::Result<Self>
 pub fn &'a bitcoin_primitives::witness::Witness::into_iter(self) -> Self::IntoIter
 pub fn &'de bitcoin_primitives::script::Script<T>::deserialize<D>(deserializer: D) -> core::result::Result<Self, <D as serde::de::Deserializer>::Error> where D: serde::de::Deserializer<'de>

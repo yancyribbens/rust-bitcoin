@@ -27,7 +27,10 @@ extern crate std;
 
 #[cfg(feature = "serde")]
 #[macro_use]
-extern crate serde;
+pub extern crate serde;
+
+#[cfg(feature = "arbitrary")]
+pub extern crate arbitrary;
 
 /// Re-export of the `encoding` crate.
 pub extern crate encoding;

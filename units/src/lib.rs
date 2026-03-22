@@ -38,6 +38,12 @@ extern crate std;
 #[cfg(feature = "encoding")]
 pub extern crate encoding;
 
+#[cfg(feature = "serde")]
+pub extern crate serde;
+
+#[cfg(feature = "arbitrary")]
+pub extern crate arbitrary;
+
 #[doc(hidden)]
 pub mod _export {
     /// A re-export of `core::*`.

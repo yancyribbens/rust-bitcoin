@@ -28,6 +28,12 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
+#[cfg(feature = "serde")]
+pub extern crate serde;
+
+#[cfg(feature = "arbitrary")]
+pub extern crate arbitrary;
+
 pub extern crate hex_stable as hex;
 
 use alloc::borrow::ToOwned;
