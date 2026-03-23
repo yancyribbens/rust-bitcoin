@@ -666,9 +666,7 @@ impl PublicKey {
     pub fn from_private_key(sk: PrivateKey) -> Self { sk.to_public_key() }
 
     /// Extracts the public key from a Keypair
-    pub fn from_keypair(pair: &Keypair) -> Self {
-        Self::from_secp(secp256k1::PublicKey::from_keypair(pair.as_inner()))
-    }
+    pub fn from_keypair(pair: &Keypair) -> Self { CompressedPublicKey::from_keypair(pair).into() }
 
     /// Checks that `sig` is a valid ECDSA signature for `msg` using this public key.
     ///
@@ -843,6 +841,11 @@ impl CompressedPublicKey {
         sk.to_public_key().try_into()
     }
 
+    /// Extracts the public key from a Keypair
+    pub fn from_keypair(pair: &Keypair) -> Self {
+        Self::from_secp(secp256k1::PublicKey::from_keypair(pair.as_inner()))
+    }
+
     /// Checks that `sig` is a valid ECDSA signature for `msg` using this public key.
     ///
     /// # Errors
@@ -887,6 +890,10 @@ impl TryFrom<PublicKey> for CompressedPublicKey {
             Err(UncompressedPublicKeyError)
         }
     }
+}
+
+impl From<secp256k1::PublicKey> for CompressedPublicKey {
+    fn from(pk: secp256k1::PublicKey) -> Self { Self::from_secp(pk) }
 }
 
 impl From<CompressedPublicKey> for PublicKey {
