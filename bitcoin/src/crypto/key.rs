@@ -862,7 +862,7 @@ impl CompressedPublicKey {
 
 impl fmt::Display for CompressedPublicKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fmt::LowerHex::fmt(&self.to_bytes().as_hex(), f)
+        fmt::Display::fmt(&self.to_bytes().as_hex(), f)
     }
 }
 
