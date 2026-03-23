@@ -237,7 +237,7 @@ mod tests {
     #[cfg(feature = "secp-recovery")]
     #[cfg(feature = "std")]
     fn message_signature() {
-        use crate::{Address, AddressType, CompressedPublicKey, Network, NetworkKind, PrivateKey};
+        use crate::{Address, AddressType, FullPublicKey, Network, NetworkKind, PrivateKey};
 
         let message = "rust-bitcoin MessageSignature test";
         let msg_hash = super::signed_msg_hash(message);
@@ -269,7 +269,7 @@ mod tests {
         let p2pkh = Address::p2pkh(pubkey, Network::Bitcoin);
         assert_eq!(signature2.is_signed_by_address(&p2pkh, msg_hash), Ok(true));
 
-        assert_eq!(pubkey, CompressedPublicKey::from_private_key(privkey).unwrap());
+        assert_eq!(pubkey, FullPublicKey::from_private_key(privkey).unwrap());
         let signature_base64 = signature.to_base64();
         let signature_round_trip =
             super::MessageSignature::from_base64(&signature_base64).expect("message signature");

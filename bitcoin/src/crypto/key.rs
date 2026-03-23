@@ -32,7 +32,7 @@ use crate::taproot::{TapNodeHash, TapTweakHash};
 #[rustfmt::skip]                // Keep public re-exports separate.
 pub use secp256k1::{constants, Parity, Verification};
 pub use encapsulate::{
-    CompressedPublicKey, Keypair, PrivateKey, PublicKey, SerializedXOnlyPublicKey, TweakedKeypair,
+    FullPublicKey, Keypair, PrivateKey, PublicKey, SerializedXOnlyPublicKey, TweakedKeypair,
     TweakedPublicKey, XOnlyPublicKey,
 };
 #[cfg(feature = "rand")]
@@ -131,9 +131,9 @@ mod encapsulate {
 
     /// An always-compressed Bitcoin ECDSA public key.
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct CompressedPublicKey(secp256k1::PublicKey);
+    pub struct FullPublicKey(secp256k1::PublicKey);
 
-    impl CompressedPublicKey {
+    impl FullPublicKey {
         /// Constructs a new compressed public key from the provided secp public key.
         #[inline]
         pub fn from_secp(inner: secp256k1::PublicKey) -> Self { Self(inner) }
@@ -584,17 +584,15 @@ impl PublicKey {
     ///
     /// Errors if this key is not compressed.
     pub fn p2wpkh_script_code(&self) -> Result<WitnessScriptBuf, UncompressedPublicKeyError> {
-        let key = CompressedPublicKey::try_from(*self)?;
+        let key = FullPublicKey::try_from(*self)?;
         Ok(key.p2wpkh_script_code())
     }
 
-    /// Converts this [`PublicKey`] into a [`CompressedPublicKey`] infallibly.
+    /// Converts this [`PublicKey`] into a [`FullPublicKey`] infallibly.
     ///
     /// Unlike the `TryFrom` implementation, this function will discard compressedness
     /// information on the [`PublicKey`].
-    pub fn force_compressed(self) -> CompressedPublicKey {
-        CompressedPublicKey::from_secp(self.to_inner())
-    }
+    pub fn force_compressed(self) -> FullPublicKey { FullPublicKey::from_secp(self.to_inner()) }
 
     /// Writes the public key into a writer.
     ///
@@ -734,7 +732,7 @@ impl PublicKey {
     pub fn from_private_key(sk: &PrivateKey) -> Self { sk.to_public_key() }
 
     /// Extracts the public key from a Keypair
-    pub fn from_keypair(pair: &Keypair) -> Self { CompressedPublicKey::from_keypair(pair).into() }
+    pub fn from_keypair(pair: &Keypair) -> Self { FullPublicKey::from_keypair(pair).into() }
 
     /// Checks that `sig` is a valid ECDSA signature for `msg` using this public key.
     ///
@@ -822,7 +820,11 @@ impl From<&PublicKey> for PubkeyHash {
     fn from(key: &PublicKey) -> Self { key.pubkey_hash() }
 }
 
-impl CompressedPublicKey {
+#[deprecated(since = "TBD", note = "use `FullPublicKey` instead")]
+#[doc(hidden)]
+pub type CompressedPublicKey = FullPublicKey;
+
+impl FullPublicKey {
     /// Returns bitcoin 160-bit hash of the public key.
     pub fn pubkey_hash(&self) -> PubkeyHash { PubkeyHash(hash160::Hash::hash(&self.to_bytes())) }
 
@@ -931,27 +933,27 @@ impl CompressedPublicKey {
     }
 }
 
-impl fmt::Display for CompressedPublicKey {
+impl fmt::Display for FullPublicKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         fmt::Display::fmt(&self.to_bytes().as_hex(), f)
     }
 }
 
-impl fmt::Debug for CompressedPublicKey {
+impl fmt::Debug for FullPublicKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_fmt(format_args!("CompressedPublicKey({})", self))
+        f.write_fmt(format_args!("FullPublicKey({})", self))
     }
 }
 
-impl FromStr for CompressedPublicKey {
-    type Err = ParseCompressedPublicKeyError;
+impl FromStr for FullPublicKey {
+    type Err = ParseFullPublicKeyError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::from_bytes(hex::decode_to_array::<33>(s)?).map_err(Into::into)
     }
 }
 
-impl TryFrom<PublicKey> for CompressedPublicKey {
+impl TryFrom<PublicKey> for FullPublicKey {
     type Error = UncompressedPublicKeyError;
 
     fn try_from(value: PublicKey) -> Result<Self, Self::Error> {
@@ -963,32 +965,32 @@ impl TryFrom<PublicKey> for CompressedPublicKey {
     }
 }
 
-impl From<secp256k1::PublicKey> for CompressedPublicKey {
+impl From<secp256k1::PublicKey> for FullPublicKey {
     fn from(pk: secp256k1::PublicKey) -> Self { Self::from_secp(pk) }
 }
 
-impl From<CompressedPublicKey> for PublicKey {
-    fn from(value: CompressedPublicKey) -> Self { Self::from_secp(value.to_inner()) }
+impl From<FullPublicKey> for PublicKey {
+    fn from(value: FullPublicKey) -> Self { Self::from_secp(value.to_inner()) }
 }
 
-impl From<CompressedPublicKey> for XOnlyPublicKey {
-    fn from(pk: CompressedPublicKey) -> Self { pk.to_inner().into() }
+impl From<FullPublicKey> for XOnlyPublicKey {
+    fn from(pk: FullPublicKey) -> Self { pk.to_inner().into() }
 }
 
-impl From<CompressedPublicKey> for PubkeyHash {
-    fn from(key: CompressedPublicKey) -> Self { key.pubkey_hash() }
+impl From<FullPublicKey> for PubkeyHash {
+    fn from(key: FullPublicKey) -> Self { key.pubkey_hash() }
 }
 
-impl From<&CompressedPublicKey> for PubkeyHash {
-    fn from(key: &CompressedPublicKey) -> Self { key.pubkey_hash() }
+impl From<&FullPublicKey> for PubkeyHash {
+    fn from(key: &FullPublicKey) -> Self { key.pubkey_hash() }
 }
 
-impl From<CompressedPublicKey> for WPubkeyHash {
-    fn from(key: CompressedPublicKey) -> Self { key.wpubkey_hash() }
+impl From<FullPublicKey> for WPubkeyHash {
+    fn from(key: FullPublicKey) -> Self { key.wpubkey_hash() }
 }
 
-impl From<&CompressedPublicKey> for WPubkeyHash {
-    fn from(key: &CompressedPublicKey) -> Self { key.wpubkey_hash() }
+impl From<&FullPublicKey> for WPubkeyHash {
+    fn from(key: &FullPublicKey) -> Self { key.wpubkey_hash() }
 }
 
 impl PrivateKey {
@@ -1306,7 +1308,7 @@ impl<'de> serde::Deserialize<'de> for PublicKey {
 }
 
 #[cfg(feature = "serde")]
-impl serde::Serialize for CompressedPublicKey {
+impl serde::Serialize for FullPublicKey {
     fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         if s.is_human_readable() {
             s.collect_str(self)
@@ -1317,13 +1319,13 @@ impl serde::Serialize for CompressedPublicKey {
 }
 
 #[cfg(feature = "serde")]
-impl<'de> serde::Deserialize<'de> for CompressedPublicKey {
+impl<'de> serde::Deserialize<'de> for FullPublicKey {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         if d.is_human_readable() {
             struct HexVisitor;
 
             impl serde::de::Visitor<'_> for HexVisitor {
-                type Value = CompressedPublicKey;
+                type Value = FullPublicKey;
 
                 fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
                     formatter.write_str("a 66 digits long ASCII hex string")
@@ -1334,7 +1336,7 @@ impl<'de> serde::Deserialize<'de> for CompressedPublicKey {
                     E: serde::de::Error,
                 {
                     if let Ok(hex) = core::str::from_utf8(v) {
-                        hex.parse::<CompressedPublicKey>().map_err(E::custom)
+                        hex.parse::<FullPublicKey>().map_err(E::custom)
                     } else {
                         Err(E::invalid_value(::serde::de::Unexpected::Bytes(v), &self))
                     }
@@ -1344,7 +1346,7 @@ impl<'de> serde::Deserialize<'de> for CompressedPublicKey {
                 where
                     E: serde::de::Error,
                 {
-                    v.parse::<CompressedPublicKey>().map_err(E::custom)
+                    v.parse::<FullPublicKey>().map_err(E::custom)
                 }
             }
             d.deserialize_str(HexVisitor)
@@ -1352,7 +1354,7 @@ impl<'de> serde::Deserialize<'de> for CompressedPublicKey {
             struct BytesVisitor;
 
             impl serde::de::Visitor<'_> for BytesVisitor {
-                type Value = CompressedPublicKey;
+                type Value = FullPublicKey;
 
                 fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
                     formatter.write_str("a bytestring")
@@ -1363,7 +1365,7 @@ impl<'de> serde::Deserialize<'de> for CompressedPublicKey {
                     E: serde::de::Error,
                 {
                     let arr = v.try_into().map_err(E::custom)?;
-                    CompressedPublicKey::from_bytes(arr).map_err(E::custom)
+                    FullPublicKey::from_bytes(arr).map_err(E::custom)
                 }
             }
 
@@ -1689,20 +1691,20 @@ impl From<FromSliceError> for ParsePublicKeyError {
     fn from(e: FromSliceError) -> Self { Self::Encoding(e) }
 }
 
-/// Error returned when parsing a [`CompressedPublicKey`] from a string.
+/// Error returned when parsing a [`FullPublicKey`] from a string.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ParseCompressedPublicKeyError {
+pub enum ParseFullPublicKeyError {
     /// secp256k1 Error.
     Secp256k1(secp256k1::Error),
     /// hex to array conversion error.
     Hex(hex::DecodeFixedLengthBytesError),
 }
 
-impl From<Infallible> for ParseCompressedPublicKeyError {
+impl From<Infallible> for ParseFullPublicKeyError {
     fn from(never: Infallible) -> Self { match never {} }
 }
 
-impl fmt::Display for ParseCompressedPublicKeyError {
+impl fmt::Display for ParseFullPublicKeyError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Secp256k1(e) => write_err!(f, "secp256k1 error"; e),
@@ -1712,7 +1714,7 @@ impl fmt::Display for ParseCompressedPublicKeyError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for ParseCompressedPublicKeyError {
+impl std::error::Error for ParseFullPublicKeyError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             Self::Secp256k1(e) => Some(e),
@@ -1721,11 +1723,11 @@ impl std::error::Error for ParseCompressedPublicKeyError {
     }
 }
 
-impl From<secp256k1::Error> for ParseCompressedPublicKeyError {
+impl From<secp256k1::Error> for ParseFullPublicKeyError {
     fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
 }
 
-impl From<hex::DecodeFixedLengthBytesError> for ParseCompressedPublicKeyError {
+impl From<hex::DecodeFixedLengthBytesError> for ParseFullPublicKeyError {
     fn from(e: hex::DecodeFixedLengthBytesError) -> Self { Self::Hex(e) }
 }
 

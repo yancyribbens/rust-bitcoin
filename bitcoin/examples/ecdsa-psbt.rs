@@ -37,7 +37,7 @@ use bitcoin::ext::*;
 use bitcoin::locktime::absolute;
 use bitcoin::psbt::{self, Input, Psbt, PsbtSighashType};
 use bitcoin::{
-    transaction, Address, Amount, CompressedPublicKey, Network, OutPoint, RedeemScriptBuf,
+    transaction, Address, Amount, FullPublicKey, Network, OutPoint, RedeemScriptBuf,
     ScriptPubKeyBuf, ScriptSigBuf, Sequence, Transaction, TxIn, TxOut, Witness,
 };
 
@@ -245,7 +245,7 @@ impl WatchOnly {
     /// "m/84h/0h/0h/1/0"). A real wallet would have access to the chain so could determine if an
     /// address has been used or not. We ignore this detail and just re-use the first change address
     /// without loss of generality.
-    fn change_address(&self) -> Result<(CompressedPublicKey, Address, DerivationPath)> {
+    fn change_address(&self) -> Result<(FullPublicKey, Address, DerivationPath)> {
         let path = [ChildNumber::ONE_NORMAL, ChildNumber::ZERO_NORMAL];
         let derived = self.account_0_xpub.derive_xpub(path)?;
 

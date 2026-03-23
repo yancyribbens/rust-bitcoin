@@ -56,8 +56,7 @@ use crate::constants::{
     SCRIPT_ADDRESS_PREFIX_TEST,
 };
 use crate::crypto::key::{
-    CompressedPublicKey, PubkeyHash, PublicKey, TweakedPublicKey, UntweakedPublicKey,
-    XOnlyPublicKey,
+    FullPublicKey, PubkeyHash, PublicKey, TweakedPublicKey, UntweakedPublicKey, XOnlyPublicKey,
 };
 use crate::network::{Network, NetworkKind, Params};
 use crate::prelude::{String, ToOwned};
@@ -532,7 +531,7 @@ impl Address {
     /// Constructs a new pay-to-witness-public-key-hash (P2WPKH) [`Address`] from a public key.
     ///
     /// This is the native SegWit address type for an output redeemable with a single signature.
-    pub fn p2wpkh(pk: CompressedPublicKey, hrp: impl Into<KnownHrp>) -> Self {
+    pub fn p2wpkh(pk: FullPublicKey, hrp: impl Into<KnownHrp>) -> Self {
         let program = WitnessProgram::p2wpkh(pk);
         Self::from_witness_program(program, hrp)
     }
@@ -541,7 +540,7 @@ impl Address {
     /// pay-to-witness-public-key-hash (P2WPKH).
     ///
     /// This is a SegWit address type that looks familiar (as p2sh) to legacy clients.
-    pub fn p2shwpkh(pk: CompressedPublicKey, network: impl Into<NetworkKind>) -> Self {
+    pub fn p2shwpkh(pk: FullPublicKey, network: impl Into<NetworkKind>) -> Self {
         let builder = ScriptPubKey::builder().push_int_unchecked(0).push_slice(pk.wpubkey_hash());
         let script_hash = builder.as_script().script_hash().expect("script is less than 520 bytes");
         Self::p2sh_from_hash(script_hash, network)
@@ -1128,7 +1127,7 @@ mod tests {
     fn p2wpkh() {
         // stolen from Bitcoin transaction: b3c8c2b6cfc335abbcb2c7823a8453f55d64b2b5125a9a61e8737230cdb8ce20
         let key = "033bc8c83c52df5712229a2f72206d90192366c36428cb0c12b6af98324d97bfbc"
-            .parse::<CompressedPublicKey>()
+            .parse::<FullPublicKey>()
             .unwrap();
         let addr = Address::p2wpkh(key, KnownHrp::Mainnet);
         assert_eq!(&addr.to_string(), "bc1qvzvkjn4q3nszqxrv3nraga2r822xjty3ykvkuw");
@@ -1153,7 +1152,7 @@ mod tests {
     fn p2shwpkh() {
         // stolen from Bitcoin transaction: ad3fd9c6b52e752ba21425435ff3dd361d6ac271531fc1d2144843a9f550ad01
         let key = "026c468be64d22761c30cd2f12cbc7de255d592d7904b1bab07236897cc4c2e766"
-            .parse::<CompressedPublicKey>()
+            .parse::<FullPublicKey>()
             .unwrap();
         let addr = Address::p2shwpkh(key, NetworkKind::Main);
         assert_eq!(&addr.to_string(), "3QBRmWNqqBGme9er7fMkGqtZtp4gjMFxhE");

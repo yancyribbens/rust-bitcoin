@@ -16,7 +16,7 @@ use hashes::{hash160, hash_newtype, sha512, Hash, HashEngine, Hmac, HmacEngine};
 use internals::array::ArrayExt;
 use internals::write_err;
 
-use crate::crypto::key::{CompressedPublicKey, Keypair, PrivateKey, XOnlyPublicKey};
+use crate::crypto::key::{FullPublicKey, Keypair, PrivateKey, XOnlyPublicKey};
 use crate::internal_macros;
 use crate::network::NetworkKind;
 use crate::prelude::{String, Vec};
@@ -869,12 +869,10 @@ impl Xpub {
 
     /// Constructs a new ECDSA compressed public key matching internal public key representation.
     #[deprecated(since = "TBD", note = "use `to_public_key()` instead")]
-    pub fn to_pub(self) -> CompressedPublicKey { self.to_public_key() }
+    pub fn to_pub(self) -> FullPublicKey { self.to_public_key() }
 
     /// Constructs a new ECDSA compressed public key matching internal public key representation.
-    pub fn to_public_key(self) -> CompressedPublicKey {
-        CompressedPublicKey::from_secp(self.public_key)
-    }
+    pub fn to_public_key(self) -> FullPublicKey { FullPublicKey::from_secp(self.public_key) }
 
     /// Constructs a new BIP-0340 x-only public key for BIP-0340 signatures and Taproot use matching
     /// the internal public key representation.

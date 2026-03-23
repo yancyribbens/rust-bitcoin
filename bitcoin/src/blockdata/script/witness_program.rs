@@ -14,7 +14,7 @@ use internals::array_vec::ArrayVec;
 
 use super::witness_version::WitnessVersion;
 use super::{PushBytes, WScriptHash, WitnessScript, WitnessScriptSizeError};
-use crate::crypto::key::{CompressedPublicKey, TapTweak, TweakedPublicKey, UntweakedPublicKey};
+use crate::crypto::key::{FullPublicKey, TapTweak, TweakedPublicKey, UntweakedPublicKey};
 use crate::script::WitnessScriptExt as _;
 use crate::taproot::TapNodeHash;
 
@@ -73,7 +73,7 @@ impl WitnessProgram {
     }
 
     /// Constructs a new [`WitnessProgram`] from `pk` for a P2WPKH output.
-    pub fn p2wpkh(pk: CompressedPublicKey) -> Self {
+    pub fn p2wpkh(pk: FullPublicKey) -> Self {
         let hash = pk.wpubkey_hash();
         Self::new_p2wpkh(hash.to_byte_array())
     }
