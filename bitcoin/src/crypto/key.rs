@@ -528,6 +528,14 @@ impl PublicKey {
         Ok(key.p2wpkh_script_code())
     }
 
+    /// Converts this [`PublicKey`] into a [`CompressedPublicKey`] infallibly.
+    ///
+    /// Unlike the `TryFrom` implementation, this function will discard compressedness
+    /// information on the [`PublicKey`].
+    pub fn force_compressed(self) -> CompressedPublicKey {
+        CompressedPublicKey::from_secp(self.to_inner())
+    }
+
     /// Writes the public key into a writer.
     ///
     /// # Errors
