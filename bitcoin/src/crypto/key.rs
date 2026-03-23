@@ -661,7 +661,7 @@ impl PublicKey {
     }
 
     /// Computes the public key as supposed to be used with this secret.
-    pub fn from_private_key(sk: PrivateKey) -> Self { sk.public_key() }
+    pub fn from_private_key(sk: PrivateKey) -> Self { sk.to_public_key() }
 
     /// Extracts the public key from a Keypair
     pub fn from_keypair(pair: &Keypair) -> Self {
@@ -827,7 +827,7 @@ impl CompressedPublicKey {
     ///
     /// Errors if the private key is not compressed.
     pub fn from_private_key(sk: PrivateKey) -> Result<Self, UncompressedPublicKeyError> {
-        sk.public_key().try_into()
+        sk.to_public_key().try_into()
     }
 
     /// Checks that `sig` is a valid ECDSA signature for `msg` using this public key.
@@ -910,7 +910,7 @@ impl PrivateKey {
     }
 
     /// Constructs a new public key from this private key.
-    pub fn public_key(&self) -> PublicKey {
+    pub fn to_public_key(&self) -> PublicKey {
         match self.compressed() {
             true => PublicKey::from_secp(secp256k1::PublicKey::from_secret_key(self.as_inner())),
             false => PublicKey::from_secp_uncompressed(secp256k1::PublicKey::from_secret_key(
@@ -918,6 +918,10 @@ impl PrivateKey {
             )),
         }
     }
+
+    /// Constructs a new public key from this private key.
+    #[deprecated(since = "TBD", note = "use `to_public_key` instead")]
+    pub fn public_key(&self) -> PublicKey { self.to_public_key() }
 
     /// Serializes the private key to bytes.
     #[deprecated(since = "TBD", note = "use to_secret_vec instead")]
@@ -1780,7 +1784,7 @@ mod tests {
         assert!(sk.private_key.compressed());
         assert_eq!(&sk.to_wif(), "cVt4o7BGAig1UXywgGSmARhxMdzP5qvQsxKkSsc1XEkw3tDTQFpy");
 
-        let pk = Address::p2pkh(sk.private_key.public_key(), sk.network_kind);
+        let pk = Address::p2pkh(sk.private_key.to_public_key(), sk.network_kind);
         assert_eq!(&pk.to_string(), "mqwpxxvfv3QbM8PU8uBx2jaNt9btQqvQNx");
 
         // test string conversion
@@ -1795,7 +1799,7 @@ mod tests {
         assert!(!sk.private_key.compressed());
         assert_eq!(&sk.to_wif(), "5JYkZjmN7PVMjJUfJWfRFwtuXTGB439XV6faajeHPAM9Z2PT2R3");
 
-        let mut pk = sk.private_key.public_key();
+        let mut pk = sk.private_key.to_public_key();
         assert!(!pk.compressed());
         assert_eq!(&pk.to_string(), "042e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af191923a2964c177f5b5923ae500fca49e99492d534aa3759d6b25a8bc971b133");
         assert_eq!(pk, "042e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af191923a2964c177f5b5923ae500fca49e99492d534aa3759d6b25a8bc971b133"
