@@ -10,7 +10,7 @@ use bitcoin::opcodes::all::OP_0;
 use bitcoin::psbt::{Psbt, PsbtSighashType};
 use bitcoin::script::{PushBytes, ScriptBuf};
 use bitcoin::{
-    absolute, hex, script, transaction, NetworkKind, OutPoint, PrivateKey, PublicKey,
+    absolute, hex, script, transaction, LegacyPublicKey, NetworkKind, OutPoint, PrivateKey,
     ScriptPubKeyBuf, ScriptSigBuf, Sequence, Transaction, TxIn, TxOut, WifKey, Witness,
 };
 
@@ -274,7 +274,7 @@ fn bip32_derivation(
         let pk = pk_path[i].0;
         let path = pk_path[i].1;
 
-        let pk = pk.parse::<PublicKey>().unwrap();
+        let pk = pk.parse::<LegacyPublicKey>().unwrap();
         let path = path.into_derivation_path().unwrap();
 
         tree.insert(pk.to_inner(), (fingerprint, path));
@@ -305,7 +305,7 @@ fn update_psbt_with_sighash_all(mut psbt: Psbt) -> Psbt {
 fn parse_and_verify_keys(
     ext_priv: &Xpriv,
     sk_path: &[(&str, &str)],
-) -> BTreeMap<PublicKey, PrivateKey> {
+) -> BTreeMap<LegacyPublicKey, PrivateKey> {
     let mut key_map = BTreeMap::new();
     for (secret_key, derivation_path) in sk_path.iter() {
         let wif_priv = WifKey::from_wif(secret_key).expect("failed to parse key");
@@ -323,7 +323,7 @@ fn parse_and_verify_keys(
 
 /// Does the first signing according to the BIP, returns the signed PSBT. Verifies against BIP 174 test vector.
 #[track_caller]
-fn signer_one_sign(psbt: Psbt, key_map: BTreeMap<bitcoin::PublicKey, PrivateKey>) -> Psbt {
+fn signer_one_sign(psbt: Psbt, key_map: BTreeMap<LegacyPublicKey, PrivateKey>) -> Psbt {
     let expected_psbt_hex = include_str!("data/sign_1_psbt_hex");
     let expected_psbt: Psbt = hex_psbt(expected_psbt_hex);
 
@@ -361,7 +361,7 @@ fn combine_lexicographically() {
 }
 
 /// Signs `psbt` with `keys` if required.
-fn sign(mut psbt: Psbt, keys: BTreeMap<bitcoin::PublicKey, PrivateKey>) -> Psbt {
+fn sign(mut psbt: Psbt, keys: BTreeMap<LegacyPublicKey, PrivateKey>) -> Psbt {
     psbt.sign(&keys).unwrap();
     psbt
 }

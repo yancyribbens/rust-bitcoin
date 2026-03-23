@@ -13,7 +13,7 @@ use internals::slice::SliceExt;
 use super::map::{Input, Map, Output, PsbtSighashType};
 use crate::bip32::{ChildNumber, Fingerprint, KeySource};
 use crate::consensus::encode::{self, deserialize_partial, serialize, Decodable, Encodable};
-use crate::crypto::key::{PublicKey, XOnlyPublicKey};
+use crate::crypto::key::{LegacyPublicKey, XOnlyPublicKey};
 use crate::crypto::{ecdsa, taproot};
 use crate::io::Write;
 use crate::prelude::{DisplayHex, String, Vec};
@@ -167,7 +167,7 @@ impl<T> Deserialize for ScriptBuf<T> {
     fn deserialize(bytes: &[u8]) -> Result<Self, Error> { Ok(Self::from(bytes.to_vec())) }
 }
 
-impl Serialize for PublicKey {
+impl Serialize for LegacyPublicKey {
     fn serialize(&self) -> Vec<u8> {
         let mut buf = Vec::new();
         self.write_into(&mut buf).expect("vecs don't error");
@@ -175,7 +175,7 @@ impl Serialize for PublicKey {
     }
 }
 
-impl Deserialize for PublicKey {
+impl Deserialize for LegacyPublicKey {
     fn deserialize(bytes: &[u8]) -> Result<Self, Error> {
         Self::from_slice(bytes).map_err(Error::InvalidPublicKey)
     }

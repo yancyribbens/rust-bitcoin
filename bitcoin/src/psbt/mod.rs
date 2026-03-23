@@ -24,7 +24,7 @@ use internals::write_err;
 use secp256k1::Message;
 
 use crate::bip32::{self, KeySource, Xpriv, Xpub};
-use crate::crypto::key::{PrivateKey, PublicKey};
+use crate::crypto::key::{LegacyPublicKey, PrivateKey};
 use crate::crypto::{ecdsa, taproot};
 use crate::key::{Keypair, TapTweak, XOnlyPublicKey};
 use crate::prelude::{btree_map, BTreeMap, BTreeSet, Borrow, Box, Vec};
@@ -344,7 +344,7 @@ impl Psbt {
         k: &K,
         input_index: usize,
         cache: &mut SighashCache<T>,
-    ) -> Result<Vec<PublicKey>, SignError>
+    ) -> Result<Vec<LegacyPublicKey>, SignError>
     where
         T: Borrow<Transaction>,
         K: GetKey,
@@ -358,7 +358,9 @@ impl Psbt {
         for (pk, key_source) in input.bip32_derivation.iter() {
             let sk = if let Ok(Some(sk)) = k.get_key(&KeyRequest::Bip32(key_source.clone())) {
                 sk
-            } else if let Ok(Some(sk)) = k.get_key(&KeyRequest::Pubkey(PublicKey::from_secp(*pk))) {
+            } else if let Ok(Some(sk)) =
+                k.get_key(&KeyRequest::Pubkey(LegacyPublicKey::from_secp(*pk)))
+            {
                 sk
             } else {
                 continue;
@@ -760,7 +762,7 @@ impl<'de> serde::Deserialize<'de> for Psbt {
 #[non_exhaustive]
 pub enum KeyRequest {
     /// Request a private key using the associated public key.
-    Pubkey(PublicKey),
+    Pubkey(LegacyPublicKey),
     /// Request a private key using BIP-0032 fingerprint and derivation path.
     Bip32(KeySource),
     /// Request a private key using the associated x-only public key.
@@ -815,7 +817,7 @@ pub type SigningKeysMap = BTreeMap<usize, SigningKeys>;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SigningKeys {
     /// Keys used to sign an ECDSA input.
-    Ecdsa(Vec<PublicKey>),
+    Ecdsa(Vec<LegacyPublicKey>),
     /// Keys used to sign a Taproot input.
     ///
     /// - Key path spend: This is the internal key.
@@ -853,7 +855,7 @@ impl_get_key_for_set!(HashSet);
 macro_rules! impl_get_key_for_pubkey_map {
     ($map:ident) => {
 
-impl GetKey for $map<PublicKey, PrivateKey> {
+impl GetKey for $map<LegacyPublicKey, PrivateKey> {
     type Error = GetKeyError;
 
     fn get_key(
@@ -2354,12 +2356,12 @@ mod tests {
 
     #[cfg(feature = "rand")]
     #[cfg(feature = "std")]
-    fn gen_keys() -> (PrivateKey, PublicKey) {
+    fn gen_keys() -> (PrivateKey, LegacyPublicKey) {
         use secp256k1::rand;
 
         let sk = SecretKey::new(&mut rand::rng());
         let priv_key = PrivateKey::from_secp(sk);
-        let pk = PublicKey::from_private_key(&priv_key);
+        let pk = LegacyPublicKey::from_private_key(&priv_key);
 
         (priv_key, pk)
     }
@@ -2386,7 +2388,7 @@ mod tests {
         let (mut priv_key, mut pk) = gen_keys();
         let xonly = XOnlyPublicKey::from(pk);
 
-        let mut pubkey_map: HashMap<PublicKey, PrivateKey> = HashMap::new();
+        let mut pubkey_map: HashMap<LegacyPublicKey, PrivateKey> = HashMap::new();
 
         if xonly.parity() == secp256k1::Parity::Even {
             priv_key = priv_key.negate();
@@ -2645,7 +2647,7 @@ mod tests {
             script_pubkey: ScriptPubKeyBuf::new_p2tr(internal_key, None),
         });
 
-        let mut key_map: HashMap<PublicKey, PrivateKey> = HashMap::new();
+        let mut key_map: HashMap<LegacyPublicKey, PrivateKey> = HashMap::new();
         key_map.insert(pk, priv_key);
 
         let key_source = (Fingerprint::default(), DerivationPath::default());

@@ -12,7 +12,7 @@ use super::{
     TapScript, WScriptHash, WitnessScript, WitnessScriptSizeError,
 };
 use crate::consensus::Encodable;
-use crate::key::{PublicKey, UntweakedPublicKey, WPubkeyHash};
+use crate::key::{LegacyPublicKey, UntweakedPublicKey, WPubkeyHash};
 use crate::opcodes::all::*;
 use crate::opcodes::{self, Opcode};
 use crate::policy::{DUST_RELAY_TX_FEE, MAX_OP_RETURN_RELAY};
@@ -290,8 +290,8 @@ internal_macros::define_extension_trait! {
         /// This may return `None` even when [`is_p2pk()`](Self::is_p2pk) returns true.
         /// This happens when the public key is invalid (e.g. the point not being on the curve).
         /// In this situation the script is unspendable.
-        fn p2pk_public_key(&self) -> Option<PublicKey> {
-            PublicKey::from_slice(self.p2pk_pubkey_bytes()?).ok()
+        fn p2pk_public_key(&self) -> Option<LegacyPublicKey> {
+            LegacyPublicKey::from_slice(self.p2pk_pubkey_bytes()?).ok()
         }
 
         /// Checks whether a script pubkey is a P2SH output.

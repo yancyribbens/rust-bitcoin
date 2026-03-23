@@ -170,12 +170,18 @@ pub type BlockInterval = BlockHeightInterval;
 #[doc(hidden)]
 pub type CompressedPublicKey = FullPublicKey;
 
+#[deprecated(since = "TBD", note = "use `LegacyPublicKey` instead")]
+#[doc(hidden)]
+pub type PublicKey = LegacyPublicKey;
+
 #[doc(inline)]
 pub use crate::{
     address::{Address, AddressType, KnownHrp},
     bip32::XKeyIdentifier,
     crypto::ecdsa,
-    crypto::key::{self, FullPublicKey, Keypair, PrivateKey, PublicKey, WifKey, XOnlyPublicKey},
+    crypto::key::{
+        self, FullPublicKey, Keypair, LegacyPublicKey, PrivateKey, WifKey, XOnlyPublicKey,
+    },
     crypto::sighash::{self, LegacySighash, SegwitV0Sighash, TapSighash, TapSighashTag},
     network::params::{self, Params},
     network::{Network, NetworkKind, TestnetVersion},
