@@ -1779,6 +1779,12 @@ pub fn bitcoin_primitives::script::WitnessScriptTag::cmp(&self, other: &bitcoin_
 pub fn bitcoin_primitives::script::WitnessScriptTag::eq(&self, other: &bitcoin_primitives::script::WitnessScriptTag) -> bool
 pub fn bitcoin_primitives::script::WitnessScriptTag::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 pub fn bitcoin_primitives::script::WitnessScriptTag::partial_cmp(&self, other: &bitcoin_primitives::script::WitnessScriptTag) -> core::option::Option<core::cmp::Ordering>
+pub fn bitcoin_primitives::serde_as_consensus::deserialize<'d, T, D>(d: D) -> core::result::Result<T, <D as serde::de::Deserializer>::Error> where T: bitcoin_consensus_encoding::encode::Encodable + bitcoin_consensus_encoding::decode::Decodable, D: serde::de::Deserializer<'d>
+pub fn bitcoin_primitives::serde_as_consensus::opt::deserialize<'d, T, D>(d: D) -> core::result::Result<core::option::Option<T>, <D as serde::de::Deserializer>::Error> where T: bitcoin_consensus_encoding::encode::Encodable + bitcoin_consensus_encoding::decode::Decodable, D: serde::de::Deserializer<'d>
+pub fn bitcoin_primitives::serde_as_consensus::opt::serialize<T, S>(t: &core::option::Option<T>, s: S) -> core::result::Result<<S as serde::ser::Serializer>::Ok, <S as serde::ser::Serializer>::Error> where T: bitcoin_consensus_encoding::encode::Encodable + bitcoin_consensus_encoding::decode::Decodable, S: serde::ser::Serializer
+pub fn bitcoin_primitives::serde_as_consensus::serialize<T, S>(value: &T, s: S) -> core::result::Result<<S as serde::ser::Serializer>::Ok, <S as serde::ser::Serializer>::Error> where T: bitcoin_consensus_encoding::encode::Encodable + bitcoin_consensus_encoding::decode::Decodable, S: serde::ser::Serializer
+pub fn bitcoin_primitives::serde_as_consensus::vec::deserialize<'d, T, D>(d: D) -> core::result::Result<alloc::vec::Vec<T>, <D as serde::de::Deserializer>::Error> where T: bitcoin_consensus_encoding::encode::Encodable + bitcoin_consensus_encoding::decode::Decodable, D: serde::de::Deserializer<'d>
+pub fn bitcoin_primitives::serde_as_consensus::vec::serialize<T, S>(v: &[T], s: S) -> core::result::Result<<S as serde::ser::Serializer>::Ok, <S as serde::ser::Serializer>::Error> where T: bitcoin_consensus_encoding::encode::Encodable + bitcoin_consensus_encoding::decode::Decodable, S: serde::ser::Serializer
 pub fn bitcoin_primitives::transaction::OutPoint::arbitrary(u: &mut arbitrary::unstructured::Unstructured<'a>) -> arbitrary::error::Result<Self>
 pub fn bitcoin_primitives::transaction::OutPoint::clone(&self) -> bitcoin_primitives::transaction::OutPoint
 pub fn bitcoin_primitives::transaction::OutPoint::cmp(&self, other: &bitcoin_primitives::transaction::OutPoint) -> core::cmp::Ordering
@@ -1971,6 +1977,9 @@ pub mod bitcoin_primitives
 pub mod bitcoin_primitives::block
 pub mod bitcoin_primitives::merkle_tree
 pub mod bitcoin_primitives::script
+pub mod bitcoin_primitives::serde_as_consensus
+pub mod bitcoin_primitives::serde_as_consensus::opt
+pub mod bitcoin_primitives::serde_as_consensus::vec
 pub mod bitcoin_primitives::transaction
 pub mod bitcoin_primitives::witness
 pub struct bitcoin_primitives::Block<V> where V: bitcoin_primitives::block::Validation
