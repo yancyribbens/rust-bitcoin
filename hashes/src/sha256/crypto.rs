@@ -332,6 +332,47 @@ impl HashEngine {
         Self::software_process_block(state, blocks);
     }
 
+    pub(crate) fn sha256d_64(outputs: &mut [[u8; 32]], inputs: &[[u8; 64]]) {
+        assert_eq!(outputs.len(), inputs.len());
+        let mut i = 0;
+        let count = inputs.len();
+
+        // TODO: 8-way AVX2
+        // TODO: 4-way SSE4.1
+        // TODO: 2-way x86 SHA-NI
+
+        // 2-way ARM SHA2
+        #[cfg(all(feature = "std", target_arch = "aarch64"))]
+        {
+            if std::arch::is_aarch64_feature_detected!("sha2") {
+                while count - i >= 2 {
+                    let out = <&mut [[u8; 32]; 2]>::try_from(&mut outputs[i..i + 2]).unwrap();
+                    let inp = <&[[u8; 64]; 2]>::try_from(&inputs[i..i + 2]).unwrap();
+                    unsafe { Self::sha256d_64_arm_2way(out, inp) };
+                    i += 2;
+                }
+            }
+        }
+
+        #[cfg(all(feature = "cpufeatures", target_arch = "aarch64"))]
+        {
+            if cpuid_sha256_aarch64::get() {
+                while count - i >= 2 {
+                    let out = <&mut [[u8; 32]; 2]>::try_from(&mut outputs[i..i + 2]).unwrap();
+                    let inp = <&[[u8; 64]; 2]>::try_from(&inputs[i..i + 2]).unwrap();
+                    unsafe { Self::sha256d_64_arm_2way(out, inp) };
+                    i += 2;
+                }
+            }
+        }
+
+        // fallback
+        while i < count {
+            outputs[i] = sha256d::hash(&inputs[i]).to_byte_array();
+            i += 1;
+        }
+    }
+
     #[cfg(all(
         any(target_arch = "x86", target_arch = "x86_64"),
         any(feature = "std", feature = "cpufeatures")

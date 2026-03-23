@@ -11,6 +11,11 @@ crate::internal_macros::general_hash_type! {
 }
 
 impl Hash {
+    /// computes double-sha256 of multiple 64-byte blocks in parallel.
+    pub fn hash_64_many(outputs: &mut [[u8; 32]], inputs: &[[u8; 64]]) {
+        sha256::HashEngine::sha256d_64(outputs, inputs);
+    }
+
     /// Finalize a hash engine to produce a hash.
     pub fn from_engine(e: HashEngine) -> Self {
         let sha2 = sha256::Hash::from_engine(e.0);
