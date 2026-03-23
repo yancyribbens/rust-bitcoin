@@ -796,7 +796,7 @@ impl CompressedPublicKey {
 
         reader.read_exact(&mut bytes)?;
         #[allow(unused_variables)] // e when std not enabled
-        Self::from_slice(&bytes).map_err(|e| {
+        Self::from_bytes(bytes).map_err(|e| {
             // Need a static string for no-std io
             #[cfg(feature = "std")]
             let reason = e;
@@ -819,8 +819,19 @@ impl CompressedPublicKey {
     /// # Errors
     ///
     /// See [`secp256k1::PublicKey::from_slice`].
+    #[deprecated(since = "TBD", note = "use `from_bytes` instead; if you only have a slice, use `<&[u8; 33]>::try_from` first")]
     pub fn from_slice(data: &[u8]) -> Result<Self, secp256k1::Error> {
-        secp256k1::PublicKey::from_slice(data).map(Self::from_secp)
+        let bytes_arr = data.try_into().map_err(|_| secp256k1::Error::InvalidPublicKey)?;
+        Self::from_bytes(bytes_arr)
+    }
+
+    /// Deserializes a public key from compressed pubkey bytes.
+    ///
+    /// # Errors
+    ///
+    /// See [`secp256k1::PublicKey::from_byte_array_compressed`].
+    pub fn from_bytes(data: [u8; 33]) -> Result<Self, secp256k1::Error> {
+        secp256k1::PublicKey::from_byte_array_compressed(data).map(Self::from_secp)
     }
 
     /// Computes the public key as supposed to be used with this secret.
@@ -862,7 +873,7 @@ impl FromStr for CompressedPublicKey {
     type Err = ParseCompressedPublicKeyError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_slice(&hex::decode_to_array::<33>(s)?).map_err(Into::into)
+        Self::from_bytes(hex::decode_to_array::<33>(s)?).map_err(Into::into)
     }
 }
 
@@ -1254,7 +1265,8 @@ impl<'de> serde::Deserialize<'de> for CompressedPublicKey {
                 where
                     E: serde::de::Error,
                 {
-                    CompressedPublicKey::from_slice(v).map_err(E::custom)
+                    let arr = v.try_into().map_err(E::custom)?;
+                    CompressedPublicKey::from_bytes(arr).map_err(E::custom)
                 }
             }
 
