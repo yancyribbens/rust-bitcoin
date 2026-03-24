@@ -289,17 +289,11 @@ impl core::convert::From<&bitcoin_primitives::transaction::Transaction> for bitc
 impl core::convert::From<&bitcoin_primitives::transaction::Transaction> for bitcoin_primitives::Wtxid
 impl core::convert::From<alloc::vec::Vec<&[u8]>> for bitcoin_primitives::witness::Witness
 impl core::convert::From<alloc::vec::Vec<alloc::vec::Vec<u8>>> for bitcoin_primitives::witness::Witness
-impl core::convert::From<bitcoin_consensus_encoding::decode::decoders::ByteVecDecoderError> for bitcoin_primitives::script::ScriptBufDecoderError
-impl core::convert::From<bitcoin_consensus_encoding::decode::decoders::VecDecoderError<bitcoin_primitives::transaction::TxInDecoderError>> for bitcoin_primitives::transaction::TransactionDecoderError
-impl core::convert::From<bitcoin_consensus_encoding::decode::decoders::VecDecoderError<bitcoin_primitives::transaction::TxOutDecoderError>> for bitcoin_primitives::transaction::TransactionDecoderError
 impl core::convert::From<bitcoin_primitives::block::Block> for bitcoin_primitives::BlockHash
 impl core::convert::From<bitcoin_primitives::block::Header> for bitcoin_primitives::BlockHash
 impl core::convert::From<bitcoin_primitives::transaction::Transaction> for bitcoin_primitives::Txid
 impl core::convert::From<bitcoin_primitives::transaction::Transaction> for bitcoin_primitives::Wtxid
 impl core::convert::From<bitcoin_primitives::transaction::Version> for u32
-impl core::convert::From<bitcoin_primitives::transaction::VersionDecoderError> for bitcoin_primitives::transaction::TransactionDecoderError
-impl core::convert::From<bitcoin_primitives::witness::WitnessDecoderError> for bitcoin_primitives::transaction::TransactionDecoderError
-impl core::convert::From<bitcoin_units::locktime::absolute::error::LockTimeDecoderError> for bitcoin_primitives::transaction::TransactionDecoderError
 impl core::convert::From<core::convert::Infallible> for bitcoin_primitives::block::BlockDecoderError
 impl core::convert::From<core::convert::Infallible> for bitcoin_primitives::block::BlockHashDecoderError
 impl core::convert::From<core::convert::Infallible> for bitcoin_primitives::block::HeaderDecoderError
@@ -1712,7 +1706,6 @@ pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::read_limit(&self) -> usi
 pub fn bitcoin_primitives::script::ScriptBufDecoderError::clone(&self) -> bitcoin_primitives::script::ScriptBufDecoderError
 pub fn bitcoin_primitives::script::ScriptBufDecoderError::eq(&self, other: &bitcoin_primitives::script::ScriptBufDecoderError) -> bool
 pub fn bitcoin_primitives::script::ScriptBufDecoderError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-pub fn bitcoin_primitives::script::ScriptBufDecoderError::from(e: bitcoin_consensus_encoding::decode::decoders::ByteVecDecoderError) -> Self
 pub fn bitcoin_primitives::script::ScriptBufDecoderError::from(never: core::convert::Infallible) -> Self
 pub fn bitcoin_primitives::script::ScriptBufDecoderError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 pub fn bitcoin_primitives::script::ScriptEncoder<'e>::advance(&mut self) -> bool
@@ -1839,11 +1832,6 @@ pub fn bitcoin_primitives::transaction::TransactionDecoder::read_limit(&self) ->
 pub fn bitcoin_primitives::transaction::TransactionDecoderError::clone(&self) -> bitcoin_primitives::transaction::TransactionDecoderError
 pub fn bitcoin_primitives::transaction::TransactionDecoderError::eq(&self, other: &bitcoin_primitives::transaction::TransactionDecoderError) -> bool
 pub fn bitcoin_primitives::transaction::TransactionDecoderError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-pub fn bitcoin_primitives::transaction::TransactionDecoderError::from(e: bitcoin_consensus_encoding::decode::decoders::VecDecoderError<bitcoin_primitives::transaction::TxInDecoderError>) -> Self
-pub fn bitcoin_primitives::transaction::TransactionDecoderError::from(e: bitcoin_consensus_encoding::decode::decoders::VecDecoderError<bitcoin_primitives::transaction::TxOutDecoderError>) -> Self
-pub fn bitcoin_primitives::transaction::TransactionDecoderError::from(e: bitcoin_primitives::transaction::VersionDecoderError) -> Self
-pub fn bitcoin_primitives::transaction::TransactionDecoderError::from(e: bitcoin_primitives::witness::WitnessDecoderError) -> Self
-pub fn bitcoin_primitives::transaction::TransactionDecoderError::from(e: bitcoin_units::locktime::absolute::error::LockTimeDecoderError) -> Self
 pub fn bitcoin_primitives::transaction::TransactionDecoderError::from(never: core::convert::Infallible) -> Self
 pub fn bitcoin_primitives::transaction::TransactionDecoderError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::advance(&mut self) -> bool
