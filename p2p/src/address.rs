@@ -537,6 +537,31 @@ impl<'e> encoding::Encoder for AddrV2Encoder<'e> {
     }
 }
 
+impl<'e> encoding::ExactSizeEncoder for AddrV2Encoder<'e> {
+    fn len(&self) -> usize {
+        let mut len = 0;
+        if let Some(network) = &self.network {
+            len += network.len();
+        }
+        if let Some(cs) = &self.size {
+            len += cs.len();
+        }
+        if let Some(b) = &self.bytes4 {
+            len += b.len();
+        }
+        if let Some(b) = &self.bytes16 {
+            len += b.len();
+        }
+        if let Some(b) = &self.bytes32 {
+            len += b.len();
+        }
+        if let Some(b) = &self.nbytes {
+            len += b.len();
+        }
+        len
+    }
+}
+
 impl encoding::Encodable for AddrV2 {
     type Encoder<'e> = AddrV2Encoder<'e>;
 
@@ -1187,6 +1212,7 @@ mod test {
     use std::net::IpAddr;
 
     use bitcoin::consensus::encode::{deserialize, serialize};
+    use encoding::{Encodable as _, Encoder as _, ExactSizeEncoder as _};
     use hex_unstable::hex;
 
     use super::*;
@@ -1661,4 +1687,72 @@ mod test {
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), AddrV2ToIpv6AddrError::Unknown);
     }
+
+    macro_rules! test_addrv2_encoder {
+        (
+            $test_name: ident,
+            $addr: expr,
+            $expected_bytes: expr$(,)?
+        ) => {
+            #[test]
+            fn $test_name() {
+                let addr = $addr;
+                let expected_bytes = $expected_bytes;
+
+                let mut encoder = addr.encoder();
+
+                // Initial encoder len should match the expected_bytes
+                let total_len = expected_bytes.len();
+                assert_eq!(encoder.len(), total_len);
+
+                // After each chunk, len() should reduce by the length of the chunk.
+                let mut encoded = vec![];
+                let mut bytes_consumed = 0;
+                loop {
+                    let chunk = encoder.current_chunk();
+                    encoded.extend_from_slice(chunk);
+                    let chunk_len = chunk.len();
+                    assert_eq!(encoder.len(), total_len - bytes_consumed);
+
+                    bytes_consumed += chunk_len;
+                    if !encoder.advance() {
+                        break;
+                    }
+                }
+                assert_eq!(encoder.len(), 0);
+                assert_eq!(encoded, expected_bytes);
+            }
+        };
+    }
+
+    test_addrv2_encoder!(
+        addrv2_encoder_ipv4,
+        AddrV2::Ipv4(Ipv4Addr::new(1, 2, 3, 4)),
+        vec![0x01, 0x04, 1, 2, 3, 4]
+    );
+    test_addrv2_encoder!(
+        addrv2_encoder_ipv6,
+        AddrV2::Ipv6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1)),
+        vec![0x02, 0x10, 0x20, 0x01, 0x0d, 0xb8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    );
+    test_addrv2_encoder!(addrv2_encoder_torv3, AddrV2::TorV3([0xAB; 32]), {
+        let mut v = vec![0x04, 0x20];
+        v.extend_from_slice(&[0xAB; 32]);
+        v
+    },);
+    test_addrv2_encoder!(addrv2_encoder_i2p, AddrV2::I2p([0xCD; 32]), {
+        let mut v = vec![0x05, 0x20];
+        v.extend_from_slice(&[0xCD; 32]);
+        v
+    },);
+    test_addrv2_encoder!(
+        addrv2_encoder_cjdns,
+        AddrV2::Cjdns(Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 1)),
+        vec![0x06, 0x10, 0xfc, 0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    );
+    test_addrv2_encoder!(
+        addrv2_encoder_unknown,
+        AddrV2::Unknown(0xFF, vec![0xDE, 0xAD]),
+        vec![0xFF, 0x02, 0xDE, 0xAD]
+    );
 }
