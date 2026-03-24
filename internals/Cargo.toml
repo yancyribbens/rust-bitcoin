@@ -18,13 +18,13 @@ default = []
 std = ["alloc", "hex?/std"]
 alloc = ["hex?/alloc"]
 
-test-serde = ["serde", "serde_json", "bincode"]
+test-serde = ["serde", "dep:serde_json", "dep:bincode"]
 
 [dependencies]
 hex = { package = "hex-conservative", version = "0.3.2", default-features = false, optional = true }
 serde = { version = "1.0.195", default-features = false, optional = true }
 
-# Don't enable these directly, use `test-serde` feature instead.
+# Behind the test-serde feature.
 serde_json = { version = "1.0.68", optional = true }
 bincode = { version = "1.3.1", optional = true }
 
