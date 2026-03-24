@@ -24,15 +24,10 @@ pub struct Foo {
     /// `FeeRate` can use kilo weight units or virtual bytes, both floor and ceil.
     #[serde(with = "fee_rate::serde::as_sat_per_kwu_floor")]
     fee_rate: FeeRate,
-
 }
 
 fn main() {
-    let f = Foo {
-        header: dummy_header(),
-        amount: Amount::ONE_BTC,
-        fee_rate: FeeRate::DUST,
-    };
+    let f = Foo { header: dummy_header(), amount: Amount::ONE_BTC, fee_rate: FeeRate::DUST };
 
     let s = serde_json::to_string(&f).unwrap();
     println!("{s}");

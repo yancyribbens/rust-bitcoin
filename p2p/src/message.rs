@@ -668,9 +668,7 @@ pub struct Ping(u64);
 
 impl Ping {
     /// Constructs a new [`Ping`] message from nonce.
-    pub fn new(nonce: u64) -> Self {
-        Self(nonce)
-    }
+    pub fn new(nonce: u64) -> Self { Self(nonce) }
 }
 
 encoding::encoder_newtype! {
