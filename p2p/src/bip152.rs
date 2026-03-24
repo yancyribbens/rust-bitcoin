@@ -286,7 +286,7 @@ impl Decodable for ShortId {
     }
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// Encoder type for a [`ShortId`].
     pub struct ShortIdEncoder<'e>(ArrayEncoder<6>);
 }

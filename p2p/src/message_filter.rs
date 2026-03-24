@@ -64,7 +64,7 @@ macro_rules! impl_hashencode {
 impl_hashencode!(FilterHash);
 impl_hashencode!(FilterHeader);
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// Encoder type for [`FilterHash`].
     pub struct FilterHashEncoder<'e>(ArrayEncoder<32>);
 }
@@ -77,7 +77,7 @@ impl encoding::Encodable for FilterHash {
     }
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// Encoder type for [`FilterHeader`].
     pub struct FilterHeaderEncoder<'e>(ArrayEncoder<32>);
 }
@@ -211,7 +211,7 @@ pub struct GetCFilters {
     pub stop_hash: BlockHash,
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// Encoder type for the [`GetCFilters`] message.
     pub struct GetCFiltersEncoder<'e>(Encoder3<ArrayEncoder<1>, BlockHeightEncoder<'e>, BlockHashEncoder<'e>>);
 }
@@ -296,7 +296,7 @@ pub struct CFilter {
     pub filter: Vec<u8>,
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// Encoder type for a [`CFilter`] message.
     pub struct CFilterEncoder<'e>(
         Encoder3<
@@ -393,7 +393,7 @@ pub struct GetCFHeaders {
     pub stop_hash: BlockHash,
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// Encoder type for the [`GetCFHeaders`] message.
     pub struct GetCFHeadersEncoder<'e>(Encoder3<ArrayEncoder<1>, BlockHeightEncoder<'e>, BlockHashEncoder<'e>>);
 }
@@ -581,7 +581,7 @@ pub struct GetCFCheckpt {
     pub stop_hash: BlockHash,
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// Encoder type for the [`GetCFCheckpt`] message.
     pub struct GetCFCheckptEncoder<'e>(Encoder2<ArrayEncoder<1>, BlockHashEncoder<'e>>);
 }

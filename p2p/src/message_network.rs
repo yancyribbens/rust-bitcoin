@@ -88,7 +88,7 @@ impl VersionMessage {
     }
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder for the [`VersionMessage`] type.
     pub struct VersionMessageEncoder<'e>(
         encoding::Encoder2<
@@ -252,7 +252,7 @@ pub struct UserAgent {
     user_agent: String,
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder for a [`UserAgent`] string.
     pub struct UserAgentEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
@@ -498,7 +498,7 @@ pub enum RejectReason {
     Checkpoint = 0x43,
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder type for a [`RejectReason`].
     pub struct RejectReasonEncoder<'e>(ArrayEncoder<1>);
 }
@@ -618,7 +618,7 @@ pub struct Reject {
     pub hash: sha256d::Hash,
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder type for a [`Reject`] message.
     pub struct RejectEncoder<'e>(
         Encoder4<
@@ -751,7 +751,7 @@ impl Alert {
     pub fn is_final_alert(&self) -> bool { self.0.eq(&Self::FINAL_ALERT) }
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder type for an [`Alert`] message.
     pub struct AlertEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
