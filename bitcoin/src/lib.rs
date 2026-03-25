@@ -62,9 +62,9 @@ extern crate std;
 #[cfg(feature = "arbitrary")]
 pub extern crate arbitrary;
 
+pub extern crate base58;
 #[cfg(feature = "base64")]
 pub extern crate base64;
-pub extern crate base58;
 pub extern crate bech32;
 pub extern crate encoding;
 pub extern crate hashes;
