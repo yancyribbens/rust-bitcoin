@@ -1089,6 +1089,7 @@ mod sealed {
     pub trait Sealed {}
     impl Sealed for super::FullPublicKey {}
     impl Sealed for super::LegacyPublicKey {}
+    impl Sealed for super::PrivateKey {}
 }
 
 impl PrivateKey {
@@ -1168,25 +1169,6 @@ impl PrivateKey {
 
     /// ECDSA signs a [`Message`] with this private key.
     ///
-    /// This produces an ECDSA signature with a recovery ID for pubkey recovery.
-    /// See [`RecoverableSignature::sign_ecdsa_recoverable`] for details.
-    ///
-    /// [`Message`]: secp256k1::Message
-    /// [`RecoverableSignature::sign_ecdsa_recoverable`]: secp256k1::ecdsa::RecoverableSignature::sign_ecdsa_recoverable
-    #[inline]
-    #[cfg(feature = "secp-recovery")]
-    pub fn raw_ecdsa_sign_recoverable(
-        &self,
-        msg: impl Into<secp256k1::Message>,
-    ) -> MessageSignature {
-        MessageSignature::new(
-            secp256k1::ecdsa::RecoverableSignature::sign_ecdsa_recoverable(msg, self.as_inner()),
-            self.compressed(),
-        )
-    }
-
-    /// ECDSA signs a [`Message`] with this private key.
-    ///
     /// This functions grinds the nonce to produce a signature less than 71 bytes and compatible
     /// with the low r signature implementation of bitcoin core.
     ///
@@ -1199,6 +1181,30 @@ impl PrivateKey {
         msg: impl Into<secp256k1::Message>,
     ) -> secp256k1::ecdsa::Signature {
         secp256k1::ecdsa::sign_low_r(msg, self.as_inner())
+    }
+}
+
+#[cfg(feature = "secp-recovery")]
+define_extension_trait! {
+    /// Extension functionality for the [`PrivateKey`] type.
+    pub trait PrivateKeyExt impl for PrivateKey {
+        /// ECDSA signs a [`Message`] with this private key.
+        ///
+        /// This produces an ECDSA signature with a recovery ID for pubkey recovery.
+        /// See [`RecoverableSignature::sign_ecdsa_recoverable`] for details.
+        ///
+        /// [`Message`]: secp256k1::Message
+        /// [`RecoverableSignature::sign_ecdsa_recoverable`]: secp256k1::ecdsa::RecoverableSignature::sign_ecdsa_recoverable
+        #[inline]
+        fn raw_ecdsa_sign_recoverable(
+            &self,
+            msg: impl Into<secp256k1::Message>,
+        ) -> MessageSignature {
+            MessageSignature::new(
+                secp256k1::ecdsa::RecoverableSignature::sign_ecdsa_recoverable(msg, self.as_inner()),
+                self.compressed(),
+            )
+        }
     }
 }
 

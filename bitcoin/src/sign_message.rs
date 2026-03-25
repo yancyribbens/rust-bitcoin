@@ -9,6 +9,8 @@ use hashes::{sha256d, HashEngine};
 
 use crate::consensus::encode::WriteExt;
 #[cfg(feature = "secp-recovery")]
+use crate::key::PrivateKeyExt as _;
+#[cfg(feature = "secp-recovery")]
 use crate::PrivateKey;
 
 #[rustfmt::skip]
