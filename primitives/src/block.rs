@@ -29,9 +29,9 @@ use crate::pow::{CompactTargetDecoder, CompactTargetDecoderError};
 #[cfg(feature = "alloc")]
 use crate::prelude::Vec;
 use crate::time::{BlockTimeDecoder, BlockTimeDecoderError};
-#[cfg(feature = "alloc")]
-use crate::Transaction;
 use crate::{BlockTime, CompactTarget};
+#[cfg(feature = "alloc")]
+use crate::{Transaction, Wtxid};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
@@ -504,7 +504,7 @@ pub fn compute_witness_root(transactions: &[Transaction]) -> Option<WitnessMerkl
     let hashes = transactions.iter().enumerate().map(|(i, t)| {
         if i == 0 {
             // Replace the first hash with zeroes.
-            crate::Wtxid::COINBASE
+            Wtxid::COINBASE
         } else {
             t.compute_wtxid()
         }
