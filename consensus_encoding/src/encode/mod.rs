@@ -83,7 +83,7 @@ macro_rules! encoder_newtype {
 
         #[allow(clippy::type_complexity)]
         impl<$lt> $name<$lt> {
-            /// Construct a new instance of the newtype encoder.
+            /// Constructs a new instance of the newtype encoder.
             pub(crate) const fn new(encoder: $encoder) -> $name<$lt> {
                 $name(encoder, core::marker::PhantomData)
             }

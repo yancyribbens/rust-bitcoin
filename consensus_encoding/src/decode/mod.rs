@@ -56,7 +56,7 @@ pub trait Decoder: Sized {
     /// The error type that this decoder can produce.
     type Error;
 
-    /// Push bytes into the decoder, consuming as much as possible.
+    /// Pushes bytes into the decoder, consuming as much as possible.
     ///
     /// The slice reference will be advanced to point to the unconsumed portion.
     /// Returns `Ok(true)` if more bytes are needed to complete decoding,
@@ -77,7 +77,7 @@ pub trait Decoder: Sized {
     #[track_caller]
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error>;
 
-    /// Complete the decoding process and return the final result.
+    /// Completes the decoding process and return the final result.
     ///
     /// This consumes the decoder and should be called when no more input
     /// data is available.
