@@ -2194,9 +2194,8 @@ mod tests {
     #[cfg(feature = "alloc")]
     #[cfg(feature = "hex")]
     fn encode_block() {
-        use crate::{
-            Block, BlockHash, BlockHeader, BlockTime, BlockVersion, CompactTarget, TxMerkleNode,
-        };
+        use crate::merkle_tree::TxMerkleNode;
+        use crate::{Block, BlockHash, BlockHeader, BlockTime, BlockVersion, CompactTarget};
 
         let seconds: u32 = 1_653_195_600; // Arbitrary timestamp: May 22nd, 5am UTC.
 

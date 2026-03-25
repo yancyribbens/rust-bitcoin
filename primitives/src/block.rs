@@ -22,14 +22,16 @@ use internals::write_err;
 
 #[cfg(feature = "hex")]
 use crate::hex_codec::{HexPrimitive, ParsePrimitiveError};
-use crate::merkle_tree::{TxMerkleNodeDecoder, TxMerkleNodeDecoderError};
+#[cfg(feature = "alloc")]
+use crate::merkle_tree::WitnessMerkleNode;
+use crate::merkle_tree::{TxMerkleNode, TxMerkleNodeDecoder, TxMerkleNodeDecoderError};
 use crate::pow::{CompactTargetDecoder, CompactTargetDecoderError};
 #[cfg(feature = "alloc")]
 use crate::prelude::Vec;
 use crate::time::{BlockTimeDecoder, BlockTimeDecoderError};
-use crate::{BlockTime, CompactTarget, TxMerkleNode};
 #[cfg(feature = "alloc")]
-use crate::{Transaction, WitnessMerkleNode};
+use crate::Transaction;
+use crate::{BlockTime, CompactTarget};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
