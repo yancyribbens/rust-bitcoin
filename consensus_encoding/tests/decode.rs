@@ -133,49 +133,6 @@ fn decode_decoder2_read_limit_with_exhausted() {
 }
 
 #[test]
-fn decode_compact_size_read_limit_transitions() {
-    // Test read_limit behavior during compact size decoding.
-    let mut decoder = CompactSizeDecoder::default();
-
-    assert_eq!(decoder.read_limit(), 1);
-    let mut data = &[0xFD][..];
-    let needs_more = decoder.push_bytes(&mut data).unwrap();
-    assert!(needs_more, "should need more data after seeing 0xFD");
-    assert_eq!(data.len(), 0, "all data should be consumed");
-
-    assert_eq!(decoder.read_limit(), 2);
-    let mut data = &[0x00][..];
-    let needs_more = decoder.push_bytes(&mut data).unwrap();
-    assert!(needs_more, "should still need one more byte");
-    assert_eq!(data.len(), 0, "all data should be consumed");
-    assert_eq!(decoder.read_limit(), 1);
-
-    let mut data = &[0x01][..];
-    let needs_more = decoder.push_bytes(&mut data).unwrap();
-    assert!(!needs_more, "should not need more data");
-    assert_eq!(data.len(), 0, "all data should be consumed");
-    assert_eq!(decoder.read_limit(), 0);
-
-    let result = decoder.end().unwrap();
-    assert_eq!(result, 256);
-}
-
-#[test]
-fn decode_compact_size_single_byte_read_limit() {
-    // Test read_limit for single-byte compact size.
-    let mut decoder = CompactSizeDecoder::default();
-
-    assert_eq!(decoder.read_limit(), 1);
-    let mut data = &[0x42][..];
-    let needs_more = decoder.push_bytes(&mut data).unwrap();
-    assert!(!needs_more, "single-byte value should be complete");
-    assert_eq!(data.len(), 0, "all data should be consumed");
-    assert_eq!(decoder.read_limit(), 0);
-    let result = decoder.end().unwrap();
-    assert_eq!(result, 66);
-}
-
-#[test]
 #[cfg(feature = "alloc")]
 fn decode_byte_vec_decoder_empty() {
     // Test decoding empty byte vector, with length prefix of 0.
@@ -484,42 +441,6 @@ check_decode_one_byte_at_a_time! {
     decode_compact_size_0x100, 0x100, [0xFD, 0x00, 0x01];
     decode_compact_size_0xFFF, 0x0FFF, [0xFD, 0xFF, 0x0F];
     decode_compact_size_0x0F0F_0F0F, 0x0F0F_0F0F, [0xFE, 0xF, 0xF, 0xF, 0xF];
-}
-
-#[test]
-#[cfg(target_pointer_width = "64")]
-#[allow(non_snake_case)]
-fn decode_compact_size_0xF0F0_F0F0_F0E0() {
-    let mut decoder = CompactSizeDecoder::new_with_limit(0xF0F0_F0F0_F0EF);
-    let array = [0xFF, 0xE0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0, 0];
-
-    for (i, _) in array.iter().enumerate() {
-        if i < array.len() - 1 {
-            let mut p = &array[i..=i];
-            assert!(decoder.push_bytes(&mut p).unwrap());
-        } else {
-            // last byte: `push_bytes` should return false since no more bytes required.
-            let mut p = &array[i..];
-            assert!(!decoder.push_bytes(&mut p).unwrap());
-        }
-    }
-
-    let got = decoder.end().unwrap();
-    assert_eq!(got, 0xF0F0_F0F0_F0E0);
-}
-
-#[test]
-#[cfg(feature = "alloc")]
-fn compact_size_zero() {
-    // Zero (eg for an empty vector) with a couple of arbitrary extra bytes.
-    let encoded = vec![0x00, 0xFF, 0xFF];
-
-    let mut slice = encoded.as_slice();
-    let mut decoder = CompactSizeDecoder::new();
-    assert!(!decoder.push_bytes(&mut slice).unwrap());
-
-    let got = decoder.end().unwrap();
-    assert_eq!(got, 0);
 }
 
 #[cfg(feature = "alloc")]

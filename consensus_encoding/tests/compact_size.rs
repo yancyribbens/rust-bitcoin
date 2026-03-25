@@ -4,9 +4,10 @@
 
 #[cfg(feature = "alloc")]
 use bitcoin_consensus_encoding::{
-    decode_from_slice, encode_to_vec, CompactSizeDecoder, CompactSizeDecoderError,
-    CompactSizeEncoder, CompactSizeU64Decoder, Decodable, Decoder, Encodable,
+    decode_from_slice, encode_to_vec, CompactSizeDecoderError, CompactSizeEncoder,
+    CompactSizeU64Decoder, Decodable, Encodable,
 };
+use bitcoin_consensus_encoding::{CompactSizeDecoder, Decoder};
 
 /// A `usize` value encoded and decoded as a compact size length prefix.
 #[cfg(feature = "alloc")]
@@ -219,4 +220,82 @@ fn non_minimal_rejected_u64_using_ff_prefix_for_small_value() {
 #[cfg(feature = "alloc")]
 fn non_minimal_rejected_usize_using_fd_prefix_for_small_value() {
     assert!(decode_from_slice::<CompactSizeUsize>(&[0xFD, 0x10, 0x00]).is_err());
+}
+
+#[test]
+fn decoder_compact_size_read_limit_transitions() {
+    // Test read_limit behavior during compact size decoding.
+    let mut decoder = CompactSizeDecoder::default();
+
+    assert_eq!(decoder.read_limit(), 1);
+    let mut data = &[0xFD][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more, "should need more data after seeing 0xFD");
+    assert_eq!(data.len(), 0, "all data should be consumed");
+
+    assert_eq!(decoder.read_limit(), 2);
+    let mut data = &[0x00][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more, "should still need one more byte");
+    assert_eq!(data.len(), 0, "all data should be consumed");
+    assert_eq!(decoder.read_limit(), 1);
+
+    let mut data = &[0x01][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(!needs_more, "should not need more data");
+    assert_eq!(data.len(), 0, "all data should be consumed");
+    assert_eq!(decoder.read_limit(), 0);
+
+    let result = decoder.end().unwrap();
+    assert_eq!(result, 256);
+}
+
+#[test]
+fn decoder_compact_size_single_byte_read_limit() {
+    // Test read_limit for single-byte compact size.
+    let mut decoder = CompactSizeDecoder::default();
+
+    assert_eq!(decoder.read_limit(), 1);
+    let mut data = &[0x42][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(!needs_more, "single-byte value should be complete");
+    assert_eq!(data.len(), 0, "all data should be consumed");
+    assert_eq!(decoder.read_limit(), 0);
+    let result = decoder.end().unwrap();
+    assert_eq!(result, 66);
+}
+
+#[test]
+#[cfg(target_pointer_width = "64")]
+#[allow(non_snake_case)]
+fn decoder_compact_size_0xF0F0_F0F0_F0E0() {
+    let mut decoder = CompactSizeDecoder::new_with_limit(0xF0F0_F0F0_F0EF);
+    let array = [0xFF, 0xE0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0, 0];
+
+    for (i, _) in array.iter().enumerate() {
+        if i < array.len() - 1 {
+            let mut p = &array[i..=i];
+            assert!(decoder.push_bytes(&mut p).unwrap());
+        } else {
+            // last byte: `push_bytes` should return false since no more bytes required.
+            let mut p = &array[i..];
+            assert!(!decoder.push_bytes(&mut p).unwrap());
+        }
+    }
+
+    let got = decoder.end().unwrap();
+    assert_eq!(got, 0xF0F0_F0F0_F0E0);
+}
+
+#[test]
+fn decoder_compact_size_zero() {
+    // Zero (eg for an empty vector) with a couple of arbitrary extra bytes.
+    let encoded = [0x00, 0xFF, 0xFF];
+
+    let mut slice = &encoded[..];
+    let mut decoder = CompactSizeDecoder::new();
+    assert!(!decoder.push_bytes(&mut slice).unwrap());
+
+    let got = decoder.end().unwrap();
+    assert_eq!(got, 0);
 }
