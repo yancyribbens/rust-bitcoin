@@ -15,7 +15,9 @@
 
 use arbitrary::Arbitrary;
 use bitcoin_primitives::block::{Checked, Unchecked};
-use bitcoin_primitives::script::{self, ScriptHash, WScriptHash};
+use bitcoin_primitives::script::{
+    self, ScriptHash, ScriptPubKeyBufDecoder, ScriptSigBufDecoder, WScriptHash,
+};
 use bitcoin_primitives::{
     absolute, block, merkle_tree, pow, relative, transaction, witness, OutPoint, RedeemScript,
     RedeemScriptBuf, ScriptPubKey, ScriptPubKeyBuf, ScriptSig, ScriptSigBuf, Sequence, TapScript,
@@ -195,6 +197,24 @@ struct Default {
     e: Witness,
 }
 
+/// A struct that includes all public decoder types.
+#[derive(Default)] // All decoders implement `Default`.
+struct Decoders {
+    a: block::BlockDecoder,
+    b: block::BlockHashDecoder,
+    c: block::HeaderDecoder,
+    d: block::VersionDecoder,
+    e: merkle_tree::TxMerkleNodeDecoder,
+    f: ScriptPubKeyBufDecoder,
+    g: ScriptSigBufDecoder,
+    h: transaction::TransactionDecoder,
+    i: transaction::TxInDecoder,
+    j: transaction::TxOutDecoder,
+    k: transaction::OutPointDecoder,
+    l: transaction::VersionDecoder,
+    m: witness::WitnessDecoder,
+}
+
 /// A struct that includes all public error types.
 // These derives are the policy of `rust-bitcoin` not Rust API guidelines.
 #[derive(Debug, Clone, PartialEq, Eq)] // All public types implement Debug (C-DEBUG).
@@ -368,6 +388,26 @@ fn regression_default() {
         e: Witness::new(),
     };
     assert_eq!(got, want);
+}
+
+#[test]
+fn decoders_implement_default() { let _ = Decoders::default(); }
+
+#[test]
+fn decoders_implement_new() {
+    let _ = block::BlockDecoder::new();
+    let _ = block::BlockHashDecoder::new();
+    let _ = block::HeaderDecoder::new();
+    let _ = block::VersionDecoder::new();
+    let _ = merkle_tree::TxMerkleNodeDecoder::new();
+    let _ = ScriptPubKeyBufDecoder::new();
+    let _ = ScriptSigBufDecoder::new();
+    let _ = transaction::TransactionDecoder::new();
+    let _ = transaction::TxInDecoder::new();
+    let _ = transaction::TxOutDecoder::new();
+    let _ = transaction::OutPointDecoder::new();
+    let _ = transaction::VersionDecoder::new();
+    let _ = witness::WitnessDecoder::new();
 }
 
 #[test]

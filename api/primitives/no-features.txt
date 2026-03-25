@@ -28,6 +28,7 @@ impl bitcoin_primitives::WitnessMerkleNode
 impl bitcoin_primitives::Wtxid
 impl bitcoin_primitives::block::BlockHashDecoder
 impl bitcoin_primitives::block::Header
+impl bitcoin_primitives::block::HeaderDecoder
 impl bitcoin_primitives::block::Version
 impl bitcoin_primitives::block::VersionDecoder
 impl bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
@@ -145,6 +146,7 @@ impl core::convert::From<core::convert::Infallible> for bitcoin_primitives::bloc
 impl core::convert::From<core::convert::Infallible> for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoderError
 impl core::convert::From<core::convert::Infallible> for bitcoin_primitives::transaction::VersionDecoderError
 impl core::default::Default for bitcoin_primitives::block::BlockHashDecoder
+impl core::default::Default for bitcoin_primitives::block::HeaderDecoder
 impl core::default::Default for bitcoin_primitives::block::Version
 impl core::default::Default for bitcoin_primitives::block::VersionDecoder
 impl core::default::Default for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
@@ -494,6 +496,7 @@ pub const fn bitcoin_primitives::Wtxid::as_byte_array(&self) -> &[u8; 32]
 pub const fn bitcoin_primitives::Wtxid::from_byte_array(bytes: [u8; 32]) -> Self
 pub const fn bitcoin_primitives::Wtxid::to_byte_array(self) -> [u8; 32]
 pub const fn bitcoin_primitives::block::BlockHashDecoder::new() -> Self
+pub const fn bitcoin_primitives::block::HeaderDecoder::new() -> Self
 pub const fn bitcoin_primitives::block::Version::from_consensus(v: i32) -> Self
 pub const fn bitcoin_primitives::block::Version::to_consensus(self) -> i32
 pub const fn bitcoin_primitives::block::VersionDecoder::new() -> Self
@@ -608,6 +611,7 @@ pub fn bitcoin_primitives::block::Header::eq(&self, other: &bitcoin_primitives::
 pub fn bitcoin_primitives::block::Header::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_primitives::block::Header::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 pub fn bitcoin_primitives::block::Header::partial_cmp(&self, other: &bitcoin_primitives::block::Header) -> core::option::Option<core::cmp::Ordering>
+pub fn bitcoin_primitives::block::HeaderDecoder::default() -> Self
 pub fn bitcoin_primitives::block::HeaderDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::block::HeaderDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::block::HeaderDecoder::read_limit(&self) -> usize

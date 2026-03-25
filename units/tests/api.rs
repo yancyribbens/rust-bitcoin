@@ -164,6 +164,18 @@ struct Errors {
     x: result::NumOpError,
 }
 
+/// A struct that includes all public decoder types.
+#[derive(Default)] // All decoders implement `Default`.
+#[cfg(feature = "encoding")]
+struct Decoders {
+    a: amount::AmountDecoder,
+    b: block::BlockHeightDecoder,
+    c: locktime::absolute::LockTimeDecoder,
+    d: pow::CompactTargetDecoder,
+    e: sequence::SequenceDecoder,
+    f: time::BlockTimeDecoder,
+}
+
 /// A struct that includes all public decoder error types.
 // These derives are the policy of `rust-bitcoin` not Rust API guidelines.
 #[derive(Debug, Clone, PartialEq, Eq)] // All public types implement Debug (C-DEBUG).
@@ -438,6 +450,21 @@ fn dyn_compatible() {
         // c: Box<dyn amount::serde::SerdeAmountForOpt>,
         // d: Box<dyn parse::Integer>, // Because of core::num::ParseIntError
     }
+}
+
+#[test]
+#[cfg(feature = "encoding")]
+fn decoders_implement_default() { let _ = Decoders::default(); }
+
+#[test]
+#[cfg(feature = "encoding")]
+fn decoders_implement_new() {
+    let _ = amount::AmountDecoder::new();
+    let _ = block::BlockHeightDecoder::new();
+    let _ = locktime::absolute::LockTimeDecoder::new();
+    let _ = pow::CompactTargetDecoder::new();
+    let _ = sequence::SequenceDecoder::new();
+    let _ = time::BlockTimeDecoder::new();
 }
 
 #[cfg(feature = "arbitrary")]
