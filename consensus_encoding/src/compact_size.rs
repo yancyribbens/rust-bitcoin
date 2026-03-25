@@ -2,9 +2,9 @@
 
 //! Compact size codec.
 //!
-//! Compact size is a variable-length integer encoding used throughout the
-//! Bitcoin consensus protocol to usually to encode collection lengths. However,
-//! there are also some unique non-length use cases.
+//! Compact size is a variable-length integer encoding used throughout the Bitcoin
+//! consensus protocol to usually to encode collection lengths. However, there are
+//! also some unique non-length use cases.
 
 use core::convert::Infallible;
 
@@ -38,18 +38,16 @@ pub struct CompactSizeEncoder {
 impl CompactSizeEncoder {
     /// Constructs a new `CompactSizeEncoder` for a length prefix.
     ///
-    /// The `usize` type is the natural Rust type for lengths and collection sizes,
-    /// which is the dominant use case for compact size encoding in the Bitcoin
-    /// protocol. Prefer this constructor whenever you are encoding the length of
-    /// a collection or a byte slice.
+    /// The `usize` type is the natural Rust type for lengths and collection sizes, which is the
+    /// dominant use case for compact size encoding in the Bitcoin protocol. Prefer this constructor
+    /// whenever you are encoding the length of a collection or a byte slice.
     ///
-    /// Compact size encodings are defined only over the `u64` range. On exotic
-    /// platforms where `usize` is wider than 64 bits the value will be saturated
-    /// to [`u64::MAX`], but in practice any in-memory length that could actually
-    /// be passed here is well within the `u64` range.
+    /// Compact size encodings are defined only over the `u64` range. On exotic platforms where
+    /// `usize` is wider than 64 bits the value will be saturated to [`u64::MAX`], but in practice
+    /// any in-memory length that could actually be passed here is well within the `u64` range.
     ///
-    /// If you need to encode an arbitrary `u64` integer that is not a length
-    /// prefix, use [`Self::new_u64`] instead.
+    /// If you need to encode an arbitrary `u64` integer that is not a length prefix, use
+    /// [`Self::new_u64`] instead.
     pub fn new(value: usize) -> Self {
         Self { buf: Some(Self::encode(u64::try_from(value).unwrap_or(u64::MAX))) }
     }
@@ -58,10 +56,9 @@ impl CompactSizeEncoder {
     ///
     /// Prefer [`Self::new`] unless you are encoding a non-length integer.
     ///
-    /// A small number of fields in the Bitcoin protocol are compact-size-encoded
-    /// integers that are not collection lengths (e.g. service flags). Use this
-    /// constructor for those cases, where the natural type of the value is `u64`
-    /// rather than `usize`.
+    /// A small number of fields in the Bitcoin protocol are compact-size-encoded integers that are
+    /// not collection lengths (e.g. service flags). Use this constructor for those cases, where the
+    /// natural type of the value is `u64` rather than `usize`.
     pub fn new_u64(value: u64) -> Self { Self { buf: Some(Self::encode(value)) } }
 
     /// Returns the number of bytes used to encode this `CompactSize` value.
@@ -127,15 +124,14 @@ impl ExactSizeEncoder for CompactSizeEncoder {
 
 /// Decodes a compact size encoded integer as a length prefix.
 ///
-/// The decoded value is returned as a `usize` and is bounded by a configurable
-/// limit (default: 4,000,000). This limit is a denial-of-service protection: a
-/// malicious peer can send a compact size value up to 2^64-1, and without a
-/// limit check the caller might attempt to allocate an enormous buffer based on
-/// that value. [`CompactSizeDecoder`] prevents this by rejecting values that
-/// exceed the limit before returning them to the caller.
+/// The decoded value is returned as a `usize` and is bounded by a configurable limit (default:
+/// 4,000,000). This limit is a denial-of-service protection: a malicious peer can send a compact
+/// size value up to 2^64-1, and without a limit check the caller might attempt to allocate an
+/// enormous buffer based on that value. [`CompactSizeDecoder`] prevents this by rejecting values
+/// that exceed the limit before returning them to the caller.
 ///
-/// If you are decoding an arbitrary `u64` integer that is genuinely not a length
-/// prefix, use [`CompactSizeU64Decoder`] instead.
+/// If you are decoding an arbitrary `u64` integer that is genuinely not a length prefix, use
+/// [`CompactSizeU64Decoder`] instead.
 ///
 /// For more information about decoders see the documentation of the [`Decoder`] trait.
 #[derive(Debug, Clone)]
@@ -147,17 +143,16 @@ pub struct CompactSizeDecoder {
 impl CompactSizeDecoder {
     /// Constructs a new compact size decoder with the default length limit.
     ///
-    /// The decoded value must not exceed 4,000,000 and must fit in a `usize`,
-    /// otherwise [`end`](Self::end) will return an error. This default limit
-    /// reflects the maximum sensible vector length under the 4 MB block weight
-    /// limit.
+    /// The decoded value must not exceed 4,000,000 and must fit in a `usize`, otherwise
+    /// [`end`](Self::end) will return an error. This default limit reflects the maximum sensible
+    /// vector length under the 4 MB block weight limit.
     pub const fn new() -> Self { Self { buf: ArrayVec::new(), limit: MAX_VEC_SIZE } }
 
     /// Constructs a new compact size decoder with a custom length limit.
     ///
-    /// The decoded value must not exceed `limit`, otherwise [`end`](Self::end)
-    /// will return an error. Use this when you know the field you are decoding
-    /// has a tighter bound than the default limit of 4,000,000.
+    /// The decoded value must not exceed `limit`, otherwise [`end`](Self::end) will return an
+    /// error. Use this when you know the field you are decoding has a tighter bound than the
+    /// default limit of 4,000,000.
     pub const fn new_with_limit(limit: usize) -> Self { Self { buf: ArrayVec::new(), limit } }
 }
 
@@ -203,19 +198,18 @@ impl Decoder for CompactSizeDecoder {
 ///
 /// If you are decoding a length prefix, you probably want [`CompactSizeDecoder`] instead.
 ///
-/// This decoder performs no limit check and no conversion to `usize`. It exists
-/// for the small number of Bitcoin protocol fields that are compact-size-encoded
-/// integers but are not length prefixes (e.g. service flags in the `version`
-/// message). For those fields the full `u64` range is meaningful and there is no
-/// associated allocation whose size would be controlled by the decoded value.
+/// This decoder performs no limit check and no conversion to `usize`. It exists for the small
+/// number of Bitcoin protocol fields that are compact-size-encoded integers but are not length
+/// prefixes (e.g. service flags in the `version` message). For those fields the full `u64` range is
+/// meaningful and there is no associated allocation whose size would be controlled by the decoded
+/// value.
 ///
 /// # Denial-of-service warning
 ///
-/// Do not use this decoder for length prefixes. If the decoded value is used
-/// to size an allocation, for example as the length of a `Vec`, a malicious
-/// peer can send a compact size value of up to 2^64-1 and cause an out-of-memory
-/// condition. [`CompactSizeDecoder`] prevents this by enforcing a configurable
-/// upper bound before returning the value.
+/// Do not use this decoder for length prefixes. If the decoded value is used to size an allocation,
+/// for example as the length of a `Vec`, a malicious peer can send a compact size value of up to
+/// 2^64-1 and cause an out-of-memory condition. [`CompactSizeDecoder`] prevents this by enforcing a
+/// configurable upper bound before returning the value.
 ///
 /// For more information about decoders see the documentation of the [`Decoder`] trait.
 #[derive(Debug, Clone)]
@@ -226,8 +220,8 @@ pub struct CompactSizeU64Decoder {
 impl CompactSizeU64Decoder {
     /// Constructs a new `CompactSizeU64Decoder`.
     ///
-    /// See the [struct-level documentation](Self) for guidance on when to use
-    /// this decoder versus [`CompactSizeDecoder`].
+    /// See the [struct-level documentation](Self) for guidance on when to use this decoder versus
+    /// [`CompactSizeDecoder`].
     pub const fn new() -> Self { Self { buf: ArrayVec::new() } }
 }
 

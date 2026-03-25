@@ -2,11 +2,10 @@
 
 //! Collection of "standard encoders".
 //!
-//! These encoders should not be used directly. Instead, when implementing the
-//! [`super::Encodable`] trait on a type, you should define a newtype around one
-//! or more of these encoders, and pass through the [`Encoder`] implementation
-//! to your newtype. This avoids leaking encoding implementation details to the
-//! users of your type.
+//! These encoders should not be used directly. Instead, when implementing the [`super::Encodable`]
+//! trait on a type, you should define a newtype around one or more of these encoders, and pass
+//! through the [`Encoder`] implementation to your newtype. This avoids leaking encoding
+//! implementation details to the users of your type.
 //!
 //! For implementing these newtypes, we provide the [`encoder_newtype`] and
 //! [`encoder_newtype_exact`] macros.

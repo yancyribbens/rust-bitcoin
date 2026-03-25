@@ -9,9 +9,8 @@ pub mod encoders;
 
 /// A Bitcoin object which can be consensus-encoded.
 ///
-/// To encode something, use the [`Self::encoder`] method to obtain a
-/// [`Self::Encoder`], which will behave like an iterator yielding
-/// byte slices.
+/// To encode something, use the [`Self::encoder`] method to obtain a [`Self::Encoder`], which will
+/// behave like an iterator yielding byte slices.
 ///
 /// # Examples
 ///
@@ -52,8 +51,8 @@ pub trait Encodable {
 pub trait Encoder {
     /// Yields the current encoded byteslice.
     ///
-    /// Will always return the same value until [`Self::advance`] is called. May return an empty
-    /// list.
+    /// Will always return the same value until [`Self::advance`] is called.
+    /// May return an empty list.
     fn current_chunk(&self) -> &[u8];
 
     /// Moves the encoder to its next state.
@@ -205,10 +204,9 @@ where
 ///
 /// # Performance
 ///
-/// This method writes data in potentially small chunks based on the encoder's
-/// internal chunking strategy. For optimal performance with unbuffered writers
-/// (like [`std::fs::File`] or [`std::net::TcpStream`]), consider wrapping your
-/// writer with [`std::io::BufWriter`].
+/// This method writes data in potentially small chunks based on the encoder's internal chunking
+/// strategy. For optimal performance with unbuffered writers (like [`std::fs::File`] or
+/// [`std::net::TcpStream`]), consider wrapping your writer with [`std::io::BufWriter`].
 ///
 /// # Errors
 ///
