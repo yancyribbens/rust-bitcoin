@@ -779,6 +779,7 @@ pub fn bitcoin_hashes::sha256::Midstate::eq(&self, other: &bitcoin_hashes::sha25
 pub fn bitcoin_hashes::sha256::Midstate::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_hashes::sha256::Midstate::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 pub fn bitcoin_hashes::sha256::Midstate::partial_cmp(&self, other: &bitcoin_hashes::sha256::Midstate) -> core::option::Option<core::cmp::Ordering>
+pub fn bitcoin_hashes::sha256::Midstate::to_engine(self) -> bitcoin_hashes::sha256::HashEngine
 pub fn bitcoin_hashes::sha256::MidstateError::clone(&self) -> bitcoin_hashes::sha256::MidstateError
 pub fn bitcoin_hashes::sha256::MidstateError::eq(&self, other: &bitcoin_hashes::sha256::MidstateError) -> bool
 pub fn bitcoin_hashes::sha256::MidstateError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result

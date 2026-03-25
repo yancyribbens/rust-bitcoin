@@ -133,7 +133,7 @@ pub struct HashEngine<T>(sha256::HashEngine, PhantomData<T>);
 
 impl<T: Tag> Default for HashEngine<T> {
     fn default() -> Self {
-        let tagged = sha256::HashEngine::from_midstate(T::MIDSTATE);
+        let tagged = T::MIDSTATE.to_engine();
         Self(tagged, PhantomData)
     }
 }

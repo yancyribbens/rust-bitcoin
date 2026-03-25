@@ -95,15 +95,7 @@ impl HashEngine {
     /// Constructs a new [`HashEngine`] from a [`Midstate`].
     ///
     /// Please see docs on [`Midstate`] before using this function.
-    pub fn from_midstate(midstate: Midstate) -> Self {
-        let mut ret = [0; 8];
-        for (ret_val, midstate_bytes) in ret.iter_mut().zip(midstate.as_ref().bitcoin_as_chunks().0)
-        {
-            *ret_val = u32::from_be_bytes(*midstate_bytes);
-        }
-
-        Self { buffer: [0; BLOCK_SIZE], h: ret, bytes_hashed: midstate.bytes_hashed }
-    }
+    pub fn from_midstate(midstate: Midstate) -> Self { midstate.to_engine() }
 
     /// Returns `true` if the midstate can be extracted from this engine.
     ///
@@ -218,6 +210,16 @@ impl Midstate {
 
     /// Deconstructs the [`Midstate`], returning the underlying byte array and number of bytes hashed.
     pub const fn to_parts(self) -> ([u8; 32], u64) { (self.bytes, self.bytes_hashed) }
+
+    /// Constructs a new [`HashEngine`] from this [`Midstate`].
+    pub fn to_engine(self) -> HashEngine {
+        let mut ret = [0; 8];
+        for (ret_val, midstate_bytes) in ret.iter_mut().zip(self.as_ref().bitcoin_as_chunks().0) {
+            *ret_val = u32::from_be_bytes(*midstate_bytes);
+        }
+
+        HashEngine { buffer: [0; BLOCK_SIZE], h: ret, bytes_hashed: self.bytes_hashed }
+    }
 
     /// Constructs a new midstate for tagged hashes.
     ///

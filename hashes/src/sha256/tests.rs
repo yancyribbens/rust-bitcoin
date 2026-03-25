@@ -132,7 +132,7 @@ fn engine_with_state() {
     ];
 
     let mut engine = sha256::Hash::engine();
-    let midstate_engine = sha256::HashEngine::from_midstate(engine.midstate_unchecked());
+    let midstate_engine = engine.midstate_unchecked().to_engine();
     // Fresh engine and engine initialized with fresh state should have same state
     assert_eq!(engine.h, midstate_engine.h);
 
@@ -147,7 +147,7 @@ fn engine_with_state() {
     let data_vec: &[&[u8]] = &[&[3u8; 1], &[4u8; 63], &[5u8; 65], &[6u8; 66]];
     for data in data_vec {
         let mut engine = engine.clone();
-        let mut midstate_engine = sha256::HashEngine::from_midstate(engine.midstate_unchecked());
+        let mut midstate_engine = engine.midstate_unchecked().to_engine();
         assert_eq!(engine.h, midstate_engine.h);
         assert_eq!(engine.bytes_hashed, midstate_engine.bytes_hashed);
         engine.input(data);
@@ -158,7 +158,7 @@ fn engine_with_state() {
         assert_eq!(hash1, hash2);
     }
 
-    let midstate_engine = sha256::HashEngine::from_midstate(sha256::Midstate::new(MIDSTATE, 64));
+    let midstate_engine = sha256::Midstate::new(MIDSTATE, 64).to_engine();
     let hash = sha256::Hash::from_engine(midstate_engine);
     assert_eq!(hash, sha256::Hash(HASH_EXPECTED));
 }
@@ -227,7 +227,7 @@ fn midstate_error_resume_hashing() {
     let err = engine1.midstate().expect_err("100 bytes not block-aligned");
     assert_eq!(err.unprocessed_bytes().len(), 36);
     // we can resume hashing from err data
-    let mut engine2 = sha256::HashEngine::from_midstate(*err.midstate());
+    let mut engine2 = err.midstate().to_engine();
     engine2.input(err.unprocessed_bytes());
     assert_eq!(sha256::Hash::from_engine(engine1), sha256::Hash::from_engine(engine2));
 }
