@@ -299,3 +299,51 @@ fn decoder_compact_size_zero() {
     let got = decoder.end().unwrap();
     assert_eq!(got, 0);
 }
+
+#[test]
+fn decoder_compact_size_end_incomplete_one_byte() {
+    let encoded = [0xFD, 0x05];
+
+    let mut slice = &encoded[..];
+    let mut decoder = CompactSizeDecoder::new();
+    assert!(decoder.push_bytes(&mut slice).unwrap());
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::CompactSizeDecoderError { .. }));
+}
+
+#[test]
+fn decoder_compact_size_end_incomplete_three_byte() {
+    let encoded = [0xFD];
+
+    let mut slice = &encoded[..];
+    let mut decoder = CompactSizeDecoder::new();
+    assert!(decoder.push_bytes(&mut slice).unwrap());
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::CompactSizeDecoderError { .. }));
+}
+
+#[test]
+fn decoder_compact_size_end_incomplete_five_byte() {
+    let encoded = [0xFE, 0x01, 0x02];
+
+    let mut slice = &encoded[..];
+    let mut decoder = CompactSizeDecoder::new();
+    assert!(decoder.push_bytes(&mut slice).unwrap());
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::CompactSizeDecoderError { .. }));
+}
+
+#[test]
+fn decoder_compact_size_end_incomplete_nine_byte() {
+    let encoded = [0xFF, 0x01, 0x02, 0x03];
+
+    let mut slice = &encoded[..];
+    let mut decoder = CompactSizeDecoder::new();
+    assert!(decoder.push_bytes(&mut slice).unwrap());
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::CompactSizeDecoderError { .. }));
+}

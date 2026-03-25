@@ -133,6 +133,51 @@ fn decode_decoder2_read_limit_with_exhausted() {
 }
 
 #[test]
+fn decode_decoder2_end_with_first_decoder_incomplete() {
+    // Test calling end() when first decoder is incomplete.
+    let mut decoder = Decoder2::new(ArrayDecoder::<5>::new(), ArrayDecoder::<3>::new());
+
+    let mut data = &[0x01, 0x02][..];
+    let _ = decoder.push_bytes(&mut data);
+    let err = decoder.end().unwrap_err();
+
+    assert!(matches!(
+        err,
+        bitcoin_consensus_encoding::Decoder2Error::First(UnexpectedEofError { .. })
+    ));
+}
+
+#[test]
+fn decode_decoder2_end_with_second_decoder_incomplete() {
+    // Test calling end() when second decoder is incomplete.
+    let mut decoder = Decoder2::new(ArrayDecoder::<2>::new(), ArrayDecoder::<5>::new());
+
+    let mut data = &[0x01, 0x02, 0x03][..];
+    let _ = decoder.push_bytes(&mut data);
+    let err = decoder.end().unwrap_err();
+
+    assert!(matches!(
+        err,
+        bitcoin_consensus_encoding::Decoder2Error::Second(UnexpectedEofError { .. })
+    ));
+}
+
+#[test]
+fn decode_decoder2_with_zero_sized_first_decoder_end() {
+    // Test edge case where first decoder needs 0 bytes.
+    let mut decoder = Decoder2::new(ArrayDecoder::<0>::new(), ArrayDecoder::<3>::new());
+
+    let mut data = &[0x42][..];
+    let _ = decoder.push_bytes(&mut data);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(
+        err,
+        bitcoin_consensus_encoding::Decoder2Error::Second(UnexpectedEofError { .. })
+    ));
+}
+
+#[test]
 #[cfg(feature = "alloc")]
 fn decode_byte_vec_decoder_empty() {
     // Test decoding empty byte vector, with length prefix of 0.
@@ -581,4 +626,54 @@ fn decode_vec_from_read_unbuffered_success() {
 
     let want = Test(vec![Inner(0xDEAD_BEEF)]);
     assert_eq!(got, want);
+}
+
+#[test]
+#[cfg(feature = "alloc")]
+fn decode_byte_vec_decoder_end_incomplete_length_prefix() {
+    let mut decoder = ByteVecDecoder::new();
+    let mut data = &[0xFD, 0x05][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::ByteVecDecoderError { .. }));
+}
+
+#[test]
+#[cfg(feature = "alloc")]
+fn decode_byte_vec_decoder_end_incomplete_data() {
+    // Length=5 but only 2 bytes of data.
+    let mut decoder = ByteVecDecoder::new();
+    let mut data = &[0x05, 0xAA, 0xBB][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::ByteVecDecoderError { .. }));
+}
+
+#[test]
+#[cfg(feature = "alloc")]
+fn decode_vec_decoder_end_incomplete_length_prefix() {
+    let mut decoder = VecDecoder::<Inner>::new();
+    let mut data = &[0xFD, 0x05][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::VecDecoderError { .. }));
+}
+
+#[test]
+#[cfg(feature = "alloc")]
+fn decode_vec_decoder_end_incomplete_item() {
+    // Length=3 but only 2 bytes of data.
+    let mut decoder = VecDecoder::<Inner>::new();
+    let mut data = &[0x03, 0xAA, 0xBB][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::VecDecoderError { .. }));
 }
