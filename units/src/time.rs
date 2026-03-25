@@ -7,18 +7,19 @@
 //! This differs from other UNIX timestamps in that we only use non-negative values. The Epoch
 //! pre-dates Bitcoin so timestamps before this are not useful for block timestamps.
 
-#[cfg(feature = "encoding")]
-use core::convert::Infallible;
 use core::fmt;
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-#[cfg(feature = "encoding")]
-use internals::write_err;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::parse_int::{self, PrefixedHexError, UnprefixedHexError};
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[cfg(feature = "encoding")]
+#[doc(no_inline)]
+pub use self::error::BlockTimeDecoderError;
 
 mod encapsulate {
     /// A Bitcoin block timestamp.
@@ -172,26 +173,37 @@ impl encoding::Decodable for BlockTime {
     fn decoder() -> Self::Decoder { BlockTimeDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
-/// An error consensus decoding an `BlockTime`.
-#[cfg(feature = "encoding")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BlockTimeDecoderError(encoding::UnexpectedEofError);
+/// Error types for block times.
+pub mod error {
+    #[cfg(feature = "encoding")]
+    use core::convert::Infallible;
+    #[cfg(feature = "encoding")]
+    use core::fmt;
 
-#[cfg(feature = "encoding")]
-impl From<Infallible> for BlockTimeDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+    #[cfg(feature = "encoding")]
+    use internals::write_err;
 
-#[cfg(feature = "encoding")]
-impl fmt::Display for BlockTimeDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "block time decoder error"; self.0)
+    /// An error consensus decoding an `BlockTime`.
+    #[cfg(feature = "encoding")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct BlockTimeDecoderError(pub(super) encoding::UnexpectedEofError);
+
+    #[cfg(feature = "encoding")]
+    impl From<Infallible> for BlockTimeDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
     }
-}
 
-#[cfg(all(feature = "std", feature = "encoding"))]
-impl std::error::Error for BlockTimeDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    #[cfg(feature = "encoding")]
+    impl fmt::Display for BlockTimeDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "block time decoder error"; self.0)
+        }
+    }
+
+    #[cfg(all(feature = "std", feature = "encoding"))]
+    impl std::error::Error for BlockTimeDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
 }
 
 #[cfg(feature = "arbitrary")]
