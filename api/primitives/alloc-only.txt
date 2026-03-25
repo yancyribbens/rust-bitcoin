@@ -60,6 +60,7 @@ impl bitcoin_primitives::script::ScriptHashableTag for bitcoin_primitives::scrip
 impl bitcoin_primitives::script::Tag for bitcoin_primitives::script::RedeemScriptTag
 impl bitcoin_primitives::script::Tag for bitcoin_primitives::script::ScriptPubKeyTag
 impl bitcoin_primitives::script::Tag for bitcoin_primitives::script::ScriptSigTag
+impl bitcoin_primitives::script::Tag for bitcoin_primitives::script::SignetBlockScriptTag
 impl bitcoin_primitives::script::Tag for bitcoin_primitives::script::TapScriptTag
 impl bitcoin_primitives::script::Tag for bitcoin_primitives::script::WitnessScriptTag
 impl bitcoin_primitives::script::WScriptHash
@@ -114,6 +115,7 @@ impl core::clone::Clone for bitcoin_primitives::script::ScriptBufDecoderError
 impl core::clone::Clone for bitcoin_primitives::script::ScriptHash
 impl core::clone::Clone for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::clone::Clone for bitcoin_primitives::script::ScriptSigTag
+impl core::clone::Clone for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::clone::Clone for bitcoin_primitives::script::TapScriptTag
 impl core::clone::Clone for bitcoin_primitives::script::WScriptHash
 impl core::clone::Clone for bitcoin_primitives::script::WitnessScriptSizeError
@@ -154,6 +156,7 @@ impl core::cmp::Eq for bitcoin_primitives::script::ScriptBufDecoderError
 impl core::cmp::Eq for bitcoin_primitives::script::ScriptHash
 impl core::cmp::Eq for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::cmp::Eq for bitcoin_primitives::script::ScriptSigTag
+impl core::cmp::Eq for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::cmp::Eq for bitcoin_primitives::script::TapScriptTag
 impl core::cmp::Eq for bitcoin_primitives::script::WScriptHash
 impl core::cmp::Eq for bitcoin_primitives::script::WitnessScriptSizeError
@@ -186,6 +189,7 @@ impl core::cmp::Ord for bitcoin_primitives::script::RedeemScriptTag
 impl core::cmp::Ord for bitcoin_primitives::script::ScriptHash
 impl core::cmp::Ord for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::cmp::Ord for bitcoin_primitives::script::ScriptSigTag
+impl core::cmp::Ord for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::cmp::Ord for bitcoin_primitives::script::TapScriptTag
 impl core::cmp::Ord for bitcoin_primitives::script::WScriptHash
 impl core::cmp::Ord for bitcoin_primitives::script::WitnessScriptTag
@@ -218,6 +222,7 @@ impl core::cmp::PartialEq for bitcoin_primitives::script::ScriptBufDecoderError
 impl core::cmp::PartialEq for bitcoin_primitives::script::ScriptHash
 impl core::cmp::PartialEq for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::cmp::PartialEq for bitcoin_primitives::script::ScriptSigTag
+impl core::cmp::PartialEq for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::cmp::PartialEq for bitcoin_primitives::script::TapScriptTag
 impl core::cmp::PartialEq for bitcoin_primitives::script::WScriptHash
 impl core::cmp::PartialEq for bitcoin_primitives::script::WitnessScriptSizeError
@@ -250,6 +255,7 @@ impl core::cmp::PartialOrd for bitcoin_primitives::script::RedeemScriptTag
 impl core::cmp::PartialOrd for bitcoin_primitives::script::ScriptHash
 impl core::cmp::PartialOrd for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::cmp::PartialOrd for bitcoin_primitives::script::ScriptSigTag
+impl core::cmp::PartialOrd for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::cmp::PartialOrd for bitcoin_primitives::script::TapScriptTag
 impl core::cmp::PartialOrd for bitcoin_primitives::script::WScriptHash
 impl core::cmp::PartialOrd for bitcoin_primitives::script::WitnessScriptTag
@@ -287,6 +293,7 @@ impl core::convert::From<alloc::vec::Vec<&[u8]>> for bitcoin_primitives::witness
 impl core::convert::From<alloc::vec::Vec<alloc::vec::Vec<u8>>> for bitcoin_primitives::witness::Witness
 impl core::convert::From<bitcoin_primitives::block::Block> for bitcoin_primitives::BlockHash
 impl core::convert::From<bitcoin_primitives::block::Header> for bitcoin_primitives::BlockHash
+impl core::convert::From<bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::WitnessScriptTag>> for bitcoin_primitives::script::SignetBlockScriptBuf
 impl core::convert::From<bitcoin_primitives::transaction::Transaction> for bitcoin_primitives::Txid
 impl core::convert::From<bitcoin_primitives::transaction::Transaction> for bitcoin_primitives::Wtxid
 impl core::convert::From<bitcoin_primitives::transaction::Version> for u32
@@ -392,6 +399,7 @@ impl core::hash::Hash for bitcoin_primitives::script::RedeemScriptTag
 impl core::hash::Hash for bitcoin_primitives::script::ScriptHash
 impl core::hash::Hash for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::hash::Hash for bitcoin_primitives::script::ScriptSigTag
+impl core::hash::Hash for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::hash::Hash for bitcoin_primitives::script::TapScriptTag
 impl core::hash::Hash for bitcoin_primitives::script::WScriptHash
 impl core::hash::Hash for bitcoin_primitives::script::WitnessScriptTag
@@ -443,6 +451,7 @@ impl core::marker::Freeze for bitcoin_primitives::script::ScriptBufDecoderError
 impl core::marker::Freeze for bitcoin_primitives::script::ScriptHash
 impl core::marker::Freeze for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::marker::Freeze for bitcoin_primitives::script::ScriptSigTag
+impl core::marker::Freeze for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::marker::Freeze for bitcoin_primitives::script::TapScriptTag
 impl core::marker::Freeze for bitcoin_primitives::script::WScriptHash
 impl core::marker::Freeze for bitcoin_primitives::script::WitnessScriptSizeError
@@ -494,6 +503,7 @@ impl core::marker::Send for bitcoin_primitives::script::ScriptBufDecoderError
 impl core::marker::Send for bitcoin_primitives::script::ScriptHash
 impl core::marker::Send for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::marker::Send for bitcoin_primitives::script::ScriptSigTag
+impl core::marker::Send for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::marker::Send for bitcoin_primitives::script::TapScriptTag
 impl core::marker::Send for bitcoin_primitives::script::WScriptHash
 impl core::marker::Send for bitcoin_primitives::script::WitnessScriptSizeError
@@ -540,6 +550,7 @@ impl core::marker::StructuralPartialEq for bitcoin_primitives::script::ScriptBuf
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::ScriptHash
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::ScriptSigTag
+impl core::marker::StructuralPartialEq for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::TapScriptTag
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::WScriptHash
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::WitnessScriptSizeError
@@ -585,6 +596,7 @@ impl core::marker::Sync for bitcoin_primitives::script::ScriptBufDecoderError
 impl core::marker::Sync for bitcoin_primitives::script::ScriptHash
 impl core::marker::Sync for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::marker::Sync for bitcoin_primitives::script::ScriptSigTag
+impl core::marker::Sync for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::marker::Sync for bitcoin_primitives::script::TapScriptTag
 impl core::marker::Sync for bitcoin_primitives::script::WScriptHash
 impl core::marker::Sync for bitcoin_primitives::script::WitnessScriptSizeError
@@ -636,6 +648,7 @@ impl core::marker::Unpin for bitcoin_primitives::script::ScriptBufDecoderError
 impl core::marker::Unpin for bitcoin_primitives::script::ScriptHash
 impl core::marker::Unpin for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::marker::Unpin for bitcoin_primitives::script::ScriptSigTag
+impl core::marker::Unpin for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::marker::Unpin for bitcoin_primitives::script::TapScriptTag
 impl core::marker::Unpin for bitcoin_primitives::script::WScriptHash
 impl core::marker::Unpin for bitcoin_primitives::script::WitnessScriptSizeError
@@ -687,6 +700,7 @@ impl core::marker::UnsafeUnpin for bitcoin_primitives::script::ScriptBufDecoderE
 impl core::marker::UnsafeUnpin for bitcoin_primitives::script::ScriptHash
 impl core::marker::UnsafeUnpin for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::marker::UnsafeUnpin for bitcoin_primitives::script::ScriptSigTag
+impl core::marker::UnsafeUnpin for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::marker::UnsafeUnpin for bitcoin_primitives::script::TapScriptTag
 impl core::marker::UnsafeUnpin for bitcoin_primitives::script::WScriptHash
 impl core::marker::UnsafeUnpin for bitcoin_primitives::script::WitnessScriptSizeError
@@ -739,6 +753,7 @@ impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_primitives::script::Scr
 impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_primitives::script::ScriptHash
 impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_primitives::script::ScriptSigTag
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_primitives::script::TapScriptTag
 impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_primitives::script::WScriptHash
 impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_primitives::script::WitnessScriptSizeError
@@ -790,6 +805,7 @@ impl core::panic::unwind_safe::UnwindSafe for bitcoin_primitives::script::Script
 impl core::panic::unwind_safe::UnwindSafe for bitcoin_primitives::script::ScriptHash
 impl core::panic::unwind_safe::UnwindSafe for bitcoin_primitives::script::ScriptPubKeyTag
 impl core::panic::unwind_safe::UnwindSafe for bitcoin_primitives::script::ScriptSigTag
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_primitives::script::SignetBlockScriptTag
 impl core::panic::unwind_safe::UnwindSafe for bitcoin_primitives::script::TapScriptTag
 impl core::panic::unwind_safe::UnwindSafe for bitcoin_primitives::script::WScriptHash
 impl core::panic::unwind_safe::UnwindSafe for bitcoin_primitives::script::WitnessScriptSizeError
@@ -1183,6 +1199,7 @@ pub enum bitcoin_primitives::block::Unchecked
 pub enum bitcoin_primitives::script::RedeemScriptTag
 pub enum bitcoin_primitives::script::ScriptPubKeyTag
 pub enum bitcoin_primitives::script::ScriptSigTag
+pub enum bitcoin_primitives::script::SignetBlockScriptTag
 pub enum bitcoin_primitives::script::TapScriptTag
 pub enum bitcoin_primitives::script::WitnessScriptTag
 pub extern crate bitcoin_primitives::encoding
@@ -1500,6 +1517,12 @@ pub fn bitcoin_primitives::script::ScriptSigTag::cmp(&self, other: &bitcoin_prim
 pub fn bitcoin_primitives::script::ScriptSigTag::eq(&self, other: &bitcoin_primitives::script::ScriptSigTag) -> bool
 pub fn bitcoin_primitives::script::ScriptSigTag::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 pub fn bitcoin_primitives::script::ScriptSigTag::partial_cmp(&self, other: &bitcoin_primitives::script::ScriptSigTag) -> core::option::Option<core::cmp::Ordering>
+pub fn bitcoin_primitives::script::SignetBlockScriptBuf::from(buf: bitcoin_primitives::script::WitnessScriptBuf) -> Self
+pub fn bitcoin_primitives::script::SignetBlockScriptTag::clone(&self) -> bitcoin_primitives::script::SignetBlockScriptTag
+pub fn bitcoin_primitives::script::SignetBlockScriptTag::cmp(&self, other: &bitcoin_primitives::script::SignetBlockScriptTag) -> core::cmp::Ordering
+pub fn bitcoin_primitives::script::SignetBlockScriptTag::eq(&self, other: &bitcoin_primitives::script::SignetBlockScriptTag) -> bool
+pub fn bitcoin_primitives::script::SignetBlockScriptTag::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+pub fn bitcoin_primitives::script::SignetBlockScriptTag::partial_cmp(&self, other: &bitcoin_primitives::script::SignetBlockScriptTag) -> core::option::Option<core::cmp::Ordering>
 pub fn bitcoin_primitives::script::TapScriptTag::clone(&self) -> bitcoin_primitives::script::TapScriptTag
 pub fn bitcoin_primitives::script::TapScriptTag::cmp(&self, other: &bitcoin_primitives::script::TapScriptTag) -> core::cmp::Ordering
 pub fn bitcoin_primitives::script::TapScriptTag::eq(&self, other: &bitcoin_primitives::script::TapScriptTag) -> bool
@@ -1783,6 +1806,8 @@ pub type bitcoin_primitives::ScriptPubKey = bitcoin_primitives::script::Script<b
 pub type bitcoin_primitives::ScriptPubKeyBuf = bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::ScriptPubKeyTag>
 pub type bitcoin_primitives::ScriptSig = bitcoin_primitives::script::Script<bitcoin_primitives::script::ScriptSigTag>
 pub type bitcoin_primitives::ScriptSigBuf = bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::ScriptSigTag>
+pub type bitcoin_primitives::SignetBlockScript = bitcoin_primitives::script::Script<bitcoin_primitives::script::SignetBlockScriptTag>
+pub type bitcoin_primitives::SignetBlockScriptBuf = bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::SignetBlockScriptTag>
 pub type bitcoin_primitives::TapScript = bitcoin_primitives::script::Script<bitcoin_primitives::script::TapScriptTag>
 pub type bitcoin_primitives::TapScriptBuf = bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::TapScriptTag>
 pub type bitcoin_primitives::TxMerkleNode::Decoder = bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
@@ -1823,6 +1848,8 @@ pub type bitcoin_primitives::script::ScriptPubKeyBufDecoder = bitcoin_primitives
 pub type bitcoin_primitives::script::ScriptSig = bitcoin_primitives::script::Script<bitcoin_primitives::script::ScriptSigTag>
 pub type bitcoin_primitives::script::ScriptSigBuf = bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::ScriptSigTag>
 pub type bitcoin_primitives::script::ScriptSigBufDecoder = bitcoin_primitives::script::ScriptBufDecoder<bitcoin_primitives::script::ScriptSigTag>
+pub type bitcoin_primitives::script::SignetBlockScript = bitcoin_primitives::script::Script<bitcoin_primitives::script::SignetBlockScriptTag>
+pub type bitcoin_primitives::script::SignetBlockScriptBuf = bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::SignetBlockScriptTag>
 pub type bitcoin_primitives::script::TapScript = bitcoin_primitives::script::Script<bitcoin_primitives::script::TapScriptTag>
 pub type bitcoin_primitives::script::TapScriptBuf = bitcoin_primitives::script::ScriptBuf<bitcoin_primitives::script::TapScriptTag>
 pub type bitcoin_primitives::script::WScriptHash::Error = bitcoin_primitives::script::WitnessScriptSizeError
