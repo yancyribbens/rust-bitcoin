@@ -9,7 +9,6 @@
 //!
 //! For implementing these newtypes, we provide the [`encoder_newtype`] and
 //! [`encoder_newtype_exact`] macros.
-//!
 
 use core::fmt;
 
