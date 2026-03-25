@@ -9,9 +9,10 @@ use core::{cmp, mem};
 use crate::HashEngine as _;
 
 crate::internal_macros::hash_type_no_default! {
-    64,
-    false,
-    "Output of the SipHash24 hash function."
+    /// Output of the SipHash24 hash function.
+    pub struct Hash([u8; 8]);
+
+    const DISPLAY_BACKWARD: bool = false;
 }
 
 macro_rules! compress {

@@ -47,17 +47,28 @@ pub(crate) use hash_trait_impls;
 /// The created type has a single field and will have all standard derives as well as an
 /// implementation of [`crate::Hash`].
 ///
-/// # Parameters
+/// # Syntax
 ///
-/// * `$bits` - the number of bits of the hash type
-/// * `$reverse` - `true` if the hash should be displayed backwards, `false` otherwise
-/// * `$doc` - the doc string to put on the type
+/// ```ignore
+/// // Requires a `HashEngine` type in scope.
+/// general_hash_type! {
+///     /// Documentation for the hash type.
+///     pub struct Hash([u8; 32]);
+///
+///     const DISPLAY_BACKWARD: bool = false;
+/// }
+/// ```
 ///
 /// Restrictions on usage:
 ///
-/// * Requires a `HashEngine` type in this module implementing `Default` and `crate::HashEngine<Hash = Hash, Bytes = [u8; $bits / 8]>`.
+/// * Requires a `HashEngine` type in this module implementing `Default` and `crate::HashEngine<Hash = Hash, Bytes = [u8; $len]>`.
 macro_rules! general_hash_type {
-    ($bits:expr, $reverse:expr, $doc:literal) => {
+    (
+        $(#[$type_attrs:meta])*
+        pub struct Hash([u8; $len:expr]);
+
+        const DISPLAY_BACKWARD: bool = $reverse:expr;
+    ) => {
         /// Hashes some bytes.
         pub fn hash(data: &[u8]) -> Hash {
             use crate::HashEngine as _;
@@ -82,7 +93,12 @@ macro_rules! general_hash_type {
             engine.finalize()
         }
 
-        $crate::internal_macros::hash_type_no_default!($bits, $reverse, $doc);
+        $crate::internal_macros::hash_type_no_default! {
+            $(#[$type_attrs])*
+            pub struct Hash([u8; $len]);
+
+            const DISPLAY_BACKWARD: bool = $reverse;
+        }
 
         impl Hash {
             /// Constructs a new engine.
@@ -113,11 +129,16 @@ macro_rules! general_hash_type {
 pub(crate) use general_hash_type;
 
 macro_rules! hash_type_no_default {
-    ($bits:expr, $reverse:expr, $doc:literal) => {
+    (
+        $(#[$type_attrs:meta])*
+        pub struct Hash([u8; $len:expr]);
+
+        const DISPLAY_BACKWARD: bool = $reverse:expr;
+    ) => {
         internals::transparent_newtype! {
-            #[doc = $doc]
+            $(#[$type_attrs])*
             #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-            pub struct Hash([u8; $bits / 8]);
+            pub struct Hash([u8; $len]);
 
             impl Hash {
                 /// Zero cost conversion between a fixed length byte array shared reference and
@@ -132,16 +153,17 @@ macro_rules! hash_type_no_default {
 
         impl Hash {
             /// Constructs a new hash from the underlying byte array.
-            pub const fn from_byte_array(bytes: [u8; $bits / 8]) -> Self { Hash(bytes) }
+            pub const fn from_byte_array(bytes: [u8; $len]) -> Self { Hash(bytes) }
 
             /// Returns the underlying byte array.
-            pub const fn to_byte_array(self) -> [u8; $bits / 8] { self.0 }
+            pub const fn to_byte_array(self) -> [u8; $len] { self.0 }
 
             /// Returns a reference to the underlying byte array.
-            pub const fn as_byte_array(&self) -> &[u8; $bits / 8] { &self.0 }
+            pub const fn as_byte_array(&self) -> &[u8; $len] { &self.0 }
         }
 
-        $crate::internal_macros::hash_trait_impls!($bits, $reverse);
+        // Parenthesize `$len` so additive expressions still map to the intended bit width.
+        $crate::internal_macros::hash_trait_impls!(($len) * 8, $reverse);
 
         $crate::internal_macros::impl_write!(
             HashEngine,

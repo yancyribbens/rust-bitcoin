@@ -13,9 +13,10 @@ mod tests;
 use crate::incomplete_block_len;
 
 crate::internal_macros::general_hash_type! {
-    512,
-    false,
-    "Output of the SHA512 hash function."
+    /// Output of the SHA512 hash function.
+    pub struct Hash([u8; 64]);
+
+    const DISPLAY_BACKWARD: bool = false;
 }
 
 impl Hash {
