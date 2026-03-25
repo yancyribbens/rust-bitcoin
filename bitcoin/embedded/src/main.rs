@@ -33,7 +33,7 @@ fn main() -> ! {
     hprintln!("Seed WIF: {}", wk.to_wif()).unwrap();
 
     // Derive address
-    let pubkey = wk.private_key.public_key().try_into().unwrap();
+    let pubkey = wk.private_key.to_public_key().try_into().unwrap();
     let address = Address::p2wpkh(pubkey, Network::Bitcoin);
     hprintln!("Address: {}", address).unwrap();
 

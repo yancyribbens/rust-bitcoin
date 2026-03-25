@@ -375,7 +375,7 @@ impl Psbt {
                 sighash_type: sighash_ty,
             };
 
-            let pk = sk.public_key();
+            let pk = sk.to_public_key();
 
             input.partial_sigs.insert(pk, sig);
             used.push(pk);
@@ -463,7 +463,7 @@ impl Psbt {
                         input.tap_script_sigs.insert((xonly, lh), signature);
                     }
 
-                    used.push(sk.public_key().into());
+                    used.push(sk.to_public_key().into());
                 }
             }
         }
@@ -906,7 +906,7 @@ impl GetKey for $map<XOnlyPublicKey, PrivateKey> {
                 let (xonly, parity) = pk.to_inner().x_only_public_key();
 
                 if let Some(mut priv_key) = self.get(&XOnlyPublicKey::from(xonly)).cloned() {
-                    let computed_pk = priv_key.public_key();
+                    let computed_pk = priv_key.to_public_key();
                     let (_, computed_parity) = computed_pk.to_inner().x_only_public_key();
 
                     if computed_parity != parity {
@@ -2388,7 +2388,7 @@ mod tests {
 
         if parity == secp256k1::Parity::Even {
             priv_key = priv_key.negate();
-            pk = priv_key.public_key();
+            pk = priv_key.to_public_key();
         }
 
         pubkey_map.insert(pk, priv_key);
@@ -2397,7 +2397,7 @@ mod tests {
 
         let retrieved_key = req_result.unwrap();
 
-        let retrieved_pub_key = retrieved_key.public_key();
+        let retrieved_pub_key = retrieved_key.to_public_key();
         let (retrieved_xonly, retrieved_parity) = retrieved_pub_key.to_inner().x_only_public_key();
 
         assert_eq!(xonly, retrieved_xonly);
