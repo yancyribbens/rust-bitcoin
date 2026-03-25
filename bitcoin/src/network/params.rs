@@ -12,13 +12,13 @@
 //!
 //! ```
 //! use bitcoin::network::Params;
-//! use bitcoin::{WitnessScript, WitnessScriptBuf, Network, Target};
+//! use bitcoin::{SignetBlockScript, SignetBlockScriptBuf, Network, Target};
 //!
 //! const POW_TARGET_SPACING: u32 = 120; // Two minutes.
 //!
 //! pub struct CustomParams {
 //!     params: Params,
-//!     challenge_script: WitnessScriptBuf,
+//!     challenge_script: SignetBlockScriptBuf,
 //! }
 //!
 //! impl CustomParams {
@@ -28,7 +28,7 @@
 //!         params.pow_target_spacing = POW_TARGET_SPACING;
 //!
 //!         // This would be something real (see BIP-00325).
-//!         let challenge_script = WitnessScriptBuf::new();
+//!         let challenge_script = SignetBlockScriptBuf::new();
 //!
 //!         Self {
 //!             params,
@@ -37,7 +37,7 @@
 //!     }
 //!
 //!     /// Returns the custom signet challenge script.
-//!     pub fn challenge_script(&self) -> &WitnessScript { &self.challenge_script }
+//!     pub fn challenge_script(&self) -> &SignetBlockScript { &self.challenge_script }
 //! }
 //!
 //! impl AsRef<Params> for CustomParams {

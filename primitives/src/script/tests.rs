@@ -562,6 +562,14 @@ fn decoder_full_read_limit() {
 }
 
 #[test]
+fn witness_to_signet_script() {
+    let bytes = vec![0x51, 0x52, 0x53];
+    let witness = WitnessScriptBuf::from(bytes.clone());
+    let signet: SignetBlockScriptBuf = witness.into();
+    assert_eq!(signet.as_bytes(), &bytes);
+}
+
+#[test]
 fn decoder_error_display() {
     #[cfg(feature = "std")]
     use std::error::Error as _;

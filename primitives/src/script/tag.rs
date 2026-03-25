@@ -23,6 +23,11 @@ impl Tag for ScriptSigTag {}
 pub enum ScriptPubKeyTag {}
 impl Tag for ScriptPubKeyTag {}
 
+/// A signet block challenge script.
+#[derive(Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
+pub enum SignetBlockScriptTag {}
+impl Tag for SignetBlockScriptTag {}
+
 /// A Segwit v1 Taproot script.
 #[derive(Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub enum TapScriptTag {}
