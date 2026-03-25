@@ -45,6 +45,7 @@ pub mod decoders;
 pub trait Decodable {
     /// Associated decoder for the type.
     type Decoder: Decoder<Output = Self>;
+
     /// Constructs a "default decoder" for the type.
     fn decoder() -> Self::Decoder;
 }
