@@ -25,6 +25,8 @@ use crate::prelude::{DisplayHex, String, Vec};
 use crate::script::{self, WitnessScriptBuf};
 #[cfg(feature = "serde")]
 use crate::serde::{Deserialize, Deserializer, Serialize, Serializer};
+#[cfg(feature = "secp-recovery")]
+use crate::sign_message::MessageSignature;
 use crate::taproot::{TapNodeHash, TapTweakHash};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
@@ -964,6 +966,25 @@ impl PrivateKey {
             true => Self::from_secp(self.as_inner().negate()),
             false => Self::from_secp_uncompressed(self.as_inner().negate()),
         }
+    }
+
+    /// ECDSA signs a [`Message`] with this private key.
+    ///
+    /// This produces an ECDSA signature with a recovery ID for pubkey recovery.
+    /// See [`RecoverableSignature::sign_ecdsa_recoverable`] for details.
+    ///
+    /// [`Message`]: secp256k1::Message
+    /// [`RecoverableSignature::sign_ecdsa_recoverable`]: secp256k1::ecdsa::RecoverableSignature::sign_ecdsa_recoverable
+    #[inline]
+    #[cfg(feature = "secp-recovery")]
+    pub fn raw_ecdsa_sign_recoverable(
+        &self,
+        msg: impl Into<secp256k1::Message>,
+    ) -> MessageSignature {
+        MessageSignature::new(
+            secp256k1::ecdsa::RecoverableSignature::sign_ecdsa_recoverable(msg, self.as_inner()),
+            self.compressed(),
+        )
     }
 }
 
