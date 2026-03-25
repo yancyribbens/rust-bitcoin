@@ -62,35 +62,15 @@ extern crate std;
 #[cfg(feature = "arbitrary")]
 pub extern crate arbitrary;
 
-/// Encodes and decodes base64 as bytes or utf8.
 #[cfg(feature = "base64")]
 pub extern crate base64;
-
-/// Bitcoin base58 encoding and decoding.
 pub extern crate base58;
-
-/// Re-export the `bech32` crate.
 pub extern crate bech32;
-
-/// Re-export the `consensus-encoding` crate.
 pub extern crate encoding;
-
-/// Rust implementation of cryptographic hash function algorithms.
 pub extern crate hashes;
-
-/// Re-export the `hex-conservative` crate.
 pub extern crate hex_stable as hex;
-
-/// Re-export the `bitcoin-io` crate.
 pub extern crate io;
-
-/// Re-export the `primitives` crate.
 pub extern crate primitives;
-
-/// Re-export the `rust-secp256k1` crate.
-///
-/// Rust wrapper library for Pieter Wuille's libsecp256k1. Implements ECDSA and BIP-0340 signatures
-/// for the SECG elliptic curve group secp256k1 and related utilities.
 pub extern crate secp256k1;
 
 #[cfg(feature = "serde")]

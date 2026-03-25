@@ -34,7 +34,6 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
-/// Re-export of the `encoding` crate.
 #[cfg(feature = "encoding")]
 pub extern crate encoding;
 
