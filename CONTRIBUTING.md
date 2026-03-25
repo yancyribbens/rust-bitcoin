@@ -190,6 +190,19 @@ adhere to the ideas presented in the following two blog posts:
 - [How to Write a Git Commit Message](https://cbea.ms/git-commit/)
 - [Write Better Commits, Build Better Projects](https://github.blog/2022-06-30-write-better-commits-build-better-projects/)
 
+Note on formatting: 
+
+- We attempt to keep the codebase formatted but it is not a merge pre-requisite.
+- `master` may not format cleanly, if so please throw a formatting patch at the
+  front of your PR if you plan on formatting your changes. I.e., don't include
+  arbitrary formatting changes in your other patches.
+- You can use `just fmt`.
+- Remember to use nightly if your editor runs the formatter (`cargo +nightly fmt`).
+- There is a CI job that runs the formatter.
+- There is a _very_ long history on the reasons for all this. Sorry this is the
+  best solution we have been able to come up with to keep all parties somewhat
+  happy.
+
 ### Deprecation and Versioning
 
 Whenever any part of your code wants to mention the version number the code will
