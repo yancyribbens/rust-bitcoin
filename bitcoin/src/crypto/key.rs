@@ -528,6 +528,14 @@ impl PublicKey {
         Ok(key.p2wpkh_script_code())
     }
 
+    /// Converts this [`PublicKey`] into a [`CompressedPublicKey`] infallibly.
+    ///
+    /// Unlike the `TryFrom` implementation, this function will discard compressedness
+    /// information on the [`PublicKey`].
+    pub fn force_compressed(self) -> CompressedPublicKey {
+        CompressedPublicKey::from_secp(self.to_inner())
+    }
+
     /// Writes the public key into a writer.
     ///
     /// # Errors
@@ -666,9 +674,7 @@ impl PublicKey {
     pub fn from_private_key(sk: PrivateKey) -> Self { sk.to_public_key() }
 
     /// Extracts the public key from a Keypair
-    pub fn from_keypair(pair: &Keypair) -> Self {
-        Self::from_secp(secp256k1::PublicKey::from_keypair(pair.as_inner()))
-    }
+    pub fn from_keypair(pair: &Keypair) -> Self { CompressedPublicKey::from_keypair(pair).into() }
 
     /// Checks that `sig` is a valid ECDSA signature for `msg` using this public key.
     ///
@@ -796,7 +802,7 @@ impl CompressedPublicKey {
 
         reader.read_exact(&mut bytes)?;
         #[allow(unused_variables)] // e when std not enabled
-        Self::from_slice(&bytes).map_err(|e| {
+        Self::from_bytes(bytes).map_err(|e| {
             // Need a static string for no-std io
             #[cfg(feature = "std")]
             let reason = e;
@@ -819,8 +825,19 @@ impl CompressedPublicKey {
     /// # Errors
     ///
     /// See [`secp256k1::PublicKey::from_slice`].
+    #[deprecated(since = "TBD", note = "use `from_bytes` instead; if you only have a slice, use `<&[u8; 33]>::try_from` first")]
     pub fn from_slice(data: &[u8]) -> Result<Self, secp256k1::Error> {
-        secp256k1::PublicKey::from_slice(data).map(Self::from_secp)
+        let bytes_arr = data.try_into().map_err(|_| secp256k1::Error::InvalidPublicKey)?;
+        Self::from_bytes(bytes_arr)
+    }
+
+    /// Deserializes a public key from compressed pubkey bytes.
+    ///
+    /// # Errors
+    ///
+    /// See [`secp256k1::PublicKey::from_byte_array_compressed`].
+    pub fn from_bytes(data: [u8; 33]) -> Result<Self, secp256k1::Error> {
+        secp256k1::PublicKey::from_byte_array_compressed(data).map(Self::from_secp)
     }
 
     /// Computes the public key as supposed to be used with this secret.
@@ -830,6 +847,11 @@ impl CompressedPublicKey {
     /// Errors if the private key is not compressed.
     pub fn from_private_key(sk: PrivateKey) -> Result<Self, UncompressedPublicKeyError> {
         sk.to_public_key().try_into()
+    }
+
+    /// Extracts the public key from a Keypair
+    pub fn from_keypair(pair: &Keypair) -> Self {
+        Self::from_secp(secp256k1::PublicKey::from_keypair(pair.as_inner()))
     }
 
     /// Checks that `sig` is a valid ECDSA signature for `msg` using this public key.
@@ -848,7 +870,7 @@ impl CompressedPublicKey {
 
 impl fmt::Display for CompressedPublicKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fmt::LowerHex::fmt(&self.to_bytes().as_hex(), f)
+        fmt::Display::fmt(&self.to_bytes().as_hex(), f)
     }
 }
 
@@ -862,7 +884,7 @@ impl FromStr for CompressedPublicKey {
     type Err = ParseCompressedPublicKeyError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_slice(&hex::decode_to_array::<33>(s)?).map_err(Into::into)
+        Self::from_bytes(hex::decode_to_array::<33>(s)?).map_err(Into::into)
     }
 }
 
@@ -876,6 +898,10 @@ impl TryFrom<PublicKey> for CompressedPublicKey {
             Err(UncompressedPublicKeyError)
         }
     }
+}
+
+impl From<secp256k1::PublicKey> for CompressedPublicKey {
+    fn from(pk: secp256k1::PublicKey) -> Self { Self::from_secp(pk) }
 }
 
 impl From<CompressedPublicKey> for PublicKey {
@@ -1254,7 +1280,8 @@ impl<'de> serde::Deserialize<'de> for CompressedPublicKey {
                 where
                     E: serde::de::Error,
                 {
-                    CompressedPublicKey::from_slice(v).map_err(E::custom)
+                    let arr = v.try_into().map_err(E::custom)?;
+                    CompressedPublicKey::from_bytes(arr).map_err(E::custom)
                 }
             }
 
