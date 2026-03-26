@@ -133,6 +133,10 @@ pub struct OutOfRangeError {
     pub(super) is_greater_than_max: bool,
 }
 
+impl From<Infallible> for OutOfRangeError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
 impl OutOfRangeError {
     /// Returns the minimum and maximum allowed values for the type that was parsed.
     ///
@@ -190,6 +194,10 @@ pub struct TooPreciseError {
     pub(super) position: usize,
 }
 
+impl From<Infallible> for TooPreciseError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
 impl fmt::Display for TooPreciseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.position {
@@ -210,6 +218,10 @@ impl std::error::Error for TooPreciseError {}
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct InputTooLargeError {
     pub(super) len: usize,
+}
+
+impl From<Infallible> for InputTooLargeError {
+    fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl fmt::Display for InputTooLargeError {
@@ -240,6 +252,10 @@ pub struct MissingDigitsError {
     pub(super) kind: MissingDigitsKind,
 }
 
+impl From<Infallible> for MissingDigitsError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
 impl fmt::Display for MissingDigitsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.kind {
@@ -266,6 +282,10 @@ pub struct InvalidCharacterError {
     pub(super) position: usize,
 }
 
+impl From<Infallible> for InvalidCharacterError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
 impl fmt::Display for InvalidCharacterError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.invalid_char {
@@ -288,6 +308,10 @@ impl std::error::Error for InvalidCharacterError {}
 pub struct BadPositionError {
     pub(super) char: char,
     pub(super) position: usize,
+}
+
+impl From<Infallible> for BadPositionError {
+    fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl fmt::Display for BadPositionError {
@@ -347,10 +371,18 @@ impl std::error::Error for ParseDenominationError {
 #[non_exhaustive]
 pub struct MissingDenominationError;
 
+impl From<Infallible> for MissingDenominationError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
 /// Error returned when parsing an unknown denomination.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct UnknownDenominationError(pub(super) InputString);
+
+impl From<Infallible> for UnknownDenominationError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
 
 impl fmt::Display for UnknownDenominationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -367,6 +399,10 @@ impl std::error::Error for UnknownDenominationError {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct PossiblyConfusingDenominationError(pub(super) InputString);
+
+impl From<Infallible> for PossiblyConfusingDenominationError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
 
 impl fmt::Display for PossiblyConfusingDenominationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

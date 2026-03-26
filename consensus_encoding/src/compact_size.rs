@@ -6,6 +6,8 @@
 //! Bitcoin consensus protocol to usually to encode collection lengths. However,
 //! there are also some unique non-length use cases.
 
+use core::convert::Infallible;
+
 use internals::array_vec::ArrayVec;
 
 use crate::decode::Decoder;
@@ -347,6 +349,10 @@ enum CompactSizeDecoderErrorInner {
     ValueExceedsLimit(LengthPrefixExceedsMaxError),
 }
 
+impl From<Infallible> for CompactSizeDecoderError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
 impl core::fmt::Display for CompactSizeDecoderError {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         use internals::write_err;
@@ -389,6 +395,10 @@ pub struct LengthPrefixExceedsMaxError {
     limit: usize,
     /// The value that exceeded the limit.
     value: u64,
+}
+
+impl From<Infallible> for LengthPrefixExceedsMaxError {
+    fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl core::fmt::Display for LengthPrefixExceedsMaxError {
