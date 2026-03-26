@@ -32,7 +32,7 @@
 //! ```
 //!
 //!
-//! Hashing content using [`std::io::Write`] on a `HashEngine`:
+//! Hashing content using [`std::io::Write`] on a [`HashEngine`]:
 //!
 //! ```
 //! # #[cfg(feature = "std")] {
@@ -178,7 +178,7 @@ pub trait HashEngine: Clone {
     /// The `Hash` type returned when finalizing this engine.
     type Hash: Hash;
 
-    /// The byte array that is used internally in `finalize`.
+    /// The byte array that is used internally in [`HashEngine::finalize`].
     type Bytes: Copy + IsByteArray;
 
     /// Length of the hash, in bytes.

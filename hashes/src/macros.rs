@@ -9,7 +9,7 @@
 
 /// Macro used to define a tag.
 ///
-/// Defines new struct and implements `Tag` for it.
+/// Defines new struct and implements [`Tag`](crate::sha256t::Tag) for it.
 ///
 /// The syntax is:
 ///
