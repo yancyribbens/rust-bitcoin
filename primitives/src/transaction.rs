@@ -10,23 +10,21 @@
 //!
 //! This module provides the structures and functions needed to support transactions.
 
-use core::convert::Infallible;
 use core::fmt;
 #[cfg(feature = "alloc")]
 use core::{cmp, mem};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-use encoding::{ArrayEncoder, BytesEncoder, Encoder2, UnexpectedEofError};
+use encoding::{ArrayEncoder, BytesEncoder, Encoder2};
 #[cfg(feature = "alloc")]
 use encoding::{
     CompactSizeEncoder, Decoder2, Decoder3, Encodable as _, Encoder3, Encoder6, SliceEncoder,
-    VecDecoder, VecDecoderError,
+    VecDecoder,
 };
 #[cfg(feature = "alloc")]
 use hashes::sha256d;
 use internals::array::ArrayExt as _;
-use internals::write_err;
 #[cfg(feature = "serde")]
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 #[cfg(feature = "alloc")]
@@ -34,12 +32,14 @@ use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use units::parse_int;
 
 #[cfg(feature = "alloc")]
+use self::error::TransactionDecoderErrorInner;
+#[cfg(feature = "alloc")]
 use crate::amount::{AmountDecoder, AmountEncoder};
 #[cfg(feature = "alloc")]
 #[cfg(feature = "hex")]
-use crate::hex_codec::{HexPrimitive, ParsePrimitiveError};
+use crate::hex_codec::HexPrimitive;
 #[cfg(feature = "alloc")]
-use crate::locktime::absolute::{LockTimeDecoder, LockTimeDecoderError, LockTimeEncoder};
+use crate::locktime::absolute::{LockTimeDecoder, LockTimeEncoder};
 #[cfg(feature = "alloc")]
 use crate::prelude::Vec;
 #[cfg(feature = "alloc")]
@@ -47,15 +47,23 @@ use crate::script::{ScriptEncoder, ScriptPubKeyBufDecoder, ScriptSigBufDecoder};
 #[cfg(feature = "alloc")]
 use crate::sequence::{SequenceDecoder, SequenceEncoder};
 #[cfg(feature = "alloc")]
-use crate::witness::{WitnessDecoder, WitnessDecoderError, WitnessEncoder};
+use crate::witness::{WitnessDecoder, WitnessEncoder};
 #[cfg(feature = "alloc")]
 use crate::{absolute, Amount, ScriptPubKeyBuf, ScriptSigBuf, Sequence, Weight, Witness};
 
 #[rustfmt::skip]            // Keep public re-exports separate.
-#[doc(inline)]
-pub use crate::hash_types::{Ntxid, Txid, Wtxid, BlockHashDecoder};
+#[cfg(all(feature = "hex", feature = "alloc"))]
+#[doc(no_inline)]
+pub use self::error::{ParseTransactionError, ParseOutPointError};
+#[doc(no_inline)]
+pub use self::error::{OutPointDecoderError, VersionDecoderError};
+#[cfg(feature = "alloc")]
+#[doc(no_inline)]
+pub use self::error::{TransactionDecoderError, TxInDecoderError, TxOutDecoderError};
 #[doc(no_inline)]
 pub use crate::hash_types::BlockHashDecoderError;
+#[doc(inline)]
+pub use crate::hash_types::{BlockHashDecoder, Ntxid, Txid, Wtxid};
 
 /// Bitcoin transaction.
 ///
@@ -413,33 +421,6 @@ impl fmt::UpperHex for Transaction {
     }
 }
 
-/// An error that occurs during parsing of a [`Transaction`] from a hex string.
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ParseTransactionError(ParsePrimitiveError<Transaction>);
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-impl From<Infallible> for ParseTransactionError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-impl fmt::Display for ParseTransactionError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "parse transaction error"; self.0)
-    }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-#[cfg(feature = "std")]
-impl std::error::Error for ParseTransactionError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 /// The decoder for the [`Transaction`] type.
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone)]
@@ -724,106 +705,6 @@ enum IsSegwit {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct Iteration(usize);
 
-/// An error consensus decoding a `Transaction`.
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TransactionDecoderError(TransactionDecoderErrorInner);
-
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum TransactionDecoderErrorInner {
-    /// Error while decoding the `version`.
-    Version(VersionDecoderError),
-    /// We only support segwit flag value 0x01.
-    UnsupportedSegwitFlag(u8),
-    /// Error while decoding the `inputs`.
-    Inputs(VecDecoderError<TxInDecoderError>),
-    /// Error while decoding the `outputs`.
-    Outputs(VecDecoderError<TxOutDecoderError>),
-    /// Error while decoding one of the witnesses.
-    Witness(WitnessDecoderError),
-    /// Non-empty Segwit transaction with no witnesses.
-    NoWitnesses,
-    /// Error while decoding the `lock_time`.
-    LockTime(LockTimeDecoderError),
-    /// Attempt to call `end()` before the transaction was complete. Holds
-    /// a description of the current state.
-    EarlyEnd(&'static str),
-    /// Null prevout in non-coinbase transaction.
-    NullPrevoutInNonCoinbase(usize),
-    /// Coinbase scriptSig too small (must be at least 2 bytes).
-    CoinbaseScriptSigTooSmall(usize),
-    /// Coinbase scriptSig is too large (must be at most 100 bytes).
-    CoinbaseScriptSigTooLarge(usize),
-    /// Transaction has duplicate inputs (this check prevents CVE-2018-17144 ).
-    DuplicateInput(OutPoint),
-    /// Sum of output values exceeds `MAX_MONEY`
-    OutputValueSumTooLarge(u64),
-    /// Transaction has no outputs.
-    NoOutputs,
-}
-
-#[cfg(feature = "alloc")]
-impl From<Infallible> for TransactionDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-impl fmt::Display for TransactionDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use TransactionDecoderErrorInner as E;
-
-        match self.0 {
-            E::Version(ref e) => write_err!(f, "transaction decoder error"; e),
-            E::UnsupportedSegwitFlag(v) => {
-                write!(f, "we only support segwit flag value 0x01: {}", v)
-            }
-            E::Inputs(ref e) => write_err!(f, "transaction decoder error"; e),
-            E::Outputs(ref e) => write_err!(f, "transaction decoder error"; e),
-            E::Witness(ref e) => write_err!(f, "transaction decoder error"; e),
-            E::NoWitnesses => write!(f, "non-empty Segwit transaction with no witnesses"),
-            E::LockTime(ref e) => write_err!(f, "transaction decoder error"; e),
-            E::EarlyEnd(s) => write!(f, "early end of transaction (still decoding {})", s),
-            E::NullPrevoutInNonCoinbase(index) =>
-                write!(f, "null prevout in non-coinbase transaction at input {}", index),
-            E::CoinbaseScriptSigTooSmall(len) =>
-                write!(f, "coinbase scriptSig too small: {} bytes (min 2)", len),
-            E::CoinbaseScriptSigTooLarge(len) =>
-                write!(f, "coinbase scriptSig too large: {} bytes (max 100)", len),
-            E::DuplicateInput(ref outpoint) =>
-                write!(f, "duplicate input: {:?}:{}", outpoint.txid, outpoint.vout),
-            E::OutputValueSumTooLarge(val) =>
-                write!(f, "sum of output values {} satoshis exceeds MAX_MONEY", val),
-            E::NoOutputs => write!(f, "transaction has no outputs"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-#[cfg(feature = "alloc")]
-impl std::error::Error for TransactionDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        use TransactionDecoderErrorInner as E;
-
-        match self.0 {
-            E::Version(ref e) => Some(e),
-            E::UnsupportedSegwitFlag(_) => None,
-            E::Inputs(ref e) => Some(e),
-            E::Outputs(ref e) => Some(e),
-            E::Witness(ref e) => Some(e),
-            E::NoWitnesses => None,
-            E::LockTime(ref e) => Some(e),
-            E::EarlyEnd(_) => None,
-            E::NullPrevoutInNonCoinbase(_) => None,
-            E::CoinbaseScriptSigTooSmall(_) => None,
-            E::CoinbaseScriptSigTooLarge(_) => None,
-            E::DuplicateInput(_) => None,
-            E::OutputValueSumTooLarge(_) => None,
-            E::NoOutputs => None,
-        }
-    }
-}
-
 /// Bitcoin transaction input.
 ///
 /// It contains the location of the previous transaction's output,
@@ -1004,29 +885,6 @@ impl encoding::Decodable for TxIn {
     }
 }
 
-/// An error consensus decoding a `TxIn`.
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TxInDecoderError(<TxInInnerDecoder as encoding::Decoder>::Error);
-
-#[cfg(feature = "alloc")]
-impl From<Infallible> for TxInDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-impl fmt::Display for TxInDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "txin decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "std")]
-impl std::error::Error for TxInDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 /// Bitcoin transaction output.
 ///
 /// Defines new coins to be created as a result of the transaction,
@@ -1113,28 +971,6 @@ impl encoding::Decodable for TxOut {
     fn decoder() -> Self::Decoder {
         TxOutDecoder(Decoder2::new(AmountDecoder::new(), ScriptPubKeyBufDecoder::new()))
     }
-}
-
-/// An error consensus decoding a `TxOut`.
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TxOutDecoderError(<TxOutInnerDecoder as encoding::Decoder>::Error);
-
-#[cfg(feature = "alloc")]
-impl From<Infallible> for TxOutDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-impl fmt::Display for TxOutDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "txout decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for TxOutDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
 
 /// A reference to a transaction output.
@@ -1272,25 +1108,6 @@ impl encoding::Decodable for OutPoint {
     fn decoder() -> Self::Decoder { OutPointDecoder::default() }
 }
 
-/// Error while decoding an `OutPoint`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct OutPointDecoderError(UnexpectedEofError);
-
-impl From<Infallible> for OutPointDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl core::fmt::Display for OutPointDecoderError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write_err!(f, "out point decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for OutPointDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 #[cfg(feature = "serde")]
 impl Serialize for OutPoint {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -1401,57 +1218,6 @@ impl<'de> Deserialize<'de> for OutPoint {
 
             const FIELDS: &[&str] = &["txid", "vout"];
             deserializer.deserialize_struct("OutPoint", FIELDS, OutPointVisitor)
-        }
-    }
-}
-
-/// An error in parsing an [`OutPoint`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-pub enum ParseOutPointError {
-    /// Error in TXID part.
-    Txid(hex::DecodeFixedLengthBytesError),
-    /// Error in vout part.
-    Vout(parse_int::ParseIntError),
-    /// Error in general format.
-    Format,
-    /// Size exceeds max.
-    TooLong,
-    /// Vout part is not strictly numeric without leading zeroes.
-    VoutNotCanonical,
-}
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-impl From<Infallible> for ParseOutPointError {
-    #[inline]
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-impl fmt::Display for ParseOutPointError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::Txid(ref e) => write_err!(f, "error parsing TXID"; e),
-            Self::Vout(ref e) => write_err!(f, "error parsing vout"; e),
-            Self::Format => write!(f, "OutPoint not in <txid>:<vout> format"),
-            Self::TooLong => write!(f, "vout should be at most 10 digits"),
-            Self::VoutNotCanonical => write!(f, "no leading zeroes or + allowed in vout part"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-#[cfg(feature = "hex")]
-impl std::error::Error for ParseOutPointError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Txid(e) => Some(e),
-            Self::Vout(e) => Some(e),
-            Self::Format | Self::TooLong | Self::VoutNotCanonical => None,
         }
     }
 }
@@ -1585,23 +1351,284 @@ impl encoding::Decodable for Version {
     fn decoder() -> Self::Decoder { VersionDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
-/// An error consensus decoding an `Version`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct VersionDecoderError(encoding::UnexpectedEofError);
+/// Error types for Bitcoin transactions.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
 
-impl From<Infallible> for VersionDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+    use internals::write_err;
 
-impl fmt::Display for VersionDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "version decoder error"; self.0)
+    #[cfg(feature = "alloc")]
+    use super::OutPoint;
+    #[cfg(all(feature = "hex", feature = "alloc"))]
+    use super::{parse_int, Transaction};
+    #[cfg(all(feature = "hex", feature = "alloc"))]
+    use crate::hex_codec::ParsePrimitiveError;
+    #[cfg(feature = "alloc")]
+    use crate::locktime::absolute::LockTimeDecoderError;
+    #[cfg(feature = "alloc")]
+    use crate::witness::WitnessDecoderError;
+
+    /// An error that occurs during parsing of a [`Transaction`] from a hex string.
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct ParseTransactionError(pub(super) ParsePrimitiveError<Transaction>);
+
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    impl From<Infallible> for ParseTransactionError {
+        fn from(never: Infallible) -> Self { match never {} }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for VersionDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    impl fmt::Display for ParseTransactionError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "parse transaction error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseTransactionError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error consensus decoding a `Transaction`.
+    #[cfg(feature = "alloc")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct TransactionDecoderError(pub(super) TransactionDecoderErrorInner);
+
+    #[cfg(feature = "alloc")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub(super) enum TransactionDecoderErrorInner {
+        /// Error while decoding the `version`.
+        Version(VersionDecoderError),
+        /// We only support segwit flag value 0x01.
+        UnsupportedSegwitFlag(u8),
+        /// Error while decoding the `inputs`.
+        Inputs(encoding::VecDecoderError<TxInDecoderError>),
+        /// Error while decoding the `outputs`.
+        Outputs(encoding::VecDecoderError<TxOutDecoderError>),
+        /// Error while decoding one of the witnesses.
+        Witness(WitnessDecoderError),
+        /// Non-empty Segwit transaction with no witnesses.
+        NoWitnesses,
+        /// Error while decoding the `lock_time`.
+        LockTime(LockTimeDecoderError),
+        /// Attempt to call `end()` before the transaction was complete. Holds
+        /// a description of the current state.
+        EarlyEnd(&'static str),
+        /// Null prevout in non-coinbase transaction.
+        NullPrevoutInNonCoinbase(usize),
+        /// Coinbase scriptSig too small (must be at least 2 bytes).
+        CoinbaseScriptSigTooSmall(usize),
+        /// Coinbase scriptSig is too large (must be at most 100 bytes).
+        CoinbaseScriptSigTooLarge(usize),
+        /// Transaction has duplicate inputs (this check prevents CVE-2018-17144 ).
+        DuplicateInput(OutPoint),
+        /// Sum of output values exceeds `MAX_MONEY`
+        OutputValueSumTooLarge(u64),
+        /// Transaction has no outputs.
+        NoOutputs,
+    }
+
+    #[cfg(feature = "alloc")]
+    impl From<Infallible> for TransactionDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    #[cfg(feature = "alloc")]
+    impl fmt::Display for TransactionDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            use TransactionDecoderErrorInner as E;
+
+            match self.0 {
+                E::Version(ref e) => write_err!(f, "transaction decoder error"; e),
+                E::UnsupportedSegwitFlag(v) => {
+                    write!(f, "we only support segwit flag value 0x01: {}", v)
+                }
+                E::Inputs(ref e) => write_err!(f, "transaction decoder error"; e),
+                E::Outputs(ref e) => write_err!(f, "transaction decoder error"; e),
+                E::Witness(ref e) => write_err!(f, "transaction decoder error"; e),
+                E::NoWitnesses => write!(f, "non-empty Segwit transaction with no witnesses"),
+                E::LockTime(ref e) => write_err!(f, "transaction decoder error"; e),
+                E::EarlyEnd(s) => write!(f, "early end of transaction (still decoding {})", s),
+                E::NullPrevoutInNonCoinbase(index) =>
+                    write!(f, "null prevout in non-coinbase transaction at input {}", index),
+                E::CoinbaseScriptSigTooSmall(len) =>
+                    write!(f, "coinbase scriptSig too small: {} bytes (min 2)", len),
+                E::CoinbaseScriptSigTooLarge(len) =>
+                    write!(f, "coinbase scriptSig too large: {} bytes (max 100)", len),
+                E::DuplicateInput(ref outpoint) =>
+                    write!(f, "duplicate input: {:?}:{}", outpoint.txid, outpoint.vout),
+                E::OutputValueSumTooLarge(val) =>
+                    write!(f, "sum of output values {} satoshis exceeds MAX_MONEY", val),
+                E::NoOutputs => write!(f, "transaction has no outputs"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    #[cfg(feature = "alloc")]
+    impl std::error::Error for TransactionDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            use TransactionDecoderErrorInner as E;
+
+            match self.0 {
+                E::Version(ref e) => Some(e),
+                E::UnsupportedSegwitFlag(_) => None,
+                E::Inputs(ref e) => Some(e),
+                E::Outputs(ref e) => Some(e),
+                E::Witness(ref e) => Some(e),
+                E::NoWitnesses => None,
+                E::LockTime(ref e) => Some(e),
+                E::EarlyEnd(_) => None,
+                E::NullPrevoutInNonCoinbase(_) => None,
+                E::CoinbaseScriptSigTooSmall(_) => None,
+                E::CoinbaseScriptSigTooLarge(_) => None,
+                E::DuplicateInput(_) => None,
+                E::OutputValueSumTooLarge(_) => None,
+                E::NoOutputs => None,
+            }
+        }
+    }
+
+    /// An error consensus decoding a `TxIn`.
+    #[cfg(feature = "alloc")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct TxInDecoderError(pub(super) <super::TxInInnerDecoder as encoding::Decoder>::Error);
+
+    #[cfg(feature = "alloc")]
+    impl From<Infallible> for TxInDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    #[cfg(feature = "alloc")]
+    impl fmt::Display for TxInDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "txin decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "std")]
+    impl std::error::Error for TxInDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error consensus decoding a `TxOut`.
+    #[cfg(feature = "alloc")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct TxOutDecoderError(pub(super) <super::TxOutInnerDecoder as encoding::Decoder>::Error);
+
+    #[cfg(feature = "alloc")]
+    impl From<Infallible> for TxOutDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    #[cfg(feature = "alloc")]
+    impl fmt::Display for TxOutDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "txout decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for TxOutDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// Error while decoding an `OutPoint`.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct OutPointDecoderError(pub(super) encoding::UnexpectedEofError);
+
+    impl From<Infallible> for OutPointDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl core::fmt::Display for OutPointDecoderError {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write_err!(f, "out point decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for OutPointDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error in parsing an [`OutPoint`].
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    pub enum ParseOutPointError {
+        /// Error in TXID part.
+        Txid(hex::DecodeFixedLengthBytesError),
+        /// Error in vout part.
+        Vout(parse_int::ParseIntError),
+        /// Error in general format.
+        Format,
+        /// Size exceeds max.
+        TooLong,
+        /// Vout part is not strictly numeric without leading zeroes.
+        VoutNotCanonical,
+    }
+
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    impl From<Infallible> for ParseOutPointError {
+        #[inline]
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    impl fmt::Display for ParseOutPointError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match *self {
+                Self::Txid(ref e) => write_err!(f, "error parsing TXID"; e),
+                Self::Vout(ref e) => write_err!(f, "error parsing vout"; e),
+                Self::Format => write!(f, "OutPoint not in <txid>:<vout> format"),
+                Self::TooLong => write!(f, "vout should be at most 10 digits"),
+                Self::VoutNotCanonical => write!(f, "no leading zeroes or + allowed in vout part"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    #[cfg(feature = "hex")]
+    impl std::error::Error for ParseOutPointError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Txid(e) => Some(e),
+                Self::Vout(e) => Some(e),
+                Self::Format | Self::TooLong | Self::VoutNotCanonical => None,
+            }
+        }
+    }
+
+    /// An error consensus decoding an `Version`.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct VersionDecoderError(pub(super) encoding::UnexpectedEofError);
+
+    impl From<Infallible> for VersionDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for VersionDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "version decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for VersionDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
 }
 
 #[cfg(feature = "arbitrary")]
@@ -1677,6 +1704,8 @@ mod tests {
     #[cfg(feature = "alloc")]
     #[cfg(feature = "hex")]
     use crate::absolute::LockTime;
+    #[cfg(feature = "hex")]
+    use crate::hex_codec::ParsePrimitiveError;
 
     const TC_TXID_BYTES: [u8; 32] = [
         32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10,
