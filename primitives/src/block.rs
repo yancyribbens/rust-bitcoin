@@ -7,7 +7,6 @@
 //! module describes structures and functions needed to describe
 //! these blocks and the blockchain.
 
-use core::convert::Infallible;
 use core::fmt;
 #[cfg(feature = "alloc")]
 use core::marker::PhantomData;
@@ -18,32 +17,41 @@ use encoding::{ArrayDecoder, Decoder6};
 #[cfg(feature = "alloc")]
 use encoding::{CompactSizeEncoder, Decoder2, Encoder2, SliceEncoder, VecDecoder};
 use hashes::{sha256d, HashEngine as _};
-use internals::write_err;
 
 #[cfg(feature = "hex")]
-use crate::hex_codec::{HexPrimitive, ParsePrimitiveError};
+use crate::hex_codec::HexPrimitive;
 #[cfg(feature = "alloc")]
 use crate::merkle_tree::WitnessMerkleNode;
-use crate::merkle_tree::{TxMerkleNode, TxMerkleNodeDecoder, TxMerkleNodeDecoderError};
-use crate::pow::{CompactTargetDecoder, CompactTargetDecoderError};
+use crate::merkle_tree::{TxMerkleNode, TxMerkleNodeDecoder};
+use crate::pow::CompactTargetDecoder;
 #[cfg(feature = "alloc")]
 use crate::prelude::Vec;
-use crate::time::{BlockTimeDecoder, BlockTimeDecoderError};
+use crate::time::BlockTimeDecoder;
 use crate::{BlockTime, CompactTarget};
 #[cfg(feature = "alloc")]
 use crate::{Transaction, Wtxid};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
-pub use units::block::{error, BlockHeight, BlockHeightDecoder, BlockHeightEncoder, BlockHeightInterval, BlockMtp, BlockMtpInterval};
-// Re-export errors that appear directly in the API - but no doc inline.
-#[doc(no_inline)]
-pub use units::block::{BlockHeightDecoderError, TooBigForRelativeHeightError};
+pub use units::block::{BlockHeight, BlockHeightDecoder, BlockHeightEncoder, BlockHeightInterval, BlockMtp, BlockMtpInterval};
 
-#[doc(inline)]
-pub use crate::hash_types::{
-    BlockHash, BlockHashDecoder, BlockHashDecoderError, BlockHashEncoder, WitnessCommitment,
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[cfg(all(feature = "hex", feature = "alloc"))]
+#[doc(no_inline)]
+pub use self::error::ParseBlockError;
+#[cfg(feature = "hex")]
+#[doc(no_inline)]
+pub use self::error::ParseHeaderError;
+#[cfg(feature = "alloc")]
+#[doc(no_inline)]
+pub use self::error::{BlockDecoderError, InvalidBlockError};
+#[doc(no_inline)]
+pub use self::error::{
+    BlockHashDecoderError, BlockHeightDecoderError, HeaderDecoderError,
+    TooBigForRelativeHeightError, VersionDecoderError,
 };
+#[doc(inline)]
+pub use crate::hash_types::{BlockHash, BlockHashDecoder, BlockHashEncoder, WitnessCommitment};
 
 /// Marker for whether or not a block has been validated.
 ///
@@ -315,33 +323,6 @@ impl<V: Validation> fmt::UpperHex for Block<V> {
     }
 }
 
-/// An error that occurs during parsing of a [`Block`] from a hex string.
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ParseBlockError(ParsePrimitiveError<Block>);
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-impl From<Infallible> for ParseBlockError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-impl fmt::Display for ParseBlockError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "parse block error"; self.0)
-    }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "hex")]
-#[cfg(feature = "std")]
-impl std::error::Error for ParseBlockError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 #[cfg(feature = "alloc")]
 encoding::encoder_newtype! {
     /// The encoder for the [`Block`] type.
@@ -420,67 +401,6 @@ impl encoding::Decodable for Block<Unchecked> {
         BlockDecoder(Decoder2::new(Header::decoder(), VecDecoder::<Transaction>::new()))
     }
 }
-
-/// An error consensus decoding a [`Block`].
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BlockDecoderError(<BlockInnerDecoder as encoding::Decoder>::Error);
-
-#[cfg(feature = "alloc")]
-impl From<Infallible> for BlockDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-impl fmt::Display for BlockDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "block decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "std")]
-impl std::error::Error for BlockDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
-/// Invalid block error.
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum InvalidBlockError {
-    /// Header Merkle root does not match the calculated Merkle root.
-    InvalidMerkleRoot,
-    /// The witness commitment in coinbase transaction does not match the calculated `witness_root`.
-    InvalidWitnessCommitment,
-    /// Block has no transactions (missing coinbase).
-    NoTransactions,
-    /// The first transaction is not a valid coinbase transaction.
-    InvalidCoinbase,
-}
-
-#[cfg(feature = "alloc")]
-impl From<Infallible> for InvalidBlockError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-impl fmt::Display for InvalidBlockError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::InvalidMerkleRoot =>
-                write!(f, "header Merkle root does not match the calculated Merkle root"),
-            Self::InvalidWitnessCommitment => write!(f, "the witness commitment in coinbase transaction does not match the calculated witness_root"),
-            Self::NoTransactions => write!(f, "block has no transactions (missing coinbase)"),
-            Self::InvalidCoinbase =>
-                write!(f, "the first transaction is not a valid coinbase transaction"),
-        }
-    }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg(feature = "std")]
-impl std::error::Error for InvalidBlockError {}
 
 /// Computes the Merkle root for a list of transactions.
 ///
@@ -625,29 +545,6 @@ impl fmt::Debug for Header {
     }
 }
 
-/// An error that occurs during parsing of a [`Header`] from a hex string.
-#[cfg(feature = "hex")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ParseHeaderError(ParsePrimitiveError<Header>);
-
-#[cfg(feature = "hex")]
-impl From<Infallible> for ParseHeaderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "hex")]
-impl fmt::Display for ParseHeaderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "parse header error"; self.0)
-    }
-}
-
-#[cfg(feature = "hex")]
-#[cfg(feature = "std")]
-impl std::error::Error for ParseHeaderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`Header`] type.
     #[derive(Debug, Clone)]
@@ -752,55 +649,6 @@ impl encoding::Decodable for Header {
             CompactTargetDecoder::new(),
             encoding::ArrayDecoder::new(),
         ))
-    }
-}
-
-/// An error consensus decoding a `Header`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum HeaderDecoderError {
-    /// Error while decoding the `version`.
-    Version(VersionDecoderError),
-    /// Error while decoding the `prev_blockhash`.
-    PrevBlockhash(BlockHashDecoderError),
-    /// Error while decoding the `merkle_root`.
-    MerkleRoot(TxMerkleNodeDecoderError),
-    /// Error while decoding the `time`.
-    Time(BlockTimeDecoderError),
-    /// Error while decoding the `bits`.
-    Bits(CompactTargetDecoderError),
-    /// Error while decoding the `nonce`.
-    Nonce(encoding::UnexpectedEofError),
-}
-
-impl From<Infallible> for HeaderDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for HeaderDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::Version(ref e) => write_err!(f, "header decoder error"; e),
-            Self::PrevBlockhash(ref e) => write_err!(f, "header decoder error"; e),
-            Self::MerkleRoot(ref e) => write_err!(f, "header decoder error"; e),
-            Self::Time(ref e) => write_err!(f, "header decoder error"; e),
-            Self::Bits(ref e) => write_err!(f, "header decoder error"; e),
-            Self::Nonce(ref e) => write_err!(f, "header decoder error"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for HeaderDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {
-            Self::Version(ref e) => Some(e),
-            Self::PrevBlockhash(ref e) => Some(e),
-            Self::MerkleRoot(ref e) => Some(e),
-            Self::Time(ref e) => Some(e),
-            Self::Bits(ref e) => Some(e),
-            Self::Nonce(ref e) => Some(e),
-        }
     }
 }
 
@@ -963,23 +811,207 @@ impl encoding::Decodable for Version {
     fn decoder() -> Self::Decoder { VersionDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
-/// An error consensus decoding an `Version`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct VersionDecoderError(encoding::UnexpectedEofError);
+/// Error types for Bitcoin blocks.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
 
-impl From<Infallible> for VersionDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+    use internals::write_err;
 
-impl fmt::Display for VersionDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "version decoder error"; self.0)
+    #[cfg(feature = "alloc")]
+    use super::Block;
+    #[cfg(feature = "hex")]
+    use super::Header;
+    #[cfg(feature = "hex")]
+    use crate::hex_codec::ParsePrimitiveError;
+    use crate::merkle_tree::TxMerkleNodeDecoderError;
+    use crate::pow::CompactTargetDecoderError;
+    use crate::time::BlockTimeDecoderError;
+
+    #[rustfmt::skip]                // Keep public re-exports separate.
+    #[doc(no_inline)]
+    pub use units::block::{BlockHeightDecoderError, TooBigForRelativeHeightError};
+    #[doc(inline)]
+    pub use crate::hash_types::BlockHashDecoderError;
+
+    /// An error that occurs during parsing of a [`Block`] from a hex string.
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct ParseBlockError(pub(super) ParsePrimitiveError<Block>);
+
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    impl From<Infallible> for ParseBlockError {
+        fn from(never: Infallible) -> Self { match never {} }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for VersionDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    impl fmt::Display for ParseBlockError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "parse block error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseBlockError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error consensus decoding a [`Block`].
+    #[cfg(feature = "alloc")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct BlockDecoderError(pub(super) <super::BlockInnerDecoder as encoding::Decoder>::Error);
+
+    #[cfg(feature = "alloc")]
+    impl From<Infallible> for BlockDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    #[cfg(feature = "alloc")]
+    impl fmt::Display for BlockDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "block decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "std")]
+    impl std::error::Error for BlockDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// Invalid block error.
+    #[cfg(feature = "alloc")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum InvalidBlockError {
+        /// Header Merkle root does not match the calculated Merkle root.
+        InvalidMerkleRoot,
+        /// The witness commitment in coinbase transaction does not match the calculated `witness_root`.
+        InvalidWitnessCommitment,
+        /// Block has no transactions (missing coinbase).
+        NoTransactions,
+        /// The first transaction is not a valid coinbase transaction.
+        InvalidCoinbase,
+    }
+
+    #[cfg(feature = "alloc")]
+    impl From<Infallible> for InvalidBlockError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    #[cfg(feature = "alloc")]
+    impl fmt::Display for InvalidBlockError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::InvalidMerkleRoot =>
+                    write!(f, "header Merkle root does not match the calculated Merkle root"),
+                Self::InvalidWitnessCommitment => write!(f, "the witness commitment in coinbase transaction does not match the calculated witness_root"),
+                Self::NoTransactions => write!(f, "block has no transactions (missing coinbase)"),
+                Self::InvalidCoinbase =>
+                    write!(f, "the first transaction is not a valid coinbase transaction"),
+            }
+        }
+    }
+
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "std")]
+    impl std::error::Error for InvalidBlockError {}
+
+    /// An error that occurs during parsing of a [`Header`] from a hex string.
+    #[cfg(feature = "hex")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct ParseHeaderError(pub(super) ParsePrimitiveError<Header>);
+
+    #[cfg(feature = "hex")]
+    impl From<Infallible> for ParseHeaderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    #[cfg(feature = "hex")]
+    impl fmt::Display for ParseHeaderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "parse header error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "hex")]
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseHeaderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error consensus decoding a `Header`.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum HeaderDecoderError {
+        /// Error while decoding the `version`.
+        Version(VersionDecoderError),
+        /// Error while decoding the `prev_blockhash`.
+        PrevBlockhash(BlockHashDecoderError),
+        /// Error while decoding the `merkle_root`.
+        MerkleRoot(TxMerkleNodeDecoderError),
+        /// Error while decoding the `time`.
+        Time(BlockTimeDecoderError),
+        /// Error while decoding the `bits`.
+        Bits(CompactTargetDecoderError),
+        /// Error while decoding the `nonce`.
+        Nonce(encoding::UnexpectedEofError),
+    }
+
+    impl From<Infallible> for HeaderDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for HeaderDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match *self {
+                Self::Version(ref e) => write_err!(f, "header decoder error"; e),
+                Self::PrevBlockhash(ref e) => write_err!(f, "header decoder error"; e),
+                Self::MerkleRoot(ref e) => write_err!(f, "header decoder error"; e),
+                Self::Time(ref e) => write_err!(f, "header decoder error"; e),
+                Self::Bits(ref e) => write_err!(f, "header decoder error"; e),
+                Self::Nonce(ref e) => write_err!(f, "header decoder error"; e),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for HeaderDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match *self {
+                Self::Version(ref e) => Some(e),
+                Self::PrevBlockhash(ref e) => Some(e),
+                Self::MerkleRoot(ref e) => Some(e),
+                Self::Time(ref e) => Some(e),
+                Self::Bits(ref e) => Some(e),
+                Self::Nonce(ref e) => Some(e),
+            }
+        }
+    }
+
+    /// An error consensus decoding an `Version`.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct VersionDecoderError(pub(super) encoding::UnexpectedEofError);
+
+    impl From<Infallible> for VersionDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for VersionDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "version decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for VersionDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
 }
 
 #[cfg(feature = "arbitrary")]
