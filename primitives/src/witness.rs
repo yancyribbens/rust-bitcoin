@@ -4,7 +4,6 @@
 //!
 //! This module contains the [`Witness`] struct and related methods to operate on it
 
-use core::convert::Infallible;
 use core::fmt;
 use core::ops::Index;
 
@@ -13,18 +12,22 @@ use arbitrary::{Arbitrary, Unstructured};
 #[cfg(doc)]
 use encoding::Decoder4;
 use encoding::{
-    self, BytesEncoder, CompactSizeDecoder, CompactSizeDecoderError, CompactSizeEncoder,
-    Decoder as _, Encoder2,
+    self, BytesEncoder, CompactSizeDecoder, CompactSizeEncoder, Decoder as _, Encoder2,
 };
 #[cfg(feature = "hex")]
 use hex::DecodeVariableLengthBytesError;
 use internals::slice::SliceExt;
 use internals::wrap_debug::WrapDebug;
-use internals::write_err;
 
 use crate::prelude::{Box, Vec};
 #[cfg(doc)]
 use crate::TxIn;
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{UnexpectedEofError, WitnessDecoderError};
+
+use self::error::WitnessDecoderErrorInner;
 
 /// Maximum amount of memory (in bytes) to allocate at once when deserializing vectors.
 #[cfg(feature = "alloc")]
@@ -822,65 +825,6 @@ impl Default for Witness {
     fn default() -> Self { Self::new() }
 }
 
-/// An error when consensus decoding a [`Witness`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct WitnessDecoderError(WitnessDecoderErrorInner);
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum WitnessDecoderErrorInner {
-    /// Error decoding the vector length prefix.
-    LengthPrefixDecode(CompactSizeDecoderError),
-    /// Not enough bytes given to decoder.
-    UnexpectedEof(UnexpectedEofError),
-}
-
-impl From<Infallible> for WitnessDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for WitnessDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use WitnessDecoderErrorInner as E;
-
-        match self.0 {
-            E::LengthPrefixDecode(ref e) => write_err!(f, "vec decoder error"; e),
-            E::UnexpectedEof(ref e) => write_err!(f, "decoder error"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for WitnessDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        use WitnessDecoderErrorInner as E;
-
-        match self.0 {
-            E::LengthPrefixDecode(ref e) => Some(e),
-            E::UnexpectedEof(ref e) => Some(e),
-        }
-    }
-}
-
-/// Not enough witness elements (bytes) given to decoder.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct UnexpectedEofError {
-    /// Number of elements missing to complete decoder.
-    missing_elements: usize,
-}
-
-impl From<Infallible> for UnexpectedEofError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for UnexpectedEofError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "not enough witness elements for decoder, missing {}", self.missing_elements)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UnexpectedEofError {}
-
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for Witness {
     fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
@@ -966,6 +910,76 @@ fn decode_unchecked(slice: &mut &[u8]) -> u64 {
             u64::from(n)
         }
     }
+}
+
+/// Error types for witness data.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
+
+    use encoding::CompactSizeDecoderError;
+    use internals::write_err;
+
+    /// An error when consensus decoding a [`Witness`].
+    ///
+    /// [`Witness`]: super::Witness
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct WitnessDecoderError(pub(super) WitnessDecoderErrorInner);
+
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub(super) enum WitnessDecoderErrorInner {
+        /// Error decoding the vector length prefix.
+        LengthPrefixDecode(CompactSizeDecoderError),
+        /// Not enough bytes given to decoder.
+        UnexpectedEof(UnexpectedEofError),
+    }
+
+    impl From<Infallible> for WitnessDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for WitnessDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            use WitnessDecoderErrorInner as E;
+
+            match self.0 {
+                E::LengthPrefixDecode(ref e) => write_err!(f, "vec decoder error"; e),
+                E::UnexpectedEof(ref e) => write_err!(f, "decoder error"; e),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for WitnessDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            use WitnessDecoderErrorInner as E;
+
+            match self.0 {
+                E::LengthPrefixDecode(ref e) => Some(e),
+                E::UnexpectedEof(ref e) => Some(e),
+            }
+        }
+    }
+
+    /// Not enough witness elements (bytes) given to decoder.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct UnexpectedEofError {
+        /// Number of elements missing to complete decoder.
+        pub(super) missing_elements: usize,
+    }
+
+    impl From<Infallible> for UnexpectedEofError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for UnexpectedEofError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "not enough witness elements for decoder, missing {}", self.missing_elements)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for UnexpectedEofError {}
 }
 
 #[cfg(test)]
