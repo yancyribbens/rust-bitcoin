@@ -225,7 +225,9 @@ pub fn hex_remove_prefix(s: &str) -> Result<&str, PrefixedHexError> {
     } else if let Some(checked) = s.strip_prefix("0X") {
         Ok(checked)
     } else {
-        Err(error::MissingPrefixError::new(s).into())
+        Err(PrefixedHexError(error::PrefixedHexErrorInner::MissingPrefix(
+            error::MissingPrefixError::new(s),
+        )))
     }
 }
 
@@ -237,7 +239,9 @@ pub fn hex_remove_prefix(s: &str) -> Result<&str, PrefixedHexError> {
 #[inline]
 pub fn hex_check_unprefixed(s: &str) -> Result<&str, UnprefixedHexError> {
     if s.starts_with("0x") || s.starts_with("0X") {
-        return Err(error::ContainsPrefixError::new(s).into());
+        return Err(UnprefixedHexError(error::UnprefixedHexErrorInner::ContainsPrefix(
+            error::ContainsPrefixError::new(s),
+        )));
     }
     Ok(s)
 }
@@ -275,7 +279,9 @@ macro_rules! parse_hex_for {
         #[inline]
         pub fn $prefix_hex_fn(s: &str) -> Result<$int_type, PrefixedHexError> {
             let checked = hex_remove_prefix(s)?;
-            Ok($uncheck_hex_fn(checked)?)
+            $uncheck_hex_fn(checked)
+                .map_err(error::PrefixedHexErrorInner::ParseInt)
+                .map_err(PrefixedHexError)
         }
 
         #[doc = "Parses a `"]
@@ -289,7 +295,9 @@ macro_rules! parse_hex_for {
         #[inline]
         pub fn $unprefix_hex_fn(s: &str) -> Result<$int_type, UnprefixedHexError> {
             let checked = hex_check_unprefixed(s)?;
-            Ok($uncheck_hex_fn(checked)?)
+            $uncheck_hex_fn(checked)
+                .map_err(error::UnprefixedHexErrorInner::ParseInt)
+                .map_err(UnprefixedHexError)
         }
 
         #[doc = "Parses a `"]
@@ -490,16 +498,6 @@ pub mod error {
         }
     }
 
-    impl From<MissingPrefixError> for PrefixedHexError {
-        #[inline]
-        fn from(e: MissingPrefixError) -> Self { Self(PrefixedHexErrorInner::MissingPrefix(e)) }
-    }
-
-    impl From<ParseIntError> for PrefixedHexError {
-        #[inline]
-        fn from(e: ParseIntError) -> Self { Self(PrefixedHexErrorInner::ParseInt(e)) }
-    }
-
     /// Error returned when parsing an integer from a hex string that is not supposed to contain a prefix.
     #[derive(Debug, Clone, Eq, PartialEq)]
     pub struct UnprefixedHexError(pub(super) UnprefixedHexErrorInner);
@@ -542,16 +540,6 @@ pub mod error {
                 E::ParseInt(ref e) => Some(e),
             }
         }
-    }
-
-    impl From<ContainsPrefixError> for UnprefixedHexError {
-        #[inline]
-        fn from(e: ContainsPrefixError) -> Self { Self(UnprefixedHexErrorInner::ContainsPrefix(e)) }
-    }
-
-    impl From<ParseIntError> for UnprefixedHexError {
-        #[inline]
-        fn from(e: ParseIntError) -> Self { Self(UnprefixedHexErrorInner::ParseInt(e)) }
     }
 
     /// Error returned when a hex string is missing a prefix (e.g. `0x`).
