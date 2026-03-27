@@ -261,7 +261,7 @@ impl convert::AsRef<[u8]> for Midstate {
     fn as_ref(&self) -> &[u8] { &self.bytes }
 }
 
-/// `Midstate` invariant violated (not a multiple of 64).
+/// [`Midstate`] invariant violated (not a multiple of 64).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MidstateError {
     /// The invalid number of bytes hashed.
