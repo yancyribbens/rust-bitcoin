@@ -342,6 +342,40 @@ parse_hex_for!(
     fn hex_u128_unchecked();
 );
 
+pub(crate) fn hex_u256_prefixed(s: &str) -> Result<crate::pow::U256, PrefixedHexError> {
+    let checked = hex_remove_prefix(s)?;
+    hex_u256_unchecked(checked)
+        .map_err(error::PrefixedHexErrorInner::ParseInt)
+        .map_err(PrefixedHexError)
+}
+
+pub(crate) fn hex_u256_unprefixed(s: &str) -> Result<crate::pow::U256, UnprefixedHexError> {
+    let checked = hex_check_unprefixed(s)?;
+    hex_u256_unchecked(checked)
+        .map_err(error::UnprefixedHexErrorInner::ParseInt)
+        .map_err(UnprefixedHexError)
+}
+
+pub(crate) fn hex_u256_unchecked(s: &str) -> Result<crate::pow::U256, ParseIntError> {
+    let (high, low) = if s.len() <= 32 {
+        let low = hex_u128_unchecked(s)?;
+        (0, low)
+    } else {
+        let high_len = s.len() - 32;
+        let high_s = &s[..high_len];
+        let low_s = &s[high_len..];
+
+        let high = hex_u128_unchecked(high_s)?;
+        let low = hex_u128_unchecked(low_s)?;
+        (high, low)
+    };
+
+    let mut bytes = [0u8; 32];
+    bytes[..16].copy_from_slice(&low.to_le_bytes());
+    bytes[16..].copy_from_slice(&high.to_le_bytes());
+    Ok(crate::pow::U256::from_le_bytes(bytes))
+}
+
 /// Strips the hex prefix off `s` if one is present.
 #[inline]
 pub(crate) fn hex_remove_optional_prefix(s: &str) -> &str {
