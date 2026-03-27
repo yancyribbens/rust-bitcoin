@@ -133,46 +133,48 @@ fn decode_decoder2_read_limit_with_exhausted() {
 }
 
 #[test]
-fn decode_compact_size_read_limit_transitions() {
-    // Test read_limit behavior during compact size decoding.
-    let mut decoder = CompactSizeDecoder::default();
+fn decode_decoder2_end_with_first_decoder_incomplete() {
+    // Test calling end() when first decoder is incomplete.
+    let mut decoder = Decoder2::new(ArrayDecoder::<5>::new(), ArrayDecoder::<3>::new());
 
-    assert_eq!(decoder.read_limit(), 1);
-    let mut data = &[0xFD][..];
-    let needs_more = decoder.push_bytes(&mut data).unwrap();
-    assert!(needs_more, "should need more data after seeing 0xFD");
-    assert_eq!(data.len(), 0, "all data should be consumed");
+    let mut data = &[0x01, 0x02][..];
+    let _ = decoder.push_bytes(&mut data);
+    let err = decoder.end().unwrap_err();
 
-    assert_eq!(decoder.read_limit(), 2);
-    let mut data = &[0x00][..];
-    let needs_more = decoder.push_bytes(&mut data).unwrap();
-    assert!(needs_more, "should still need one more byte");
-    assert_eq!(data.len(), 0, "all data should be consumed");
-    assert_eq!(decoder.read_limit(), 1);
-
-    let mut data = &[0x01][..];
-    let needs_more = decoder.push_bytes(&mut data).unwrap();
-    assert!(!needs_more, "should not need more data");
-    assert_eq!(data.len(), 0, "all data should be consumed");
-    assert_eq!(decoder.read_limit(), 0);
-
-    let result = decoder.end().unwrap();
-    assert_eq!(result, 256);
+    assert!(matches!(
+        err,
+        bitcoin_consensus_encoding::Decoder2Error::First(UnexpectedEofError { .. })
+    ));
 }
 
 #[test]
-fn decode_compact_size_single_byte_read_limit() {
-    // Test read_limit for single-byte compact size.
-    let mut decoder = CompactSizeDecoder::default();
+fn decode_decoder2_end_with_second_decoder_incomplete() {
+    // Test calling end() when second decoder is incomplete.
+    let mut decoder = Decoder2::new(ArrayDecoder::<2>::new(), ArrayDecoder::<5>::new());
 
-    assert_eq!(decoder.read_limit(), 1);
+    let mut data = &[0x01, 0x02, 0x03][..];
+    let _ = decoder.push_bytes(&mut data);
+    let err = decoder.end().unwrap_err();
+
+    assert!(matches!(
+        err,
+        bitcoin_consensus_encoding::Decoder2Error::Second(UnexpectedEofError { .. })
+    ));
+}
+
+#[test]
+fn decode_decoder2_with_zero_sized_first_decoder_end() {
+    // Test edge case where first decoder needs 0 bytes.
+    let mut decoder = Decoder2::new(ArrayDecoder::<0>::new(), ArrayDecoder::<3>::new());
+
     let mut data = &[0x42][..];
-    let needs_more = decoder.push_bytes(&mut data).unwrap();
-    assert!(!needs_more, "single-byte value should be complete");
-    assert_eq!(data.len(), 0, "all data should be consumed");
-    assert_eq!(decoder.read_limit(), 0);
-    let result = decoder.end().unwrap();
-    assert_eq!(result, 66);
+    let _ = decoder.push_bytes(&mut data);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(
+        err,
+        bitcoin_consensus_encoding::Decoder2Error::Second(UnexpectedEofError { .. })
+    ));
 }
 
 #[test]
@@ -486,42 +488,6 @@ check_decode_one_byte_at_a_time! {
     decode_compact_size_0x0F0F_0F0F, 0x0F0F_0F0F, [0xFE, 0xF, 0xF, 0xF, 0xF];
 }
 
-#[test]
-#[cfg(target_pointer_width = "64")]
-#[allow(non_snake_case)]
-fn decode_compact_size_0xF0F0_F0F0_F0E0() {
-    let mut decoder = CompactSizeDecoder::new_with_limit(0xF0F0_F0F0_F0EF);
-    let array = [0xFF, 0xE0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0, 0];
-
-    for (i, _) in array.iter().enumerate() {
-        if i < array.len() - 1 {
-            let mut p = &array[i..=i];
-            assert!(decoder.push_bytes(&mut p).unwrap());
-        } else {
-            // last byte: `push_bytes` should return false since no more bytes required.
-            let mut p = &array[i..];
-            assert!(!decoder.push_bytes(&mut p).unwrap());
-        }
-    }
-
-    let got = decoder.end().unwrap();
-    assert_eq!(got, 0xF0F0_F0F0_F0E0);
-}
-
-#[test]
-#[cfg(feature = "alloc")]
-fn compact_size_zero() {
-    // Zero (eg for an empty vector) with a couple of arbitrary extra bytes.
-    let encoded = vec![0x00, 0xFF, 0xFF];
-
-    let mut slice = encoded.as_slice();
-    let mut decoder = CompactSizeDecoder::new();
-    assert!(!decoder.push_bytes(&mut slice).unwrap());
-
-    let got = decoder.end().unwrap();
-    assert_eq!(got, 0);
-}
-
 #[cfg(feature = "alloc")]
 fn two_fifty_six_bytes_encoded() -> Vec<u8> {
     let data = [0xff; 256];
@@ -660,4 +626,54 @@ fn decode_vec_from_read_unbuffered_success() {
 
     let want = Test(vec![Inner(0xDEAD_BEEF)]);
     assert_eq!(got, want);
+}
+
+#[test]
+#[cfg(feature = "alloc")]
+fn decode_byte_vec_decoder_end_incomplete_length_prefix() {
+    let mut decoder = ByteVecDecoder::new();
+    let mut data = &[0xFD, 0x05][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::ByteVecDecoderError { .. }));
+}
+
+#[test]
+#[cfg(feature = "alloc")]
+fn decode_byte_vec_decoder_end_incomplete_data() {
+    // Length=5 but only 2 bytes of data.
+    let mut decoder = ByteVecDecoder::new();
+    let mut data = &[0x05, 0xAA, 0xBB][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::ByteVecDecoderError { .. }));
+}
+
+#[test]
+#[cfg(feature = "alloc")]
+fn decode_vec_decoder_end_incomplete_length_prefix() {
+    let mut decoder = VecDecoder::<Inner>::new();
+    let mut data = &[0xFD, 0x05][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::VecDecoderError { .. }));
+}
+
+#[test]
+#[cfg(feature = "alloc")]
+fn decode_vec_decoder_end_incomplete_item() {
+    // Length=3 but only 2 bytes of data.
+    let mut decoder = VecDecoder::<Inner>::new();
+    let mut data = &[0x03, 0xAA, 0xBB][..];
+    let needs_more = decoder.push_bytes(&mut data).unwrap();
+    assert!(needs_more);
+
+    let err = decoder.end().unwrap_err();
+    assert!(matches!(err, bitcoin_consensus_encoding::VecDecoderError { .. }));
 }
