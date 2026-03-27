@@ -178,7 +178,7 @@ impl encoding::Encoder for CommandStringEncoder {
 
 impl encoding::ExactSizeEncoder for CommandStringEncoder {
     #[inline]
-    fn len(&self) -> usize { 12 }
+    fn len(&self) -> usize { self.0.len() }
 }
 
 /// Decoder for [`CommandString`].
@@ -2736,5 +2736,20 @@ mod test {
 
         let enc = serialize(&decoded);
         assert_eq!(data.as_slice(), enc.as_slice());
+    }
+
+    #[test]
+    fn command_string_encoder() {
+        use encoding::{Encodable as _, ExactSizeEncoder as _};
+
+        let cmd = CommandString::try_from_static("version").unwrap();
+        let expected_bytes: [u8; 12] = [b'v', b'e', b'r', b's', b'i', b'o', b'n', 0, 0, 0, 0, 0];
+
+        let mut encoder = cmd.encoder();
+        assert_eq!(encoder.len(), expected_bytes.len());
+
+        let encoded = encoding::flush_to_vec(&mut encoder);
+        assert_eq!(encoder.len(), 0);
+        assert_eq!(encoded, expected_bytes);
     }
 }
