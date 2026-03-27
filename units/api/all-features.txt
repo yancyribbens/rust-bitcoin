@@ -5482,10 +5482,6 @@ impl core::cmp::PartialEq for bitcoin_units::parse_int::error::ParseIntError
 pub fn bitcoin_units::parse_int::error::ParseIntError::eq(&self, other: &bitcoin_units::parse_int::error::ParseIntError) -> bool
 impl core::convert::AsRef<core::num::error::ParseIntError> for bitcoin_units::parse_int::error::ParseIntError
 pub fn bitcoin_units::parse_int::error::ParseIntError::as_ref(&self) -> &core::num::error::ParseIntError
-impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for bitcoin_units::parse_int::error::PrefixedHexError
-pub fn bitcoin_units::parse_int::error::PrefixedHexError::from(e: bitcoin_units::parse_int::error::ParseIntError) -> Self
-impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for bitcoin_units::parse_int::error::UnprefixedHexError
-pub fn bitcoin_units::parse_int::error::UnprefixedHexError::from(e: bitcoin_units::parse_int::error::ParseIntError) -> Self
 impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for core::num::error::ParseIntError
 pub fn core::num::error::ParseIntError::from(value: bitcoin_units::parse_int::error::ParseIntError) -> Self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::parse_int::error::ParseIntError
@@ -5534,8 +5530,6 @@ pub fn bitcoin_units::parse_int::error::PrefixedHexError::clone(&self) -> bitcoi
 impl core::cmp::Eq for bitcoin_units::parse_int::error::PrefixedHexError
 impl core::cmp::PartialEq for bitcoin_units::parse_int::error::PrefixedHexError
 pub fn bitcoin_units::parse_int::error::PrefixedHexError::eq(&self, other: &bitcoin_units::parse_int::error::PrefixedHexError) -> bool
-impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for bitcoin_units::parse_int::error::PrefixedHexError
-pub fn bitcoin_units::parse_int::error::PrefixedHexError::from(e: bitcoin_units::parse_int::error::ParseIntError) -> Self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::parse_int::error::PrefixedHexError
 pub fn bitcoin_units::parse_int::error::PrefixedHexError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::parse_int::error::PrefixedHexError
@@ -5582,8 +5576,6 @@ pub fn bitcoin_units::parse_int::error::UnprefixedHexError::clone(&self) -> bitc
 impl core::cmp::Eq for bitcoin_units::parse_int::error::UnprefixedHexError
 impl core::cmp::PartialEq for bitcoin_units::parse_int::error::UnprefixedHexError
 pub fn bitcoin_units::parse_int::error::UnprefixedHexError::eq(&self, other: &bitcoin_units::parse_int::error::UnprefixedHexError) -> bool
-impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for bitcoin_units::parse_int::error::UnprefixedHexError
-pub fn bitcoin_units::parse_int::error::UnprefixedHexError::from(e: bitcoin_units::parse_int::error::ParseIntError) -> Self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::parse_int::error::UnprefixedHexError
 pub fn bitcoin_units::parse_int::error::UnprefixedHexError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::parse_int::error::UnprefixedHexError
@@ -5632,10 +5624,6 @@ impl core::cmp::PartialEq for bitcoin_units::parse_int::error::ParseIntError
 pub fn bitcoin_units::parse_int::error::ParseIntError::eq(&self, other: &bitcoin_units::parse_int::error::ParseIntError) -> bool
 impl core::convert::AsRef<core::num::error::ParseIntError> for bitcoin_units::parse_int::error::ParseIntError
 pub fn bitcoin_units::parse_int::error::ParseIntError::as_ref(&self) -> &core::num::error::ParseIntError
-impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for bitcoin_units::parse_int::error::PrefixedHexError
-pub fn bitcoin_units::parse_int::error::PrefixedHexError::from(e: bitcoin_units::parse_int::error::ParseIntError) -> Self
-impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for bitcoin_units::parse_int::error::UnprefixedHexError
-pub fn bitcoin_units::parse_int::error::UnprefixedHexError::from(e: bitcoin_units::parse_int::error::ParseIntError) -> Self
 impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for core::num::error::ParseIntError
 pub fn core::num::error::ParseIntError::from(value: bitcoin_units::parse_int::error::ParseIntError) -> Self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::parse_int::error::ParseIntError
@@ -5684,8 +5672,6 @@ pub fn bitcoin_units::parse_int::error::PrefixedHexError::clone(&self) -> bitcoi
 impl core::cmp::Eq for bitcoin_units::parse_int::error::PrefixedHexError
 impl core::cmp::PartialEq for bitcoin_units::parse_int::error::PrefixedHexError
 pub fn bitcoin_units::parse_int::error::PrefixedHexError::eq(&self, other: &bitcoin_units::parse_int::error::PrefixedHexError) -> bool
-impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for bitcoin_units::parse_int::error::PrefixedHexError
-pub fn bitcoin_units::parse_int::error::PrefixedHexError::from(e: bitcoin_units::parse_int::error::ParseIntError) -> Self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::parse_int::error::PrefixedHexError
 pub fn bitcoin_units::parse_int::error::PrefixedHexError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::parse_int::error::PrefixedHexError
@@ -5732,8 +5718,6 @@ pub fn bitcoin_units::parse_int::error::UnprefixedHexError::clone(&self) -> bitc
 impl core::cmp::Eq for bitcoin_units::parse_int::error::UnprefixedHexError
 impl core::cmp::PartialEq for bitcoin_units::parse_int::error::UnprefixedHexError
 pub fn bitcoin_units::parse_int::error::UnprefixedHexError::eq(&self, other: &bitcoin_units::parse_int::error::UnprefixedHexError) -> bool
-impl core::convert::From<bitcoin_units::parse_int::error::ParseIntError> for bitcoin_units::parse_int::error::UnprefixedHexError
-pub fn bitcoin_units::parse_int::error::UnprefixedHexError::from(e: bitcoin_units::parse_int::error::ParseIntError) -> Self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::parse_int::error::UnprefixedHexError
 pub fn bitcoin_units::parse_int::error::UnprefixedHexError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::parse_int::error::UnprefixedHexError
