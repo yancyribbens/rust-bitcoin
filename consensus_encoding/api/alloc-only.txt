@@ -853,6 +853,7 @@ pub fn bitcoin_consensus_encoding::ArrayRefEncoder<'e, N>::from(t: T) -> T
 pub struct bitcoin_consensus_encoding::ByteVecDecoder
 impl bitcoin_consensus_encoding::ByteVecDecoder
 pub const fn bitcoin_consensus_encoding::ByteVecDecoder::new() -> Self
+pub const fn bitcoin_consensus_encoding::ByteVecDecoder::new_with_limit(limit: usize) -> Self
 impl bitcoin_consensus_encoding::Decoder for bitcoin_consensus_encoding::ByteVecDecoder
 pub type bitcoin_consensus_encoding::ByteVecDecoder::Error = bitcoin_consensus_encoding::error::ByteVecDecoderError
 pub type bitcoin_consensus_encoding::ByteVecDecoder::Output = alloc::vec::Vec<u8>
@@ -1706,6 +1707,7 @@ pub fn bitcoin_consensus_encoding::error::UnexpectedEofError::from(t: T) -> T
 pub struct bitcoin_consensus_encoding::VecDecoder<T: bitcoin_consensus_encoding::Decodable>
 impl<T: bitcoin_consensus_encoding::Decodable> bitcoin_consensus_encoding::VecDecoder<T>
 pub const fn bitcoin_consensus_encoding::VecDecoder<T>::new() -> Self
+pub const fn bitcoin_consensus_encoding::VecDecoder<T>::new_with_limit(limit: usize) -> Self
 impl<T: bitcoin_consensus_encoding::Decodable> bitcoin_consensus_encoding::Decoder for bitcoin_consensus_encoding::VecDecoder<T>
 pub type bitcoin_consensus_encoding::VecDecoder<T>::Error = bitcoin_consensus_encoding::error::VecDecoderError<<<T as bitcoin_consensus_encoding::Decodable>::Decoder as bitcoin_consensus_encoding::Decoder>::Error>
 pub type bitcoin_consensus_encoding::VecDecoder<T>::Output = alloc::vec::Vec<T>
