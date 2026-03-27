@@ -133,10 +133,6 @@ pub struct OutOfRangeError {
     pub(super) is_greater_than_max: bool,
 }
 
-impl From<Infallible> for OutOfRangeError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
 impl OutOfRangeError {
     /// Returns the minimum and maximum allowed values for the type that was parsed.
     ///
@@ -173,6 +169,10 @@ impl OutOfRangeError {
             is_greater_than_max: false,
         }
     }
+}
+
+impl From<Infallible> for OutOfRangeError {
+    fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl fmt::Display for OutOfRangeError {

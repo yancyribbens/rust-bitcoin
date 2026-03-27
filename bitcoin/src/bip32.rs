@@ -665,9 +665,6 @@ pub struct IndexOutOfRangeError {
     pub index: u32,
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for IndexOutOfRangeError {}
-
 impl From<Infallible> for IndexOutOfRangeError {
     fn from(never: Infallible) -> Self { match never {} }
 }
@@ -677,6 +674,9 @@ impl fmt::Display for IndexOutOfRangeError {
         write!(f, "index {} out of range [0, 2^31 - 1] (do you have a hardened child number, rather than an index?)", self.index)
     }
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for IndexOutOfRangeError {}
 
 /// Error parsing a child number.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -691,21 +691,21 @@ impl From<Infallible> for ParseChildNumberError {
     fn from(never: Infallible) -> Self { match never {} }
 }
 
+impl fmt::Display for ParseChildNumberError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::IndexOutOfRange(ref e) => e.fmt(f),
+            Self::ParseInt(ref e) => e.fmt(f),
+        }
+    }
+}
+
 #[cfg(feature = "std")]
 impl std::error::Error for ParseChildNumberError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
             Self::IndexOutOfRange(ref e) => Some(e),
             Self::ParseInt(ref e) => Some(e),
-        }
-    }
-}
-
-impl fmt::Display for ParseChildNumberError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::IndexOutOfRange(ref e) => e.fmt(f),
-            Self::ParseInt(ref e) => e.fmt(f),
         }
     }
 }
