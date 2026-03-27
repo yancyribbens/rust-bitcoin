@@ -39,8 +39,7 @@ impl fmt::Display for ParseError {
             ParseErrorInner::Amount(ref e) => write_err!(f, "invalid amount"; e),
             ParseErrorInner::Denomination(ref e) => write_err!(f, "invalid denomination"; e),
             // We consider this to not be a source because it currently doesn't contain useful info.
-            ParseErrorInner::MissingDenomination(_) =>
-                f.write_str("the input doesn't contain a denomination"),
+            ParseErrorInner::MissingDenomination(ref e) => write_err!(f, "missing denomination"; e),
         }
     }
 }
@@ -52,7 +51,7 @@ impl std::error::Error for ParseError {
             ParseErrorInner::Amount(ref e) => Some(e),
             ParseErrorInner::Denomination(ref e) => Some(e),
             // We consider this to not be a source because it currently doesn't contain useful info.
-            ParseErrorInner::MissingDenomination(_) => None,
+            ParseErrorInner::MissingDenomination(ref e) => Some(e),
         }
     }
 }
@@ -375,6 +374,17 @@ impl From<Infallible> for MissingDenominationError {
     fn from(never: Infallible) -> Self { match never {} }
 }
 
+impl fmt::Display for MissingDenominationError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "the input does not contain a denomination")
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for MissingDenominationError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
+
 /// Error returned when parsing an unknown denomination.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
@@ -618,7 +628,7 @@ mod tests {
         let e = "123".parse::<Amount>().unwrap_err();
         assert!(!e.to_string().is_empty());
         #[cfg(feature = "std")]
-        assert!(e.source().is_none());
+        assert!(e.source().is_some());
 
         #[cfg(feature = "encoding")]
         {
