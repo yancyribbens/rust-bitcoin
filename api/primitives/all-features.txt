@@ -109,6 +109,8 @@ impl core::clone::Clone for bitcoin_primitives::block::Checked
 impl core::clone::Clone for bitcoin_primitives::block::Header
 impl core::clone::Clone for bitcoin_primitives::block::HeaderDecoderError
 impl core::clone::Clone for bitcoin_primitives::block::InvalidBlockError
+impl core::clone::Clone for bitcoin_primitives::block::ParseBlockError
+impl core::clone::Clone for bitcoin_primitives::block::ParseHeaderError
 impl core::clone::Clone for bitcoin_primitives::block::Unchecked
 impl core::clone::Clone for bitcoin_primitives::block::Version
 impl core::clone::Clone for bitcoin_primitives::block::VersionDecoderError
@@ -126,6 +128,7 @@ impl core::clone::Clone for bitcoin_primitives::script::WitnessScriptTag
 impl core::clone::Clone for bitcoin_primitives::transaction::OutPoint
 impl core::clone::Clone for bitcoin_primitives::transaction::OutPointDecoderError
 impl core::clone::Clone for bitcoin_primitives::transaction::ParseOutPointError
+impl core::clone::Clone for bitcoin_primitives::transaction::ParseTransactionError
 impl core::clone::Clone for bitcoin_primitives::transaction::Transaction
 impl core::clone::Clone for bitcoin_primitives::transaction::TransactionDecoderError
 impl core::clone::Clone for bitcoin_primitives::transaction::TxIn
@@ -150,6 +153,8 @@ impl core::cmp::Eq for bitcoin_primitives::block::Checked
 impl core::cmp::Eq for bitcoin_primitives::block::Header
 impl core::cmp::Eq for bitcoin_primitives::block::HeaderDecoderError
 impl core::cmp::Eq for bitcoin_primitives::block::InvalidBlockError
+impl core::cmp::Eq for bitcoin_primitives::block::ParseBlockError
+impl core::cmp::Eq for bitcoin_primitives::block::ParseHeaderError
 impl core::cmp::Eq for bitcoin_primitives::block::Unchecked
 impl core::cmp::Eq for bitcoin_primitives::block::Version
 impl core::cmp::Eq for bitcoin_primitives::block::VersionDecoderError
@@ -167,6 +172,7 @@ impl core::cmp::Eq for bitcoin_primitives::script::WitnessScriptTag
 impl core::cmp::Eq for bitcoin_primitives::transaction::OutPoint
 impl core::cmp::Eq for bitcoin_primitives::transaction::OutPointDecoderError
 impl core::cmp::Eq for bitcoin_primitives::transaction::ParseOutPointError
+impl core::cmp::Eq for bitcoin_primitives::transaction::ParseTransactionError
 impl core::cmp::Eq for bitcoin_primitives::transaction::Transaction
 impl core::cmp::Eq for bitcoin_primitives::transaction::TransactionDecoderError
 impl core::cmp::Eq for bitcoin_primitives::transaction::TxIn
@@ -215,6 +221,8 @@ impl core::cmp::PartialEq for bitcoin_primitives::block::Checked
 impl core::cmp::PartialEq for bitcoin_primitives::block::Header
 impl core::cmp::PartialEq for bitcoin_primitives::block::HeaderDecoderError
 impl core::cmp::PartialEq for bitcoin_primitives::block::InvalidBlockError
+impl core::cmp::PartialEq for bitcoin_primitives::block::ParseBlockError
+impl core::cmp::PartialEq for bitcoin_primitives::block::ParseHeaderError
 impl core::cmp::PartialEq for bitcoin_primitives::block::Unchecked
 impl core::cmp::PartialEq for bitcoin_primitives::block::Version
 impl core::cmp::PartialEq for bitcoin_primitives::block::VersionDecoderError
@@ -232,6 +240,7 @@ impl core::cmp::PartialEq for bitcoin_primitives::script::WitnessScriptTag
 impl core::cmp::PartialEq for bitcoin_primitives::transaction::OutPoint
 impl core::cmp::PartialEq for bitcoin_primitives::transaction::OutPointDecoderError
 impl core::cmp::PartialEq for bitcoin_primitives::transaction::ParseOutPointError
+impl core::cmp::PartialEq for bitcoin_primitives::transaction::ParseTransactionError
 impl core::cmp::PartialEq for bitcoin_primitives::transaction::Transaction
 impl core::cmp::PartialEq for bitcoin_primitives::transaction::TransactionDecoderError
 impl core::cmp::PartialEq for bitcoin_primitives::transaction::TxIn
@@ -618,6 +627,8 @@ impl core::marker::StructuralPartialEq for bitcoin_primitives::block::Checked
 impl core::marker::StructuralPartialEq for bitcoin_primitives::block::Header
 impl core::marker::StructuralPartialEq for bitcoin_primitives::block::HeaderDecoderError
 impl core::marker::StructuralPartialEq for bitcoin_primitives::block::InvalidBlockError
+impl core::marker::StructuralPartialEq for bitcoin_primitives::block::ParseBlockError
+impl core::marker::StructuralPartialEq for bitcoin_primitives::block::ParseHeaderError
 impl core::marker::StructuralPartialEq for bitcoin_primitives::block::Unchecked
 impl core::marker::StructuralPartialEq for bitcoin_primitives::block::Version
 impl core::marker::StructuralPartialEq for bitcoin_primitives::block::VersionDecoderError
@@ -635,6 +646,7 @@ impl core::marker::StructuralPartialEq for bitcoin_primitives::script::WitnessSc
 impl core::marker::StructuralPartialEq for bitcoin_primitives::transaction::OutPoint
 impl core::marker::StructuralPartialEq for bitcoin_primitives::transaction::OutPointDecoderError
 impl core::marker::StructuralPartialEq for bitcoin_primitives::transaction::ParseOutPointError
+impl core::marker::StructuralPartialEq for bitcoin_primitives::transaction::ParseTransactionError
 impl core::marker::StructuralPartialEq for bitcoin_primitives::transaction::Transaction
 impl core::marker::StructuralPartialEq for bitcoin_primitives::transaction::TransactionDecoderError
 impl core::marker::StructuralPartialEq for bitcoin_primitives::transaction::TxIn
@@ -1590,9 +1602,13 @@ pub fn bitcoin_primitives::block::InvalidBlockError::clone(&self) -> bitcoin_pri
 pub fn bitcoin_primitives::block::InvalidBlockError::eq(&self, other: &bitcoin_primitives::block::InvalidBlockError) -> bool
 pub fn bitcoin_primitives::block::InvalidBlockError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_primitives::block::InvalidBlockError::from(never: core::convert::Infallible) -> Self
+pub fn bitcoin_primitives::block::ParseBlockError::clone(&self) -> bitcoin_primitives::block::ParseBlockError
+pub fn bitcoin_primitives::block::ParseBlockError::eq(&self, other: &bitcoin_primitives::block::ParseBlockError) -> bool
 pub fn bitcoin_primitives::block::ParseBlockError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_primitives::block::ParseBlockError::from(never: core::convert::Infallible) -> Self
 pub fn bitcoin_primitives::block::ParseBlockError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+pub fn bitcoin_primitives::block::ParseHeaderError::clone(&self) -> bitcoin_primitives::block::ParseHeaderError
+pub fn bitcoin_primitives::block::ParseHeaderError::eq(&self, other: &bitcoin_primitives::block::ParseHeaderError) -> bool
 pub fn bitcoin_primitives::block::ParseHeaderError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_primitives::block::ParseHeaderError::from(never: core::convert::Infallible) -> Self
 pub fn bitcoin_primitives::block::ParseHeaderError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
@@ -1825,6 +1841,8 @@ pub fn bitcoin_primitives::transaction::ParseOutPointError::eq(&self, other: &bi
 pub fn bitcoin_primitives::transaction::ParseOutPointError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_primitives::transaction::ParseOutPointError::from(never: core::convert::Infallible) -> Self
 pub fn bitcoin_primitives::transaction::ParseOutPointError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+pub fn bitcoin_primitives::transaction::ParseTransactionError::clone(&self) -> bitcoin_primitives::transaction::ParseTransactionError
+pub fn bitcoin_primitives::transaction::ParseTransactionError::eq(&self, other: &bitcoin_primitives::transaction::ParseTransactionError) -> bool
 pub fn bitcoin_primitives::transaction::ParseTransactionError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn bitcoin_primitives::transaction::ParseTransactionError::from(never: core::convert::Infallible) -> Self
 pub fn bitcoin_primitives::transaction::ParseTransactionError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
