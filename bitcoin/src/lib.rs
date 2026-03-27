@@ -107,7 +107,6 @@ pub mod ext {
     #[cfg(feature = "bitcoinconsensus")]
     pub use crate::consensus_validation::{ScriptPubKeyExt as _, TransactionExt as _};
 }
-#[macro_use]
 pub mod address;
 pub mod bip158;
 pub mod bip32;
