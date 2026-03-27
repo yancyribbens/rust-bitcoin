@@ -609,36 +609,6 @@ impl U256 {
 
     const ONE: Self = Self(0, 1);
 
-    /// Constructs a new `U256` from a prefixed hex string.
-    fn from_hex(s: &str) -> Result<Self, PrefixedHexError> {
-        let checked = parse_int::hex_remove_prefix(s)?;
-        Ok(Self::from_hex_internal(checked)?)
-    }
-
-    /// Constructs a new `U256` from an unprefixed hex string.
-    fn from_unprefixed_hex(s: &str) -> Result<Self, UnprefixedHexError> {
-        let checked = parse_int::hex_check_unprefixed(s)?;
-        Ok(Self::from_hex_internal(checked)?)
-    }
-
-    // Caller to ensure `s` does not contain a prefix.
-    fn from_hex_internal(s: &str) -> Result<Self, ParseIntError> {
-        let (high, low) = if s.len() <= 32 {
-            let low = parse_int::hex_u128_unchecked(s)?;
-            (0, low)
-        } else {
-            let high_len = s.len() - 32;
-            let high_s = &s[..high_len];
-            let low_s = &s[high_len..];
-
-            let high = parse_int::hex_u128_unchecked(high_s)?;
-            let low = parse_int::hex_u128_unchecked(low_s)?;
-            (high, low)
-        };
-
-        Ok(Self(high, low))
-    }
-
     /// Constructs a new `U256` from a big-endian array of `u8`s.
     fn from_be_bytes(a: [u8; 32]) -> Self {
         let (high, low) = split_in_half(a);
@@ -1007,6 +977,38 @@ impl U256 {
         // Step 7: sign bit is always 0, exponent is shifted into place
         // Use addition instead of bitwise OR to saturate the exponent if mantissa overflows
         f64::from_bits((exponent << 52) + mantissa)
+    }
+}
+
+impl U256 {
+    /// Constructs a new `U256` from a prefixed hex string.
+    fn from_hex(s: &str) -> Result<Self, PrefixedHexError> {
+        let checked = parse_int::hex_remove_prefix(s)?;
+        Ok(Self::from_hex_internal(checked)?)
+    }
+
+    /// Constructs a new `U256` from an unprefixed hex string.
+    fn from_unprefixed_hex(s: &str) -> Result<Self, UnprefixedHexError> {
+        let checked = parse_int::hex_check_unprefixed(s)?;
+        Ok(Self::from_hex_internal(checked)?)
+    }
+
+    // Caller to ensure `s` does not contain a prefix.
+    fn from_hex_internal(s: &str) -> Result<Self, ParseIntError> {
+        let (high, low) = if s.len() <= 32 {
+            let low = parse_int::hex_u128_unchecked(s)?;
+            (0, low)
+        } else {
+            let high_len = s.len() - 32;
+            let high_s = &s[..high_len];
+            let low_s = &s[high_len..];
+
+            let high = parse_int::hex_u128_unchecked(high_s)?;
+            let low = parse_int::hex_u128_unchecked(low_s)?;
+            (high, low)
+        };
+
+        Ok(Self(high, low))
     }
 }
 
