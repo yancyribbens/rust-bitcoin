@@ -88,7 +88,8 @@ pub use self::{
     },
     script::{
         RedeemScript, RedeemScriptBuf, ScriptPubKey, ScriptPubKeyBuf, ScriptSig, ScriptSigBuf,
-        TapScript, TapScriptBuf, WitnessScript, WitnessScriptBuf,
+        SignetBlockScript, SignetBlockScriptBuf, TapScript, TapScriptBuf, WitnessScript,
+        WitnessScriptBuf,
     },
     transaction::{Transaction, TxIn, TxOut},
     witness::Witness,

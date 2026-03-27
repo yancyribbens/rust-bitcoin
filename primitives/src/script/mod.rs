@@ -27,7 +27,7 @@ use crate::prelude::{Borrow, BorrowMut, Box, Cow, ToOwned, Vec};
 pub use self::{
     borrowed::{Script, ScriptEncoder},
     owned::{ScriptBuf, ScriptBufDecoder, ScriptBufDecoderError},
-    tag::{Tag, RedeemScriptTag, ScriptPubKeyTag, ScriptSigTag, TapScriptTag, WitnessScriptTag},
+    tag::{Tag, RedeemScriptTag, ScriptPubKeyTag, ScriptSigTag, SignetBlockScriptTag, TapScriptTag, WitnessScriptTag},
 };
 #[doc(inline)]
 pub use crate::hash_types::{
@@ -57,6 +57,12 @@ pub type ScriptSigBuf = ScriptBuf<ScriptSigTag>;
 
 /// A `scriptSig` decoder.
 pub type ScriptSigBufDecoder = ScriptBufDecoder<ScriptSigTag>;
+
+/// A signet block/challenge script.
+pub type SignetBlockScriptBuf = ScriptBuf<SignetBlockScriptTag>;
+
+/// A reference to a signet block/challenge script.
+pub type SignetBlockScript = Script<SignetBlockScriptTag>;
 
 /// A Segwit v1 Taproot script.
 pub type TapScriptBuf = ScriptBuf<TapScriptTag>;
@@ -148,6 +154,11 @@ impl TryFrom<&WitnessScript> for WScriptHash {
     fn try_from(witness_script: &WitnessScript) -> Result<Self, Self::Error> {
         Self::from_script(witness_script)
     }
+}
+
+impl From<WitnessScriptBuf> for SignetBlockScriptBuf {
+    #[inline]
+    fn from(buf: WitnessScriptBuf) -> Self { Self::from_bytes(buf.into_bytes()) }
 }
 
 // We keep all the `Script` and `ScriptBuf` impls together since it's easier to see side-by-side.
