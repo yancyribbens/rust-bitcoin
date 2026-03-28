@@ -311,16 +311,12 @@ impl<V: Validation> fmt::UpperHex for Block<V> {
 
 /// An error that occurs during parsing of a [`Block`] from a hex string.
 #[cfg(all(feature = "hex", feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParseBlockError(ParsePrimitiveError<Block>);
 
 #[cfg(all(feature = "hex", feature = "alloc"))]
 impl From<Infallible> for ParseBlockError {
     fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(all(feature = "hex", feature = "alloc"))]
-impl fmt::Debug for ParseBlockError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { fmt::Debug::fmt(&self.0, f) }
 }
 
 #[cfg(all(feature = "hex", feature = "alloc"))]
@@ -618,16 +614,12 @@ impl fmt::Debug for Header {
 
 /// An error that occurs during parsing of a [`Header`] from a hex string.
 #[cfg(feature = "hex")]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParseHeaderError(ParsePrimitiveError<Header>);
 
 #[cfg(feature = "hex")]
 impl From<Infallible> for ParseHeaderError {
     fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "hex")]
-impl fmt::Debug for ParseHeaderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { fmt::Debug::fmt(&self.0, f) }
 }
 
 #[cfg(feature = "hex")]

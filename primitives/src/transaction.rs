@@ -408,16 +408,12 @@ impl fmt::UpperHex for Transaction {
 
 /// An error that occurs during parsing of a [`Transaction`] from a hex string.
 #[cfg(all(feature = "hex", feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParseTransactionError(ParsePrimitiveError<Transaction>);
 
 #[cfg(all(feature = "hex", feature = "alloc"))]
 impl From<Infallible> for ParseTransactionError {
     fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(all(feature = "hex", feature = "alloc"))]
-impl fmt::Debug for ParseTransactionError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { fmt::Debug::fmt(&self.0, f) }
 }
 
 #[cfg(all(feature = "hex", feature = "alloc"))]

@@ -162,6 +162,8 @@ impl<T: Decodable> From<Infallible> for ParsePrimitiveError<T> {
     fn from(never: Infallible) -> Self { match never {} }
 }
 
+// Manual impls for Debug, Clone, PartialEq and Eq so that errors which wrap
+// `ParsePrimitiveError` can properly derive the defaults.
 impl<T: Decodable> fmt::Debug for ParsePrimitiveError<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -171,6 +173,38 @@ impl<T: Decodable> fmt::Debug for ParsePrimitiveError<T> {
                 write!(f, "failure decoding hex string into {}", core::any::type_name::<T>()),
         }
     }
+}
+
+impl<T: Decodable> Clone for ParsePrimitiveError<T>
+where
+    <<T as Decodable>::Decoder as Decoder>::Error: Clone,
+{
+    fn clone(&self) -> Self {
+        match self {
+            Self::OddLengthString(ref e) => Self::OddLengthString(e.clone()),
+            Self::InvalidChar(ref e) => Self::InvalidChar(e.clone()),
+            Self::Decode(ref e) => Self::Decode(e.clone()),
+        }
+    }
+}
+
+impl<T: Decodable> PartialEq for ParsePrimitiveError<T>
+where
+    <<T as Decodable>::Decoder as Decoder>::Error: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::OddLengthString(ref e1), Self::OddLengthString(ref e2)) => e1 == e2,
+            (Self::InvalidChar(ref e1), Self::InvalidChar(ref e2)) => e1 == e2,
+            (Self::Decode(ref e1), Self::Decode(ref e2)) => e1 == e2,
+            _ => false,
+        }
+    }
+}
+
+impl<T: Decodable> Eq for ParsePrimitiveError<T> where
+    <<T as Decodable>::Decoder as Decoder>::Error: PartialEq
+{
 }
 
 impl<T: Decodable> fmt::Display for ParsePrimitiveError<T> {
