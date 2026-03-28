@@ -960,6 +960,7 @@ pub fn bitcoin_hashes::sha256d::Hash::from_engine(e: bitcoin_hashes::sha256d::Ha
 pub fn bitcoin_hashes::sha256d::Hash::from_str(s: &str) -> core::result::Result<Self, Self::Err>
 pub fn bitcoin_hashes::sha256d::Hash::hash(data: &[u8]) -> Self
 pub fn bitcoin_hashes::sha256d::Hash::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+pub fn bitcoin_hashes::sha256d::Hash::hash_64_many(outputs: &mut [[u8; 32]], inputs: &[[u8; 64]])
 pub fn bitcoin_hashes::sha256d::Hash::hash_byte_chunks<B, I>(byte_slices: I) -> Self where B: core::convert::AsRef<[u8]>, I: core::iter::traits::collect::IntoIterator<Item = B>
 pub fn bitcoin_hashes::sha256d::Hash::partial_cmp(&self, other: &bitcoin_hashes::sha256d::Hash) -> core::option::Option<core::cmp::Ordering>
 pub fn bitcoin_hashes::sha256d::Hash::serialize<S: serde::ser::Serializer>(&self, s: S) -> core::result::Result<<S as serde::ser::Serializer>::Ok, <S as serde::ser::Serializer>::Error>

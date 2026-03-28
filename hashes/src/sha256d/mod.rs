@@ -12,6 +12,11 @@ crate::internal_macros::general_hash_type! {
 }
 
 impl Hash {
+    /// computes double-sha256 of multiple 64-byte blocks in parallel.
+    pub fn hash_64_many(outputs: &mut [[u8; 32]], inputs: &[[u8; 64]]) {
+        sha256::HashEngine::sha256d_64(outputs, inputs);
+    }
+
     /// Finalize a hash engine to produce a hash.
     pub fn from_engine(e: HashEngine) -> Self {
         let sha2 = sha256::Hash::from_engine(e.0);
@@ -136,5 +141,29 @@ mod tests {
             &hash.readable(),
             &[Token::Str("6cfb35868c4465b7c289d7d5641563aa973db6a929655282a7bf95c8257f53ef")],
         );
+    }
+
+    #[test]
+    #[cfg(feature = "alloc")]
+    fn hash_64_many() {
+        for count in 0..=32 {
+            let inputs: alloc::vec::Vec<[u8; 64]> = (0..count)
+                .map(|i: usize| {
+                    let mut block = [0u8; 64];
+                    for (j, byte) in block.iter_mut().enumerate() {
+                        *byte = (i * 64 + j) as u8;
+                    }
+                    block
+                })
+                .collect();
+
+            let expected: alloc::vec::Vec<[u8; 32]> =
+                inputs.iter().map(|inp| sha256d::hash(inp).to_byte_array()).collect();
+
+            let mut outputs = alloc::vec![[0u8; 32]; count];
+            sha256d::Hash::hash_64_many(&mut outputs, &inputs);
+
+            assert_eq!(outputs, expected);
+        }
     }
 }
