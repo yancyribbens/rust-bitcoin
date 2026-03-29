@@ -642,7 +642,14 @@ pub enum DerivationError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for DerivationError {}
+impl std::error::Error for DerivationError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::CannotDeriveHardenedChild => None,
+            Self::MaximumDepthExceeded => None,
+        }
+    }
+}
 
 impl fmt::Display for DerivationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -676,7 +683,9 @@ impl fmt::Display for IndexOutOfRangeError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for IndexOutOfRangeError {}
+impl std::error::Error for IndexOutOfRangeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Error parsing a child number.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1061,7 +1070,9 @@ impl fmt::Display for InvalidBase58PayloadLengthError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidBase58PayloadLengthError {}
+impl std::error::Error for InvalidBase58PayloadLengthError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 // Helps unify decoding
 struct Common {

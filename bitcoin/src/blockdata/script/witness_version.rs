@@ -247,4 +247,6 @@ impl fmt::Display for TryFromError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for TryFromError {}
+impl std::error::Error for TryFromError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}

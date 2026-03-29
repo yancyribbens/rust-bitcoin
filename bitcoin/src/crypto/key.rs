@@ -1764,7 +1764,9 @@ impl fmt::Display for InvalidBase58PayloadLengthError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidBase58PayloadLengthError {}
+impl std::error::Error for InvalidBase58PayloadLengthError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Invalid address version in decoded base58 data.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1785,7 +1787,9 @@ impl fmt::Display for InvalidAddressVersionError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidAddressVersionError {}
+impl std::error::Error for InvalidAddressVersionError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Invalid compression flag for a WIF key
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1806,7 +1810,9 @@ impl fmt::Display for InvalidWifCompressionFlagError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidWifCompressionFlagError {}
+impl std::error::Error for InvalidWifCompressionFlagError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 impl SerializedXOnlyPublicKey {
     /// Returns `XOnlyPublicKey` if the bytes are valid.
@@ -1850,7 +1856,13 @@ impl fmt::Display for ParseXOnlyPublicKeyError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for ParseXOnlyPublicKeyError {}
+impl std::error::Error for ParseXOnlyPublicKeyError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::InvalidXCoordinate => None,
+        }
+    }
+}
 
 /// Error that can occur when tweaking an [`XOnlyPublicKey`].
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1874,7 +1886,15 @@ impl fmt::Display for TweakXOnlyPublicKeyError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for TweakXOnlyPublicKeyError {}
+impl std::error::Error for TweakXOnlyPublicKeyError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::BadTweak => None,
+            Self::ResultKeyInvalid => None,
+            Self::ParityError => None,
+        }
+    }
+}
 
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for PublicKey {
