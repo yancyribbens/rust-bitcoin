@@ -44,7 +44,7 @@ pub trait Tag {
 }
 
 internals::transparent_newtype! {
-    /// Output of the SHA256t hash function.
+    /// Output of the `SHA256t` hash function.
     pub struct Hash<T>(PhantomData<T>, [u8; 32]);
 
     impl<T> Hash<T> {
