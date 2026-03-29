@@ -395,14 +395,13 @@ mod tests {
 
     use hex_unstable::hex;
     use internals::ToU64 as _;
-    use primitives::Wtxid;
 
     use super::*;
     use crate::consensus::encode::{deserialize, serialize};
     use crate::pow::test_utils::{u128_to_work, u64_to_work};
     use crate::script::{ScriptPubKeyBuf, ScriptSigBuf};
     use crate::transaction::{OutPoint, Transaction, TxIn, TxOut, Txid};
-    use crate::{block, Amount, CompactTarget, Network, Sequence, TestnetVersion, Witness};
+    use crate::{block, Amount, CompactTarget, Network, Sequence, TestnetVersion, Witness, Wtxid};
 
     #[test]
     fn static_vector() {

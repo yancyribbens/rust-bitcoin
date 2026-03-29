@@ -144,9 +144,7 @@ pub use primitives::{
         SignetBlockScriptBuf, SignetBlockScriptTag, Tag, TapScript, TapScriptBuf, TapScriptTag,
         WitnessScript, WitnessScriptBuf, WitnessScriptTag,
     },
-    transaction::{
-        Ntxid, OutPoint, Transaction, TxIn, TxOut, Txid, Version as TransactionVersion, Wtxid,
-    },
+    transaction::{OutPoint, Transaction, TxIn, TxOut, Txid, Version as TransactionVersion, Wtxid},
     witness::Witness,
 };
 #[doc(inline)]

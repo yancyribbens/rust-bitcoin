@@ -270,10 +270,10 @@ fn api_can_use_modules_from_crate_root() {
 fn api_can_use_types_from_crate_root() {
     use bitcoin_primitives::{
         Block, BlockChecked, BlockHash, BlockHeader, BlockUnchecked, BlockValidation, BlockVersion,
-        CompactTarget, Ntxid, OutPoint, RedeemScript, RedeemScriptBuf, ScriptPubKey,
-        ScriptPubKeyBuf, ScriptSig, ScriptSigBuf, Sequence, TapScript, TapScriptBuf, Transaction,
-        TransactionVersion, TxIn, TxMerkleNode, TxOut, Txid, Witness, WitnessCommitment,
-        WitnessMerkleNode, WitnessScript, WitnessScriptBuf, Wtxid,
+        CompactTarget, OutPoint, RedeemScript, RedeemScriptBuf, ScriptPubKey, ScriptPubKeyBuf,
+        ScriptSig, ScriptSigBuf, Sequence, TapScript, TapScriptBuf, Transaction,
+        TransactionVersion, TxIn, TxOut, Txid, Witness, WitnessCommitment, WitnessScript,
+        WitnessScriptBuf, Wtxid,
     };
 }
 

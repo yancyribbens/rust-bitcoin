@@ -18,10 +18,7 @@ use io::{BufRead, Write};
 
 #[rustfmt::skip]
 #[doc(inline)]
-pub use primitives::{
-    TxMerkleNode, WitnessMerkleNode,
-    merkle_tree::{TxMerkleNodeDecoder, TxMerkleNodeEncoder},
-};
+pub use primitives::merkle_tree::{TxMerkleNodeDecoder, TxMerkleNodeEncoder, TxMerkleNode, WitnessMerkleNode};
 #[doc(no_inline)]
 pub use primitives::merkle_tree::TxMerkleNodeDecoderError;
 
