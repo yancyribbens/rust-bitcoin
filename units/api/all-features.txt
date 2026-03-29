@@ -62,6 +62,7 @@ pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::eq(&se
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
@@ -110,6 +111,7 @@ pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::eq(&self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
@@ -521,6 +523,7 @@ pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::eq(&se
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
@@ -569,6 +572,7 @@ pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::eq(&self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
@@ -1021,6 +1025,7 @@ pub fn bitcoin_units::amount::error::BadPositionError::eq(&self, other: &bitcoin
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::amount::error::BadPositionError
 pub fn bitcoin_units::amount::error::BadPositionError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::amount::error::BadPositionError
+pub fn bitcoin_units::amount::error::BadPositionError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::amount::error::BadPositionError
 pub fn bitcoin_units::amount::error::BadPositionError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::amount::error::BadPositionError
@@ -1066,6 +1071,7 @@ pub fn bitcoin_units::amount::error::InputTooLargeError::eq(&self, other: &bitco
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::amount::error::InputTooLargeError
 pub fn bitcoin_units::amount::error::InputTooLargeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::amount::error::InputTooLargeError
+pub fn bitcoin_units::amount::error::InputTooLargeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::amount::error::InputTooLargeError
 pub fn bitcoin_units::amount::error::InputTooLargeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::amount::error::InputTooLargeError
@@ -1111,6 +1117,7 @@ pub fn bitcoin_units::amount::error::InvalidCharacterError::eq(&self, other: &bi
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::amount::error::InvalidCharacterError
 pub fn bitcoin_units::amount::error::InvalidCharacterError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::amount::error::InvalidCharacterError
+pub fn bitcoin_units::amount::error::InvalidCharacterError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::amount::error::InvalidCharacterError
 pub fn bitcoin_units::amount::error::InvalidCharacterError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::amount::error::InvalidCharacterError
@@ -1202,6 +1209,7 @@ pub fn bitcoin_units::amount::error::MissingDigitsError::eq(&self, other: &bitco
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::amount::error::MissingDigitsError
 pub fn bitcoin_units::amount::error::MissingDigitsError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::amount::error::MissingDigitsError
+pub fn bitcoin_units::amount::error::MissingDigitsError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::amount::error::MissingDigitsError
 pub fn bitcoin_units::amount::error::MissingDigitsError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::amount::error::MissingDigitsError
@@ -1251,6 +1259,7 @@ pub fn bitcoin_units::amount::error::OutOfRangeError::eq(&self, other: &bitcoin_
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::amount::error::OutOfRangeError
 pub fn bitcoin_units::amount::error::OutOfRangeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::amount::error::OutOfRangeError
+pub fn bitcoin_units::amount::error::OutOfRangeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::amount::error::OutOfRangeError
 pub fn bitcoin_units::amount::error::OutOfRangeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::amount::error::OutOfRangeError
@@ -1435,6 +1444,7 @@ pub fn bitcoin_units::amount::error::TooPreciseError::eq(&self, other: &bitcoin_
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::amount::error::TooPreciseError
 pub fn bitcoin_units::amount::error::TooPreciseError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::amount::error::TooPreciseError
+pub fn bitcoin_units::amount::error::TooPreciseError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::amount::error::TooPreciseError
 pub fn bitcoin_units::amount::error::TooPreciseError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::amount::error::TooPreciseError
@@ -2123,6 +2133,7 @@ pub fn bitcoin_units::amount::error::OutOfRangeError::eq(&self, other: &bitcoin_
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::amount::error::OutOfRangeError
 pub fn bitcoin_units::amount::error::OutOfRangeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::amount::error::OutOfRangeError
+pub fn bitcoin_units::amount::error::OutOfRangeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::amount::error::OutOfRangeError
 pub fn bitcoin_units::amount::error::OutOfRangeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::amount::error::OutOfRangeError
@@ -2548,6 +2559,7 @@ pub fn bitcoin_units::block::error::TooBigForRelativeHeightError::eq(&self, othe
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::block::error::TooBigForRelativeHeightError
 pub fn bitcoin_units::block::error::TooBigForRelativeHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::block::error::TooBigForRelativeHeightError
+pub fn bitcoin_units::block::error::TooBigForRelativeHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::block::error::TooBigForRelativeHeightError
 pub fn bitcoin_units::block::error::TooBigForRelativeHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::block::error::TooBigForRelativeHeightError
@@ -3310,6 +3322,7 @@ pub fn bitcoin_units::block::error::TooBigForRelativeHeightError::eq(&self, othe
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::block::error::TooBigForRelativeHeightError
 pub fn bitcoin_units::block::error::TooBigForRelativeHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::block::error::TooBigForRelativeHeightError
+pub fn bitcoin_units::block::error::TooBigForRelativeHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::block::error::TooBigForRelativeHeightError
 pub fn bitcoin_units::block::error::TooBigForRelativeHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::block::error::TooBigForRelativeHeightError
@@ -3384,6 +3397,7 @@ pub fn bitcoin_units::fee_rate::serde::OverflowError::eq(&self, other: &bitcoin_
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::fee_rate::serde::OverflowError
 pub fn bitcoin_units::fee_rate::serde::OverflowError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::fee_rate::serde::OverflowError
+pub fn bitcoin_units::fee_rate::serde::OverflowError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::fee_rate::serde::OverflowError
 pub fn bitcoin_units::fee_rate::serde::OverflowError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::fee_rate::serde::OverflowError
@@ -3674,6 +3688,7 @@ pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::eq(&se
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
@@ -3722,6 +3737,7 @@ pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::eq(&self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
@@ -4133,6 +4149,7 @@ pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::eq(&se
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::absolute::error::IncompatibleHeightError
@@ -4181,6 +4198,7 @@ pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::eq(&self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
 pub fn bitcoin_units::locktime::absolute::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::absolute::error::IncompatibleTimeError
@@ -4685,6 +4703,7 @@ pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::eq(&self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::DisabledLockTimeError
+pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::DisabledLockTimeError
@@ -4730,6 +4749,7 @@ pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::eq(&self, o
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::InvalidHeightError
+pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::InvalidHeightError
@@ -4775,6 +4795,7 @@ pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::eq(&self, oth
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::InvalidTimeError
 pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::InvalidTimeError
+pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::InvalidTimeError
 pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::InvalidTimeError
@@ -4820,6 +4841,7 @@ pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::eq(&self, ot
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::TimeOverflowError
 pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::TimeOverflowError
+pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::TimeOverflowError
 pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::TimeOverflowError
@@ -5093,6 +5115,7 @@ pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::eq(&self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::DisabledLockTimeError
+pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::DisabledLockTimeError
@@ -5138,6 +5161,7 @@ pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::eq(&self, o
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::InvalidHeightError
+pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::InvalidHeightError
@@ -5183,6 +5207,7 @@ pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::eq(&self, oth
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::InvalidTimeError
 pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::InvalidTimeError
+pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::InvalidTimeError
 pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::InvalidTimeError
@@ -5410,6 +5435,7 @@ pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::eq(&self, ot
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::TimeOverflowError
 pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::TimeOverflowError
+pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::TimeOverflowError
 pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::TimeOverflowError
@@ -6202,6 +6228,7 @@ pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::eq(&self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::DisabledLockTimeError
+pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::DisabledLockTimeError
@@ -6247,6 +6274,7 @@ pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::eq(&self, o
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::InvalidHeightError
+pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::InvalidHeightError
@@ -6292,6 +6320,7 @@ pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::eq(&self, oth
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::InvalidTimeError
 pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::InvalidTimeError
+pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::InvalidTimeError
 pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::InvalidTimeError
@@ -6337,6 +6366,7 @@ pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::eq(&self, ot
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::TimeOverflowError
 pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::TimeOverflowError
+pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::TimeOverflowError
 pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::TimeOverflowError
@@ -6610,6 +6640,7 @@ pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::eq(&self
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::DisabledLockTimeError
+pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::DisabledLockTimeError
@@ -6655,6 +6686,7 @@ pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::eq(&self, o
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::InvalidHeightError
+pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::InvalidHeightError
@@ -6700,6 +6732,7 @@ pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::eq(&self, oth
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::InvalidTimeError
 pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::InvalidTimeError
+pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::InvalidTimeError
 pub fn bitcoin_units::locktime::relative::error::InvalidTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::InvalidTimeError
@@ -6927,6 +6960,7 @@ pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::eq(&self, ot
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::TimeOverflowError
 pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::locktime::relative::error::TimeOverflowError
+pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::locktime::relative::error::TimeOverflowError
 pub fn bitcoin_units::locktime::relative::error::TimeOverflowError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::locktime::relative::error::TimeOverflowError
@@ -6978,6 +7012,7 @@ pub fn bitcoin_units::result::error::NumOpError::eq(&self, other: &bitcoin_units
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::result::error::NumOpError
 pub fn bitcoin_units::result::error::NumOpError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::result::error::NumOpError
+pub fn bitcoin_units::result::error::NumOpError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::result::error::NumOpError
 pub fn bitcoin_units::result::error::NumOpError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::result::error::NumOpError
@@ -7534,6 +7569,7 @@ pub fn bitcoin_units::result::error::NumOpError::eq(&self, other: &bitcoin_units
 impl core::convert::From<core::convert::Infallible> for bitcoin_units::result::error::NumOpError
 pub fn bitcoin_units::result::error::NumOpError::from(never: core::convert::Infallible) -> Self
 impl core::error::Error for bitcoin_units::result::error::NumOpError
+pub fn bitcoin_units::result::error::NumOpError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for bitcoin_units::result::error::NumOpError
 pub fn bitcoin_units::result::error::NumOpError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::result::error::NumOpError
