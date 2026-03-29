@@ -194,7 +194,9 @@ impl core::fmt::Display for LengthPrefixExceedsMaxError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for LengthPrefixExceedsMaxError {}
+impl std::error::Error for LengthPrefixExceedsMaxError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// The error returned by the [`ByteVecDecoder`].
 #[cfg(feature = "alloc")]
@@ -311,7 +313,9 @@ impl fmt::Display for UnexpectedEofError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for UnexpectedEofError {}
+impl std::error::Error for UnexpectedEofError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Helper macro to define an error type for a `DecoderN`.
 macro_rules! define_decoder_n_error {
