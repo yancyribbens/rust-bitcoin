@@ -993,7 +993,9 @@ pub mod error {
     }
 
     #[cfg(feature = "std")]
-    impl std::error::Error for UnexpectedEofError {}
+    impl std::error::Error for UnexpectedEofError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
 }
 
 #[cfg(test)]
