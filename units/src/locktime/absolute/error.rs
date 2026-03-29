@@ -68,7 +68,9 @@ impl fmt::Display for IncompatibleHeightError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for IncompatibleHeightError {}
+impl std::error::Error for IncompatibleHeightError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Tried to satisfy a lock-by-height lock using a height value.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -103,7 +105,9 @@ impl fmt::Display for IncompatibleTimeError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for IncompatibleTimeError {}
+impl std::error::Error for IncompatibleTimeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Error returned when parsing block height fails.
 #[derive(Debug, Clone, Eq, PartialEq)]
