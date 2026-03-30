@@ -5,7 +5,6 @@
 //! Implementation of BIP-0032 hierarchical deterministic wallets, as defined
 //! at <https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki>.
 
-use core::convert::Infallible;
 use core::ops::Index;
 use core::str::FromStr;
 use core::{fmt, slice};
@@ -14,12 +13,18 @@ use core::{fmt, slice};
 use arbitrary::{Arbitrary, Unstructured};
 use hashes::{hash160, hash_newtype, sha512, Hash, HashEngine, Hmac, HmacEngine};
 use internals::array::ArrayExt;
-use internals::write_err;
 
 use crate::crypto::key::{FullPublicKey, Keypair, PrivateKey, XOnlyPublicKey};
 use crate::internal_macros;
 use crate::network::NetworkKind;
 use crate::prelude::{String, Vec};
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{
+    DerivationError, IndexOutOfRangeError, InvalidBase58PayloadLengthError,
+    ParseChildNumberError, ParseError,
+};
 
 /// Version bytes for extended public keys on the Bitcoin network.
 const VERSION_BYTES_MAINNET_PUBLIC: [u8; 4] = [0x04, 0x88, 0xB2, 0x1E];
@@ -554,171 +559,6 @@ impl fmt::Debug for DerivationPath {
 /// master extended public key and a derivation path from it.
 pub type KeySource = (Fingerprint, DerivationPath);
 
-/// A BIP-0032 error
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum ParseError {
-    /// A secp256k1 error occurred
-    Secp256k1(secp256k1::Error),
-    /// Unknown version magic bytes
-    UnknownVersion([u8; 4]),
-    /// Encoded extended key data has wrong length
-    WrongExtendedKeyLength(usize),
-    /// Base58 encoding error
-    Base58(base58::Error),
-    /// Base58 decoded data was an invalid length.
-    InvalidBase58PayloadLength(InvalidBase58PayloadLengthError),
-    /// Invalid private key prefix (byte 45 must be 0)
-    InvalidPrivateKeyPrefix,
-    /// Non-zero parent fingerprint for a master key (depth 0)
-    NonZeroParentFingerprintForMasterKey,
-    /// Non-zero child number for a master key (depth 0)
-    NonZeroChildNumberForMasterKey,
-}
-
-impl From<Infallible> for ParseError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Secp256k1(ref e) => write_err!(f, "secp256k1 error"; e),
-            Self::UnknownVersion(ref bytes) =>
-                write!(f, "unknown version magic bytes: {:?}", bytes),
-            Self::WrongExtendedKeyLength(ref len) =>
-                write!(f, "encoded extended key data has wrong length {}", len),
-            Self::Base58(ref e) => write_err!(f, "base58 encoding error"; e),
-            Self::InvalidBase58PayloadLength(ref e) => write_err!(f, "base58 payload"; e),
-            Self::InvalidPrivateKeyPrefix =>
-                f.write_str("invalid private key prefix, byte 45 must be 0 as required by BIP-0032"),
-            Self::NonZeroParentFingerprintForMasterKey =>
-                f.write_str("non-zero parent fingerprint in master key"),
-            Self::NonZeroChildNumberForMasterKey =>
-                f.write_str("non-zero child number in master key"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ParseError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Secp256k1(ref e) => Some(e),
-            Self::Base58(ref e) => Some(e),
-            Self::InvalidBase58PayloadLength(ref e) => Some(e),
-            Self::UnknownVersion(_) | Self::WrongExtendedKeyLength(_) => None,
-            Self::InvalidPrivateKeyPrefix => None,
-            Self::NonZeroParentFingerprintForMasterKey => None,
-            Self::NonZeroChildNumberForMasterKey => None,
-        }
-    }
-}
-
-impl From<secp256k1::Error> for ParseError {
-    fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
-}
-
-impl From<base58::Error> for ParseError {
-    fn from(err: base58::Error) -> Self { Self::Base58(err) }
-}
-
-impl From<InvalidBase58PayloadLengthError> for ParseError {
-    fn from(e: InvalidBase58PayloadLengthError) -> Self { Self::InvalidBase58PayloadLength(e) }
-}
-
-/// A BIP-0032 error
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum DerivationError {
-    /// Attempted to derive a hardened child from an xpub.
-    ///
-    /// You can only derive hardened children from xprivs.
-    CannotDeriveHardenedChild,
-    /// Attempted to derive a child of depth 256 or higher.
-    ///
-    /// There is no way to encode such xkeys.
-    MaximumDepthExceeded,
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for DerivationError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::CannotDeriveHardenedChild => None,
-            Self::MaximumDepthExceeded => None,
-        }
-    }
-}
-
-impl fmt::Display for DerivationError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::CannotDeriveHardenedChild =>
-                f.write_str("cannot derive hardened child of public key"),
-            Self::MaximumDepthExceeded => f.write_str("cannot derive child of depth 256 or higher"),
-        }
-    }
-}
-
-/// Out-of-range index when constructing a child number.
-///
-/// *Indices* are always in the range [0, 2^31 - 1]. Normal child numbers have the
-/// same range, while hardened child numbers lie in the range [2^31, 2^32 - 1].
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct IndexOutOfRangeError {
-    /// The index that was out of range for a child number.
-    pub index: u32,
-}
-
-impl From<Infallible> for IndexOutOfRangeError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for IndexOutOfRangeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "index {} out of range [0, 2^31 - 1] (do you have a hardened child number, rather than an index?)", self.index)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for IndexOutOfRangeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// Error parsing a child number.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ParseChildNumberError {
-    /// Parsed the child number as an integer, but the integer was out of range.
-    IndexOutOfRange(IndexOutOfRangeError),
-    /// Failed to parse the child number as an integer.
-    ParseInt(core::num::ParseIntError),
-}
-
-impl From<Infallible> for ParseChildNumberError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for ParseChildNumberError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::IndexOutOfRange(ref e) => e.fmt(f),
-            Self::ParseInt(ref e) => e.fmt(f),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ParseChildNumberError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {
-            Self::IndexOutOfRange(ref e) => Some(e),
-            Self::ParseInt(ref e) => Some(e),
-        }
-    }
-}
-
 impl Xpriv {
     /// Constructs a new master key from a seed value
     pub fn new_master(network: impl Into<NetworkKind>, seed: &[u8]) -> Self {
@@ -1045,33 +885,6 @@ impl From<&Xpub> for XKeyIdentifier {
     fn from(key: &Xpub) -> Self { key.identifier() }
 }
 
-/// Decoded base58 data was an invalid length.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct InvalidBase58PayloadLengthError {
-    /// The base58 payload length we got after decoding xpriv/xpub string.
-    pub(crate) length: usize,
-}
-
-impl InvalidBase58PayloadLengthError {
-    /// Returns the invalid payload length.
-    pub fn invalid_base58_payload_length(&self) -> usize { self.length }
-}
-
-impl fmt::Display for InvalidBase58PayloadLengthError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "decoded base58 xpriv/xpub data was an invalid length: {} (expected 78)",
-            self.length
-        )
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InvalidBase58PayloadLengthError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
 // Helps unify decoding
 struct Common {
     network: [u8; 4],
@@ -1112,6 +925,208 @@ impl Common {
             chain_code: chain_code.into(),
             key,
         })
+    }
+}
+
+/// Error types for BIP-0032 operations
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
+
+    use internals::write_err;
+
+    /// A BIP-0032 error
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum ParseError {
+        /// A secp256k1 error occurred
+        Secp256k1(secp256k1::Error),
+        /// Unknown version magic bytes
+        UnknownVersion([u8; 4]),
+        /// Encoded extended key data has wrong length
+        WrongExtendedKeyLength(usize),
+        /// Base58 encoding error
+        Base58(base58::Error),
+        /// Base58 decoded data was an invalid length.
+        InvalidBase58PayloadLength(InvalidBase58PayloadLengthError),
+        /// Invalid private key prefix (byte 45 must be 0)
+        InvalidPrivateKeyPrefix,
+        /// Non-zero parent fingerprint for a master key (depth 0)
+        NonZeroParentFingerprintForMasterKey,
+        /// Non-zero child number for a master key (depth 0)
+        NonZeroChildNumberForMasterKey,
+    }
+
+    impl From<Infallible> for ParseError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for ParseError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::Secp256k1(ref e) => write_err!(f, "secp256k1 error"; e),
+                Self::UnknownVersion(ref bytes) =>
+                    write!(f, "unknown version magic bytes: {:?}", bytes),
+                Self::WrongExtendedKeyLength(ref len) =>
+                    write!(f, "encoded extended key data has wrong length {}", len),
+                Self::Base58(ref e) => write_err!(f, "base58 encoding error"; e),
+                Self::InvalidBase58PayloadLength(ref e) => write_err!(f, "base58 payload"; e),
+                Self::InvalidPrivateKeyPrefix => f.write_str(
+                    "invalid private key prefix, byte 45 must be 0 as required by BIP-0032",
+                ),
+                Self::NonZeroParentFingerprintForMasterKey =>
+                    f.write_str("non-zero parent fingerprint in master key"),
+                Self::NonZeroChildNumberForMasterKey =>
+                    f.write_str("non-zero child number in master key"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Secp256k1(ref e) => Some(e),
+                Self::Base58(ref e) => Some(e),
+                Self::InvalidBase58PayloadLength(ref e) => Some(e),
+                Self::UnknownVersion(_) | Self::WrongExtendedKeyLength(_) => None,
+                Self::InvalidPrivateKeyPrefix => None,
+                Self::NonZeroParentFingerprintForMasterKey => None,
+                Self::NonZeroChildNumberForMasterKey => None,
+            }
+        }
+    }
+
+    impl From<secp256k1::Error> for ParseError {
+        fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
+    }
+
+    impl From<base58::Error> for ParseError {
+        fn from(err: base58::Error) -> Self { Self::Base58(err) }
+    }
+
+    impl From<InvalidBase58PayloadLengthError> for ParseError {
+        fn from(e: InvalidBase58PayloadLengthError) -> Self { Self::InvalidBase58PayloadLength(e) }
+    }
+
+    /// A BIP-0032 error
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum DerivationError {
+        /// Attempted to derive a hardened child from an xpub.
+        ///
+        /// You can only derive hardened children from xprivs.
+        CannotDeriveHardenedChild,
+        /// Attempted to derive a child of depth 256 or higher.
+        ///
+        /// There is no way to encode such xkeys.
+        MaximumDepthExceeded,
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for DerivationError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::CannotDeriveHardenedChild => None,
+                Self::MaximumDepthExceeded => None,
+            }
+        }
+    }
+
+    impl fmt::Display for DerivationError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match *self {
+                Self::CannotDeriveHardenedChild =>
+                    f.write_str("cannot derive hardened child of public key"),
+                Self::MaximumDepthExceeded =>
+                    f.write_str("cannot derive child of depth 256 or higher"),
+            }
+        }
+    }
+
+    /// Out-of-range index when constructing a child number.
+    ///
+    /// *Indices* are always in the range [0, 2^31 - 1]. Normal child numbers have the
+    /// same range, while hardened child numbers lie in the range [2^31, 2^32 - 1].
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct IndexOutOfRangeError {
+        /// The index that was out of range for a child number.
+        pub index: u32,
+    }
+
+    impl From<Infallible> for IndexOutOfRangeError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for IndexOutOfRangeError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "index {} out of range [0, 2^31 - 1] (do you have a hardened child number, rather than an index?)", self.index)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for IndexOutOfRangeError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// Error parsing a child number.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum ParseChildNumberError {
+        /// Parsed the child number as an integer, but the integer was out of range.
+        IndexOutOfRange(IndexOutOfRangeError),
+        /// Failed to parse the child number as an integer.
+        ParseInt(core::num::ParseIntError),
+    }
+
+    impl From<Infallible> for ParseChildNumberError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for ParseChildNumberError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match *self {
+                Self::IndexOutOfRange(ref e) => e.fmt(f),
+                Self::ParseInt(ref e) => e.fmt(f),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseChildNumberError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match *self {
+                Self::IndexOutOfRange(ref e) => Some(e),
+                Self::ParseInt(ref e) => Some(e),
+            }
+        }
+    }
+
+    /// Decoded base58 data was an invalid length.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct InvalidBase58PayloadLengthError {
+        /// The base58 payload length we got after decoding xpriv/xpub string.
+        pub(crate) length: usize,
+    }
+
+    impl InvalidBase58PayloadLengthError {
+        /// Returns the invalid payload length.
+        pub fn invalid_base58_payload_length(&self) -> usize { self.length }
+    }
+
+    impl fmt::Display for InvalidBase58PayloadLengthError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                f,
+                "decoded base58 xpriv/xpub data was an invalid length: {} (expected 78)",
+                self.length
+            )
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for InvalidBase58PayloadLengthError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
     }
 }
 
