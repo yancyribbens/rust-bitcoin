@@ -7,7 +7,7 @@ use core::ops::{Deref, DerefMut};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-use encoding::{ByteVecDecoder, ByteVecDecoderError, Decodable, Decoder};
+use encoding::{ByteVecDecoder, ByteVecDecoderError};
 use internals::write_err;
 
 use super::Script;
@@ -195,7 +195,7 @@ impl<T> Default for ScriptBufDecoder<T> {
     fn default() -> Self { Self::new() }
 }
 
-impl<T> Decoder for ScriptBufDecoder<T> {
+impl<T> encoding::Decoder for ScriptBufDecoder<T> {
     type Output = ScriptBuf<T>;
     type Error = ScriptBufDecoderError;
 
@@ -213,7 +213,7 @@ impl<T> Decoder for ScriptBufDecoder<T> {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl<T> Decodable for ScriptBuf<T> {
+impl<T> encoding::Decodable for ScriptBuf<T> {
     type Decoder = ScriptBufDecoder<T>;
     fn decoder() -> Self::Decoder { ScriptBufDecoder(ByteVecDecoder::new(), PhantomData) }
 }

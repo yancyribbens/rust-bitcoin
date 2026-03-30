@@ -50,13 +50,9 @@ impl TxMerkleNode {
     }
 }
 
-encoding::encoder_newtype_exact! {
-    /// The encoder for the [`TxMerkleNode`] type.
-    pub struct TxMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
-}
-
 impl encoding::Encodable for TxMerkleNode {
     type Encoder<'e> = TxMerkleNodeEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         TxMerkleNodeEncoder::new(encoding::ArrayRefEncoder::without_length_prefix(
             self.as_byte_array(),
@@ -64,15 +60,28 @@ impl encoding::Encodable for TxMerkleNode {
     }
 }
 
+impl encoding::Decodable for TxMerkleNode {
+    type Decoder = TxMerkleNodeDecoder;
+    #[inline]
+    fn decoder() -> Self::Decoder { TxMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
+}
+
+encoding::encoder_newtype_exact! {
+    /// The encoder for the [`TxMerkleNode`] type.
+    pub struct TxMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
+}
+
 /// The decoder for the [`TxMerkleNode`] type.
 pub struct TxMerkleNodeDecoder(encoding::ArrayDecoder<32>);
 
 impl TxMerkleNodeDecoder {
     /// Constructs a new [`TxMerkleNode`] decoder.
+    #[inline]
     pub const fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
 }
 
 impl Default for TxMerkleNodeDecoder {
+    #[inline]
     fn default() -> Self { Self::new() }
 }
 
@@ -93,11 +102,6 @@ impl encoding::Decoder for TxMerkleNodeDecoder {
 
     #[inline]
     fn read_limit(&self) -> usize { self.0.read_limit() }
-}
-
-impl encoding::Decodable for TxMerkleNode {
-    type Decoder = TxMerkleNodeDecoder;
-    fn decoder() -> Self::Decoder { TxMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
 }
 
 /// An error consensus decoding an `TxMerkleNode`.

@@ -13,8 +13,8 @@ use arbitrary::{Arbitrary, Unstructured};
 #[cfg(doc)]
 use encoding::Decoder4;
 use encoding::{
-    self, BytesEncoder, CompactSizeDecoder, CompactSizeDecoderError, CompactSizeEncoder, Decoder,
-    Encodable, Encoder, Encoder2,
+    self, BytesEncoder, CompactSizeDecoder, CompactSizeDecoderError, CompactSizeEncoder,
+    Decoder as _, Encoder2,
 };
 #[cfg(feature = "hex")]
 use hex::DecodeVariableLengthBytesError;
@@ -261,7 +261,7 @@ fn decode_cursor(bytes: &[u8], start_of_indices: usize, index: usize) -> Option<
 /// The encoder for the [`Witness`] type.
 pub struct WitnessEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 
-impl Encodable for Witness {
+impl encoding::Encodable for Witness {
     type Encoder<'e>
         = WitnessEncoder<'e>
     where
@@ -276,7 +276,7 @@ impl Encodable for Witness {
     }
 }
 
-impl Encoder for WitnessEncoder<'_> {
+impl encoding::Encoder for WitnessEncoder<'_> {
     #[inline]
     fn current_chunk(&self) -> &[u8] { self.0.current_chunk() }
 
@@ -347,7 +347,7 @@ impl Default for WitnessDecoder {
     fn default() -> Self { Self::new() }
 }
 
-impl Decoder for WitnessDecoder {
+impl encoding::Decoder for WitnessDecoder {
     type Output = Witness;
     type Error = WitnessDecoderError;
 
@@ -977,6 +977,9 @@ mod test {
 
     #[cfg(feature = "alloc")]
     use encoding::Decodable as _;
+    #[cfg(feature = "alloc")]
+    use encoding::Encodable as _;
+    use encoding::Encoder as _;
 
     use super::*;
 

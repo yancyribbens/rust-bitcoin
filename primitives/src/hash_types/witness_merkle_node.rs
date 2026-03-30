@@ -50,13 +50,9 @@ impl WitnessMerkleNode {
     }
 }
 
-encoding::encoder_newtype_exact! {
-    /// The encoder for the [`WitnessMerkleNode`] type.
-    pub struct WitnessMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
-}
-
 impl encoding::Encodable for WitnessMerkleNode {
     type Encoder<'e> = WitnessMerkleNodeEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         WitnessMerkleNodeEncoder::new(encoding::ArrayRefEncoder::without_length_prefix(
             self.as_byte_array(),
@@ -64,15 +60,28 @@ impl encoding::Encodable for WitnessMerkleNode {
     }
 }
 
+impl encoding::Decodable for WitnessMerkleNode {
+    type Decoder = WitnessMerkleNodeDecoder;
+    #[inline]
+    fn decoder() -> Self::Decoder { WitnessMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
+}
+
+encoding::encoder_newtype_exact! {
+    /// The encoder for the [`WitnessMerkleNode`] type.
+    pub struct WitnessMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
+}
+
 /// The decoder for the [`WitnessMerkleNode`] type.
 pub struct WitnessMerkleNodeDecoder(encoding::ArrayDecoder<32>);
 
 impl WitnessMerkleNodeDecoder {
     /// Constructs a new [`WitnessMerkleNode`] decoder.
-    pub fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
+    #[inline]
+    pub const fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
 }
 
 impl Default for WitnessMerkleNodeDecoder {
+    #[inline]
     fn default() -> Self { Self::new() }
 }
 
@@ -93,11 +102,6 @@ impl encoding::Decoder for WitnessMerkleNodeDecoder {
 
     #[inline]
     fn read_limit(&self) -> usize { self.0.read_limit() }
-}
-
-impl encoding::Decodable for WitnessMerkleNode {
-    type Decoder = WitnessMerkleNodeDecoder;
-    fn decoder() -> Self::Decoder { WitnessMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
 }
 
 /// An error consensus decoding an `WitnessMerkleNode`.
