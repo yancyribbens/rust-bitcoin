@@ -5,7 +5,6 @@
 //! This module provides keys used in Bitcoin that can be roundtrip
 //! (de)serialized.
 
-use core::convert::Infallible;
 use core::fmt;
 use core::str::FromStr;
 
@@ -14,7 +13,7 @@ use arbitrary::{Arbitrary, Unstructured};
 use hashes::hash160;
 use internals::array::ArrayExt;
 use internals::array_vec::ArrayVec;
-use internals::{impl_to_hex_from_lower_hex, write_err};
+use internals::impl_to_hex_from_lower_hex;
 use io::{Read, Write};
 
 use crate::crypto::ecdsa;
@@ -38,6 +37,14 @@ pub use encapsulate::{
 #[cfg(feature = "rand")]
 #[cfg(feature = "std")]
 pub use secp256k1::rand;
+
+#[doc(no_inline)]
+pub use self::error::{
+    FromSliceError, FromWifError, InvalidAddressVersionError, InvalidBase58PayloadLengthError,
+    InvalidWifCompressionFlagError, ParseFullPublicKeyError, ParseKeypairError,
+    ParsePublicKeyError, ParseXOnlyPublicKeyError, TweakXOnlyPublicKeyError,
+    UncompressedPublicKeyError,
+};
 
 /// Encapsulation module to provide a clear barrier for construction/destruction of types.
 mod encapsulate {
@@ -1529,300 +1536,6 @@ impl From<TweakedKeypair> for TweakedPublicKey {
     fn from(pair: TweakedKeypair) -> Self { Self::from_keypair(pair) }
 }
 
-/// Error returned while generating key from slice.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum FromSliceError {
-    /// Invalid key prefix error.
-    InvalidKeyPrefix(u8),
-    /// A secp256k1 error.
-    Secp256k1(secp256k1::Error),
-    /// Invalid Length of the slice.
-    InvalidLength(usize),
-}
-
-impl From<Infallible> for FromSliceError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for FromSliceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Secp256k1(e) => write_err!(f, "secp256k1"; e),
-            Self::InvalidKeyPrefix(b) => write!(f, "key prefix invalid: {}", b),
-            Self::InvalidLength(got) =>
-                write!(f, "slice length should be 33 or 65 bytes, got: {}", got),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for FromSliceError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Secp256k1(ref e) => Some(e),
-            Self::InvalidKeyPrefix(_) | Self::InvalidLength(_) => None,
-        }
-    }
-}
-
-impl From<secp256k1::Error> for FromSliceError {
-    fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
-}
-
-/// Error generated from WIF key format.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum FromWifError {
-    /// A base58 decoding error.
-    Base58(base58::Error),
-    /// Base58 decoded data was an invalid length.
-    InvalidBase58PayloadLength(InvalidBase58PayloadLengthError),
-    /// Base58 decoded data contained an invalid address version byte.
-    InvalidAddressVersion(InvalidAddressVersionError),
-    /// A secp256k1 error.
-    Secp256k1(secp256k1::Error),
-    /// Invalid WIF compression flag.
-    InvalidWifCompressionFlag(InvalidWifCompressionFlagError),
-}
-
-impl From<Infallible> for FromWifError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for FromWifError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Base58(ref e) => write_err!(f, "invalid base58"; e),
-            Self::InvalidBase58PayloadLength(ref e) =>
-                write_err!(f, "decoded base58 data was an invalid length"; e),
-            Self::InvalidAddressVersion(ref e) =>
-                write_err!(f, "decoded base58 data contained an invalid address version byte"; e),
-            Self::Secp256k1(ref e) => write_err!(f, "private key validation failed"; e),
-            Self::InvalidWifCompressionFlag(ref e) =>
-                write_err!(f, "invalid WIF compression flag"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for FromWifError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Base58(ref e) => Some(e),
-            Self::InvalidBase58PayloadLength(ref e) => Some(e),
-            Self::InvalidAddressVersion(ref e) => Some(e),
-            Self::Secp256k1(ref e) => Some(e),
-            Self::InvalidWifCompressionFlag(ref e) => Some(e),
-        }
-    }
-}
-
-impl From<base58::Error> for FromWifError {
-    fn from(e: base58::Error) -> Self { Self::Base58(e) }
-}
-
-impl From<secp256k1::Error> for FromWifError {
-    fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
-}
-
-impl From<InvalidBase58PayloadLengthError> for FromWifError {
-    fn from(e: InvalidBase58PayloadLengthError) -> Self { Self::InvalidBase58PayloadLength(e) }
-}
-
-impl From<InvalidAddressVersionError> for FromWifError {
-    fn from(e: InvalidAddressVersionError) -> Self { Self::InvalidAddressVersion(e) }
-}
-
-impl From<InvalidWifCompressionFlagError> for FromWifError {
-    fn from(e: InvalidWifCompressionFlagError) -> Self { Self::InvalidWifCompressionFlag(e) }
-}
-
-/// Error returned while constructing a [`Keypair`] from string.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ParseKeypairError(secp256k1::Error);
-
-impl From<Infallible> for ParseKeypairError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for ParseKeypairError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "parse keypair failed"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ParseKeypairError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
-/// Error returned while constructing public key from string.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ParsePublicKeyError {
-    /// Error originated while parsing string.
-    Encoding(FromSliceError),
-    /// Hex decoding error.
-    InvalidChar(hex::error::InvalidCharError),
-    /// `LegacyPublicKey` hex should be 66 or 130 digits long.
-    InvalidHexLength(usize),
-}
-
-impl From<Infallible> for ParsePublicKeyError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for ParsePublicKeyError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Encoding(ref e) => write_err!(f, "string error"; e),
-            Self::InvalidChar(ref e) => write_err!(f, "hex decoding"; e),
-            Self::InvalidHexLength(got) =>
-                write!(f, "pubkey string should be 66 or 130 digits long, got: {}", got),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ParsePublicKeyError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Encoding(ref e) => Some(e),
-            Self::InvalidChar(ref e) => Some(e),
-            Self::InvalidHexLength(_) => None,
-        }
-    }
-}
-
-impl From<FromSliceError> for ParsePublicKeyError {
-    fn from(e: FromSliceError) -> Self { Self::Encoding(e) }
-}
-
-/// Error returned when parsing a [`FullPublicKey`] from a string.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ParseFullPublicKeyError {
-    /// secp256k1 Error.
-    Secp256k1(secp256k1::Error),
-    /// hex to array conversion error.
-    Hex(hex::DecodeFixedLengthBytesError),
-}
-
-impl From<Infallible> for ParseFullPublicKeyError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for ParseFullPublicKeyError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Secp256k1(e) => write_err!(f, "secp256k1 error"; e),
-            Self::Hex(e) => write_err!(f, "invalid hex"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ParseFullPublicKeyError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Secp256k1(e) => Some(e),
-            Self::Hex(e) => Some(e),
-        }
-    }
-}
-
-impl From<secp256k1::Error> for ParseFullPublicKeyError {
-    fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
-}
-
-impl From<hex::DecodeFixedLengthBytesError> for ParseFullPublicKeyError {
-    fn from(e: hex::DecodeFixedLengthBytesError) -> Self { Self::Hex(e) }
-}
-
-/// SegWit public keys must always be compressed.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct UncompressedPublicKeyError;
-
-impl fmt::Display for UncompressedPublicKeyError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str("SegWit public keys must always be compressed")
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UncompressedPublicKeyError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// Decoded base58 data was an invalid length.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct InvalidBase58PayloadLengthError {
-    /// The base58 payload length we got after decoding WIF string.
-    pub(crate) length: usize,
-}
-
-impl InvalidBase58PayloadLengthError {
-    /// Returns the invalid payload length.
-    pub fn invalid_base58_payload_length(&self) -> usize { self.length }
-}
-
-impl fmt::Display for InvalidBase58PayloadLengthError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "decoded base58 data was an invalid length: {} (expected 33 or 34)", self.length)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InvalidBase58PayloadLengthError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// Invalid address version in decoded base58 data.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct InvalidAddressVersionError {
-    /// The invalid version.
-    pub(crate) invalid: u8,
-}
-
-impl InvalidAddressVersionError {
-    /// Returns the invalid version.
-    pub fn invalid_address_version(&self) -> u8 { self.invalid }
-}
-
-impl fmt::Display for InvalidAddressVersionError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid address version in decoded base58 data {}", self.invalid)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InvalidAddressVersionError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// Invalid compression flag for a WIF key
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct InvalidWifCompressionFlagError {
-    /// The invalid compression flag.
-    pub(crate) invalid: u8,
-}
-
-impl InvalidWifCompressionFlagError {
-    /// Returns the invalid compression flag.
-    pub fn invalid_compression_flag(&self) -> u8 { self.invalid }
-}
-
-impl fmt::Display for InvalidWifCompressionFlagError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid WIF compression flag. Expected a 0x01 byte at the end of the key but found: {}", self.invalid)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InvalidWifCompressionFlagError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
 impl SerializedXOnlyPublicKey {
     /// Returns `XOnlyPublicKey` if the bytes are valid.
     ///
@@ -1849,58 +1562,372 @@ impl fmt::Debug for SerializedXOnlyPublicKey {
     }
 }
 
-/// Error that can occur when parsing an [`XOnlyPublicKey`] from bytes.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ParseXOnlyPublicKeyError {
-    /// The provided bytes do not represent a valid secp256k1 point x-coordinate.
-    InvalidXCoordinate,
-}
+/// Error types for bitcoin keys.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
 
-impl fmt::Display for ParseXOnlyPublicKeyError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::InvalidXCoordinate => write!(f, "Invalid X coordinate for secp256k1 point"),
+    use internals::write_err;
+
+    /// Error returned while generating key from slice.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum FromSliceError {
+        /// Invalid key prefix error.
+        InvalidKeyPrefix(u8),
+        /// A secp256k1 error.
+        Secp256k1(secp256k1::Error),
+        /// Invalid Length of the slice.
+        InvalidLength(usize),
+    }
+
+    impl From<Infallible> for FromSliceError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for FromSliceError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::Secp256k1(e) => write_err!(f, "secp256k1"; e),
+                Self::InvalidKeyPrefix(b) => write!(f, "key prefix invalid: {}", b),
+                Self::InvalidLength(got) =>
+                    write!(f, "slice length should be 33 or 65 bytes, got: {}", got),
+            }
         }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for ParseXOnlyPublicKeyError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::InvalidXCoordinate => None,
+    #[cfg(feature = "std")]
+    impl std::error::Error for FromSliceError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Secp256k1(ref e) => Some(e),
+                Self::InvalidKeyPrefix(_) | Self::InvalidLength(_) => None,
+            }
         }
     }
-}
 
-/// Error that can occur when tweaking an [`XOnlyPublicKey`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum TweakXOnlyPublicKeyError {
-    /// The tweak value was invalid.
-    BadTweak,
-    /// The resulting public key would be invalid.
-    ResultKeyInvalid,
-    /// Invalid parity value encountered during the operation.
-    ParityError,
-}
+    impl From<secp256k1::Error> for FromSliceError {
+        fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
+    }
 
-impl fmt::Display for TweakXOnlyPublicKeyError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::BadTweak => write!(f, "Invalid tweak value"),
-            Self::ResultKeyInvalid => write!(f, "Resulting public key would be invalid"),
-            Self::ParityError => write!(f, "Invalid parity value encountered"),
+    /// Error generated from WIF key format.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum FromWifError {
+        /// A base58 decoding error.
+        Base58(base58::Error),
+        /// Base58 decoded data was an invalid length.
+        InvalidBase58PayloadLength(InvalidBase58PayloadLengthError),
+        /// Base58 decoded data contained an invalid address version byte.
+        InvalidAddressVersion(InvalidAddressVersionError),
+        /// A secp256k1 error.
+        Secp256k1(secp256k1::Error),
+        /// Invalid WIF compression flag.
+        InvalidWifCompressionFlag(InvalidWifCompressionFlagError),
+    }
+
+    impl From<Infallible> for FromWifError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for FromWifError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::Base58(ref e) => write_err!(f, "invalid base58"; e),
+                Self::InvalidBase58PayloadLength(ref e) =>
+                    write_err!(f, "decoded base58 data was an invalid length"; e),
+                Self::InvalidAddressVersion(ref e) =>
+                    write_err!(f, "decoded base58 data contained an invalid address version byte"; e),
+                Self::Secp256k1(ref e) => write_err!(f, "private key validation failed"; e),
+                Self::InvalidWifCompressionFlag(ref e) =>
+                    write_err!(f, "invalid WIF compression flag"; e),
+            }
         }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for TweakXOnlyPublicKeyError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::BadTweak => None,
-            Self::ResultKeyInvalid => None,
-            Self::ParityError => None,
+    #[cfg(feature = "std")]
+    impl std::error::Error for FromWifError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Base58(ref e) => Some(e),
+                Self::InvalidBase58PayloadLength(ref e) => Some(e),
+                Self::InvalidAddressVersion(ref e) => Some(e),
+                Self::Secp256k1(ref e) => Some(e),
+                Self::InvalidWifCompressionFlag(ref e) => Some(e),
+            }
+        }
+    }
+
+    impl From<base58::Error> for FromWifError {
+        fn from(e: base58::Error) -> Self { Self::Base58(e) }
+    }
+
+    impl From<secp256k1::Error> for FromWifError {
+        fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
+    }
+
+    impl From<InvalidBase58PayloadLengthError> for FromWifError {
+        fn from(e: InvalidBase58PayloadLengthError) -> Self { Self::InvalidBase58PayloadLength(e) }
+    }
+
+    impl From<InvalidAddressVersionError> for FromWifError {
+        fn from(e: InvalidAddressVersionError) -> Self { Self::InvalidAddressVersion(e) }
+    }
+
+    impl From<InvalidWifCompressionFlagError> for FromWifError {
+        fn from(e: InvalidWifCompressionFlagError) -> Self { Self::InvalidWifCompressionFlag(e) }
+    }
+
+    /// Error returned while constructing a [`Keypair`] from string.
+    ///
+    /// [`Keypair`]: super::Keypair
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct ParseKeypairError(pub(super) secp256k1::Error);
+
+    impl From<Infallible> for ParseKeypairError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for ParseKeypairError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "parse keypair failed"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseKeypairError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// Error returned while constructing public key from string.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum ParsePublicKeyError {
+        /// Error originated while parsing string.
+        Encoding(FromSliceError),
+        /// Hex decoding error.
+        InvalidChar(hex::error::InvalidCharError),
+        /// `LegacyPublicKey` hex should be 66 or 130 digits long.
+        InvalidHexLength(usize),
+    }
+
+    impl From<Infallible> for ParsePublicKeyError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for ParsePublicKeyError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::Encoding(ref e) => write_err!(f, "string error"; e),
+                Self::InvalidChar(ref e) => write_err!(f, "hex decoding"; e),
+                Self::InvalidHexLength(got) =>
+                    write!(f, "pubkey string should be 66 or 130 digits long, got: {}", got),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParsePublicKeyError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Encoding(ref e) => Some(e),
+                Self::InvalidChar(ref e) => Some(e),
+                Self::InvalidHexLength(_) => None,
+            }
+        }
+    }
+
+    impl From<FromSliceError> for ParsePublicKeyError {
+        fn from(e: FromSliceError) -> Self { Self::Encoding(e) }
+    }
+
+    /// Error returned when parsing a [`FullPublicKey`] from a string.
+    ///
+    /// [`FullPublicKey`]: super::FullPublicKey
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum ParseFullPublicKeyError {
+        /// secp256k1 Error.
+        Secp256k1(secp256k1::Error),
+        /// hex to array conversion error.
+        Hex(hex::DecodeFixedLengthBytesError),
+    }
+
+    impl From<Infallible> for ParseFullPublicKeyError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for ParseFullPublicKeyError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::Secp256k1(e) => write_err!(f, "secp256k1 error"; e),
+                Self::Hex(e) => write_err!(f, "invalid hex"; e),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseFullPublicKeyError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Secp256k1(e) => Some(e),
+                Self::Hex(e) => Some(e),
+            }
+        }
+    }
+
+    impl From<secp256k1::Error> for ParseFullPublicKeyError {
+        fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
+    }
+
+    impl From<hex::DecodeFixedLengthBytesError> for ParseFullPublicKeyError {
+        fn from(e: hex::DecodeFixedLengthBytesError) -> Self { Self::Hex(e) }
+    }
+
+    /// SegWit public keys must always be compressed.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct UncompressedPublicKeyError;
+
+    impl fmt::Display for UncompressedPublicKeyError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            f.write_str("SegWit public keys must always be compressed")
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for UncompressedPublicKeyError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// Decoded base58 data was an invalid length.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct InvalidBase58PayloadLengthError {
+        /// The base58 payload length we got after decoding WIF string.
+        pub(crate) length: usize,
+    }
+
+    impl InvalidBase58PayloadLengthError {
+        /// Returns the invalid payload length.
+        pub fn invalid_base58_payload_length(&self) -> usize { self.length }
+    }
+
+    impl fmt::Display for InvalidBase58PayloadLengthError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                f,
+                "decoded base58 data was an invalid length: {} (expected 33 or 34)",
+                self.length
+            )
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for InvalidBase58PayloadLengthError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// Invalid address version in decoded base58 data.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct InvalidAddressVersionError {
+        /// The invalid version.
+        pub(crate) invalid: u8,
+    }
+
+    impl InvalidAddressVersionError {
+        /// Returns the invalid version.
+        pub fn invalid_address_version(&self) -> u8 { self.invalid }
+    }
+
+    impl fmt::Display for InvalidAddressVersionError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "invalid address version in decoded base58 data {}", self.invalid)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for InvalidAddressVersionError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// Invalid compression flag for a WIF key
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct InvalidWifCompressionFlagError {
+        /// The invalid compression flag.
+        pub(crate) invalid: u8,
+    }
+
+    impl InvalidWifCompressionFlagError {
+        /// Returns the invalid compression flag.
+        pub fn invalid_compression_flag(&self) -> u8 { self.invalid }
+    }
+
+    impl fmt::Display for InvalidWifCompressionFlagError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "invalid WIF compression flag. Expected a 0x01 byte at the end of the key but found: {}", self.invalid)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for InvalidWifCompressionFlagError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// Error that can occur when parsing an [`XOnlyPublicKey`] from bytes.
+    ///
+    /// [`XOnlyPublicKey`]: super::XOnlyPublicKey
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum ParseXOnlyPublicKeyError {
+        /// The provided bytes do not represent a valid secp256k1 point x-coordinate.
+        InvalidXCoordinate,
+    }
+
+    impl fmt::Display for ParseXOnlyPublicKeyError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::InvalidXCoordinate => write!(f, "Invalid X coordinate for secp256k1 point"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseXOnlyPublicKeyError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::InvalidXCoordinate => None,
+            }
+        }
+    }
+
+    /// Error that can occur when tweaking an [`XOnlyPublicKey`].
+    ///
+    /// [`XOnlyPublicKey`]: super::XOnlyPublicKey
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum TweakXOnlyPublicKeyError {
+        /// The tweak value was invalid.
+        BadTweak,
+        /// The resulting public key would be invalid.
+        ResultKeyInvalid,
+        /// Invalid parity value encountered during the operation.
+        ParityError,
+    }
+
+    impl fmt::Display for TweakXOnlyPublicKeyError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::BadTweak => write!(f, "Invalid tweak value"),
+                Self::ResultKeyInvalid => write!(f, "Resulting public key would be invalid"),
+                Self::ParityError => write!(f, "Invalid parity value encountered"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for TweakXOnlyPublicKeyError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::BadTweak => None,
+                Self::ResultKeyInvalid => None,
+                Self::ParityError => None,
+            }
         }
     }
 }
