@@ -80,7 +80,7 @@ mod encapsulate {
     }
 
     /// A Bitcoin secret and public key pair.
-    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct Keypair(secp256k1::Keypair);
 
@@ -124,6 +124,10 @@ mod encapsulate {
         pub fn compressed(&self) -> bool { self.compressed }
     }
 
+    impl Drop for Keypair {
+        fn drop(&mut self) { self.0.non_secure_erase(); }
+    }
+
     /// An always-compressed Bitcoin ECDSA public key.
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct CompressedPublicKey(secp256k1::PublicKey);
@@ -139,7 +143,7 @@ mod encapsulate {
     }
 
     /// A Bitcoin ECDSA private key.
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[derive(Debug, Clone, PartialEq, Eq)]
     pub struct PrivateKey {
         /// Whether this private key should be serialized as compressed.
         compressed: bool,
@@ -168,6 +172,10 @@ mod encapsulate {
         pub fn compressed(&self) -> bool { self.compressed }
     }
 
+    impl Drop for PrivateKey {
+        fn drop(&mut self) { self.inner.non_secure_erase(); }
+    }
+
     /// Tweaked BIP-0340 X-coord-only public key.
     #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -178,7 +186,7 @@ mod encapsulate {
         /// Returns the [`TweakedPublicKey`] for `keypair`.
         #[inline]
         pub fn from_keypair(keypair: TweakedKeypair) -> Self {
-            Self(keypair.to_keypair().to_x_only_public_key())
+            Self(keypair.as_keypair().to_x_only_public_key())
         }
 
         /// Constructs a new [`TweakedPublicKey`] from a [`XOnlyPublicKey`]. No tweak is applied, consider
@@ -210,11 +218,11 @@ mod encapsulate {
     /// # let keypair = TweakedKeypair::dangerous_assume_tweaked(Keypair::generate());
     /// // There are various conversion methods available to get a tweaked pubkey from a tweaked keypair.
     /// let (_pk, _parity) = keypair.public_parts();
-    /// let _pk = TweakedPublicKey::from_keypair(keypair);
-    /// let _pk = TweakedPublicKey::from(keypair);
+    /// let _pk = TweakedPublicKey::from_keypair(keypair.clone());
+    /// let _pk = TweakedPublicKey::from(keypair.clone());
     /// # }
     /// ```
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[cfg_attr(feature = "serde", serde(transparent))]
     pub struct TweakedKeypair(Keypair);
@@ -230,7 +238,7 @@ mod encapsulate {
 
         /// Returns the underlying key pair.
         #[inline]
-        pub fn to_keypair(self) -> Keypair { self.0 }
+        pub fn into_keypair(self) -> Keypair { self.0 }
 
         /// Returns a reference to the underlying key pair.
         #[inline]
@@ -410,13 +418,13 @@ impl Keypair {
     ///
     /// This is equivalent to using [`secp256k1::SecretKey::from_keypair`] on the inner value.
     #[inline]
-    pub fn to_secret_key(self) -> secp256k1::SecretKey {
+    pub fn to_secret_key(&self) -> secp256k1::SecretKey {
         secp256k1::SecretKey::from_keypair(self.as_inner())
     }
 
     /// Returns the secret bytes for this [`Keypair`].
     #[inline]
-    pub fn to_secret_bytes(self) -> [u8; constants::SECRET_KEY_SIZE] {
+    pub fn to_secret_bytes(&self) -> [u8; constants::SECRET_KEY_SIZE] {
         self.as_inner().to_secret_bytes()
     }
 
@@ -424,13 +432,13 @@ impl Keypair {
     ///
     /// This is equivalent to using [`PublicKey::from_keypair`].
     #[inline]
-    pub fn to_public_key(self) -> PublicKey { PublicKey::from_keypair(&self) }
+    pub fn to_public_key(&self) -> PublicKey { PublicKey::from_keypair(self) }
 
     /// Returns the [`XOnlyPublicKey`] for this [`Keypair`].
     ///
     /// This is equivalent to using [`XOnlyPublicKey::from_keypair`].
     #[inline]
-    pub fn to_x_only_public_key(self) -> XOnlyPublicKey { XOnlyPublicKey::from_keypair(&self) }
+    pub fn to_x_only_public_key(&self) -> XOnlyPublicKey { XOnlyPublicKey::from_keypair(self) }
 
     /// Schnorr sign a message slice with this keypair.
     ///
@@ -714,7 +722,7 @@ impl PublicKey {
     }
 
     /// Computes the public key as supposed to be used with this secret.
-    pub fn from_private_key(sk: PrivateKey) -> Self { sk.to_public_key() }
+    pub fn from_private_key(sk: &PrivateKey) -> Self { sk.to_public_key() }
 
     /// Extracts the public key from a Keypair
     pub fn from_keypair(pair: &Keypair) -> Self { CompressedPublicKey::from_keypair(pair).into() }
@@ -999,13 +1007,13 @@ impl PrivateKey {
 
     /// Serializes the private key to bytes.
     #[deprecated(since = "TBD", note = "use to_secret_vec instead")]
-    pub fn to_bytes(self) -> Vec<u8> { self.to_secret_vec() }
+    pub fn to_bytes(&self) -> Vec<u8> { self.to_secret_vec() }
 
     /// Serializes the private key to bytes.
-    pub fn to_secret_vec(self) -> Vec<u8> { self.to_secret_bytes().to_vec() }
+    pub fn to_secret_vec(&self) -> Vec<u8> { self.to_secret_bytes().to_vec() }
 
     /// Serializes the private key to bytes.
-    pub fn to_secret_bytes(self) -> [u8; 32] { self.as_inner().to_secret_bytes() }
+    pub fn to_secret_bytes(&self) -> [u8; 32] { self.as_inner().to_secret_bytes() }
 
     /// Deserializes a private key from a byte array.
     ///
@@ -1104,7 +1112,6 @@ impl WifKey {
     }
 
     /// Gets the WIF encoding of this private key.
-    #[allow(clippy::missing_panics_doc)]
     pub fn to_wif(&self) -> String {
         let mut buf = String::new();
         let _ = self.fmt_wif(&mut buf);
@@ -1461,8 +1468,8 @@ impl TweakedKeypair {
     /// Returns the underlying key pair.
     #[inline]
     #[doc(hidden)]
-    #[deprecated(since = "0.32.6", note = "use to_keypair() instead")]
-    pub fn to_inner(self) -> Keypair { self.to_keypair() }
+    #[deprecated(since = "0.32.6", note = "use into_keypair() instead")]
+    pub fn to_inner(self) -> Keypair { self.into_keypair() }
 
     /// Returns the [`TweakedPublicKey`] and its [`Parity`] for this [`TweakedKeypair`].
     #[inline]
@@ -1479,7 +1486,7 @@ impl From<TweakedPublicKey> for XOnlyPublicKey {
 
 impl From<TweakedKeypair> for Keypair {
     #[inline]
-    fn from(pair: TweakedKeypair) -> Self { pair.to_keypair() }
+    fn from(pair: TweakedKeypair) -> Self { pair.into_keypair() }
 }
 
 impl From<TweakedKeypair> for TweakedPublicKey {
@@ -1974,7 +1981,7 @@ mod tests {
         ];
 
         let wk = KEY_WIF.parse::<WifKey>().unwrap();
-        let pk = PublicKey::from_private_key(wk.private_key);
+        let pk = PublicKey::from_private_key(&wk.private_key);
         let pk_u = PublicKey::from_secp_uncompressed(pk.to_inner());
 
         assert_tokens(&wk, &[Token::BorrowedStr(KEY_WIF)]);
@@ -2169,7 +2176,7 @@ mod tests {
     fn public_key_constructors() {
         let kp = Keypair::generate();
 
-        let _ = PublicKey::from_secp(kp);
+        let _ = PublicKey::from_secp(kp.clone());
         let _ = PublicKey::from_secp_uncompressed(kp);
     }
 
