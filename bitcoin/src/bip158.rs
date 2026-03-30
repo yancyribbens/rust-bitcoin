@@ -38,12 +38,10 @@
 //!  ```
 
 use core::cmp::{self, Ordering};
-use core::convert::Infallible;
-use core::fmt;
 
 use hashes::{sha256d, siphash24};
 use internals::array::ArrayExt as _;
-use internals::{write_err, ToU64 as _};
+use internals::ToU64 as _;
 use io::{BufRead, Write};
 
 use crate::block::{Block, BlockHash, Checked};
@@ -52,46 +50,13 @@ use crate::prelude::{BTreeSet, Borrow, Vec};
 use crate::script::{ScriptPubKey, ScriptPubKeyExt as _};
 use crate::transaction::OutPoint;
 
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::Error;
+
 /// Golomb encoding parameter as in BIP-0158, see also https://gist.github.com/sipa/576d5f09c3b86c3b1b75598d799fc845
 const P: u8 = 19;
 const M: u64 = 784931;
-
-/// Errors for blockfilter.
-#[derive(Debug)]
-#[non_exhaustive]
-pub enum Error {
-    /// Missing UTXO, cannot calculate script filter.
-    UtxoMissing(OutPoint),
-    /// I/O error reading or writing binary serialization of the filter.
-    Io(io::Error),
-}
-
-impl From<Infallible> for Error {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::UtxoMissing(ref coin) => write!(f, "unresolved UTXO {}", coin),
-            Self::Io(ref e) => write_err!(f, "I/O error"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::UtxoMissing(_) => None,
-            Self::Io(ref e) => Some(e),
-        }
-    }
-}
-
-impl From<io::Error> for Error {
-    fn from(io: io::Error) -> Self { Self::Io(io) }
-}
 
 /// A block filter, as described by BIP 158.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -528,6 +493,53 @@ impl<'a, W: Write> BitStreamWriter<'a, W> {
         } else {
             Ok(0)
         }
+    }
+}
+
+/// Error types for BIP-158
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
+
+    use internals::write_err;
+
+    use crate::transaction::OutPoint;
+
+    /// Errors for blockfilter.
+    #[derive(Debug)]
+    #[non_exhaustive]
+    pub enum Error {
+        /// Missing UTXO, cannot calculate script filter.
+        UtxoMissing(OutPoint),
+        /// I/O error reading or writing binary serialization of the filter.
+        Io(io::Error),
+    }
+
+    impl From<Infallible> for Error {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for Error {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::UtxoMissing(ref coin) => write!(f, "unresolved UTXO {}", coin),
+                Self::Io(ref e) => write_err!(f, "I/O error"; e),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for Error {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::UtxoMissing(_) => None,
+                Self::Io(ref e) => Some(e),
+            }
+        }
+    }
+
+    impl From<io::Error> for Error {
+        fn from(io: io::Error) -> Self { Self::Io(io) }
     }
 }
 
