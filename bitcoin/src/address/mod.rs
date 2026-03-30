@@ -71,7 +71,7 @@ use crate::script::{
 use crate::taproot::TapNodeHash;
 
 #[rustfmt::skip]                // Keep public re-exports separate.
-#[doc(inline)]
+#[doc(no_inline)]
 pub use self::error::{
         Base58Error, Bech32Error, FromScriptError, InvalidBase58PayloadLengthError,
         InvalidLegacyPrefixError, LegacyAddressTooLongError, NetworkValidationError,
