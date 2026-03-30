@@ -14,66 +14,24 @@ use crate::PrivateKey;
 #[rustfmt::skip]
 #[doc(inline)]
 #[cfg(feature = "secp-recovery")]
-pub use self::message_signing::{MessageSignature, MessageSignatureError};
+pub use self::message_signing::MessageSignature;
+#[doc(no_inline)]
+#[cfg(feature = "secp-recovery")]
+pub use self::error::MessageSignatureError;
 
 /// The prefix for signed messages using Bitcoin's message signing protocol.
 pub const BITCOIN_SIGNED_MSG_PREFIX: &[u8] = b"\x18Bitcoin Signed Message:\n";
 
 #[cfg(feature = "secp-recovery")]
 mod message_signing {
-    use core::convert::Infallible;
     use core::fmt;
 
     use hashes::sha256d;
-    use internals::write_err;
     use secp256k1::ecdsa::{RecoverableSignature, RecoveryId};
 
+    use super::error::MessageSignatureError;
     use crate::address::{Address, AddressType};
     use crate::crypto::key::LegacyPublicKey;
-
-    /// An error used for dealing with Bitcoin Signed Messages.
-    #[derive(Debug, Clone, PartialEq, Eq)]
-    #[non_exhaustive]
-    pub enum MessageSignatureError {
-        /// Signature is expected to be 65 bytes.
-        InvalidLength,
-        /// The signature is invalidly constructed.
-        InvalidEncoding(secp256k1::Error),
-        /// Invalid base64 encoding.
-        InvalidBase64,
-        /// Unsupported Address Type
-        UnsupportedAddressType(AddressType),
-    }
-
-    impl From<Infallible> for MessageSignatureError {
-        fn from(never: Infallible) -> Self { match never {} }
-    }
-
-    impl fmt::Display for MessageSignatureError {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            match self {
-                Self::InvalidLength => write!(f, "length not 65 bytes"),
-                Self::InvalidEncoding(ref e) => write_err!(f, "invalid encoding"; e),
-                Self::InvalidBase64 => write!(f, "invalid base64"),
-                Self::UnsupportedAddressType(ref address_type) =>
-                    write!(f, "unsupported address type: {}", address_type),
-            }
-        }
-    }
-
-    #[cfg(feature = "std")]
-    impl std::error::Error for MessageSignatureError {
-        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-            match self {
-                Self::InvalidEncoding(ref e) => Some(e),
-                Self::InvalidLength | Self::InvalidBase64 | Self::UnsupportedAddressType(_) => None,
-            }
-        }
-    }
-
-    impl From<secp256k1::Error> for MessageSignatureError {
-        fn from(e: secp256k1::Error) -> Self { Self::InvalidEncoding(e) }
-    }
 
     /// A signature on a Bitcoin Signed Message.
     ///
@@ -214,6 +172,61 @@ pub fn sign(msg: impl AsRef<[u8]>, privkey: &PrivateKey) -> MessageSignature {
     let msg_hash = signed_msg_hash(msg);
     let msg_to_sign = secp256k1::Message::from_digest(msg_hash.to_byte_array());
     privkey.raw_ecdsa_sign_recoverable(msg_to_sign)
+}
+
+/// Error types for message signing.
+#[cfg(feature = "secp-recovery")]
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
+
+    use internals::write_err;
+
+    use crate::address::AddressType;
+
+    /// An error used for dealing with Bitcoin Signed Messages.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum MessageSignatureError {
+        /// Signature is expected to be 65 bytes.
+        InvalidLength,
+        /// The signature is invalidly constructed.
+        InvalidEncoding(secp256k1::Error),
+        /// Invalid base64 encoding.
+        InvalidBase64,
+        /// Unsupported Address Type
+        UnsupportedAddressType(AddressType),
+    }
+
+    impl From<Infallible> for MessageSignatureError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for MessageSignatureError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::InvalidLength => write!(f, "length not 65 bytes"),
+                Self::InvalidEncoding(ref e) => write_err!(f, "invalid encoding"; e),
+                Self::InvalidBase64 => write!(f, "invalid base64"),
+                Self::UnsupportedAddressType(ref address_type) =>
+                    write!(f, "unsupported address type: {}", address_type),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for MessageSignatureError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::InvalidEncoding(ref e) => Some(e),
+                Self::InvalidLength | Self::InvalidBase64 | Self::UnsupportedAddressType(_) => None,
+            }
+        }
+    }
+
+    impl From<secp256k1::Error> for MessageSignatureError {
+        fn from(e: secp256k1::Error) -> Self { Self::InvalidEncoding(e) }
+    }
 }
 
 #[cfg(test)]
