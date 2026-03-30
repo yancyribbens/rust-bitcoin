@@ -14,20 +14,21 @@
 //! [BIP-0068]: <https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki>
 //! [BIP-0125]: <https://github.com/bitcoin/bips/blob/master/bip-0125.mediawiki>
 
-#[cfg(feature = "encoding")]
-use core::convert::Infallible;
 use core::fmt;
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-#[cfg(feature = "encoding")]
-use internals::write_err;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::locktime::relative::error::TimeOverflowError;
 use crate::locktime::relative::{self, NumberOf512Seconds};
 use crate::parse_int::{self, PrefixedHexError, UnprefixedHexError};
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[cfg(feature = "encoding")]
+#[doc(no_inline)]
+pub use self::error::SequenceDecoderError;
 
 /// Bitcoin transaction input sequence number.
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -314,26 +315,37 @@ impl encoding::Decodable for Sequence {
     fn decoder() -> Self::Decoder { SequenceDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
-/// An error consensus decoding an `Sequence`.
-#[cfg(feature = "encoding")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SequenceDecoderError(encoding::UnexpectedEofError);
+/// Error types for input sequence numbers.
+pub mod error {
+    #[cfg(feature = "encoding")]
+    use core::convert::Infallible;
+    #[cfg(feature = "encoding")]
+    use core::fmt;
 
-#[cfg(feature = "encoding")]
-impl From<Infallible> for SequenceDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+    #[cfg(feature = "encoding")]
+    use internals::write_err;
 
-#[cfg(feature = "encoding")]
-impl fmt::Display for SequenceDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "sequence decoder error"; self.0)
+    /// An error consensus decoding an `Sequence`.
+    #[cfg(feature = "encoding")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct SequenceDecoderError(pub(super) encoding::UnexpectedEofError);
+
+    #[cfg(feature = "encoding")]
+    impl From<Infallible> for SequenceDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
     }
-}
 
-#[cfg(all(feature = "std", feature = "encoding"))]
-impl std::error::Error for SequenceDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    #[cfg(feature = "encoding")]
+    impl fmt::Display for SequenceDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "sequence decoder error"; self.0)
+        }
+    }
+
+    #[cfg(all(feature = "std", feature = "encoding"))]
+    impl std::error::Error for SequenceDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
 }
 
 #[cfg(feature = "arbitrary")]

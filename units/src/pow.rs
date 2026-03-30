@@ -2,18 +2,19 @@
 
 //! Proof-of-work related integer types.
 
-#[cfg(feature = "encoding")]
-use core::convert::Infallible;
 use core::fmt;
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-#[cfg(feature = "encoding")]
-use internals::write_err;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::parse_int::{self, PrefixedHexError, UnprefixedHexError};
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[cfg(feature = "encoding")]
+#[doc(no_inline)]
+pub use self::error::CompactTargetDecoderError;
 
 /// Encoding of 256-bit target as 32-bit float.
 ///
@@ -143,27 +144,38 @@ impl encoding::Decodable for CompactTarget {
     fn decoder() -> Self::Decoder { CompactTargetDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
-/// An error consensus decoding an `CompactTarget`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg(feature = "encoding")]
-pub struct CompactTargetDecoderError(encoding::UnexpectedEofError);
+/// Error types for proof-of-work related integer types.
+pub mod error {
+    #[cfg(feature = "encoding")]
+    use core::convert::Infallible;
+    #[cfg(feature = "encoding")]
+    use core::fmt;
 
-#[cfg(feature = "encoding")]
-impl From<Infallible> for CompactTargetDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+    #[cfg(feature = "encoding")]
+    use internals::write_err;
 
-#[cfg(feature = "encoding")]
-impl fmt::Display for CompactTargetDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "compact target decoder error"; self.0)
+    /// An error consensus decoding an `CompactTarget`.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[cfg(feature = "encoding")]
+    pub struct CompactTargetDecoderError(pub(super) encoding::UnexpectedEofError);
+
+    #[cfg(feature = "encoding")]
+    impl From<Infallible> for CompactTargetDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
     }
-}
 
-#[cfg(feature = "std")]
-#[cfg(feature = "encoding")]
-impl std::error::Error for CompactTargetDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    #[cfg(feature = "encoding")]
+    impl fmt::Display for CompactTargetDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "compact target decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    #[cfg(feature = "encoding")]
+    impl std::error::Error for CompactTargetDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
 }
 
 #[cfg(feature = "arbitrary")]

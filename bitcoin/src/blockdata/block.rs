@@ -36,7 +36,7 @@ pub use primitives::block::{
 };
 #[doc(inline)]
 pub use units::block::{
-    BlockHeight, BlockHeightDecoder, BlockHeightEncoder, BlockHeightInterval, BlockMtp,
+    error, BlockHeight, BlockHeightDecoder, BlockHeightEncoder, BlockHeightInterval, BlockMtp,
     BlockMtpInterval,
 };
 #[doc(no_inline)]

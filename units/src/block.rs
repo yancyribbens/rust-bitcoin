@@ -11,13 +11,10 @@
 //! The difference between these types and the locktime types is that these types are thin wrappers
 //! whereas the locktime types contain more complex locktime specific abstractions.
 
-use core::convert::Infallible;
 use core::{fmt, ops};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-#[cfg(feature = "encoding")]
-use internals::write_err;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -25,6 +22,13 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crate::locktime;
 use crate::locktime::{absolute, relative};
 use crate::parse_int::{self, PrefixedHexError, UnprefixedHexError};
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[cfg(feature = "encoding")]
+#[doc(no_inline)]
+pub use self::error::BlockHeightDecoderError;
+#[doc(no_inline)]
+pub use self::error::TooBigForRelativeHeightError;
 
 macro_rules! impl_u32_wrapper {
     {
@@ -248,28 +252,6 @@ impl encoding::Decodable for BlockHeight {
     fn decoder() -> Self::Decoder { BlockHeightDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
-/// An error consensus decoding an `BlockHeight`.
-#[cfg(feature = "encoding")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BlockHeightDecoderError(encoding::UnexpectedEofError);
-
-#[cfg(feature = "encoding")]
-impl From<Infallible> for BlockHeightDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "encoding")]
-impl fmt::Display for BlockHeightDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "block height decoder error"; self.0)
-    }
-}
-
-#[cfg(all(feature = "std", feature = "encoding"))]
-impl std::error::Error for BlockHeightDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 impl_u32_wrapper! {
     /// An unsigned block interval.
     ///
@@ -490,28 +472,6 @@ impl From<relative::NumberOf512Seconds> for BlockMtpInterval {
     fn from(h: relative::NumberOf512Seconds) -> Self { Self::from_u32(h.to_seconds()) }
 }
 
-/// Error returned when the block interval is too big to be used as a relative lock time.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TooBigForRelativeHeightError(u32);
-
-impl From<Infallible> for TooBigForRelativeHeightError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for TooBigForRelativeHeightError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "block interval is too big to be used as a relative lock time: {} (max: {})",
-            self.0,
-            relative::NumberOfBlocks::MAX
-        )
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for TooBigForRelativeHeightError {}
-
 crate::internal_macros::impl_op_for_references! {
     // height - height = interval
     impl ops::Sub<BlockHeight> for BlockHeight {
@@ -650,6 +610,61 @@ impl<'a> core::iter::Sum<&'a Self> for BlockMtpInterval {
     {
         let sum = iter.map(|interval| interval.to_u32()).sum();
         Self::from_u32(sum)
+    }
+}
+
+/// Error types for block height and interval types.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
+
+    #[cfg(feature = "encoding")]
+    use internals::write_err;
+
+    use crate::locktime::relative;
+
+    /// Error returned when the block interval is too big to be used as a relative lock time.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct TooBigForRelativeHeightError(pub(super) u32);
+
+    impl From<Infallible> for TooBigForRelativeHeightError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for TooBigForRelativeHeightError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                f,
+                "block interval is too big to be used as a relative lock time: {} (max: {})",
+                self.0,
+                relative::NumberOfBlocks::MAX
+            )
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for TooBigForRelativeHeightError {}
+
+    /// An error consensus decoding an `BlockHeight`.
+    #[cfg(feature = "encoding")]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct BlockHeightDecoderError(pub(super) encoding::UnexpectedEofError);
+
+    #[cfg(feature = "encoding")]
+    impl From<Infallible> for BlockHeightDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    #[cfg(feature = "encoding")]
+    impl fmt::Display for BlockHeightDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "block height decoder error"; self.0)
+        }
+    }
+
+    #[cfg(all(feature = "std", feature = "encoding"))]
+    impl std::error::Error for BlockHeightDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
     }
 }
 

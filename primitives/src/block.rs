@@ -35,7 +35,7 @@ use crate::{Transaction, Wtxid};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
-pub use units::block::{BlockHeight, BlockHeightDecoder, BlockHeightEncoder, BlockHeightInterval, BlockMtp, BlockMtpInterval};
+pub use units::block::{error, BlockHeight, BlockHeightDecoder, BlockHeightEncoder, BlockHeightInterval, BlockMtp, BlockMtpInterval};
 // Re-export errors that appear directly in the API - but no doc inline.
 #[doc(no_inline)]
 pub use units::block::{BlockHeightDecoderError, TooBigForRelativeHeightError};

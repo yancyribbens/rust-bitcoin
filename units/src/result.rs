@@ -11,6 +11,10 @@ use NumOpResult as R;
 
 use crate::{Amount, FeeRate, SignedAmount, Weight};
 
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::NumOpError;
+
 /// Result of a mathematical operation on two numeric types.
 ///
 /// In order to prevent overflow we provide a custom result type that is similar to the normal
@@ -326,38 +330,6 @@ macro_rules! impl_opt_ext {
 }
 impl_opt_ext!(Amount, SignedAmount, u64, i64, FeeRate, Weight);
 
-/// Error returned when a mathematical operation fails.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct NumOpError(MathOp);
-
-impl From<Infallible> for NumOpError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl NumOpError {
-    /// Constructs a [`NumOpError`] caused by `op`.
-    pub(crate) const fn while_doing(op: MathOp) -> Self { Self(op) }
-
-    /// Returns `true` if this operation error'ed due to overflow.
-    pub fn is_overflow(self) -> bool { self.0.is_overflow() }
-
-    /// Returns `true` if this operation error'ed due to division by zero.
-    pub fn is_div_by_zero(self) -> bool { self.0.is_div_by_zero() }
-
-    /// Returns the [`MathOp`] that caused this error.
-    pub fn operation(self) -> MathOp { self.0 }
-}
-
-impl fmt::Display for NumOpError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "math operation '{}' gave an invalid numeric result", self.operation())
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for NumOpError {}
-
 /// The math operation that caused the error.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[non_exhaustive]
@@ -414,6 +386,46 @@ impl fmt::Display for MathOp {
             Self::_DoNotUse(infallible) => match infallible {},
         }
     }
+}
+
+/// Error types for mathematical operations.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
+
+    use super::MathOp;
+
+    /// Error returned when a mathematical operation fails.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct NumOpError(pub(super) MathOp);
+
+    impl From<Infallible> for NumOpError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl NumOpError {
+        /// Constructs a [`NumOpError`] caused by `op`.
+        pub(crate) const fn while_doing(op: MathOp) -> Self { Self(op) }
+
+        /// Returns `true` if this operation error'ed due to overflow.
+        pub fn is_overflow(self) -> bool { self.0.is_overflow() }
+
+        /// Returns `true` if this operation error'ed due to division by zero.
+        pub fn is_div_by_zero(self) -> bool { self.0.is_div_by_zero() }
+
+        /// Returns the [`MathOp`] that caused this error.
+        pub fn operation(self) -> MathOp { self.0 }
+    }
+
+    impl fmt::Display for NumOpError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "math operation '{}' gave an invalid numeric result", self.operation())
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for NumOpError {}
 }
 
 #[cfg(feature = "arbitrary")]
