@@ -10,12 +10,10 @@
 //!
 //! This module provides the structures and functions needed to support transactions.
 
-use core::fmt;
-
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
 use encoding::CompactSizeEncoder;
-use internals::{const_casts, write_err, ToU64};
+use internals::{const_casts, ToU64};
 use io::{BufRead, Write};
 
 use super::Weight;
@@ -33,16 +31,19 @@ use crate::{internal_macros, Amount, FeeRate, Sequence, SignedAmount};
 
 #[rustfmt::skip]            // Keep public re-exports separate.
 #[doc(no_inline)]
-pub use primitives::transaction::{
-    BlockHashDecoderError, OutPointDecoderError, ParseTransactionError, ParseOutPointError,
-    TransactionDecoderError, TxInDecoderError, TxOutDecoderError,
-    VersionDecoderError,
-};
+pub use primitives::transaction::BlockHashDecoderError;
 #[doc(inline)]
 pub use primitives::transaction::{
-    error, BlockHashDecoder, Ntxid, OutPoint, OutPointDecoder, OutPointEncoder, Transaction,
+    BlockHashDecoder, Ntxid, OutPoint, OutPointDecoder, OutPointEncoder, Transaction,
     TransactionDecoder, TransactionEncoder, TxIn, TxInDecoder, TxInEncoder, TxOut, TxOutDecoder,
     TxOutEncoder, Txid, Version, VersionDecoder, VersionEncoder, WitnessesEncoder, Wtxid,
+};
+
+#[doc(no_inline)]
+pub use self::error::{
+    IndexOutOfBoundsError, InputsIndexError, OutPointDecoderError, OutputsIndexError,
+    ParseOutPointError, ParseTransactionError, TransactionDecoderError, TxInDecoderError,
+    TxOutDecoderError, VersionDecoderError,
 };
 
 impl Encodable for Txid {
@@ -608,65 +609,6 @@ impl TransactionExtPriv for Transaction {
         // `Transaction` docs for full explanation).
         self.inputs.is_empty()
     }
-}
-
-/// Error attempting to do an out of bounds access on the transaction inputs vector.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct InputsIndexError(pub IndexOutOfBoundsError);
-
-impl fmt::Display for InputsIndexError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "invalid input index"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InputsIndexError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
-impl From<IndexOutOfBoundsError> for InputsIndexError {
-    fn from(e: IndexOutOfBoundsError) -> Self { Self(e) }
-}
-
-/// Error attempting to do an out of bounds access on the transaction outputs vector.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct OutputsIndexError(pub IndexOutOfBoundsError);
-
-impl fmt::Display for OutputsIndexError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "invalid output index"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for OutputsIndexError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
-impl From<IndexOutOfBoundsError> for OutputsIndexError {
-    fn from(e: IndexOutOfBoundsError) -> Self { Self(e) }
-}
-
-/// Error attempting to do an out of bounds access on a vector.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct IndexOutOfBoundsError {
-    /// Attempted index access.
-    pub index: usize,
-    /// Length of the vector where access was attempted.
-    pub length: usize,
-}
-
-impl fmt::Display for IndexOutOfBoundsError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "index {} is out-of-bounds for vector with length {}", self.index, self.length)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for IndexOutOfBoundsError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
 impl Encodable for Version {
@@ -1253,6 +1195,83 @@ mod sealed {
     impl Sealed for super::TxIn {}
     impl Sealed for super::TxOut {}
     impl Sealed for super::Version {}
+}
+
+/// Error types for Bitcoin transactions.
+pub mod error {
+    use core::fmt;
+
+    use internals::write_err;
+
+    #[rustfmt::skip]            // Keep public re-exports separate.
+    #[doc(no_inline)]
+    pub use primitives::transaction::error::{
+        ParseTransactionError, TransactionDecoderError, TxInDecoderError,
+        TxOutDecoderError, OutPointDecoderError, ParseOutPointError, VersionDecoderError,
+    };
+
+    /// Error attempting to do an out of bounds access on the transaction inputs vector.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct InputsIndexError(pub IndexOutOfBoundsError);
+
+    impl fmt::Display for InputsIndexError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "invalid input index"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for InputsIndexError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    impl From<IndexOutOfBoundsError> for InputsIndexError {
+        fn from(e: IndexOutOfBoundsError) -> Self { Self(e) }
+    }
+
+    /// Error attempting to do an out of bounds access on the transaction outputs vector.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct OutputsIndexError(pub IndexOutOfBoundsError);
+
+    impl fmt::Display for OutputsIndexError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "invalid output index"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for OutputsIndexError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    impl From<IndexOutOfBoundsError> for OutputsIndexError {
+        fn from(e: IndexOutOfBoundsError) -> Self { Self(e) }
+    }
+
+    /// Error attempting to do an out of bounds access on a vector.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct IndexOutOfBoundsError {
+        /// Attempted index access.
+        pub index: usize,
+        /// Length of the vector where access was attempted.
+        pub length: usize,
+    }
+
+    impl fmt::Display for IndexOutOfBoundsError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "index {} is out-of-bounds for vector with length {}",
+                self.index, self.length
+            )
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for IndexOutOfBoundsError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
 }
 
 #[cfg(feature = "arbitrary")]
