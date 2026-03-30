@@ -906,9 +906,9 @@ pub enum NetworkMessage {
     /// `getaddr`
     GetAddr,
     /// `ping`
-    Ping(u64),
+    Ping(Ping),
     /// `pong`
-    Pong(u64),
+    Pong(Pong),
     /// `merkleblock`
     MerkleBlock(MerkleBlock),
     /// BIP-0037 `filterload`
@@ -1090,8 +1090,8 @@ impl Encodable for NetworkMessage {
             Self::Tx(ref dat) => dat.consensus_encode(writer),
             Self::Block(ref dat) => dat.consensus_encode(writer),
             Self::Headers(ref dat) => dat.consensus_encode(writer),
-            Self::Ping(ref dat) => dat.consensus_encode(writer),
-            Self::Pong(ref dat) => dat.consensus_encode(writer),
+            Self::Ping(ref dat) => dat.0.consensus_encode(writer),
+            Self::Pong(ref dat) => dat.0.consensus_encode(writer),
             Self::MerkleBlock(ref dat) => dat.consensus_encode(writer),
             Self::FilterLoad(ref dat) => dat.consensus_encode(writer),
             Self::FilterAdd(ref dat) => dat.consensus_encode(writer),
@@ -1309,22 +1309,22 @@ impl encoding::Decoder for NetworkMessageDecoder {
             ),
             "sendheaders" => NetworkMessage::SendHeaders,
             "getaddr" => NetworkMessage::GetAddr,
-            "ping" => NetworkMessage::Ping(
+            "ping" => NetworkMessage::Ping(Ping(
                 bitcoin::consensus::encode::Decodable::consensus_decode_from_finite_reader(
                     &mut mem_d,
                 )
                 .map_err(|_| {
                     V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Payload)
                 })?,
-            ),
-            "pong" => NetworkMessage::Pong(
+            )),
+            "pong" => NetworkMessage::Pong(Pong(
                 bitcoin::consensus::encode::Decodable::consensus_decode_from_finite_reader(
                     &mut mem_d,
                 )
                 .map_err(|_| {
                     V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Payload)
                 })?,
-            ),
+            )),
             "merkleblock" => NetworkMessage::MerkleBlock(
                 bitcoin::consensus::encode::Decodable::consensus_decode_from_finite_reader(
                     &mut mem_d,
@@ -1925,10 +1925,12 @@ impl Decodable for V1NetworkMessage {
             ),
             "sendheaders" => NetworkMessage::SendHeaders,
             "getaddr" => NetworkMessage::GetAddr,
-            "ping" =>
-                NetworkMessage::Ping(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "pong" =>
-                NetworkMessage::Pong(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "ping" => NetworkMessage::Ping(Ping(Decodable::consensus_decode_from_finite_reader(
+                &mut mem_d,
+            )?)),
+            "pong" => NetworkMessage::Pong(Pong(Decodable::consensus_decode_from_finite_reader(
+                &mut mem_d,
+            )?)),
             "merkleblock" => NetworkMessage::MerkleBlock(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
@@ -2036,8 +2038,8 @@ impl Decodable for V2NetworkMessage {
             15u8 => NetworkMessage::MemPool,
             16u8 => NetworkMessage::MerkleBlock(Decodable::consensus_decode_from_finite_reader(r)?),
             17u8 => NetworkMessage::NotFound(Decodable::consensus_decode_from_finite_reader(r)?),
-            18u8 => NetworkMessage::Ping(Decodable::consensus_decode_from_finite_reader(r)?),
-            19u8 => NetworkMessage::Pong(Decodable::consensus_decode_from_finite_reader(r)?),
+            18u8 => NetworkMessage::Ping(Ping(Decodable::consensus_decode_from_finite_reader(r)?)),
+            19u8 => NetworkMessage::Pong(Pong(Decodable::consensus_decode_from_finite_reader(r)?)),
             20u8 => NetworkMessage::SendCmpct(Decodable::consensus_decode_from_finite_reader(r)?),
             21u8 => NetworkMessage::Tx(Decodable::consensus_decode_from_finite_reader(r)?),
             22u8 => NetworkMessage::GetCFilters(Decodable::consensus_decode_from_finite_reader(r)?),
@@ -2216,8 +2218,8 @@ impl<'a> Arbitrary<'a> for NetworkMessage {
             11 => Ok(Self::Headers(u.arbitrary()?)),
             12 => Ok(Self::SendHeaders),
             13 => Ok(Self::GetAddr),
-            14 => Ok(Self::Ping(u.arbitrary()?)),
-            15 => Ok(Self::Pong(u.arbitrary()?)),
+            14 => Ok(Self::Ping(Ping(u.arbitrary()?))),
+            15 => Ok(Self::Pong(Pong(u.arbitrary()?))),
             16 => Ok(Self::MerkleBlock(u.arbitrary()?)),
             17 => Ok(Self::FilterLoad(u.arbitrary()?)),
             18 => Ok(Self::FilterAdd(u.arbitrary()?)),
@@ -2325,8 +2327,8 @@ mod test {
             NetworkMessage::Headers(HeadersMessage(vec![NetworkHeader { header, length: 0 }])),
             NetworkMessage::SendHeaders,
             NetworkMessage::GetAddr,
-            NetworkMessage::Ping(15),
-            NetworkMessage::Pong(23),
+            NetworkMessage::Ping(Ping(15)),
+            NetworkMessage::Pong(Pong(23)),
             NetworkMessage::MerkleBlock(merkle_block),
             NetworkMessage::FilterLoad(FilterLoad {
                 filter: hex!("03614e9b050000000000000001").to_vec(),
