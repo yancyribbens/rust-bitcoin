@@ -5,21 +5,24 @@
 //! This module provides ECDSA signatures used by Bitcoin that can be roundtrip (de)serialized.
 
 use core::borrow::Borrow;
-use core::convert::Infallible;
 use core::ops::Deref;
 use core::str::FromStr;
 use core::{fmt, iter};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-use internals::{impl_to_hex_from_lower_hex, write_err};
+use internals::impl_to_hex_from_lower_hex;
 use io::Write;
 
 use crate::hex;
 use crate::prelude::{DisplayHex, Vec};
 #[cfg(doc)]
 use crate::script::ScriptPubKeyBufExt as _;
-use crate::sighash::{EcdsaSighashType, NonStandardSighashTypeError};
+use crate::sighash::EcdsaSighashType;
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{DecodeError, ParseSignatureError};
 
 const MAX_SIG_LEN: usize = 73;
 
@@ -232,90 +235,100 @@ impl<'a> IntoIterator for &'a SerializedSignature {
     fn into_iter(self) -> Self::IntoIter { (**self).iter() }
 }
 
-/// Error encountered while parsing an ECDSA signature from a byte slice.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum DecodeError {
-    /// Non-standard sighash type.
-    SighashType(NonStandardSighashTypeError),
-    /// Signature was empty.
-    EmptySignature,
-    /// A secp256k1 error.
-    Secp256k1(secp256k1::Error),
-}
+/// Error types for ECDSA
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
 
-impl From<Infallible> for DecodeError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+    use internals::write_err;
 
-impl fmt::Display for DecodeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::SighashType(ref e) => write_err!(f, "non-standard signature hash type"; e),
-            Self::EmptySignature => write!(f, "empty ECDSA signature"),
-            Self::Secp256k1(ref e) => write_err!(f, "secp256k1"; e),
+    use crate::sighash::NonStandardSighashTypeError;
+
+    /// Error encountered while parsing an ECDSA signature from a byte slice.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum DecodeError {
+        /// Non-standard sighash type.
+        SighashType(NonStandardSighashTypeError),
+        /// Signature was empty.
+        EmptySignature,
+        /// A secp256k1 error.
+        Secp256k1(secp256k1::Error),
+    }
+
+    impl From<Infallible> for DecodeError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for DecodeError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::SighashType(ref e) => write_err!(f, "non-standard signature hash type"; e),
+                Self::EmptySignature => write!(f, "empty ECDSA signature"),
+                Self::Secp256k1(ref e) => write_err!(f, "secp256k1"; e),
+            }
         }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for DecodeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Secp256k1(ref e) => Some(e),
-            Self::SighashType(ref e) => Some(e),
-            Self::EmptySignature => None,
+    #[cfg(feature = "std")]
+    impl std::error::Error for DecodeError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Secp256k1(ref e) => Some(e),
+                Self::SighashType(ref e) => Some(e),
+                Self::EmptySignature => None,
+            }
         }
     }
-}
 
-impl From<secp256k1::Error> for DecodeError {
-    fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
-}
+    impl From<secp256k1::Error> for DecodeError {
+        fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
+    }
 
-impl From<NonStandardSighashTypeError> for DecodeError {
-    fn from(e: NonStandardSighashTypeError) -> Self { Self::SighashType(e) }
-}
+    impl From<NonStandardSighashTypeError> for DecodeError {
+        fn from(e: NonStandardSighashTypeError) -> Self { Self::SighashType(e) }
+    }
 
-/// Error encountered while parsing an ECDSA signature from a string.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum ParseSignatureError {
-    /// Hex string decoding error.
-    Hex(hex::DecodeVariableLengthBytesError),
-    /// Signature byte slice decoding error.
-    Decode(DecodeError),
-}
+    /// Error encountered while parsing an ECDSA signature from a string.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum ParseSignatureError {
+        /// Hex string decoding error.
+        Hex(hex::DecodeVariableLengthBytesError),
+        /// Signature byte slice decoding error.
+        Decode(DecodeError),
+    }
 
-impl From<Infallible> for ParseSignatureError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+    impl From<Infallible> for ParseSignatureError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
 
-impl fmt::Display for ParseSignatureError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Hex(ref e) => write_err!(f, "signature hex decoding error"; e),
-            Self::Decode(ref e) => write_err!(f, "signature byte slice decoding error"; e),
+    impl fmt::Display for ParseSignatureError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::Hex(ref e) => write_err!(f, "signature hex decoding error"; e),
+                Self::Decode(ref e) => write_err!(f, "signature byte slice decoding error"; e),
+            }
         }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for ParseSignatureError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Hex(ref e) => Some(e),
-            Self::Decode(ref e) => Some(e),
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseSignatureError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Hex(ref e) => Some(e),
+                Self::Decode(ref e) => Some(e),
+            }
         }
     }
-}
 
-impl From<hex::DecodeVariableLengthBytesError> for ParseSignatureError {
-    fn from(e: hex::DecodeVariableLengthBytesError) -> Self { Self::Hex(e) }
-}
+    impl From<hex::DecodeVariableLengthBytesError> for ParseSignatureError {
+        fn from(e: hex::DecodeVariableLengthBytesError) -> Self { Self::Hex(e) }
+    }
 
-impl From<DecodeError> for ParseSignatureError {
-    fn from(e: DecodeError) -> Self { Self::Decode(e) }
+    impl From<DecodeError> for ParseSignatureError {
+        fn from(e: DecodeError) -> Self { Self::Decode(e) }
+    }
 }
 
 #[cfg(feature = "arbitrary")]
