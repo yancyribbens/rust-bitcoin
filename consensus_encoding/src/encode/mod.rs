@@ -9,9 +9,8 @@ pub mod encoders;
 
 /// A Bitcoin object which can be consensus-encoded.
 ///
-/// To encode something, use the [`Self::encoder`] method to obtain a
-/// [`Self::Encoder`], which will behave like an iterator yielding
-/// byte slices.
+/// To encode something, use the [`Self::encoder`] method to obtain a [`Self::Encoder`], which will
+/// behave like an iterator yielding byte slices.
 ///
 /// # Examples
 ///
@@ -52,8 +51,8 @@ pub trait Encodable {
 pub trait Encoder {
     /// Yields the current encoded byteslice.
     ///
-    /// Will always return the same value until [`Self::advance`] is called. May return an empty
-    /// list.
+    /// Will always return the same value until [`Self::advance`] is called.
+    /// May return an empty list.
     fn current_chunk(&self) -> &[u8];
 
     /// Moves the encoder to its next state.
@@ -72,6 +71,18 @@ pub trait Encoder {
 ///
 /// The new type will implement the [`Encoder`] trait by forwarding to the wrapped encoder. If your
 /// type has a known size consider using [`crate::encoder_newtype_exact`] instead.
+///
+/// # Examples
+/// ```
+/// use bitcoin_consensus_encoding::{encoder_newtype, BytesEncoder};
+///
+/// encoder_newtype! {
+///     /// The encoder for the [`Foo`] type.
+///     pub struct FooEncoder<'e>(BytesEncoder<'e>);
+/// }
+/// ```
+///
+/// For a full example see `./examples/encoder.rs`.
 #[macro_export]
 macro_rules! encoder_newtype {
     (
@@ -83,7 +94,7 @@ macro_rules! encoder_newtype {
 
         #[allow(clippy::type_complexity)]
         impl<$lt> $name<$lt> {
-            /// Construct a new instance of the newtype encoder.
+            /// Constructs a new instance of the newtype encoder.
             pub(crate) const fn new(encoder: $encoder) -> $name<$lt> {
                 $name(encoder, core::marker::PhantomData)
             }
@@ -103,6 +114,18 @@ macro_rules! encoder_newtype {
 ///
 /// The new type will implement both the [`Encoder`] and [`ExactSizeEncoder`] traits
 /// by forwarding to the wrapped encoder.
+///
+/// # Examples
+/// ```
+/// use bitcoin_consensus_encoding::{encoder_newtype_exact, ArrayEncoder};
+///
+/// encoder_newtype_exact! {
+///     /// The encoder for the [`Bar`] type.
+///     pub struct BarEncoder<'e>(ArrayEncoder<32>);
+/// }
+/// ```
+///
+/// For a full example see `./examples/encoder.rs`.
 #[macro_export]
 macro_rules! encoder_newtype_exact {
     (
@@ -205,10 +228,9 @@ where
 ///
 /// # Performance
 ///
-/// This method writes data in potentially small chunks based on the encoder's
-/// internal chunking strategy. For optimal performance with unbuffered writers
-/// (like [`std::fs::File`] or [`std::net::TcpStream`]), consider wrapping your
-/// writer with [`std::io::BufWriter`].
+/// This method writes data in potentially small chunks based on the encoder's internal chunking
+/// strategy. For optimal performance with unbuffered writers (like [`std::fs::File`] or
+/// [`std::net::TcpStream`]), consider wrapping your writer with [`std::io::BufWriter`].
 ///
 /// # Errors
 ///

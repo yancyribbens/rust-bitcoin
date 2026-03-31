@@ -4,16 +4,18 @@
 
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
-use core::convert::Infallible;
 use core::{fmt, mem};
-
-use internals::write_err;
 
 #[cfg(feature = "alloc")]
 use super::Decodable;
 use super::Decoder;
 #[cfg(feature = "alloc")]
-use crate::compact_size::{CompactSizeDecoder, CompactSizeDecoderError};
+use crate::compact_size::CompactSizeDecoder;
+#[cfg(feature = "alloc")]
+use crate::error::{
+    ByteVecDecoderError, ByteVecDecoderErrorInner, VecDecoderError, VecDecoderErrorInner,
+};
+use crate::{Decoder2Error, Decoder3Error, Decoder4Error, Decoder6Error, UnexpectedEofError};
 
 /// Maximum amount of memory (in bytes) to allocate at once when deserializing vectors.
 #[cfg(feature = "alloc")]
@@ -679,216 +681,6 @@ where
 
     #[inline]
     fn read_limit(&self) -> usize { self.inner.read_limit() }
-}
-
-/// The error returned by the [`ByteVecDecoder`].
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ByteVecDecoderError(ByteVecDecoderErrorInner);
-
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum ByteVecDecoderErrorInner {
-    /// Error decoding the byte vector length prefix.
-    LengthPrefixDecode(CompactSizeDecoderError),
-    /// Not enough bytes given to decoder.
-    UnexpectedEof(UnexpectedEofError),
-}
-
-#[cfg(feature = "alloc")]
-impl From<Infallible> for ByteVecDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-impl fmt::Display for ByteVecDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use ByteVecDecoderErrorInner as E;
-
-        match self.0 {
-            E::LengthPrefixDecode(ref e) => write_err!(f, "byte vec decoder error"; e),
-            E::UnexpectedEof(ref e) => write_err!(f, "byte vec decoder error"; e),
-        }
-    }
-}
-
-#[cfg(all(feature = "std", feature = "alloc"))]
-impl std::error::Error for ByteVecDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        use ByteVecDecoderErrorInner as E;
-
-        match self.0 {
-            E::LengthPrefixDecode(ref e) => Some(e),
-            E::UnexpectedEof(ref e) => Some(e),
-        }
-    }
-}
-
-/// The error returned by the [`VecDecoder`].
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct VecDecoderError<Err>(VecDecoderErrorInner<Err>);
-
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum VecDecoderErrorInner<Err> {
-    /// Error decoding the vector length prefix.
-    LengthPrefixDecode(CompactSizeDecoderError),
-    /// Error while decoding an item.
-    Item(Err),
-    /// Not enough bytes given to decoder.
-    UnexpectedEof(UnexpectedEofError),
-}
-
-#[cfg(feature = "alloc")]
-impl<Err> From<Infallible> for VecDecoderError<Err> {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-#[cfg(feature = "alloc")]
-impl<Err> fmt::Display for VecDecoderError<Err>
-where
-    Err: fmt::Display + fmt::Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use VecDecoderErrorInner as E;
-
-        match self.0 {
-            E::LengthPrefixDecode(ref e) => write_err!(f, "vec decoder error"; e),
-            E::Item(ref e) => write_err!(f, "vec decoder error"; e),
-            E::UnexpectedEof(ref e) => write_err!(f, "vec decoder error"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<Err> std::error::Error for VecDecoderError<Err>
-where
-    Err: std::error::Error + 'static,
-{
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        use VecDecoderErrorInner as E;
-
-        match self.0 {
-            E::LengthPrefixDecode(ref e) => Some(e),
-            E::Item(ref e) => Some(e),
-            E::UnexpectedEof(ref e) => Some(e),
-        }
-    }
-}
-
-/// Not enough bytes given to decoder.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct UnexpectedEofError {
-    /// Number of bytes missing to complete decoder.
-    missing: usize,
-}
-
-impl From<Infallible> for UnexpectedEofError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for UnexpectedEofError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "not enough bytes for decoder, {} more bytes required", self.missing)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UnexpectedEofError {}
-
-/// Helper macro to define an error type for a `DecoderN`.
-macro_rules! define_decoder_n_error {
-    (
-        $(#[$attr:meta])*
-        $name:ident;
-        $(
-            $(#[$err_attr:meta])*
-            ($err_wrap:ident, $err_type:ident, $err_msg:literal),
-        )*
-    ) => {
-        $(#[$attr])*
-        #[derive(Debug, Clone, PartialEq, Eq)]
-        pub enum $name<$($err_type,)*> {
-            $(
-                $(#[$err_attr])*
-                $err_wrap($err_type),
-            )*
-        }
-
-        impl<$($err_type,)*> fmt::Display for $name<$($err_type,)*>
-        where
-            $($err_type: fmt::Display,)*
-        {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                match self {
-                    $(Self::$err_wrap(ref e) => write_err!(f, $err_msg; e),)*
-                }
-            }
-        }
-
-        #[cfg(feature = "std")]
-        impl<$($err_type,)*> std::error::Error for $name<$($err_type,)*>
-        where
-            $($err_type: std::error::Error + 'static,)*
-        {
-            fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-                match self {
-                    $(Self::$err_wrap(ref e) => Some(e),)*
-                }
-            }
-        }
-    };
-}
-
-define_decoder_n_error! {
-    /// Error type for [`Decoder2`].
-    Decoder2Error;
-    /// Error from the first decoder.
-    (First, A, "first decoder error."),
-    /// Error from the second decoder.
-    (Second, B, "second decoder error."),
-}
-
-define_decoder_n_error! {
-    /// Error type for [`Decoder3`].
-    Decoder3Error;
-    /// Error from the first decoder.
-    (First, A, "first decoder error."),
-    /// Error from the second decoder.
-    (Second, B, "second decoder error."),
-    /// Error from the third decoder.
-    (Third, C, "third decoder error."),
-}
-
-define_decoder_n_error! {
-    /// Error type for [`Decoder4`].
-    Decoder4Error;
-    /// Error from the first decoder.
-    (First, A, "first decoder error."),
-    /// Error from the second decoder.
-    (Second, B, "second decoder error."),
-    /// Error from the third decoder.
-    (Third, C, "third decoder error."),
-    /// Error from the fourth decoder.
-    (Fourth, D, "fourth decoder error."),
-}
-
-define_decoder_n_error! {
-    /// Error type for [`Decoder6`].
-    Decoder6Error;
-    /// Error from the first decoder.
-    (First, A, "first decoder error."),
-    /// Error from the second decoder.
-    (Second, B, "second decoder error."),
-    /// Error from the third decoder.
-    (Third, C, "third decoder error."),
-    /// Error from the fourth decoder.
-    (Fourth, D, "fourth decoder error."),
-    /// Error from the fifth decoder.
-    (Fifth, E, "fifth decoder error."),
-    /// Error from the sixth decoder.
-    (Sixth, F, "sixth decoder error."),
 }
 
 #[cfg(test)]

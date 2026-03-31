@@ -2,17 +2,16 @@
 
 //! Consensus Decoding Traits
 
-use core::convert::Infallible;
-use core::fmt;
-
-use internals::write_err;
-
 pub mod decoders;
+
+#[cfg(feature = "std")]
+use crate::ReadError;
+use crate::{DecodeError, UnconsumedError};
 
 /// A Bitcoin object which can be consensus-decoded using a push decoder.
 ///
-/// To decode something, create a [`Self::Decoder`] and push byte slices
-/// into it with [`Decoder::push_bytes`], then call [`Decoder::end`] to get the result.
+/// To decode something, create a [`Self::Decoder`] and push byte slices into it with
+/// [`Decoder::push_bytes`], then call [`Decoder::end`] to get the result.
 ///
 /// # Examples
 ///
@@ -45,6 +44,7 @@ pub mod decoders;
 pub trait Decodable {
     /// Associated decoder for the type.
     type Decoder: Decoder<Output = Self>;
+
     /// Constructs a "default decoder" for the type.
     fn decoder() -> Self::Decoder;
 }
@@ -56,19 +56,18 @@ pub trait Decoder: Sized {
     /// The error type that this decoder can produce.
     type Error;
 
-    /// Push bytes into the decoder, consuming as much as possible.
+    /// Pushes bytes into the decoder, consuming as much as possible.
     ///
-    /// The slice reference will be advanced to point to the unconsumed portion.
-    /// Returns `Ok(true)` if more bytes are needed to complete decoding,
-    /// `Ok(false)` if the decoder is ready to finalize with [`Self::end`],
-    /// or `Err(error)` if parsing failed.
+    /// The slice reference will be advanced to point to the unconsumed portion. Returns `Ok(true)`
+    /// if more bytes are needed to complete decoding, `Ok(false)` if the decoder is ready to
+    /// finalize with [`Self::end`], or `Err(error)` if parsing failed.
     ///
     /// # Errors
     ///
-    /// Returns an error if the provided bytes are invalid or malformed according
-    /// to the decoder's validation rules. Insufficient data (needing more
-    /// bytes) is *not* an error for this method, the decoder will simply consume
-    /// what it can and return `true` to indicate more data is needed.
+    /// Returns an error if the provided bytes are invalid or malformed according to the decoder's
+    /// validation rules. Insufficient data (needing more bytes) is *not* an error for this method,
+    /// the decoder will simply consume what it can and return `true` to indicate more data is
+    /// needed.
     ///
     /// # Panics
     ///
@@ -77,16 +76,14 @@ pub trait Decoder: Sized {
     #[track_caller]
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error>;
 
-    /// Complete the decoding process and return the final result.
+    /// Completes the decoding process and return the final result.
     ///
-    /// This consumes the decoder and should be called when no more input
-    /// data is available.
+    /// This consumes the decoder and should be called when no more input data is available.
     ///
     /// # Errors
     ///
-    /// Returns an error if the decoder has not received sufficient data to
-    /// complete decoding, or if the accumulated data is invalid when considered
-    /// as a complete object.
+    /// Returns an error if the decoder has not received sufficient data to complete decoding, or if
+    /// the accumulated data is invalid when considered as a complete object.
     ///
     /// # Panics
     ///
@@ -97,9 +94,9 @@ pub trait Decoder: Sized {
 
     /// Returns the maximum number of bytes this decoder can consume without over-reading.
     ///
-    /// Returns 0 if the decoder is complete and ready to finalize with [`Self::end`].
-    /// This is used by [`decode_from_read_unbuffered`] to optimize read sizes,
-    /// avoiding both inefficient under-reads and unnecessary over-reads.
+    /// Returns 0 if the decoder is complete and ready to finalize with [`Self::end`]. This is used
+    /// by [`decode_from_read_unbuffered`] to optimize read sizes, avoiding both inefficient
+    /// under-reads and unnecessary over-reads.
     fn read_limit(&self) -> usize;
 }
 
@@ -107,9 +104,8 @@ pub trait Decoder: Sized {
 ///
 /// # Errors
 ///
-/// Returns an error if the decoder encounters an error while
-/// parsing the data, including insufficient data. This function
-/// also errors if the provided slice is not completely consumed
+/// Returns an error if the decoder encounters an error while parsing the data, including
+/// insufficient data. This function also errors if the provided slice is not completely consumed
 /// during decode.
 pub fn decode_from_slice<T: Decodable>(
     bytes: &[u8],
@@ -126,15 +122,14 @@ pub fn decode_from_slice<T: Decodable>(
 
 /// Decodes an object from an unbounded byte slice.
 ///
-/// Unlike [`decode_from_slice`], this function will not error if the slice
-/// contains additional bytes that are not required to decode.
-/// Furthermore, the byte slice reference provided to this function will be
-/// updated based on the consumed data, returning the unconsumed bytes.
+/// Unlike [`decode_from_slice`], this function will not error if the slice contains additional
+/// bytes that are not required to decode. Furthermore, the byte slice reference provided to this
+/// function will be updated based on the consumed data, returning the unconsumed bytes.
 ///
 /// # Errors
 ///
-/// Returns an error if the decoder encounters an error while
-/// parsing the data, including insufficient data.
+/// Returns an error if the decoder encounters an error while parsing the data, including
+/// insufficient data.
 pub fn decode_from_slice_unbounded<T>(
     bytes: &mut &[u8],
 ) -> Result<T, <T::Decoder as Decoder>::Error>
@@ -156,15 +151,14 @@ where
 ///
 /// # Performance
 ///
-/// For unbuffered readers (like [`std::fs::File`] or [`std::net::TcpStream`]),
-/// consider wrapping your reader with [`std::io::BufReader`] in order to use
-/// this function. This avoids frequent small reads, which can significantly
-/// impact performance.
+/// For unbuffered readers (like [`std::fs::File`] or [`std::net::TcpStream`]), consider wrapping
+/// your reader with [`std::io::BufReader`] in order to use this function. This avoids frequent
+/// small reads, which can significantly impact performance.
 ///
 /// # Errors
 ///
-/// Returns [`ReadError::Decode`] if the decoder encounters an error while parsing
-/// the data, or [`ReadError::Io`] if an I/O error occurs while reading.
+/// Returns [`ReadError::Decode`] if the decoder encounters an error while parsing the data, or
+/// [`ReadError::Io`] if an I/O error occurs while reading.
 #[cfg(feature = "std")]
 pub fn decode_from_read<T, R>(mut reader: R) -> Result<T, ReadError<<T::Decoder as Decoder>::Error>>
 where
@@ -199,22 +193,21 @@ where
 
 /// Decodes an object from an unbuffered reader using a fixed-size buffer.
 ///
-/// For most use cases, prefer [`decode_from_read`] with a [`std::io::BufReader`].
-/// This function is only needed when you have an unbuffered reader which you
-/// cannot wrap. It will probably have worse performance.
+/// For most use cases, prefer [`decode_from_read`] with a [`std::io::BufReader`]. This function is
+/// only needed when you have an unbuffered reader which you cannot wrap. It will probably have
+/// worse performance.
 ///
 /// # Buffer
 ///
-/// Uses a fixed 4KB (4096 bytes) stack-allocated buffer that is reused across
-/// read operations. This size is a good balance between memory usage and
-/// system call efficiency for most use cases.
+/// Uses a fixed 4KB (4096 bytes) stack-allocated buffer that is reused across read operations. This
+/// size is a good balance between memory usage and system call efficiency for most use cases.
 ///
 /// For different buffer sizes, use [`decode_from_read_unbuffered_with`].
 ///
 /// # Errors
 ///
-/// Returns [`ReadError::Decode`] if the decoder encounters an error while parsing
-/// the data, or [`ReadError::Io`] if an I/O error occurs while reading.
+/// Returns [`ReadError::Decode`] if the decoder encounters an error while parsing the data, or
+/// [`ReadError::Io`] if an I/O error occurs while reading.
 #[cfg(feature = "std")]
 pub fn decode_from_read_unbuffered<T, R>(
     reader: R,
@@ -228,21 +221,20 @@ where
 
 /// Decodes an object from an unbuffered reader using a custom-sized buffer.
 ///
-/// For most use cases, prefer [`decode_from_read`] with a [`std::io::BufReader`].
-/// This function is only needed when you have an unbuffered reader which you
-/// cannot wrap. It will probably have worse performance.
+/// For most use cases, prefer [`decode_from_read`] with a [`std::io::BufReader`]. This function is
+/// only needed when you have an unbuffered reader which you cannot wrap. It will probably have
+/// worse performance.
 ///
 /// # Buffer
 ///
-/// The `BUFFER_SIZE` parameter controls the intermediate buffer size used for
-/// reading. The buffer is allocated on the stack (not heap) and reused across
-/// read operations. Larger buffers reduce the number of system calls, but use
-/// more memory.
+/// The `BUFFER_SIZE` parameter controls the intermediate buffer size used for reading. The buffer
+/// is allocated on the stack (not heap) and reused across read operations. Larger buffers reduce
+/// the number of system calls, but use more memory.
 ///
 /// # Errors
 ///
-/// Returns [`ReadError::Decode`] if the decoder encounters an error while parsing
-/// the data, or [`ReadError::Io`] if an I/O error occurs while reading.
+/// Returns [`ReadError::Decode`] if the decoder encounters an error while parsing the data, or
+/// [`ReadError::Io`] if an I/O error occurs while reading.
 #[cfg(feature = "std")]
 pub fn decode_from_read_unbuffered_with<T, R, const BUFFER_SIZE: usize>(
     mut reader: R,
@@ -278,101 +270,4 @@ where
     }
 
     decoder.end().map_err(ReadError::Decode)
-}
-
-/// An error that can occur when reading and decoding from a buffered reader.
-#[cfg(feature = "std")]
-#[derive(Debug)]
-pub enum ReadError<D> {
-    /// An I/O error occurred while reading from the reader.
-    Io(std::io::Error),
-    /// The decoder encountered an error while parsing the data.
-    Decode(D),
-}
-
-#[cfg(feature = "std")]
-impl<D: core::fmt::Display> core::fmt::Display for ReadError<D> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::Io(e) => write!(f, "I/O error: {}", e),
-            Self::Decode(e) => write!(f, "decode error: {}", e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<D> std::error::Error for ReadError<D>
-where
-    D: std::error::Error + 'static,
-{
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Io(e) => Some(e),
-            Self::Decode(e) => Some(e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<D> From<std::io::Error> for ReadError<D> {
-    fn from(e: std::io::Error) -> Self { Self::Io(e) }
-}
-
-/// An error that can occur when decoding from a byte slice.
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum DecodeError<Err> {
-    /// Provided slice failed to correctly decode as a type.
-    Parse(Err),
-    /// Bytes remained unconsumed after completing decoding.
-    Unconsumed(UnconsumedError),
-}
-
-impl<Err> From<Infallible> for DecodeError<Err> {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl<Err> fmt::Display for DecodeError<Err>
-where
-    Err: fmt::Display,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Parse(ref e) => write_err!(f, "error parsing encoded object"; e),
-            Self::Unconsumed(ref e) => write_err!(f, "unconsumed"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<Err> std::error::Error for DecodeError<Err>
-where
-    Err: std::error::Error + 'static,
-{
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Parse(ref e) => Some(e),
-            Self::Unconsumed(ref e) => Some(e),
-        }
-    }
-}
-
-/// Bytes remained unconsumed after completing decoding.
-// This is just to give us the ability to add details in a
-// non-breaking way if we want to at some stage.
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct UnconsumedError();
-
-impl From<Infallible> for UnconsumedError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for UnconsumedError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "data not consumed entirely when decoding")
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UnconsumedError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
