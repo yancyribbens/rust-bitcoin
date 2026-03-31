@@ -365,15 +365,12 @@ impl Psbt {
             };
 
             // Only return the error if we have a secret key to sign this input.
-            let (msg, sighash_ty) = match msg_sighash_ty_res {
+            let (msg, sighash_type) = match msg_sighash_ty_res {
                 Err(e) => return Err(e),
                 Ok((msg, sighash_ty)) => (msg, sighash_ty),
             };
 
-            let sig = ecdsa::Signature {
-                signature: secp256k1::ecdsa::sign(msg, sk.as_inner()),
-                sighash_type: sighash_ty,
-            };
+            let sig = ecdsa::Signature { signature: sk.raw_ecdsa_sign(msg), sighash_type };
 
             let pk = sk.to_public_key();
 
