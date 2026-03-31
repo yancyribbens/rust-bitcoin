@@ -6,12 +6,13 @@
 //! consensus protocol to usually to encode collection lengths. However, there are
 //! also some unique non-length use cases.
 
-use core::convert::Infallible;
-
 use internals::array_vec::ArrayVec;
 
 use crate::decode::Decoder;
 use crate::encode::{Encoder, ExactSizeEncoder};
+use crate::error::{
+    CompactSizeDecoderError, CompactSizeDecoderErrorInner, LengthPrefixExceedsMaxError,
+};
 
 /// Maximum size, in bytes, of a vector we are allowed to decode.
 ///
@@ -320,89 +321,6 @@ fn compact_size_decode_u64(buf: &ArrayVec<u8, 9>) -> Result<u64, CompactSizeDeco
         n => Ok(n.into()),
     }
 }
-
-/// An error consensus decoding a compact size encoded integer.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CompactSizeDecoderError(CompactSizeDecoderErrorInner);
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum CompactSizeDecoderErrorInner {
-    /// Returned when the decoder reaches end of stream (EOF).
-    UnexpectedEof {
-        /// How many bytes were required.
-        required: usize,
-        /// How many bytes were received.
-        received: usize,
-    },
-    /// Returned when the encoding is not minimal
-    NonMinimal {
-        /// The encoded value.
-        value: u64,
-    },
-    /// Returned when the encoded value exceeds the decoder's limit.
-    ValueExceedsLimit(LengthPrefixExceedsMaxError),
-}
-
-impl From<Infallible> for CompactSizeDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl core::fmt::Display for CompactSizeDecoderError {
-    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        use internals::write_err;
-        use CompactSizeDecoderErrorInner as E;
-
-        match self.0 {
-            E::UnexpectedEof { required: 1, received: 0 } => {
-                write!(f, "required at least one byte but the input is empty")
-            }
-            E::UnexpectedEof { required, received: 0 } => {
-                write!(f, "required at least {} bytes but the input is empty", required)
-            }
-            E::UnexpectedEof { required, received } => write!(
-                f,
-                "required at least {} bytes but only {} bytes were received",
-                required, received
-            ),
-            E::NonMinimal { value } => write!(f, "the value {} was not encoded minimally", value),
-            E::ValueExceedsLimit(ref e) => write_err!(f, "value exceeds limit"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for CompactSizeDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        use CompactSizeDecoderErrorInner as E;
-
-        match self {
-            Self(E::ValueExceedsLimit(ref e)) => Some(e),
-            _ => None,
-        }
-    }
-}
-
-/// The error returned when a compact size value exceeds a configured limit.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct LengthPrefixExceedsMaxError {
-    /// The limit that was exceeded.
-    limit: usize,
-    /// The value that exceeded the limit.
-    value: u64,
-}
-
-impl From<Infallible> for LengthPrefixExceedsMaxError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl core::fmt::Display for LengthPrefixExceedsMaxError {
-    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        write!(f, "decoded length {} exceeds maximum allowed {}", self.value, self.limit)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for LengthPrefixExceedsMaxError {}
 
 #[cfg(test)]
 mod tests {

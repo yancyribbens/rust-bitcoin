@@ -2,12 +2,11 @@
 
 //! Consensus Decoding Traits
 
-use core::convert::Infallible;
-use core::fmt;
-
-use internals::write_err;
-
 pub mod decoders;
+
+#[cfg(feature = "std")]
+use crate::ReadError;
+use crate::{DecodeError, UnconsumedError};
 
 /// A Bitcoin object which can be consensus-decoded using a push decoder.
 ///
@@ -271,101 +270,4 @@ where
     }
 
     decoder.end().map_err(ReadError::Decode)
-}
-
-/// An error that can occur when reading and decoding from a buffered reader.
-#[cfg(feature = "std")]
-#[derive(Debug)]
-pub enum ReadError<D> {
-    /// An I/O error occurred while reading from the reader.
-    Io(std::io::Error),
-    /// The decoder encountered an error while parsing the data.
-    Decode(D),
-}
-
-#[cfg(feature = "std")]
-impl<D: core::fmt::Display> core::fmt::Display for ReadError<D> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::Io(e) => write!(f, "I/O error: {}", e),
-            Self::Decode(e) => write!(f, "decode error: {}", e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<D> std::error::Error for ReadError<D>
-where
-    D: std::error::Error + 'static,
-{
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Io(e) => Some(e),
-            Self::Decode(e) => Some(e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<D> From<std::io::Error> for ReadError<D> {
-    fn from(e: std::io::Error) -> Self { Self::Io(e) }
-}
-
-/// An error that can occur when decoding from a byte slice.
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum DecodeError<Err> {
-    /// Provided slice failed to correctly decode as a type.
-    Parse(Err),
-    /// Bytes remained unconsumed after completing decoding.
-    Unconsumed(UnconsumedError),
-}
-
-impl<Err> From<Infallible> for DecodeError<Err> {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl<Err> fmt::Display for DecodeError<Err>
-where
-    Err: fmt::Display,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Parse(ref e) => write_err!(f, "error parsing encoded object"; e),
-            Self::Unconsumed(ref e) => write_err!(f, "unconsumed"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<Err> std::error::Error for DecodeError<Err>
-where
-    Err: std::error::Error + 'static,
-{
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Parse(ref e) => Some(e),
-            Self::Unconsumed(ref e) => Some(e),
-        }
-    }
-}
-
-/// Bytes remained unconsumed after completing decoding.
-// This is just to give us the ability to add details in a
-// non-breaking way if we want to at some stage.
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct UnconsumedError();
-
-impl From<Infallible> for UnconsumedError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for UnconsumedError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "data not consumed entirely when decoding")
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UnconsumedError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }

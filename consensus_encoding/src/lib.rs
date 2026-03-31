@@ -68,32 +68,46 @@ mod compact_size;
 mod decode;
 mod encode;
 
+pub mod error;
+
+#[doc(inline)]
+pub use self::compact_size::{CompactSizeDecoder, CompactSizeEncoder, CompactSizeU64Decoder};
+#[doc(inline)]
+pub use self::decode::decoders::{ArrayDecoder, Decoder2, Decoder3, Decoder4, Decoder6};
 #[cfg(feature = "alloc")]
-pub use self::compact_size::LengthPrefixExceedsMaxError;
-pub use self::compact_size::{
-    CompactSizeDecoder, CompactSizeDecoderError, CompactSizeEncoder, CompactSizeU64Decoder,
-};
-pub use self::decode::decoders::{
-    ArrayDecoder, Decoder2, Decoder2Error, Decoder3, Decoder3Error, Decoder4, Decoder4Error,
-    Decoder6, Decoder6Error, UnexpectedEofError,
-};
-#[cfg(feature = "alloc")]
-pub use self::decode::decoders::{
-    ByteVecDecoder, ByteVecDecoderError, VecDecoder, VecDecoderError,
-};
+#[doc(inline)]
+pub use self::decode::decoders::{ByteVecDecoder, VecDecoder};
 #[cfg(feature = "std")]
+#[doc(inline)]
 pub use self::decode::{
-    decode_from_read, decode_from_read_unbuffered, decode_from_read_unbuffered_with, ReadError,
+    decode_from_read, decode_from_read_unbuffered, decode_from_read_unbuffered_with,
 };
-pub use self::decode::{
-    decode_from_slice, decode_from_slice_unbounded, Decodable, DecodeError, Decoder,
-};
+#[doc(inline)]
+pub use self::decode::{decode_from_slice, decode_from_slice_unbounded, Decodable, Decoder};
+#[doc(inline)]
 pub use self::encode::encoders::{
     ArrayEncoder, ArrayRefEncoder, BytesEncoder, Encoder2, Encoder3, Encoder4, Encoder6,
     SliceEncoder,
 };
 #[cfg(feature = "alloc")]
+#[doc(inline)]
 pub use self::encode::{encode_to_vec, flush_to_vec};
 #[cfg(feature = "std")]
+#[doc(inline)]
 pub use self::encode::{encode_to_writer, flush_to_writer};
+#[doc(inline)]
 pub use self::encode::{Encodable, EncodableByteIter, Encoder, ExactSizeEncoder};
+#[cfg(feature = "alloc")]
+#[doc(no_inline)]
+pub use self::error::LengthPrefixExceedsMaxError;
+#[cfg(feature = "std")]
+#[doc(no_inline)]
+pub use self::error::ReadError;
+#[cfg(feature = "alloc")]
+#[doc(no_inline)]
+pub use self::error::{ByteVecDecoderError, VecDecoderError};
+#[doc(no_inline)]
+pub use self::error::{
+    CompactSizeDecoderError, DecodeError, Decoder2Error, Decoder3Error, Decoder4Error,
+    Decoder6Error, UnconsumedError, UnexpectedEofError,
+};
