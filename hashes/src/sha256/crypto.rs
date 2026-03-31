@@ -25,9 +25,8 @@ use core::arch::x86_64::{
 
 use internals::slice::SliceExt;
 
-use crate::sha256d;
-
 use super::{HashEngine, Midstate, BLOCK_SIZE};
+use crate::sha256d;
 
 #[cfg(all(feature = "cpufeatures", target_arch = "aarch64"))]
 // cpufeatures crate internally uses `u8::max_value()` which will be deprecated.
@@ -835,6 +834,7 @@ impl HashEngine {
         use core::arch::aarch64::vst1q_u8;
 
         // initial state
+        #[rustfmt::skip]
         const INIT: [u32; 8] = [
             0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
@@ -862,6 +862,7 @@ impl HashEngine {
         ];
 
         // Precomputed W[i] + K[i] for the 2nd transform (padding block).
+        #[rustfmt::skip]
         const MIDS: [u32; 64] = [
             0xc28a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
             0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -893,13 +894,12 @@ impl HashEngine {
         ];
 
         // Padding processed in the 3rd transform (byteswapped).
-        const FINAL: [u32; 8] = [
-            0x80000000, 0, 0, 0, 0, 0, 0, 0x100,
-        ];
+        const FINAL: [u32; 8] = [0x80000000, 0, 0, 0, 0, 0, 0, 0x100];
 
         let (mut state0_a, mut state0_b, mut state1_a, mut state1_b);
         let (abcd_save_a, abcd_save_b, efgh_save_a, efgh_save_b);
 
+        #[rustfmt::skip]
         let (mut msg0_a, mut msg0_b, mut msg1_a, mut msg1_b, mut msg2_a, mut msg2_b, mut msg3_a, mut msg3_b);
         let (mut tmp0_a, mut tmp0_b, mut tmp2_a, mut tmp2_b, mut tmp);
 
@@ -928,7 +928,7 @@ impl HashEngine {
         msg1_b = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(msg1_b)));
         msg2_b = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(msg2_b)));
         msg3_b = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(msg3_b)));
-        
+
         // Transform 1: Rounds 1-4
         tmp = vld1q_u32(K.as_ptr().add(0));
         tmp0_a = vaddq_u32(msg0_a, tmp);
@@ -1570,7 +1570,6 @@ impl HashEngine {
         vst1q_u8(output[1].as_mut_ptr().add(0), vrev32q_u8(vreinterpretq_u8_u32(state0_b)));
         vst1q_u8(output[1].as_mut_ptr().add(16), vrev32q_u8(vreinterpretq_u8_u32(state1_b)));
     }
-
 
     // Algorithm copied from libsecp256k1
     fn software_process_block(state: &mut [u32; 8], blocks: &[u8]) {
