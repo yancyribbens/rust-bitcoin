@@ -337,6 +337,7 @@ type TransactionEncoderInner<'e> = Encoder6<
 #[cfg(feature = "alloc")]
 encoding::encoder_newtype! {
     /// The encoder for the [`Transaction`] type.
+    #[derive(Debug, Clone)]
     pub struct TransactionEncoder<'e>(TransactionEncoderInner<'e>);
 }
 
@@ -430,6 +431,7 @@ impl std::error::Error for ParseTransactionError {
 
 /// The decoder for the [`Transaction`] type.
 #[cfg(feature = "alloc")]
+#[derive(Debug, Clone)]
 pub struct TransactionDecoder {
     state: TransactionDecoderState,
 }
@@ -665,6 +667,7 @@ impl encoding::Decodable for Transaction {
 
 /// The state of the transiting decoder.
 #[cfg(feature = "alloc")]
+#[derive(Debug, Clone)]
 enum TransactionDecoderState {
     /// Decoding the transaction version.
     Version(VersionDecoder),
@@ -858,6 +861,7 @@ impl TxIn {
 #[cfg(feature = "alloc")]
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`TxIn`] type.
+    #[derive(Debug, Clone)]
     pub struct TxInEncoder<'e>(
         Encoder3<OutPointEncoder<'e>, ScriptEncoder<'e>, SequenceEncoder<'e>>
     );
@@ -881,6 +885,7 @@ impl encoding::Encodable for TxIn {
 
 /// Encodes the witnesses from a list of inputs.
 #[cfg(feature = "alloc")]
+#[derive(Debug, Clone)]
 pub struct WitnessesEncoder<'e> {
     inputs: &'e [TxIn],
     /// Encoder for the current witness being encoded.
@@ -936,6 +941,7 @@ type TxInInnerDecoder = Decoder3<OutPointDecoder, ScriptSigBufDecoder, SequenceD
 
 /// The decoder for the [`TxIn`] type.
 #[cfg(feature = "alloc")]
+#[derive(Debug, Clone)]
 pub struct TxInDecoder(TxInInnerDecoder);
 
 #[cfg(feature = "alloc")]
@@ -1033,6 +1039,7 @@ pub struct TxOut {
 #[cfg(feature = "alloc")]
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`TxOut`] type.
+    #[derive(Debug, Clone)]
     pub struct TxOutEncoder<'e>(Encoder2<AmountEncoder<'e>, ScriptEncoder<'e>>);
 }
 
@@ -1053,6 +1060,7 @@ type TxOutInnerDecoder = Decoder2<AmountDecoder, ScriptPubKeyBufDecoder>;
 
 /// The decoder for the [`TxOut`] type.
 #[cfg(feature = "alloc")]
+#[derive(Debug, Clone)]
 pub struct TxOutDecoder(TxOutInnerDecoder);
 
 #[cfg(feature = "alloc")]
@@ -1144,6 +1152,7 @@ impl OutPoint {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`OutPoint`] type.
+    #[derive(Debug, Clone)]
     pub struct OutPointEncoder<'e>(Encoder2<BytesEncoder<'e>, ArrayEncoder<4>>);
 }
 
@@ -1211,6 +1220,7 @@ fn parse_vout(s: &str) -> Result<u32, ParseOutPointError> {
 
 /// The decoder for the [`OutPoint`] type.
 // 32 for the txid + 4 for the vout
+#[derive(Debug, Clone)]
 pub struct OutPointDecoder(encoding::ArrayDecoder<36>);
 
 impl OutPointDecoder {
@@ -1513,6 +1523,7 @@ impl From<Version> for u32 {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`Version`] type.
+    #[derive(Debug, Clone)]
     pub struct VersionEncoder<'e>(encoding::ArrayEncoder<4>);
 }
 
@@ -1526,6 +1537,7 @@ impl encoding::Encodable for Version {
 }
 
 /// The decoder for the [`Version`] type.
+#[derive(Debug, Clone)]
 pub struct VersionDecoder(encoding::ArrayDecoder<4>);
 
 impl VersionDecoder {

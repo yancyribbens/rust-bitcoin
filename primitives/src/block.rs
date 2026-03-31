@@ -336,6 +336,7 @@ impl std::error::Error for ParseBlockError {
 #[cfg(feature = "alloc")]
 encoding::encoder_newtype! {
     /// The encoder for the [`Block`] type.
+    #[derive(Debug, Clone)]
     pub struct BlockEncoder<'e>(
         Encoder2<HeaderEncoder<'e>, Encoder2<CompactSizeEncoder, SliceEncoder<'e, Transaction>>>
     );
@@ -369,6 +370,7 @@ type BlockInnerDecoder = Decoder2<HeaderDecoder, VecDecoder<Transaction>>;
 ///
 /// This decoder can only produce a `Block<Unchecked>`.
 #[cfg(feature = "alloc")]
+#[derive(Debug, Clone)]
 pub struct BlockDecoder(BlockInnerDecoder);
 
 #[cfg(feature = "alloc")]
@@ -638,6 +640,7 @@ impl std::error::Error for ParseHeaderError {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`Header`] type.
+    #[derive(Debug, Clone)]
     pub struct HeaderEncoder<'e>(
         encoding::Encoder6<
             VersionEncoder<'e>,
@@ -675,6 +678,7 @@ type HeaderInnerDecoder = Decoder6<
 >;
 
 /// The decoder for the [`Header`] type.
+#[derive(Debug, Clone)]
 pub struct HeaderDecoder(HeaderInnerDecoder);
 
 impl HeaderDecoder {
@@ -899,6 +903,7 @@ impl Default for Version {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`Version`] type.
+    #[derive(Debug, Clone)]
     pub struct VersionEncoder<'e>(encoding::ArrayEncoder<4>);
 }
 
@@ -912,6 +917,7 @@ impl encoding::Encodable for Version {
 }
 
 /// The decoder for the [`Version`] type.
+#[derive(Debug, Clone)]
 pub struct VersionDecoder(encoding::ArrayDecoder<4>);
 
 impl VersionDecoder {

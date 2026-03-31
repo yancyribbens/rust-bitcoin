@@ -182,6 +182,7 @@ impl<T> Script<T> {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`Script<T>`] type.
+    #[derive(Debug, Clone)]
     pub struct ScriptEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
 

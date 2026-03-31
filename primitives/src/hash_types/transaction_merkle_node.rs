@@ -68,10 +68,12 @@ impl encoding::Decodable for TxMerkleNode {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`TxMerkleNode`] type.
+    #[derive(Debug, Clone)]
     pub struct TxMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
 }
 
 /// The decoder for the [`TxMerkleNode`] type.
+#[derive(Debug, Clone)]
 pub struct TxMerkleNodeDecoder(encoding::ArrayDecoder<32>);
 
 impl TxMerkleNodeDecoder {

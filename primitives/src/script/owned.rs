@@ -184,6 +184,7 @@ impl<T> DerefMut for ScriptBuf<T> {
 }
 
 /// The decoder for the [`ScriptBuf`] type.
+#[derive(Debug, Clone)]
 pub struct ScriptBufDecoder<T>(ByteVecDecoder, PhantomData<T>);
 
 impl<T> ScriptBufDecoder<T> {

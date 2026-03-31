@@ -48,10 +48,12 @@ impl encoding::Decodable for BlockHash {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`BlockHash`] type.
+    #[derive(Debug, Clone)]
     pub struct BlockHashEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
 }
 
 /// The decoder for the [`BlockHash`] type.
+#[derive(Debug, Clone)]
 pub struct BlockHashDecoder(encoding::ArrayDecoder<32>);
 
 impl BlockHashDecoder {
