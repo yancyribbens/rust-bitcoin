@@ -71,6 +71,18 @@ pub trait Encoder {
 ///
 /// The new type will implement the [`Encoder`] trait by forwarding to the wrapped encoder. If your
 /// type has a known size consider using [`crate::encoder_newtype_exact`] instead.
+///
+/// # Examples
+/// ```
+/// use bitcoin_consensus_encoding::{encoder_newtype, BytesEncoder};
+///
+/// encoder_newtype! {
+///     /// The encoder for the [`Foo`] type.
+///     pub struct FooEncoder<'e>(BytesEncoder<'e>);
+/// }
+/// ```
+///
+/// For a full example see `./examples/encoder.rs`.
 #[macro_export]
 macro_rules! encoder_newtype {
     (
@@ -102,6 +114,18 @@ macro_rules! encoder_newtype {
 ///
 /// The new type will implement both the [`Encoder`] and [`ExactSizeEncoder`] traits
 /// by forwarding to the wrapped encoder.
+///
+/// # Examples
+/// ```
+/// use bitcoin_consensus_encoding::{encoder_newtype_exact, ArrayEncoder};
+///
+/// encoder_newtype_exact! {
+///     /// The encoder for the [`Bar`] type.
+///     pub struct BarEncoder<'e>(ArrayEncoder<32>);
+/// }
+/// ```
+///
+/// For a full example see `./examples/encoder.rs`.
 #[macro_export]
 macro_rules! encoder_newtype_exact {
     (
