@@ -9,13 +9,20 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
+use core::fmt;
+
 use bitcoin_consensus_encoding::{
-    ArrayDecoder, ArrayEncoder, ArrayRefEncoder, BytesEncoder, CompactSizeDecoder,
-    CompactSizeDecoderError, CompactSizeEncoder, UnexpectedEofError,
+    self as encoding, encoder_newtype, ArrayDecoder, ArrayEncoder, ArrayRefEncoder, BytesEncoder,
+    CompactSizeDecoder, CompactSizeDecoderError, CompactSizeEncoder, CompactSizeU64Decoder,
+    Decodable, Decoder, Decoder2, Decoder3, Decoder4, Decoder6, Encodable, EncodableByteIter,
+    SliceEncoder, UnexpectedEofError,
 };
+use encoding::error::{DecodeError, UnconsumedError};
+#[cfg(feature = "std")]
+use encoding::ReadError;
 #[cfg(feature = "alloc")]
-use bitcoin_consensus_encoding::{
-    ByteVecDecoder, ByteVecDecoderError, LengthPrefixExceedsMaxError, VecDecoderError,
+use encoding::{
+    ByteVecDecoder, ByteVecDecoderError, LengthPrefixExceedsMaxError, VecDecoder, VecDecoderError,
 };
 
 static BYTES: &[u8] = &[];
@@ -31,6 +38,60 @@ struct Structs {
     e: ByteVecDecoder,
     f: CompactSizeDecoder,
     g: CompactSizeEncoder,
+    h: CompactSizeU64Decoder,
+    i: Decoder2<D, D>,
+    j: Decoder3<D, D, D>,
+    k: Decoder4<D, D, D, D>,
+    l: Decoder6<D, D, D, D, D, D>,
+    m: EncodableByteIter<'static, Foo>,
+    n: SliceEncoder<'static, Foo>,
+    #[cfg(feature = "alloc")]
+    o: VecDecoder<Foo>,
+}
+
+// Dummy decoder to use in place of generic.
+type D = FooDecoder;
+
+// Dummy type that can be encoded/decoded.
+#[derive(Debug, Clone)]
+struct Foo([u8; 4]);
+
+impl Foo {
+    fn dummy() -> Self { Self([0; 4]) }
+}
+
+encoder_newtype! {
+    #[derive(Debug, Clone)]
+    pub struct FooEncoder<'e>(ArrayEncoder<4>);
+}
+
+impl Encodable for Foo {
+    type Encoder<'e>
+        = FooEncoder<'e>
+    where
+        Self: 'e;
+    fn encoder(&self) -> Self::Encoder<'_> {
+        FooEncoder::new(ArrayEncoder::without_length_prefix(self.0))
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+struct FooDecoder(ArrayDecoder<4>);
+
+impl Decoder for FooDecoder {
+    type Output = Foo;
+    type Error = UnexpectedEofError;
+
+    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
+        self.0.push_bytes(bytes)
+    }
+    fn end(self) -> Result<Self::Output, Self::Error> { self.0.end().map(Foo) }
+    fn read_limit(&self) -> usize { self.0.read_limit() }
+}
+
+impl Decodable for Foo {
+    type Decoder = FooDecoder;
+    fn decoder() -> Self::Decoder { FooDecoder(ArrayDecoder::new()) }
 }
 
 /// A struct that includes all types that implement `Clone`.
@@ -44,57 +105,65 @@ struct Clone {
     e: ByteVecDecoder,
     f: CompactSizeDecoder,
     g: CompactSizeEncoder,
+    h: CompactSizeU64Decoder,
+    // We don't implement Clone for the composite decoders.
+    //
+    // i: Decoder2<D, D>,
+    // j: Decoder3<D, D, D>,
+    // k: Decoder4<D, D, D, D>,
+    // l: Decoder6<D, D, D, D, D, D>,
+    m: EncodableByteIter<'static, Foo>,
+    n: SliceEncoder<'static, Foo>,
+    #[cfg(feature = "alloc")]
+    o: VecDecoder<Foo>,
 }
 
-/// A struct that includes all types that implement `Default`.
-#[derive(Debug, Default)] // C-COMMON-TRAITS: `Default`
+/// A struct that includes all types that implement `Default` (implies decoders).
+#[derive(Default)] // C-COMMON-TRAITS: `Default`
 struct Default {
     a: ArrayDecoder<4>,
     #[cfg(feature = "alloc")]
-    b: ByteVecDecoder,
-    c: CompactSizeDecoder,
+    e: ByteVecDecoder,
+    f: CompactSizeDecoder,
+    h: CompactSizeU64Decoder,
+    // We don't implement Default for the composite decoders.
+    //
+    // i: Decoder2<D, D>,
+    // j: Decoder3<D, D, D>,
+    // k: Decoder4<D, D, D, D>,
+    // l: Decoder6<D, D, D, D, D, D>,
+    #[cfg(feature = "alloc")]
+    o: VecDecoder<Foo>,
 }
 
 /// A struct that includes all public error types.
 // These derives are the policy of `rust-bitcoin` not Rust API guidelines.
 #[derive(Debug, Clone, PartialEq, Eq)] // All public types implement Debug (C-DEBUG).
 struct Errors {
+    // a: ReadError<UnexpectedEofError>, // Debug only, tested below.
+    b: DecodeError<UnexpectedEofError>,
+    c: UnconsumedError,
+    d: CompactSizeDecoderError,
     #[cfg(feature = "alloc")]
-    a: ByteVecDecoderError,
-    b: CompactSizeDecoderError,
+    e: LengthPrefixExceedsMaxError,
     #[cfg(feature = "alloc")]
-    c: LengthPrefixExceedsMaxError,
-    d: UnexpectedEofError,
+    f: ByteVecDecoderError,
     #[cfg(feature = "alloc")]
-    e: VecDecoderError<UnexpectedEofError>,
+    g: VecDecoderError<UnexpectedEofError>,
+    h: UnexpectedEofError,
 }
 
 #[test]
-fn api_can_use_all_encoder_types() {
-    use bitcoin_consensus_encoding::{
-        ArrayEncoder, ArrayRefEncoder, BytesEncoder, CompactSizeEncoder, Encoder2, Encoder3,
-        Encoder4, Encoder6, SliceEncoder,
-    };
-}
+#[cfg(feature = "std")]
+fn api_can_call_debug_on_read_error() {
+    use std::io::{BufReader, Cursor};
 
-#[test]
-fn api_can_use_all_decoder_types() {
-    use bitcoin_consensus_encoding::{
-        ArrayDecoder, CompactSizeDecoder, Decoder2, Decoder3, Decoder4, Decoder6,
-    };
-    #[cfg(feature = "alloc")]
-    use bitcoin_consensus_encoding::{ByteVecDecoder, VecDecoder};
-}
-
-#[test]
-fn api_can_use_all_decoder_error_types() {
-    #[cfg(feature = "std")]
-    use bitcoin_consensus_encoding::ReadError;
-    #[cfg(feature = "alloc")]
-    use bitcoin_consensus_encoding::{
-        ByteVecDecoderError, LengthPrefixExceedsMaxError, VecDecoderError,
-    };
-    use bitcoin_consensus_encoding::{CompactSizeDecoderError, UnexpectedEofError};
+    let s = String::new();
+    let cursor = Cursor::new(s.as_bytes());
+    let reader = BufReader::new(cursor);
+    let err = encoding::decode_from_read::<Foo, BufReader<Cursor<&[u8]>>>(reader).unwrap_err();
+    let debug = format!("{:?}", err);
+    assert!(!debug.is_empty()); // We don't check this for other errors.
 }
 
 // `Debug` representation is never empty (C-DEBUG-NONEMPTY).
@@ -119,6 +188,29 @@ fn api_all_non_error_types_have_non_empty_debug() {
     assert!(!debug.is_empty());
     let debug = format!("{:?}", CompactSizeEncoder::new(0));
     assert!(!debug.is_empty());
+    let debug = format!("{:?}", CompactSizeU64Decoder::default());
+    assert!(!debug.is_empty());
+
+    let d = || FooDecoder::default();
+
+    let debug = format!("{:?}", Decoder2::new(d(), d()));
+    assert!(!debug.is_empty());
+    let debug = format!("{:?}", Decoder3::new(d(), d(), d()));
+    assert!(!debug.is_empty());
+    let debug = format!("{:?}", Decoder4::new(d(), d(), d(), d()));
+    assert!(!debug.is_empty());
+    let debug = format!("{:?}", Decoder6::new(d(), d(), d(), d(), d(), d()));
+    assert!(!debug.is_empty());
+
+    let debug = format!("{:?}", EncodableByteIter::new(&Foo::dummy()));
+    assert!(!debug.is_empty());
+    let debug = format!("{:?}", SliceEncoder::without_length_prefix(&[Foo::dummy()]));
+    assert!(!debug.is_empty());
+    #[cfg(feature = "alloc")]
+    {
+        let debug = format!("{:?}", VecDecoder::<Foo>::default());
+        assert!(!debug.is_empty());
+    }
 }
 
 #[test]
@@ -139,8 +231,8 @@ fn all_types_implement_send_sync() {
 fn dyn_compatible() {
     // If this builds then traits are dyn compatible.
     struct Traits {
-        a: Box<dyn bitcoin_consensus_encoding::Encoder>,
-        b: Box<dyn bitcoin_consensus_encoding::ExactSizeEncoder>,
+        a: Box<dyn encoding::Encoder>,
+        b: Box<dyn encoding::ExactSizeEncoder>,
     }
     // The following traits are not dyn compatible:
     // - `Encodable`: has a GAT (`type Encoder<'e>`)
