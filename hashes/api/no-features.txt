@@ -115,11 +115,49 @@ pub fn bitcoin_hashes::hash160::HashEngine::from(t: T) -> T
 pub fn bitcoin_hashes::hash160::hash(data: &[u8]) -> bitcoin_hashes::hash160::Hash
 pub fn bitcoin_hashes::hash160::hash_byte_chunks<B, I>(byte_slices: I) -> bitcoin_hashes::hash160::Hash where B: core::convert::AsRef<[u8]>, I: core::iter::traits::collect::IntoIterator<Item = B>
 pub mod bitcoin_hashes::hkdf
+pub mod bitcoin_hashes::hkdf::error
+pub struct bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::clone::Clone for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::clone(&self) -> bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::cmp::Eq for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::cmp::PartialEq for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::eq(&self, other: &bitcoin_hashes::hkdf::error::MaxLengthError) -> bool
+impl core::fmt::Debug for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::StructuralPartialEq for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::Freeze for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::Send for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::Sync for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::Unpin for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::UnsafeUnpin for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_hashes::hkdf::error::MaxLengthError
+impl<T, U> core::convert::Into<U> for bitcoin_hashes::hkdf::error::MaxLengthError where U: core::convert::From<T>
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_hashes::hkdf::error::MaxLengthError where U: core::convert::Into<T>
+pub type bitcoin_hashes::hkdf::error::MaxLengthError::Error = core::convert::Infallible
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_hashes::hkdf::error::MaxLengthError where U: core::convert::TryFrom<T>
+pub type bitcoin_hashes::hkdf::error::MaxLengthError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for bitcoin_hashes::hkdf::error::MaxLengthError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_hashes::hkdf::error::MaxLengthError where T: ?core::marker::Sized
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_hashes::hkdf::error::MaxLengthError where T: ?core::marker::Sized
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_hashes::hkdf::error::MaxLengthError where T: core::clone::Clone
+pub unsafe fn bitcoin_hashes::hkdf::error::MaxLengthError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::from(t: T) -> T
 pub struct bitcoin_hashes::hkdf::Hkdf<T: bitcoin_hashes::HashEngine>
 impl<T: bitcoin_hashes::HashEngine> bitcoin_hashes::hkdf::Hkdf<T>
 pub fn bitcoin_hashes::hkdf::Hkdf<T>::non_secure_erase(&mut self)
 impl<T> bitcoin_hashes::hkdf::Hkdf<T> where T: core::default::Default + bitcoin_hashes::HashEngine
-pub fn bitcoin_hashes::hkdf::Hkdf<T>::expand(&self, info: &[u8], okm: &mut [u8]) -> core::result::Result<(), bitcoin_hashes::hkdf::MaxLengthError>
+pub fn bitcoin_hashes::hkdf::Hkdf<T>::expand(&self, info: &[u8], okm: &mut [u8]) -> core::result::Result<(), bitcoin_hashes::hkdf::error::MaxLengthError>
 pub fn bitcoin_hashes::hkdf::Hkdf<T>::new(salt: &[u8], ikm: &[u8]) -> Self
 impl<T: bitcoin_hashes::HashEngine> core::fmt::Debug for bitcoin_hashes::hkdf::Hkdf<T>
 pub fn bitcoin_hashes::hkdf::Hkdf<T>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
@@ -153,42 +191,42 @@ pub unsafe fn bitcoin_hashes::hkdf::Hkdf<T>::clone_to_uninit(&self, dest: *mut u
 impl<T> core::convert::From<T> for bitcoin_hashes::hkdf::Hkdf<T>
 pub fn bitcoin_hashes::hkdf::Hkdf<T>::from(t: T) -> T
 pub struct bitcoin_hashes::hkdf::MaxLengthError
-impl core::clone::Clone for bitcoin_hashes::hkdf::MaxLengthError
-pub fn bitcoin_hashes::hkdf::MaxLengthError::clone(&self) -> bitcoin_hashes::hkdf::MaxLengthError
-impl core::cmp::Eq for bitcoin_hashes::hkdf::MaxLengthError
-impl core::cmp::PartialEq for bitcoin_hashes::hkdf::MaxLengthError
-pub fn bitcoin_hashes::hkdf::MaxLengthError::eq(&self, other: &bitcoin_hashes::hkdf::MaxLengthError) -> bool
-impl core::fmt::Debug for bitcoin_hashes::hkdf::MaxLengthError
-pub fn bitcoin_hashes::hkdf::MaxLengthError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::fmt::Display for bitcoin_hashes::hkdf::MaxLengthError
-pub fn bitcoin_hashes::hkdf::MaxLengthError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::marker::Copy for bitcoin_hashes::hkdf::MaxLengthError
-impl core::marker::StructuralPartialEq for bitcoin_hashes::hkdf::MaxLengthError
-impl core::marker::Freeze for bitcoin_hashes::hkdf::MaxLengthError
-impl core::marker::Send for bitcoin_hashes::hkdf::MaxLengthError
-impl core::marker::Sync for bitcoin_hashes::hkdf::MaxLengthError
-impl core::marker::Unpin for bitcoin_hashes::hkdf::MaxLengthError
-impl core::marker::UnsafeUnpin for bitcoin_hashes::hkdf::MaxLengthError
-impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_hashes::hkdf::MaxLengthError
-impl core::panic::unwind_safe::UnwindSafe for bitcoin_hashes::hkdf::MaxLengthError
-impl<T, U> core::convert::Into<U> for bitcoin_hashes::hkdf::MaxLengthError where U: core::convert::From<T>
-pub fn bitcoin_hashes::hkdf::MaxLengthError::into(self) -> U
-impl<T, U> core::convert::TryFrom<U> for bitcoin_hashes::hkdf::MaxLengthError where U: core::convert::Into<T>
-pub type bitcoin_hashes::hkdf::MaxLengthError::Error = core::convert::Infallible
-pub fn bitcoin_hashes::hkdf::MaxLengthError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
-impl<T, U> core::convert::TryInto<U> for bitcoin_hashes::hkdf::MaxLengthError where U: core::convert::TryFrom<T>
-pub type bitcoin_hashes::hkdf::MaxLengthError::Error = <U as core::convert::TryFrom<T>>::Error
-pub fn bitcoin_hashes::hkdf::MaxLengthError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
-impl<T> core::any::Any for bitcoin_hashes::hkdf::MaxLengthError where T: 'static + ?core::marker::Sized
-pub fn bitcoin_hashes::hkdf::MaxLengthError::type_id(&self) -> core::any::TypeId
-impl<T> core::borrow::Borrow<T> for bitcoin_hashes::hkdf::MaxLengthError where T: ?core::marker::Sized
-pub fn bitcoin_hashes::hkdf::MaxLengthError::borrow(&self) -> &T
-impl<T> core::borrow::BorrowMut<T> for bitcoin_hashes::hkdf::MaxLengthError where T: ?core::marker::Sized
-pub fn bitcoin_hashes::hkdf::MaxLengthError::borrow_mut(&mut self) -> &mut T
-impl<T> core::clone::CloneToUninit for bitcoin_hashes::hkdf::MaxLengthError where T: core::clone::Clone
-pub unsafe fn bitcoin_hashes::hkdf::MaxLengthError::clone_to_uninit(&self, dest: *mut u8)
-impl<T> core::convert::From<T> for bitcoin_hashes::hkdf::MaxLengthError
-pub fn bitcoin_hashes::hkdf::MaxLengthError::from(t: T) -> T
+impl core::clone::Clone for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::clone(&self) -> bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::cmp::Eq for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::cmp::PartialEq for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::eq(&self, other: &bitcoin_hashes::hkdf::error::MaxLengthError) -> bool
+impl core::fmt::Debug for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::StructuralPartialEq for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::Freeze for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::Send for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::Sync for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::Unpin for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::marker::UnsafeUnpin for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_hashes::hkdf::error::MaxLengthError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_hashes::hkdf::error::MaxLengthError
+impl<T, U> core::convert::Into<U> for bitcoin_hashes::hkdf::error::MaxLengthError where U: core::convert::From<T>
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_hashes::hkdf::error::MaxLengthError where U: core::convert::Into<T>
+pub type bitcoin_hashes::hkdf::error::MaxLengthError::Error = core::convert::Infallible
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_hashes::hkdf::error::MaxLengthError where U: core::convert::TryFrom<T>
+pub type bitcoin_hashes::hkdf::error::MaxLengthError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for bitcoin_hashes::hkdf::error::MaxLengthError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_hashes::hkdf::error::MaxLengthError where T: ?core::marker::Sized
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_hashes::hkdf::error::MaxLengthError where T: ?core::marker::Sized
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_hashes::hkdf::error::MaxLengthError where T: core::clone::Clone
+pub unsafe fn bitcoin_hashes::hkdf::error::MaxLengthError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_hashes::hkdf::error::MaxLengthError
+pub fn bitcoin_hashes::hkdf::error::MaxLengthError::from(t: T) -> T
 pub mod bitcoin_hashes::hmac
 #[repr(transparent)] pub struct bitcoin_hashes::hmac::Hmac<T: bitcoin_hashes::Hash>(_)
 impl<T: bitcoin_hashes::Hash + core::fmt::Debug> core::fmt::Debug for bitcoin_hashes::hmac::Hmac<T>
@@ -574,6 +612,46 @@ pub fn bitcoin_hashes::sha1::HashEngine::from(t: T) -> T
 pub fn bitcoin_hashes::sha1::hash(data: &[u8]) -> bitcoin_hashes::sha1::Hash
 pub fn bitcoin_hashes::sha1::hash_byte_chunks<B, I>(byte_slices: I) -> bitcoin_hashes::sha1::Hash where B: core::convert::AsRef<[u8]>, I: core::iter::traits::collect::IntoIterator<Item = B>
 pub mod bitcoin_hashes::sha256
+pub mod bitcoin_hashes::sha256::error
+pub struct bitcoin_hashes::sha256::error::MidstateError
+impl bitcoin_hashes::sha256::error::MidstateError
+pub const fn bitcoin_hashes::sha256::error::MidstateError::midstate(&self) -> &bitcoin_hashes::sha256::Midstate
+pub fn bitcoin_hashes::sha256::error::MidstateError::unprocessed_bytes(&self) -> &[u8]
+impl core::clone::Clone for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::clone(&self) -> bitcoin_hashes::sha256::error::MidstateError
+impl core::cmp::Eq for bitcoin_hashes::sha256::error::MidstateError
+impl core::cmp::PartialEq for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::eq(&self, other: &bitcoin_hashes::sha256::error::MidstateError) -> bool
+impl core::fmt::Debug for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::Freeze for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::Send for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::Sync for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::Unpin for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::UnsafeUnpin for bitcoin_hashes::sha256::error::MidstateError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_hashes::sha256::error::MidstateError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_hashes::sha256::error::MidstateError
+impl<T, U> core::convert::Into<U> for bitcoin_hashes::sha256::error::MidstateError where U: core::convert::From<T>
+pub fn bitcoin_hashes::sha256::error::MidstateError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_hashes::sha256::error::MidstateError where U: core::convert::Into<T>
+pub type bitcoin_hashes::sha256::error::MidstateError::Error = core::convert::Infallible
+pub fn bitcoin_hashes::sha256::error::MidstateError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_hashes::sha256::error::MidstateError where U: core::convert::TryFrom<T>
+pub type bitcoin_hashes::sha256::error::MidstateError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_hashes::sha256::error::MidstateError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for bitcoin_hashes::sha256::error::MidstateError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_hashes::sha256::error::MidstateError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_hashes::sha256::error::MidstateError where T: ?core::marker::Sized
+pub fn bitcoin_hashes::sha256::error::MidstateError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_hashes::sha256::error::MidstateError where T: ?core::marker::Sized
+pub fn bitcoin_hashes::sha256::error::MidstateError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_hashes::sha256::error::MidstateError where T: core::clone::Clone
+pub unsafe fn bitcoin_hashes::sha256::error::MidstateError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::from(t: T) -> T
 #[repr(transparent)] pub struct bitcoin_hashes::sha256::Hash(_)
 impl bitcoin_hashes::sha256::Hash
 pub const fn bitcoin_hashes::sha256::Hash::as_byte_array(&self) -> &[u8; 32]
@@ -648,7 +726,7 @@ pub struct bitcoin_hashes::sha256::HashEngine
 impl bitcoin_hashes::sha256::HashEngine
 pub const fn bitcoin_hashes::sha256::HashEngine::can_extract_midstate(&self) -> bool
 pub fn bitcoin_hashes::sha256::HashEngine::from_midstate(midstate: bitcoin_hashes::sha256::Midstate) -> Self
-pub fn bitcoin_hashes::sha256::HashEngine::midstate(&self) -> core::result::Result<bitcoin_hashes::sha256::Midstate, bitcoin_hashes::sha256::MidstateError>
+pub fn bitcoin_hashes::sha256::HashEngine::midstate(&self) -> core::result::Result<bitcoin_hashes::sha256::Midstate, bitcoin_hashes::sha256::error::MidstateError>
 pub const fn bitcoin_hashes::sha256::HashEngine::new() -> Self
 impl bitcoin_hashes::HashEngine for bitcoin_hashes::sha256::HashEngine
 pub type bitcoin_hashes::sha256::HashEngine::Bytes = [u8; 32]
@@ -740,44 +818,44 @@ pub unsafe fn bitcoin_hashes::sha256::Midstate::clone_to_uninit(&self, dest: *mu
 impl<T> core::convert::From<T> for bitcoin_hashes::sha256::Midstate
 pub fn bitcoin_hashes::sha256::Midstate::from(t: T) -> T
 pub struct bitcoin_hashes::sha256::MidstateError
-impl bitcoin_hashes::sha256::MidstateError
-pub const fn bitcoin_hashes::sha256::MidstateError::midstate(&self) -> &bitcoin_hashes::sha256::Midstate
-pub fn bitcoin_hashes::sha256::MidstateError::unprocessed_bytes(&self) -> &[u8]
-impl core::clone::Clone for bitcoin_hashes::sha256::MidstateError
-pub fn bitcoin_hashes::sha256::MidstateError::clone(&self) -> bitcoin_hashes::sha256::MidstateError
-impl core::cmp::Eq for bitcoin_hashes::sha256::MidstateError
-impl core::cmp::PartialEq for bitcoin_hashes::sha256::MidstateError
-pub fn bitcoin_hashes::sha256::MidstateError::eq(&self, other: &bitcoin_hashes::sha256::MidstateError) -> bool
-impl core::fmt::Debug for bitcoin_hashes::sha256::MidstateError
-pub fn bitcoin_hashes::sha256::MidstateError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::fmt::Display for bitcoin_hashes::sha256::MidstateError
-pub fn bitcoin_hashes::sha256::MidstateError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::marker::StructuralPartialEq for bitcoin_hashes::sha256::MidstateError
-impl core::marker::Freeze for bitcoin_hashes::sha256::MidstateError
-impl core::marker::Send for bitcoin_hashes::sha256::MidstateError
-impl core::marker::Sync for bitcoin_hashes::sha256::MidstateError
-impl core::marker::Unpin for bitcoin_hashes::sha256::MidstateError
-impl core::marker::UnsafeUnpin for bitcoin_hashes::sha256::MidstateError
-impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_hashes::sha256::MidstateError
-impl core::panic::unwind_safe::UnwindSafe for bitcoin_hashes::sha256::MidstateError
-impl<T, U> core::convert::Into<U> for bitcoin_hashes::sha256::MidstateError where U: core::convert::From<T>
-pub fn bitcoin_hashes::sha256::MidstateError::into(self) -> U
-impl<T, U> core::convert::TryFrom<U> for bitcoin_hashes::sha256::MidstateError where U: core::convert::Into<T>
-pub type bitcoin_hashes::sha256::MidstateError::Error = core::convert::Infallible
-pub fn bitcoin_hashes::sha256::MidstateError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
-impl<T, U> core::convert::TryInto<U> for bitcoin_hashes::sha256::MidstateError where U: core::convert::TryFrom<T>
-pub type bitcoin_hashes::sha256::MidstateError::Error = <U as core::convert::TryFrom<T>>::Error
-pub fn bitcoin_hashes::sha256::MidstateError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
-impl<T> core::any::Any for bitcoin_hashes::sha256::MidstateError where T: 'static + ?core::marker::Sized
-pub fn bitcoin_hashes::sha256::MidstateError::type_id(&self) -> core::any::TypeId
-impl<T> core::borrow::Borrow<T> for bitcoin_hashes::sha256::MidstateError where T: ?core::marker::Sized
-pub fn bitcoin_hashes::sha256::MidstateError::borrow(&self) -> &T
-impl<T> core::borrow::BorrowMut<T> for bitcoin_hashes::sha256::MidstateError where T: ?core::marker::Sized
-pub fn bitcoin_hashes::sha256::MidstateError::borrow_mut(&mut self) -> &mut T
-impl<T> core::clone::CloneToUninit for bitcoin_hashes::sha256::MidstateError where T: core::clone::Clone
-pub unsafe fn bitcoin_hashes::sha256::MidstateError::clone_to_uninit(&self, dest: *mut u8)
-impl<T> core::convert::From<T> for bitcoin_hashes::sha256::MidstateError
-pub fn bitcoin_hashes::sha256::MidstateError::from(t: T) -> T
+impl bitcoin_hashes::sha256::error::MidstateError
+pub const fn bitcoin_hashes::sha256::error::MidstateError::midstate(&self) -> &bitcoin_hashes::sha256::Midstate
+pub fn bitcoin_hashes::sha256::error::MidstateError::unprocessed_bytes(&self) -> &[u8]
+impl core::clone::Clone for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::clone(&self) -> bitcoin_hashes::sha256::error::MidstateError
+impl core::cmp::Eq for bitcoin_hashes::sha256::error::MidstateError
+impl core::cmp::PartialEq for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::eq(&self, other: &bitcoin_hashes::sha256::error::MidstateError) -> bool
+impl core::fmt::Debug for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::Freeze for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::Send for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::Sync for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::Unpin for bitcoin_hashes::sha256::error::MidstateError
+impl core::marker::UnsafeUnpin for bitcoin_hashes::sha256::error::MidstateError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_hashes::sha256::error::MidstateError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_hashes::sha256::error::MidstateError
+impl<T, U> core::convert::Into<U> for bitcoin_hashes::sha256::error::MidstateError where U: core::convert::From<T>
+pub fn bitcoin_hashes::sha256::error::MidstateError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_hashes::sha256::error::MidstateError where U: core::convert::Into<T>
+pub type bitcoin_hashes::sha256::error::MidstateError::Error = core::convert::Infallible
+pub fn bitcoin_hashes::sha256::error::MidstateError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_hashes::sha256::error::MidstateError where U: core::convert::TryFrom<T>
+pub type bitcoin_hashes::sha256::error::MidstateError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_hashes::sha256::error::MidstateError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for bitcoin_hashes::sha256::error::MidstateError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_hashes::sha256::error::MidstateError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_hashes::sha256::error::MidstateError where T: ?core::marker::Sized
+pub fn bitcoin_hashes::sha256::error::MidstateError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_hashes::sha256::error::MidstateError where T: ?core::marker::Sized
+pub fn bitcoin_hashes::sha256::error::MidstateError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_hashes::sha256::error::MidstateError where T: core::clone::Clone
+pub unsafe fn bitcoin_hashes::sha256::error::MidstateError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_hashes::sha256::error::MidstateError
+pub fn bitcoin_hashes::sha256::error::MidstateError::from(t: T) -> T
 pub fn bitcoin_hashes::sha256::hash(data: &[u8]) -> bitcoin_hashes::sha256::Hash
 pub fn bitcoin_hashes::sha256::hash_byte_chunks<B, I>(byte_slices: I) -> bitcoin_hashes::sha256::Hash where B: core::convert::AsRef<[u8]>, I: core::iter::traits::collect::IntoIterator<Item = B>
 pub mod bitcoin_hashes::sha256d
@@ -1664,7 +1742,7 @@ pub struct bitcoin_hashes::Hkdf<T: bitcoin_hashes::HashEngine>
 impl<T: bitcoin_hashes::HashEngine> bitcoin_hashes::hkdf::Hkdf<T>
 pub fn bitcoin_hashes::hkdf::Hkdf<T>::non_secure_erase(&mut self)
 impl<T> bitcoin_hashes::hkdf::Hkdf<T> where T: core::default::Default + bitcoin_hashes::HashEngine
-pub fn bitcoin_hashes::hkdf::Hkdf<T>::expand(&self, info: &[u8], okm: &mut [u8]) -> core::result::Result<(), bitcoin_hashes::hkdf::MaxLengthError>
+pub fn bitcoin_hashes::hkdf::Hkdf<T>::expand(&self, info: &[u8], okm: &mut [u8]) -> core::result::Result<(), bitcoin_hashes::hkdf::error::MaxLengthError>
 pub fn bitcoin_hashes::hkdf::Hkdf<T>::new(salt: &[u8], ikm: &[u8]) -> Self
 impl<T: bitcoin_hashes::HashEngine> core::fmt::Debug for bitcoin_hashes::hkdf::Hkdf<T>
 pub fn bitcoin_hashes::hkdf::Hkdf<T>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
