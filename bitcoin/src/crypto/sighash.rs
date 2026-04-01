@@ -95,7 +95,7 @@ hashes::impl_hex_for_newtype!(TapSighash);
 hashes::impl_serde_for_newtype!(TapSighash);
 
 /// Efficiently calculates signature hash message for legacy, SegWit and Taproot inputs.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SighashCache<T: Borrow<Transaction>> {
     /// Access to transaction required for transaction introspection. Moreover, type
     /// `T: Borrow<Transaction>` allows us to use borrowed and mutable borrowed types,
@@ -113,7 +113,7 @@ pub struct SighashCache<T: Borrow<Transaction>> {
 }
 
 /// Common values cached between SegWit and Taproot inputs.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct CommonCache {
     prevouts: sha256::Hash,
     sequences: sha256::Hash,
@@ -124,7 +124,7 @@ struct CommonCache {
 }
 
 /// Values cached for SegWit inputs, equivalent to [`CommonCache`] plus another round of `sha256`.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct SegwitCache {
     prevouts: sha256d::Hash,
     sequences: sha256d::Hash,
@@ -132,7 +132,7 @@ struct SegwitCache {
 }
 
 /// Values cached for Taproot inputs.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct TaprootCache {
     amounts: sha256::Hash,
     script_pubkeys: sha256::Hash,
