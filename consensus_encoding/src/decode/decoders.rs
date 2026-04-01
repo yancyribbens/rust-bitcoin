@@ -392,6 +392,22 @@ where
     }
 }
 
+impl<A, B> Clone for Decoder2<A, B>
+where
+    A: Decoder + Clone,
+    B: Decoder + Clone,
+    A::Output: Clone,
+{
+    fn clone(&self) -> Self {
+        let state = match &self.state {
+            Decoder2State::First(a, b) => Decoder2State::First(a.clone(), b.clone()),
+            Decoder2State::Second(out, b) => Decoder2State::Second(out.clone(), b.clone()),
+            Decoder2State::Errored => Decoder2State::Errored,
+        };
+        Self { state }
+    }
+}
+
 impl<A, B> Decoder for Decoder2<A, B>
 where
     A: Decoder,
@@ -498,6 +514,17 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { self.inner.fmt(f) }
 }
 
+impl<A, B, C> Clone for Decoder3<A, B, C>
+where
+    A: Decoder + Clone,
+    B: Decoder + Clone,
+    C: Decoder + Clone,
+    A::Output: Clone,
+    B::Output: Clone,
+{
+    fn clone(&self) -> Self { Self { inner: self.inner.clone() } }
+}
+
 impl<A, B, C> Decoder for Decoder3<A, B, C>
 where
     A: Decoder,
@@ -567,6 +594,19 @@ where
     C::Output: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { self.inner.fmt(f) }
+}
+
+impl<A, B, C, D> Clone for Decoder4<A, B, C, D>
+where
+    A: Decoder + Clone,
+    B: Decoder + Clone,
+    C: Decoder + Clone,
+    D: Decoder + Clone,
+    A::Output: Clone,
+    B::Output: Clone,
+    C::Output: Clone,
+{
+    fn clone(&self) -> Self { Self { inner: self.inner.clone() } }
 }
 
 impl<A, B, C, D> Decoder for Decoder4<A, B, C, D>
@@ -655,6 +695,23 @@ where
     E::Output: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { self.inner.fmt(f) }
+}
+
+impl<A, B, C, D, E, F> Clone for Decoder6<A, B, C, D, E, F>
+where
+    A: Decoder + Clone,
+    B: Decoder + Clone,
+    C: Decoder + Clone,
+    D: Decoder + Clone,
+    E: Decoder + Clone,
+    F: Decoder + Clone,
+    A::Output: Clone,
+    B::Output: Clone,
+    C::Output: Clone,
+    D::Output: Clone,
+    E::Output: Clone,
+{
+    fn clone(&self) -> Self { Self { inner: self.inner.clone() } }
 }
 
 impl<A, B, C, D, E, F> Decoder for Decoder6<A, B, C, D, E, F>
