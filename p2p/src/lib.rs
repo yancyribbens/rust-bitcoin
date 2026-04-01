@@ -125,6 +125,7 @@ impl Decodable for ProtocolVersion {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`ProtocolVersion`] type.
+    #[derive(Debug, Clone)]
     pub struct ProtocolVersionEncoder<'e>(encoding::ArrayEncoder<4>);
 }
 
@@ -138,6 +139,7 @@ impl encoding::Encodable for ProtocolVersion {
 }
 
 /// The decoder for the [`ProtocolVersion`] type.
+#[derive(Debug, Clone)]
 pub struct ProtocolVersionDecoder(encoding::ArrayDecoder<4>);
 
 impl ProtocolVersionDecoder {
@@ -350,6 +352,7 @@ impl Decodable for ServiceFlags {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`ServiceFlags`] type.
+    #[derive(Debug, Clone)]
     pub struct ServiceFlagsEncoder<'e>(encoding::ArrayEncoder<8>);
 }
 
@@ -363,6 +366,7 @@ impl encoding::Encodable for ServiceFlags {
 }
 
 /// The decoder for the [`ServiceFlags`] type.
+#[derive(Debug, Clone)]
 pub struct ServiceFlagsDecoder(encoding::ArrayDecoder<8>);
 
 impl ServiceFlagsDecoder {
@@ -521,6 +525,7 @@ impl Decodable for Magic {
 
 encoding::encoder_newtype_exact! {
     /// The encoder type for network [`Magic`].
+    #[derive(Debug, Clone)]
     pub struct MagicEncoder<'e>(ArrayEncoder<4>);
 }
 
@@ -535,6 +540,7 @@ impl encoding::Encodable for Magic {
 type MagicInnerDecoder = ArrayDecoder<4>;
 
 /// The decoder type for a network [`Magic`].
+#[derive(Debug, Clone)]
 pub struct MagicDecoder(MagicInnerDecoder);
 
 impl encoding::Decoder for MagicDecoder {

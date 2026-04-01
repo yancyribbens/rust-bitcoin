@@ -157,6 +157,7 @@ impl ToSocketAddrs for Address {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`Address`] type.
+    #[derive(Debug, Clone)]
     pub struct AddressEncoder<'e>(encoding::Encoder3<
         crate::ServiceFlagsEncoder<'e>,
         encoding::ArrayEncoder<16>,
@@ -195,6 +196,7 @@ type AddressInnerDecoder = encoding::Decoder3<
 >;
 
 /// The Decoder for [`Address`].
+#[derive(Debug, Clone)]
 pub struct AddressDecoder(AddressInnerDecoder);
 
 impl encoding::Decoder for AddressDecoder {
@@ -258,6 +260,7 @@ pub struct AddrV1Message {
 
 encoding::encoder_newtype! {
     /// The encoder for an [`AddrV1Message`].
+    #[derive(Debug, Clone)]
     pub struct AddrV1MessageEncoder<'e>(Encoder2<ArrayEncoder<4>, AddressEncoder<'e>>);
 }
 
@@ -275,6 +278,7 @@ impl encoding::Encodable for AddrV1Message {
 type AddrV1MessageInnerDecoder = Decoder2<ArrayDecoder<4>, AddressDecoder>;
 
 /// The decoder for an [`AddrV2Message`].
+#[derive(Debug, Clone)]
 pub struct AddrV1MessageDecoder(AddrV1MessageInnerDecoder);
 
 impl encoding::Decoder for AddrV1MessageDecoder {
@@ -409,6 +413,7 @@ impl From<Ipv6Addr> for AddrV2 {
 }
 
 /// The encoder type for [`AddrV2`].
+#[derive(Debug, Clone)]
 pub struct AddrV2Encoder<'e> {
     network: Option<ArrayEncoder<1>>,
     size: Option<CompactSizeEncoder>,
@@ -541,6 +546,7 @@ impl encoding::Encodable for AddrV2 {
 type AddrV2InnerDecoder = Decoder2<ArrayDecoder<1>, ByteVecDecoder>;
 
 /// The decoder type for an [`AddrV2`] type.
+#[derive(Debug, Clone)]
 pub struct AddrV2Decoder(AddrV2InnerDecoder);
 
 impl AddrV2Decoder {
@@ -852,6 +858,7 @@ impl ToSocketAddrs for AddrV2Message {
 
 encoding::encoder_newtype! {
     /// The encoder type for an [`AddrV2Message`].
+    #[derive(Debug, Clone)]
     pub struct AddrV2MessageEncoder<'e>(Encoder4<ArrayEncoder<4>, CompactSizeEncoder, AddrV2Encoder<'e>, ArrayEncoder<2>>);
 }
 
@@ -872,6 +879,7 @@ type AddrV2MessageInnerDecoder =
     Decoder4<ArrayDecoder<4>, CompactSizeU64Decoder, AddrV2Decoder, ArrayDecoder<2>>;
 
 /// The decoder for an [`AddrV2Message`].
+#[derive(Debug, Clone)]
 pub struct AddrV2MessageDecoder(AddrV2MessageInnerDecoder);
 
 impl encoding::Decoder for AddrV2MessageDecoder {

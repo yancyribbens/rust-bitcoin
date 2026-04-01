@@ -110,6 +110,7 @@ impl Decodable for Inventory {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`Inventory`] type.
+    #[derive(Debug, Clone)]
     pub struct InventoryEncoder<'e>(Encoder2<ArrayEncoder<4>, ArrayEncoder<32>>);
 }
 
@@ -137,6 +138,7 @@ impl encoding::Encodable for Inventory {
 type InventoryInnerDecoder = Decoder2<ArrayDecoder<4>, ArrayDecoder<32>>;
 
 /// The decoder for the [`Inventory`] type.
+#[derive(Debug, Clone)]
 pub struct InventoryDecoder(InventoryInnerDecoder);
 
 impl encoding::Decoder for InventoryDecoder {
@@ -264,6 +266,7 @@ type BlockLocatorInnerEncoder<'e> = Encoder2<CompactSizeEncoder, SliceEncoder<'e
 
 encoding::encoder_newtype! {
     /// The encoder for [`BlockLocator`].
+    #[derive(Debug, Clone)]
     pub struct BlockLocatorEncoder<'e>(BlockLocatorInnerEncoder<'e>);
 }
 
@@ -281,6 +284,7 @@ impl encoding::Encodable for BlockLocator {
 type BlockLocatorInnerDecoder = VecDecoder<BlockHash>;
 
 /// The decoder for the [`BlockLocator`] type.
+#[derive(Debug, Clone)]
 pub struct BlockLocatorDecoder(BlockLocatorInnerDecoder);
 
 impl BlockLocatorDecoder {
@@ -366,11 +370,13 @@ type GetBlocksOrHeadersInnerEncoder<'e> = Encoder3<
 
 encoding::encoder_newtype! {
     /// The encoder for [`GetBlocksMessage`].
+    #[derive(Debug, Clone)]
     pub struct GetBlocksEncoder<'e>(GetBlocksOrHeadersInnerEncoder<'e>);
 }
 
 encoding::encoder_newtype! {
     /// The encoder for [`GetHeadersMessage`].
+    #[derive(Debug, Clone)]
     pub struct GetHeadersEncoder<'e>(GetBlocksOrHeadersInnerEncoder<'e>);
 }
 
@@ -408,9 +414,11 @@ type GetBlocksOrHeadersInnerDecoder =
     Decoder3<ProtocolVersionDecoder, BlockLocatorDecoder, BlockHashDecoder>;
 
 /// Decoder type for [`GetBlocksMessage`].
+#[derive(Debug, Clone)]
 pub struct GetBlocksMessageDecoder(GetBlocksOrHeadersInnerDecoder);
 
 /// Decoder type for [`GetHeadersMessage`].
+#[derive(Debug, Clone)]
 pub struct GetHeadersMessageDecoder(GetBlocksOrHeadersInnerDecoder);
 
 impl encoding::Decoder for GetHeadersMessageDecoder {

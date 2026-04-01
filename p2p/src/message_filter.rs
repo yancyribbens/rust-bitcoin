@@ -66,6 +66,7 @@ impl_hashencode!(FilterHeader);
 
 encoding::encoder_newtype_exact! {
     /// Encoder type for [`FilterHash`].
+    #[derive(Debug, Clone)]
     pub struct FilterHashEncoder<'e>(ArrayEncoder<32>);
 }
 
@@ -79,6 +80,7 @@ impl encoding::Encodable for FilterHash {
 
 encoding::encoder_newtype_exact! {
     /// Encoder type for [`FilterHeader`].
+    #[derive(Debug, Clone)]
     pub struct FilterHeaderEncoder<'e>(ArrayEncoder<32>);
 }
 
@@ -93,6 +95,7 @@ impl encoding::Encodable for FilterHeader {
 type HashInnerDecoder = ArrayDecoder<32>;
 
 /// Decoder for the [`FilterHash`] type.
+#[derive(Debug, Clone)]
 pub struct FilterHashDecoder(HashInnerDecoder);
 
 impl encoding::Decoder for FilterHashDecoder {
@@ -140,6 +143,7 @@ impl std::error::Error for FilterHashDecoderError {
 }
 
 /// Decoder for the [`FilterHeader`] type.
+#[derive(Debug, Clone)]
 pub struct FilterHeaderDecoder(HashInnerDecoder);
 
 impl encoding::Decoder for FilterHeaderDecoder {
@@ -213,6 +217,7 @@ pub struct GetCFilters {
 
 encoding::encoder_newtype_exact! {
     /// Encoder type for the [`GetCFilters`] message.
+    #[derive(Debug, Clone)]
     pub struct GetCFiltersEncoder<'e>(Encoder3<ArrayEncoder<1>, BlockHeightEncoder<'e>, BlockHashEncoder<'e>>);
 }
 
@@ -231,6 +236,7 @@ impl encoding::Encodable for GetCFilters {
 type GetCFiltersInnerDecoder = Decoder3<ArrayDecoder<1>, BlockHeightDecoder, BlockHashDecoder>;
 
 /// Decoder type for the [`GetCFilters`] message.
+#[derive(Debug, Clone)]
 pub struct GetCFiltersDecoder(GetCFiltersInnerDecoder);
 
 impl encoding::Decoder for GetCFiltersDecoder {
@@ -298,6 +304,7 @@ pub struct CFilter {
 
 encoding::encoder_newtype_exact! {
     /// Encoder type for a [`CFilter`] message.
+    #[derive(Debug, Clone)]
     pub struct CFilterEncoder<'e>(
         Encoder3<
             ArrayEncoder<1>,
@@ -328,6 +335,7 @@ impl encoding::Encodable for CFilter {
 type CFilterInnerDecoder = Decoder3<ArrayDecoder<1>, BlockHashDecoder, ByteVecDecoder>;
 
 /// Decoder type for a [`CFilter`] message.
+#[derive(Debug, Clone)]
 pub struct CFilterDecoder(CFilterInnerDecoder);
 
 impl encoding::Decoder for CFilterDecoder {
@@ -395,6 +403,7 @@ pub struct GetCFHeaders {
 
 encoding::encoder_newtype_exact! {
     /// Encoder type for the [`GetCFHeaders`] message.
+    #[derive(Debug, Clone)]
     pub struct GetCFHeadersEncoder<'e>(Encoder3<ArrayEncoder<1>, BlockHeightEncoder<'e>, BlockHashEncoder<'e>>);
 }
 
@@ -413,6 +422,7 @@ impl encoding::Encodable for GetCFHeaders {
 type GetCFHeadersInnerDecoder = Decoder3<ArrayDecoder<1>, BlockHeightDecoder, BlockHashDecoder>;
 
 /// Decoder type for the [`GetCFHeaders`] message.
+#[derive(Debug, Clone)]
 pub struct GetCFHeadersDecoder(GetCFHeadersInnerDecoder);
 
 impl encoding::Decoder for GetCFHeadersDecoder {
@@ -482,6 +492,7 @@ pub struct CFHeaders {
 
 encoding::encoder_newtype! {
     /// Encoder type for a [`CFHeaders`] message.
+    #[derive(Debug, Clone)]
     pub struct CFHeadersEncoder<'e>(
         Encoder4<
             ArrayEncoder<1>,
@@ -512,6 +523,7 @@ type CFHeadersInnerDecoder =
     Decoder4<ArrayDecoder<1>, BlockHashDecoder, FilterHeaderDecoder, VecDecoder<FilterHash>>;
 
 /// Decoder type for a [`CFHeaders`] message.
+#[derive(Debug, Clone)]
 pub struct CFHeadersDecoder(CFHeadersInnerDecoder);
 
 impl encoding::Decoder for CFHeadersDecoder {
@@ -583,6 +595,7 @@ pub struct GetCFCheckpt {
 
 encoding::encoder_newtype_exact! {
     /// Encoder type for the [`GetCFCheckpt`] message.
+    #[derive(Debug, Clone)]
     pub struct GetCFCheckptEncoder<'e>(Encoder2<ArrayEncoder<1>, BlockHashEncoder<'e>>);
 }
 
@@ -600,6 +613,7 @@ impl encoding::Encodable for GetCFCheckpt {
 type GetCFCheckptInnerDecoder = Decoder2<ArrayDecoder<1>, BlockHashDecoder>;
 
 /// Decoder type for a [`GetCFCheckpt`] message.
+#[derive(Debug, Clone)]
 pub struct GetCFCheckptDecoder(GetCFCheckptInnerDecoder);
 
 impl encoding::Decoder for GetCFCheckptDecoder {
@@ -663,6 +677,7 @@ pub struct CFCheckpt {
 
 encoding::encoder_newtype! {
     /// Encoder type for a [`CFCheckpt`] message.
+    #[derive(Debug, Clone)]
     pub struct CFCheckptEncoder<'e>(
         Encoder3<
             ArrayEncoder<1>,
@@ -693,6 +708,7 @@ impl encoding::Encodable for CFCheckpt {
 type CFCheckptInnerDecoder = Decoder3<ArrayDecoder<1>, BlockHashDecoder, VecDecoder<FilterHeader>>;
 
 /// Decoder type for a [`CFCheckpt`] message.
+#[derive(Debug, Clone)]
 pub struct CFCheckptDecoder(CFCheckptInnerDecoder);
 
 impl encoding::Decoder for CFCheckptDecoder {
