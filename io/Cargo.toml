@@ -4,6 +4,7 @@ version = "0.5.0"
 authors = ["Matt Corallo <birchneutea@mattcorallo.com>"]
 license = "CC0-1.0"
 repository = "https://github.com/rust-bitcoin/rust-bitcoin"
+homepage = "https://rust-bitcoin.org"
 documentation = "https://docs.rs/bitcoin-io/"
 description = "Simple I/O traits for no-std (and std) environments"
 categories = ["no-std"]

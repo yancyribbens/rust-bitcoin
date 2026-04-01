@@ -4,6 +4,7 @@ version = "0.0.0"
 authors = ["Andrew Poelstra <apoelstra@wpsoftware.net>"]
 license = "CC0-1.0"
 repository = "https://github.com/rust-bitcoin/rust-bitcoin"
+homepage = "https://rust-bitcoin.org"
 description = "Crypto support for the rust-bitcoin ecosystem"
 categories = ["cryptography::cryptocurrencies"]
 keywords = ["bitcoin", "types"]
