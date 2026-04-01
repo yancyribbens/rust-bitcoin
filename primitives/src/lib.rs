@@ -124,3 +124,6 @@ pub(crate) fn compact_size_encode(value: usize) -> ArrayVec<u8, 9> {
     let encoder = encoding::CompactSizeEncoder::new(value);
     ArrayVec::from_slice(encoder.current_chunk())
 }
+
+#[cfg(feature = "alloc")]
+include!("../../include/newtype.rs"); // Explained in `REPO_DIR/docs/README.md`.

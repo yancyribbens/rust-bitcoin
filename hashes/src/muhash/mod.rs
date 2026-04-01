@@ -11,8 +11,8 @@
 const BYTE_SIZE: usize = 384;
 
 // This code is the exact same as calling `hash_type_no_default!` but excludes call to `impl_write`.
-internals::transparent_newtype! {
-    #[doc = "Output of the MuHash3072 hash function."]
+crate::transparent_newtype! {
+    /// Output of the `MuHash3072` hash function.
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct Hash([u8; BYTE_SIZE]);
 

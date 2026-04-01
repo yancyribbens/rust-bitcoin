@@ -1192,7 +1192,8 @@ impl InputWeightPrediction {
     }
 }
 
-internals::transparent_newtype! {
+// Defined in `REPO_DIR/include/newtype.rs`.
+transparent_newtype! {
     /// A wrapper type for the coinbase transaction of a block.
     ///
     /// This type exists to distinguish coinbase transactions from regular ones at the type level.

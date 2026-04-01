@@ -5,7 +5,7 @@
 use crate::sha256;
 
 crate::internal_macros::general_hash_type! {
-    /// Output of the SHA256d hash function.
+    /// Output of the `SHA256d` hash function.
     pub struct Hash([u8; 32]);
 
     const DISPLAY_BACKWARD: bool = true;
