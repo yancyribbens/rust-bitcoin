@@ -69,8 +69,8 @@ fn main() {
     let signature = ecdsa::Signature { signature: sk.raw_ecdsa_sign(sighash), sighash_type };
 
     // Update the witness stack.
-    let pk = sk.public_key();
-    *sighasher.witness_mut(input_index).unwrap() = Witness::p2wpkh(signature, pk.to_inner());
+    let pk = sk.public_key().force_compressed();
+    *sighasher.witness_mut(input_index).unwrap() = Witness::p2wpkh(signature, pk);
 
     // Get the signed transaction.
     let tx = sighasher.into_transaction();
