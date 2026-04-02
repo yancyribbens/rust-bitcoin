@@ -3,8 +3,8 @@
 //! Compact size codec.
 //!
 //! Compact size is a variable-length integer encoding used throughout the Bitcoin
-//! consensus protocol to usually to encode collection lengths. However, there are
-//! also some unique non-length use cases.
+//! consensus protocol to encode collection lengths. However, there are also some
+//! unique non-length use cases.
 
 use internals::array_vec::ArrayVec;
 
