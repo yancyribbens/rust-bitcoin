@@ -68,10 +68,12 @@ impl encoding::Decodable for WitnessMerkleNode {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`WitnessMerkleNode`] type.
+    #[derive(Debug, Clone)]
     pub struct WitnessMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
 }
 
 /// The decoder for the [`WitnessMerkleNode`] type.
+#[derive(Debug, Clone)]
 pub struct WitnessMerkleNodeDecoder(encoding::ArrayDecoder<32>);
 
 impl WitnessMerkleNodeDecoder {

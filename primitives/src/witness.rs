@@ -259,6 +259,7 @@ fn decode_cursor(bytes: &[u8], start_of_indices: usize, index: usize) -> Option<
 }
 
 /// The encoder for the [`Witness`] type.
+#[derive(Debug, Clone)]
 pub struct WitnessEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 
 impl encoding::Encodable for Witness {
@@ -286,6 +287,7 @@ impl encoding::Encoder for WitnessEncoder<'_> {
 
 /// The decoder for the [`Witness`] type.
 #[cfg(feature = "alloc")]
+#[derive(Debug, Clone)]
 pub struct WitnessDecoder {
     /// The single buffer that will become the Witness content.
     /// The index entries are written at the beginning, then rotated in [`Self::end`].

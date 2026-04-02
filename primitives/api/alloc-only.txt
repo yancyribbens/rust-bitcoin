@@ -295,8 +295,12 @@ pub type bitcoin_primitives::block::BlockDecoder::Output = bitcoin_primitives::b
 pub fn bitcoin_primitives::block::BlockDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::block::BlockDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::block::BlockDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::block::BlockDecoder
+pub fn bitcoin_primitives::block::BlockDecoder::clone(&self) -> bitcoin_primitives::block::BlockDecoder
 impl core::default::Default for bitcoin_primitives::block::BlockDecoder
 pub fn bitcoin_primitives::block::BlockDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::block::BlockDecoder
+pub fn bitcoin_primitives::block::BlockDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::block::BlockDecoder
 impl core::marker::Send for bitcoin_primitives::block::BlockDecoder
 impl core::marker::Sync for bitcoin_primitives::block::BlockDecoder
@@ -312,12 +316,18 @@ pub fn bitcoin_primitives::block::BlockDecoder::try_from(value: U) -> core::resu
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::block::BlockDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::block::BlockDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::block::BlockDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::block::BlockDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::block::BlockDecoder::Owned = T
+pub fn bitcoin_primitives::block::BlockDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::block::BlockDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::block::BlockDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::block::BlockDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::block::BlockDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::block::BlockDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::block::BlockDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::block::BlockDecoder
 pub fn bitcoin_primitives::block::BlockDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::block::BlockDecoderError(_)
@@ -368,6 +378,10 @@ pub struct bitcoin_primitives::block::BlockEncoder<'e>(_, _)
 impl<'e> bitcoin_consensus_encoding::encode::Encoder for bitcoin_primitives::block::BlockEncoder<'e>
 pub fn bitcoin_primitives::block::BlockEncoder<'e>::advance(&mut self) -> bool
 pub fn bitcoin_primitives::block::BlockEncoder<'e>::current_chunk(&self) -> &[u8]
+impl<'e> core::clone::Clone for bitcoin_primitives::block::BlockEncoder<'e>
+pub fn bitcoin_primitives::block::BlockEncoder<'e>::clone(&self) -> bitcoin_primitives::block::BlockEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::block::BlockEncoder<'e>
+pub fn bitcoin_primitives::block::BlockEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::block::BlockEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::block::BlockEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::block::BlockEncoder<'e>
@@ -383,12 +397,18 @@ pub fn bitcoin_primitives::block::BlockEncoder<'e>::try_from(value: U) -> core::
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::block::BlockEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::block::BlockEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::block::BlockEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::block::BlockEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::block::BlockEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::block::BlockEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::block::BlockEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::block::BlockEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::block::BlockEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::block::BlockEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::block::BlockEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::block::BlockEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::block::BlockEncoder<'e>
 pub fn bitcoin_primitives::block::BlockEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::block::BlockHash(_)
@@ -473,8 +493,12 @@ pub type bitcoin_primitives::block::BlockHashDecoder::Output = bitcoin_primitive
 pub fn bitcoin_primitives::block::BlockHashDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::block::BlockHashDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::block::BlockHashDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::block::BlockHashDecoder
+pub fn bitcoin_primitives::block::BlockHashDecoder::clone(&self) -> bitcoin_primitives::block::BlockHashDecoder
 impl core::default::Default for bitcoin_primitives::block::BlockHashDecoder
 pub fn bitcoin_primitives::block::BlockHashDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::block::BlockHashDecoder
+pub fn bitcoin_primitives::block::BlockHashDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::block::BlockHashDecoder
 impl core::marker::Send for bitcoin_primitives::block::BlockHashDecoder
 impl core::marker::Sync for bitcoin_primitives::block::BlockHashDecoder
@@ -490,12 +514,18 @@ pub fn bitcoin_primitives::block::BlockHashDecoder::try_from(value: U) -> core::
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::block::BlockHashDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::block::BlockHashDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::block::BlockHashDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::block::BlockHashDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::block::BlockHashDecoder::Owned = T
+pub fn bitcoin_primitives::block::BlockHashDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::block::BlockHashDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::block::BlockHashDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockHashDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::block::BlockHashDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockHashDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::block::BlockHashDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockHashDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::block::BlockHashDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::block::BlockHashDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::block::BlockHashDecoder
 pub fn bitcoin_primitives::block::BlockHashDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::block::BlockHashDecoderError(_)
@@ -548,6 +578,10 @@ pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::advance(&mut self) -> bo
 pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::current_chunk(&self) -> &[u8]
 impl<'e> bitcoin_consensus_encoding::encode::ExactSizeEncoder for bitcoin_primitives::block::BlockHashEncoder<'e>
 pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::len(&self) -> usize
+impl<'e> core::clone::Clone for bitcoin_primitives::block::BlockHashEncoder<'e>
+pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::clone(&self) -> bitcoin_primitives::block::BlockHashEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::block::BlockHashEncoder<'e>
+pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::block::BlockHashEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::block::BlockHashEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::block::BlockHashEncoder<'e>
@@ -563,12 +597,18 @@ pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::try_from(value: U) -> co
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::block::BlockHashEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::block::BlockHashEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::block::BlockHashEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::block::BlockHashEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::block::BlockHashEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::block::BlockHashEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::block::BlockHashEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::block::BlockHashEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::block::BlockHashEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::block::BlockHashEncoder<'e>
 pub fn bitcoin_primitives::block::BlockHashEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::block::Header
@@ -644,8 +684,12 @@ pub type bitcoin_primitives::block::HeaderDecoder::Output = bitcoin_primitives::
 pub fn bitcoin_primitives::block::HeaderDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::block::HeaderDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::block::HeaderDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::block::HeaderDecoder
+pub fn bitcoin_primitives::block::HeaderDecoder::clone(&self) -> bitcoin_primitives::block::HeaderDecoder
 impl core::default::Default for bitcoin_primitives::block::HeaderDecoder
 pub fn bitcoin_primitives::block::HeaderDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::block::HeaderDecoder
+pub fn bitcoin_primitives::block::HeaderDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::block::HeaderDecoder
 impl core::marker::Send for bitcoin_primitives::block::HeaderDecoder
 impl core::marker::Sync for bitcoin_primitives::block::HeaderDecoder
@@ -661,12 +705,18 @@ pub fn bitcoin_primitives::block::HeaderDecoder::try_from(value: U) -> core::res
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::block::HeaderDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::block::HeaderDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::block::HeaderDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::block::HeaderDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::block::HeaderDecoder::Owned = T
+pub fn bitcoin_primitives::block::HeaderDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::block::HeaderDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::block::HeaderDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::block::HeaderDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::block::HeaderDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::HeaderDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::block::HeaderDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::HeaderDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::block::HeaderDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::block::HeaderDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::block::HeaderDecoder
 pub fn bitcoin_primitives::block::HeaderDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::block::HeaderEncoder<'e>(_, _)
@@ -675,6 +725,10 @@ pub fn bitcoin_primitives::block::HeaderEncoder<'e>::advance(&mut self) -> bool
 pub fn bitcoin_primitives::block::HeaderEncoder<'e>::current_chunk(&self) -> &[u8]
 impl<'e> bitcoin_consensus_encoding::encode::ExactSizeEncoder for bitcoin_primitives::block::HeaderEncoder<'e>
 pub fn bitcoin_primitives::block::HeaderEncoder<'e>::len(&self) -> usize
+impl<'e> core::clone::Clone for bitcoin_primitives::block::HeaderEncoder<'e>
+pub fn bitcoin_primitives::block::HeaderEncoder<'e>::clone(&self) -> bitcoin_primitives::block::HeaderEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::block::HeaderEncoder<'e>
+pub fn bitcoin_primitives::block::HeaderEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::block::HeaderEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::block::HeaderEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::block::HeaderEncoder<'e>
@@ -690,12 +744,18 @@ pub fn bitcoin_primitives::block::HeaderEncoder<'e>::try_from(value: U) -> core:
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::block::HeaderEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::block::HeaderEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::block::HeaderEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::block::HeaderEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::block::HeaderEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::block::HeaderEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::block::HeaderEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::block::HeaderEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::block::HeaderEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::block::HeaderEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::HeaderEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::block::HeaderEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::HeaderEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::block::HeaderEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::block::HeaderEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::block::HeaderEncoder<'e>
 pub fn bitcoin_primitives::block::HeaderEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::block::Version(_)
@@ -779,8 +839,12 @@ pub type bitcoin_primitives::block::VersionDecoder::Output = bitcoin_primitives:
 pub fn bitcoin_primitives::block::VersionDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::block::VersionDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::block::VersionDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::block::VersionDecoder
+pub fn bitcoin_primitives::block::VersionDecoder::clone(&self) -> bitcoin_primitives::block::VersionDecoder
 impl core::default::Default for bitcoin_primitives::block::VersionDecoder
 pub fn bitcoin_primitives::block::VersionDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::block::VersionDecoder
+pub fn bitcoin_primitives::block::VersionDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::block::VersionDecoder
 impl core::marker::Send for bitcoin_primitives::block::VersionDecoder
 impl core::marker::Sync for bitcoin_primitives::block::VersionDecoder
@@ -796,12 +860,18 @@ pub fn bitcoin_primitives::block::VersionDecoder::try_from(value: U) -> core::re
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::block::VersionDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::block::VersionDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::block::VersionDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::block::VersionDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::block::VersionDecoder::Owned = T
+pub fn bitcoin_primitives::block::VersionDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::block::VersionDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::block::VersionDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::block::VersionDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::block::VersionDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::VersionDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::block::VersionDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::VersionDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::block::VersionDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::block::VersionDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::block::VersionDecoder
 pub fn bitcoin_primitives::block::VersionDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::block::VersionDecoderError(_)
@@ -854,6 +924,10 @@ pub fn bitcoin_primitives::block::VersionEncoder<'e>::advance(&mut self) -> bool
 pub fn bitcoin_primitives::block::VersionEncoder<'e>::current_chunk(&self) -> &[u8]
 impl<'e> bitcoin_consensus_encoding::encode::ExactSizeEncoder for bitcoin_primitives::block::VersionEncoder<'e>
 pub fn bitcoin_primitives::block::VersionEncoder<'e>::len(&self) -> usize
+impl<'e> core::clone::Clone for bitcoin_primitives::block::VersionEncoder<'e>
+pub fn bitcoin_primitives::block::VersionEncoder<'e>::clone(&self) -> bitcoin_primitives::block::VersionEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::block::VersionEncoder<'e>
+pub fn bitcoin_primitives::block::VersionEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::block::VersionEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::block::VersionEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::block::VersionEncoder<'e>
@@ -869,12 +943,18 @@ pub fn bitcoin_primitives::block::VersionEncoder<'e>::try_from(value: U) -> core
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::block::VersionEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::block::VersionEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::block::VersionEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::block::VersionEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::block::VersionEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::block::VersionEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::block::VersionEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::block::VersionEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::block::VersionEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::block::VersionEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::VersionEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::block::VersionEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::VersionEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::block::VersionEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::block::VersionEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::block::VersionEncoder<'e>
 pub fn bitcoin_primitives::block::VersionEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::block::WitnessCommitment(_)
@@ -1021,8 +1101,12 @@ pub type bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::Output = bitcoin_
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
+pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::clone(&self) -> bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
 impl core::default::Default for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
+pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
 impl core::marker::Send for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
 impl core::marker::Sync for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
@@ -1038,12 +1122,18 @@ pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::try_from(value: U) 
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::Owned = T
+pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::merkle_tree::TxMerkleNodeDecoderError(_)
@@ -1096,6 +1186,10 @@ pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::advance(&mut se
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::current_chunk(&self) -> &[u8]
 impl<'e> bitcoin_consensus_encoding::encode::ExactSizeEncoder for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::len(&self) -> usize
+impl<'e> core::clone::Clone for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>
+pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::clone(&self) -> bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>
+pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>
@@ -1111,12 +1205,18 @@ pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::try_from(value:
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>
 pub fn bitcoin_primitives::merkle_tree::TxMerkleNodeEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::merkle_tree::WitnessMerkleNode(_)
@@ -1199,6 +1299,8 @@ impl core::cmp::PartialEq for bitcoin_primitives::script::RedeemScriptTag
 pub fn bitcoin_primitives::script::RedeemScriptTag::eq(&self, other: &bitcoin_primitives::script::RedeemScriptTag) -> bool
 impl core::cmp::PartialOrd for bitcoin_primitives::script::RedeemScriptTag
 pub fn bitcoin_primitives::script::RedeemScriptTag::partial_cmp(&self, other: &bitcoin_primitives::script::RedeemScriptTag) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for bitcoin_primitives::script::RedeemScriptTag
+pub fn bitcoin_primitives::script::RedeemScriptTag::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::hash::Hash for bitcoin_primitives::script::RedeemScriptTag
 pub fn bitcoin_primitives::script::RedeemScriptTag::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::RedeemScriptTag
@@ -1243,6 +1345,8 @@ impl core::cmp::PartialEq for bitcoin_primitives::script::ScriptPubKeyTag
 pub fn bitcoin_primitives::script::ScriptPubKeyTag::eq(&self, other: &bitcoin_primitives::script::ScriptPubKeyTag) -> bool
 impl core::cmp::PartialOrd for bitcoin_primitives::script::ScriptPubKeyTag
 pub fn bitcoin_primitives::script::ScriptPubKeyTag::partial_cmp(&self, other: &bitcoin_primitives::script::ScriptPubKeyTag) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for bitcoin_primitives::script::ScriptPubKeyTag
+pub fn bitcoin_primitives::script::ScriptPubKeyTag::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::hash::Hash for bitcoin_primitives::script::ScriptPubKeyTag
 pub fn bitcoin_primitives::script::ScriptPubKeyTag::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::ScriptPubKeyTag
@@ -1286,6 +1390,8 @@ impl core::cmp::PartialEq for bitcoin_primitives::script::ScriptSigTag
 pub fn bitcoin_primitives::script::ScriptSigTag::eq(&self, other: &bitcoin_primitives::script::ScriptSigTag) -> bool
 impl core::cmp::PartialOrd for bitcoin_primitives::script::ScriptSigTag
 pub fn bitcoin_primitives::script::ScriptSigTag::partial_cmp(&self, other: &bitcoin_primitives::script::ScriptSigTag) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for bitcoin_primitives::script::ScriptSigTag
+pub fn bitcoin_primitives::script::ScriptSigTag::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::hash::Hash for bitcoin_primitives::script::ScriptSigTag
 pub fn bitcoin_primitives::script::ScriptSigTag::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::ScriptSigTag
@@ -1329,6 +1435,8 @@ impl core::cmp::PartialEq for bitcoin_primitives::script::SignetBlockScriptTag
 pub fn bitcoin_primitives::script::SignetBlockScriptTag::eq(&self, other: &bitcoin_primitives::script::SignetBlockScriptTag) -> bool
 impl core::cmp::PartialOrd for bitcoin_primitives::script::SignetBlockScriptTag
 pub fn bitcoin_primitives::script::SignetBlockScriptTag::partial_cmp(&self, other: &bitcoin_primitives::script::SignetBlockScriptTag) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for bitcoin_primitives::script::SignetBlockScriptTag
+pub fn bitcoin_primitives::script::SignetBlockScriptTag::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::hash::Hash for bitcoin_primitives::script::SignetBlockScriptTag
 pub fn bitcoin_primitives::script::SignetBlockScriptTag::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::SignetBlockScriptTag
@@ -1372,6 +1480,8 @@ impl core::cmp::PartialEq for bitcoin_primitives::script::TapScriptTag
 pub fn bitcoin_primitives::script::TapScriptTag::eq(&self, other: &bitcoin_primitives::script::TapScriptTag) -> bool
 impl core::cmp::PartialOrd for bitcoin_primitives::script::TapScriptTag
 pub fn bitcoin_primitives::script::TapScriptTag::partial_cmp(&self, other: &bitcoin_primitives::script::TapScriptTag) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for bitcoin_primitives::script::TapScriptTag
+pub fn bitcoin_primitives::script::TapScriptTag::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::hash::Hash for bitcoin_primitives::script::TapScriptTag
 pub fn bitcoin_primitives::script::TapScriptTag::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::TapScriptTag
@@ -1415,6 +1525,8 @@ impl core::cmp::PartialEq for bitcoin_primitives::script::WitnessScriptTag
 pub fn bitcoin_primitives::script::WitnessScriptTag::eq(&self, other: &bitcoin_primitives::script::WitnessScriptTag) -> bool
 impl core::cmp::PartialOrd for bitcoin_primitives::script::WitnessScriptTag
 pub fn bitcoin_primitives::script::WitnessScriptTag::partial_cmp(&self, other: &bitcoin_primitives::script::WitnessScriptTag) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for bitcoin_primitives::script::WitnessScriptTag
+pub fn bitcoin_primitives::script::WitnessScriptTag::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::hash::Hash for bitcoin_primitives::script::WitnessScriptTag
 pub fn bitcoin_primitives::script::WitnessScriptTag::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 impl core::marker::StructuralPartialEq for bitcoin_primitives::script::WitnessScriptTag
@@ -1729,6 +1841,10 @@ pub fn bitcoin_primitives::script::ScriptBuf<T>::from(t: T) -> T
 pub struct bitcoin_primitives::script::ScriptBufDecoder<T>(_, _)
 impl<T> bitcoin_primitives::script::ScriptBufDecoder<T>
 pub const fn bitcoin_primitives::script::ScriptBufDecoder<T>::new() -> Self
+impl<T: core::clone::Clone> core::clone::Clone for bitcoin_primitives::script::ScriptBufDecoder<T>
+pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::clone(&self) -> bitcoin_primitives::script::ScriptBufDecoder<T>
+impl<T: core::fmt::Debug> core::fmt::Debug for bitcoin_primitives::script::ScriptBufDecoder<T>
+pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<T> bitcoin_consensus_encoding::decode::Decoder for bitcoin_primitives::script::ScriptBufDecoder<T>
 pub type bitcoin_primitives::script::ScriptBufDecoder<T>::Error = bitcoin_primitives::script::ScriptBufDecoderError
 pub type bitcoin_primitives::script::ScriptBufDecoder<T>::Output = bitcoin_primitives::script::ScriptBuf<T>
@@ -1752,12 +1868,18 @@ pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::try_from(value: U) -> co
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::script::ScriptBufDecoder<T> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::script::ScriptBufDecoder<T>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::script::ScriptBufDecoder<T> where T: core::clone::Clone
+pub type bitcoin_primitives::script::ScriptBufDecoder<T>::Owned = T
+pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::script::ScriptBufDecoder<T> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::script::ScriptBufDecoder<T> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::script::ScriptBufDecoder<T> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::script::ScriptBufDecoder<T> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::script::ScriptBufDecoder<T>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::script::ScriptBufDecoder<T>
 pub fn bitcoin_primitives::script::ScriptBufDecoder<T>::from(t: T) -> T
 pub struct bitcoin_primitives::script::ScriptBufDecoderError(_)
@@ -1810,6 +1932,10 @@ pub fn bitcoin_primitives::script::ScriptEncoder<'e>::advance(&mut self) -> bool
 pub fn bitcoin_primitives::script::ScriptEncoder<'e>::current_chunk(&self) -> &[u8]
 impl<'e> bitcoin_consensus_encoding::encode::ExactSizeEncoder for bitcoin_primitives::script::ScriptEncoder<'e>
 pub fn bitcoin_primitives::script::ScriptEncoder<'e>::len(&self) -> usize
+impl<'e> core::clone::Clone for bitcoin_primitives::script::ScriptEncoder<'e>
+pub fn bitcoin_primitives::script::ScriptEncoder<'e>::clone(&self) -> bitcoin_primitives::script::ScriptEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::script::ScriptEncoder<'e>
+pub fn bitcoin_primitives::script::ScriptEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::script::ScriptEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::script::ScriptEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::script::ScriptEncoder<'e>
@@ -1825,12 +1951,18 @@ pub fn bitcoin_primitives::script::ScriptEncoder<'e>::try_from(value: U) -> core
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::script::ScriptEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::script::ScriptEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::script::ScriptEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::script::ScriptEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::script::ScriptEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::script::ScriptEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::script::ScriptEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::script::ScriptEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::script::ScriptEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::script::ScriptEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::script::ScriptEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::script::ScriptEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::script::ScriptEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::script::ScriptEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::script::ScriptEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::script::ScriptEncoder<'e>
 pub fn bitcoin_primitives::script::ScriptEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::script::ScriptHash(_)
@@ -2053,8 +2185,12 @@ pub type bitcoin_primitives::block::BlockHashDecoder::Output = bitcoin_primitive
 pub fn bitcoin_primitives::block::BlockHashDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::block::BlockHashDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::block::BlockHashDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::block::BlockHashDecoder
+pub fn bitcoin_primitives::block::BlockHashDecoder::clone(&self) -> bitcoin_primitives::block::BlockHashDecoder
 impl core::default::Default for bitcoin_primitives::block::BlockHashDecoder
 pub fn bitcoin_primitives::block::BlockHashDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::block::BlockHashDecoder
+pub fn bitcoin_primitives::block::BlockHashDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::block::BlockHashDecoder
 impl core::marker::Send for bitcoin_primitives::block::BlockHashDecoder
 impl core::marker::Sync for bitcoin_primitives::block::BlockHashDecoder
@@ -2070,12 +2206,18 @@ pub fn bitcoin_primitives::block::BlockHashDecoder::try_from(value: U) -> core::
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::block::BlockHashDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::block::BlockHashDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::block::BlockHashDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::block::BlockHashDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::block::BlockHashDecoder::Owned = T
+pub fn bitcoin_primitives::block::BlockHashDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::block::BlockHashDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::block::BlockHashDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockHashDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::block::BlockHashDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockHashDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::block::BlockHashDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::block::BlockHashDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::block::BlockHashDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::block::BlockHashDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::block::BlockHashDecoder
 pub fn bitcoin_primitives::block::BlockHashDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::BlockHashDecoderError(_)
@@ -2244,8 +2386,12 @@ pub type bitcoin_primitives::transaction::OutPointDecoder::Output = bitcoin_prim
 pub fn bitcoin_primitives::transaction::OutPointDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::transaction::OutPointDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::transaction::OutPointDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::transaction::OutPointDecoder
+pub fn bitcoin_primitives::transaction::OutPointDecoder::clone(&self) -> bitcoin_primitives::transaction::OutPointDecoder
 impl core::default::Default for bitcoin_primitives::transaction::OutPointDecoder
 pub fn bitcoin_primitives::transaction::OutPointDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::transaction::OutPointDecoder
+pub fn bitcoin_primitives::transaction::OutPointDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::transaction::OutPointDecoder
 impl core::marker::Send for bitcoin_primitives::transaction::OutPointDecoder
 impl core::marker::Sync for bitcoin_primitives::transaction::OutPointDecoder
@@ -2261,12 +2407,18 @@ pub fn bitcoin_primitives::transaction::OutPointDecoder::try_from(value: U) -> c
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::OutPointDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::OutPointDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::OutPointDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::OutPointDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::OutPointDecoder::Owned = T
+pub fn bitcoin_primitives::transaction::OutPointDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::OutPointDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::OutPointDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::OutPointDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::OutPointDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::OutPointDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::OutPointDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::OutPointDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::OutPointDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::OutPointDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::OutPointDecoder
 pub fn bitcoin_primitives::transaction::OutPointDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::OutPointDecoderError(_)
@@ -2319,6 +2471,10 @@ pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::advance(&mut self) 
 pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::current_chunk(&self) -> &[u8]
 impl<'e> bitcoin_consensus_encoding::encode::ExactSizeEncoder for bitcoin_primitives::transaction::OutPointEncoder<'e>
 pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::len(&self) -> usize
+impl<'e> core::clone::Clone for bitcoin_primitives::transaction::OutPointEncoder<'e>
+pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::clone(&self) -> bitcoin_primitives::transaction::OutPointEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::transaction::OutPointEncoder<'e>
+pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::transaction::OutPointEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::transaction::OutPointEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::transaction::OutPointEncoder<'e>
@@ -2334,12 +2490,18 @@ pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::try_from(value: U) 
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::OutPointEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::OutPointEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::OutPointEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::OutPointEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::OutPointEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::OutPointEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::OutPointEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::OutPointEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::OutPointEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::OutPointEncoder<'e>
 pub fn bitcoin_primitives::transaction::OutPointEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::Transaction
@@ -2419,8 +2581,12 @@ pub type bitcoin_primitives::transaction::TransactionDecoder::Output = bitcoin_p
 pub fn bitcoin_primitives::transaction::TransactionDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::transaction::TransactionDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::transaction::TransactionDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::transaction::TransactionDecoder
+pub fn bitcoin_primitives::transaction::TransactionDecoder::clone(&self) -> bitcoin_primitives::transaction::TransactionDecoder
 impl core::default::Default for bitcoin_primitives::transaction::TransactionDecoder
 pub fn bitcoin_primitives::transaction::TransactionDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::transaction::TransactionDecoder
+pub fn bitcoin_primitives::transaction::TransactionDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::transaction::TransactionDecoder
 impl core::marker::Send for bitcoin_primitives::transaction::TransactionDecoder
 impl core::marker::Sync for bitcoin_primitives::transaction::TransactionDecoder
@@ -2436,12 +2602,18 @@ pub fn bitcoin_primitives::transaction::TransactionDecoder::try_from(value: U) -
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::TransactionDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::TransactionDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::TransactionDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::TransactionDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::TransactionDecoder::Owned = T
+pub fn bitcoin_primitives::transaction::TransactionDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::TransactionDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::TransactionDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TransactionDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::TransactionDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TransactionDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::TransactionDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TransactionDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::TransactionDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::TransactionDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::TransactionDecoder
 pub fn bitcoin_primitives::transaction::TransactionDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::TransactionDecoderError(_)
@@ -2492,6 +2664,10 @@ pub struct bitcoin_primitives::transaction::TransactionEncoder<'e>(_, _)
 impl<'e> bitcoin_consensus_encoding::encode::Encoder for bitcoin_primitives::transaction::TransactionEncoder<'e>
 pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::advance(&mut self) -> bool
 pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::current_chunk(&self) -> &[u8]
+impl<'e> core::clone::Clone for bitcoin_primitives::transaction::TransactionEncoder<'e>
+pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::clone(&self) -> bitcoin_primitives::transaction::TransactionEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::transaction::TransactionEncoder<'e>
+pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::transaction::TransactionEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::transaction::TransactionEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::transaction::TransactionEncoder<'e>
@@ -2507,12 +2683,18 @@ pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::try_from(value: 
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::TransactionEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::TransactionEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::TransactionEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::TransactionEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::TransactionEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::TransactionEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::TransactionEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::TransactionEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::TransactionEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::TransactionEncoder<'e>
 pub fn bitcoin_primitives::transaction::TransactionEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::TxIn
@@ -2580,8 +2762,12 @@ pub type bitcoin_primitives::transaction::TxInDecoder::Output = bitcoin_primitiv
 pub fn bitcoin_primitives::transaction::TxInDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::transaction::TxInDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::transaction::TxInDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::transaction::TxInDecoder
+pub fn bitcoin_primitives::transaction::TxInDecoder::clone(&self) -> bitcoin_primitives::transaction::TxInDecoder
 impl core::default::Default for bitcoin_primitives::transaction::TxInDecoder
 pub fn bitcoin_primitives::transaction::TxInDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::transaction::TxInDecoder
+pub fn bitcoin_primitives::transaction::TxInDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::transaction::TxInDecoder
 impl core::marker::Send for bitcoin_primitives::transaction::TxInDecoder
 impl core::marker::Sync for bitcoin_primitives::transaction::TxInDecoder
@@ -2597,12 +2783,18 @@ pub fn bitcoin_primitives::transaction::TxInDecoder::try_from(value: U) -> core:
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::TxInDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::TxInDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::TxInDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::TxInDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::TxInDecoder::Owned = T
+pub fn bitcoin_primitives::transaction::TxInDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::TxInDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::TxInDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxInDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::TxInDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxInDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::TxInDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxInDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::TxInDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::TxInDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::TxInDecoder
 pub fn bitcoin_primitives::transaction::TxInDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::TxInDecoderError(_)
@@ -2655,6 +2847,10 @@ pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::advance(&mut self) -> b
 pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::current_chunk(&self) -> &[u8]
 impl<'e> bitcoin_consensus_encoding::encode::ExactSizeEncoder for bitcoin_primitives::transaction::TxInEncoder<'e>
 pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::len(&self) -> usize
+impl<'e> core::clone::Clone for bitcoin_primitives::transaction::TxInEncoder<'e>
+pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::clone(&self) -> bitcoin_primitives::transaction::TxInEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::transaction::TxInEncoder<'e>
+pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::transaction::TxInEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::transaction::TxInEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::transaction::TxInEncoder<'e>
@@ -2670,12 +2866,18 @@ pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::try_from(value: U) -> c
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::TxInEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::TxInEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::TxInEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::TxInEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::TxInEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::TxInEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::TxInEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::TxInEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::TxInEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::TxInEncoder<'e>
 pub fn bitcoin_primitives::transaction::TxInEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::TxOut
@@ -2739,8 +2941,12 @@ pub type bitcoin_primitives::transaction::TxOutDecoder::Output = bitcoin_primiti
 pub fn bitcoin_primitives::transaction::TxOutDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::transaction::TxOutDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::transaction::TxOutDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::transaction::TxOutDecoder
+pub fn bitcoin_primitives::transaction::TxOutDecoder::clone(&self) -> bitcoin_primitives::transaction::TxOutDecoder
 impl core::default::Default for bitcoin_primitives::transaction::TxOutDecoder
 pub fn bitcoin_primitives::transaction::TxOutDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::transaction::TxOutDecoder
+pub fn bitcoin_primitives::transaction::TxOutDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::transaction::TxOutDecoder
 impl core::marker::Send for bitcoin_primitives::transaction::TxOutDecoder
 impl core::marker::Sync for bitcoin_primitives::transaction::TxOutDecoder
@@ -2756,12 +2962,18 @@ pub fn bitcoin_primitives::transaction::TxOutDecoder::try_from(value: U) -> core
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::TxOutDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::TxOutDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::TxOutDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::TxOutDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::TxOutDecoder::Owned = T
+pub fn bitcoin_primitives::transaction::TxOutDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::TxOutDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::TxOutDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxOutDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::TxOutDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxOutDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::TxOutDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxOutDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::TxOutDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::TxOutDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::TxOutDecoder
 pub fn bitcoin_primitives::transaction::TxOutDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::TxOutDecoderError(_)
@@ -2814,6 +3026,10 @@ pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::advance(&mut self) -> 
 pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::current_chunk(&self) -> &[u8]
 impl<'e> bitcoin_consensus_encoding::encode::ExactSizeEncoder for bitcoin_primitives::transaction::TxOutEncoder<'e>
 pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::len(&self) -> usize
+impl<'e> core::clone::Clone for bitcoin_primitives::transaction::TxOutEncoder<'e>
+pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::clone(&self) -> bitcoin_primitives::transaction::TxOutEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::transaction::TxOutEncoder<'e>
+pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::transaction::TxOutEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::transaction::TxOutEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::transaction::TxOutEncoder<'e>
@@ -2829,12 +3045,18 @@ pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::try_from(value: U) -> 
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::TxOutEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::TxOutEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::TxOutEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::TxOutEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::TxOutEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::TxOutEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::TxOutEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::TxOutEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::TxOutEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::TxOutEncoder<'e>
 pub fn bitcoin_primitives::transaction::TxOutEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::Txid(_)
@@ -2981,8 +3203,12 @@ pub type bitcoin_primitives::transaction::VersionDecoder::Output = bitcoin_primi
 pub fn bitcoin_primitives::transaction::VersionDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::transaction::VersionDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::transaction::VersionDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::transaction::VersionDecoder
+pub fn bitcoin_primitives::transaction::VersionDecoder::clone(&self) -> bitcoin_primitives::transaction::VersionDecoder
 impl core::default::Default for bitcoin_primitives::transaction::VersionDecoder
 pub fn bitcoin_primitives::transaction::VersionDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::transaction::VersionDecoder
+pub fn bitcoin_primitives::transaction::VersionDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::transaction::VersionDecoder
 impl core::marker::Send for bitcoin_primitives::transaction::VersionDecoder
 impl core::marker::Sync for bitcoin_primitives::transaction::VersionDecoder
@@ -2998,12 +3224,18 @@ pub fn bitcoin_primitives::transaction::VersionDecoder::try_from(value: U) -> co
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::VersionDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::VersionDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::VersionDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::VersionDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::VersionDecoder::Owned = T
+pub fn bitcoin_primitives::transaction::VersionDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::VersionDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::VersionDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::VersionDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::VersionDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::VersionDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::VersionDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::VersionDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::VersionDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::VersionDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::VersionDecoder
 pub fn bitcoin_primitives::transaction::VersionDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::VersionDecoderError(_)
@@ -3056,6 +3288,10 @@ pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::advance(&mut self) -
 pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::current_chunk(&self) -> &[u8]
 impl<'e> bitcoin_consensus_encoding::encode::ExactSizeEncoder for bitcoin_primitives::transaction::VersionEncoder<'e>
 pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::len(&self) -> usize
+impl<'e> core::clone::Clone for bitcoin_primitives::transaction::VersionEncoder<'e>
+pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::clone(&self) -> bitcoin_primitives::transaction::VersionEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::transaction::VersionEncoder<'e>
+pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::transaction::VersionEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::transaction::VersionEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::transaction::VersionEncoder<'e>
@@ -3071,12 +3307,18 @@ pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::try_from(value: U) -
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::VersionEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::VersionEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::VersionEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::VersionEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::VersionEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::VersionEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::VersionEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::VersionEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::VersionEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::VersionEncoder<'e>
 pub fn bitcoin_primitives::transaction::VersionEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::WitnessesEncoder<'e>
@@ -3085,6 +3327,10 @@ pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::new(inputs: &'e [b
 impl bitcoin_consensus_encoding::encode::Encoder for bitcoin_primitives::transaction::WitnessesEncoder<'_>
 pub fn bitcoin_primitives::transaction::WitnessesEncoder<'_>::advance(&mut self) -> bool
 pub fn bitcoin_primitives::transaction::WitnessesEncoder<'_>::current_chunk(&self) -> &[u8]
+impl<'e> core::clone::Clone for bitcoin_primitives::transaction::WitnessesEncoder<'e>
+pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::clone(&self) -> bitcoin_primitives::transaction::WitnessesEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::transaction::WitnessesEncoder<'e>
+pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::transaction::WitnessesEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::transaction::WitnessesEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::transaction::WitnessesEncoder<'e>
@@ -3100,12 +3346,18 @@ pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::try_from(value: U)
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::transaction::WitnessesEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::transaction::WitnessesEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::transaction::WitnessesEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::transaction::WitnessesEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::transaction::WitnessesEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::transaction::WitnessesEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::transaction::WitnessesEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::transaction::WitnessesEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::transaction::WitnessesEncoder<'e>
 pub fn bitcoin_primitives::transaction::WitnessesEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_primitives::transaction::Wtxid(_)
@@ -3396,8 +3648,12 @@ pub type bitcoin_primitives::witness::WitnessDecoder::Output = bitcoin_primitive
 pub fn bitcoin_primitives::witness::WitnessDecoder::end(self) -> core::result::Result<Self::Output, Self::Error>
 pub fn bitcoin_primitives::witness::WitnessDecoder::push_bytes(&mut self, bytes: &mut &[u8]) -> core::result::Result<bool, Self::Error>
 pub fn bitcoin_primitives::witness::WitnessDecoder::read_limit(&self) -> usize
+impl core::clone::Clone for bitcoin_primitives::witness::WitnessDecoder
+pub fn bitcoin_primitives::witness::WitnessDecoder::clone(&self) -> bitcoin_primitives::witness::WitnessDecoder
 impl core::default::Default for bitcoin_primitives::witness::WitnessDecoder
 pub fn bitcoin_primitives::witness::WitnessDecoder::default() -> Self
+impl core::fmt::Debug for bitcoin_primitives::witness::WitnessDecoder
+pub fn bitcoin_primitives::witness::WitnessDecoder::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::marker::Freeze for bitcoin_primitives::witness::WitnessDecoder
 impl core::marker::Send for bitcoin_primitives::witness::WitnessDecoder
 impl core::marker::Sync for bitcoin_primitives::witness::WitnessDecoder
@@ -3413,12 +3669,18 @@ pub fn bitcoin_primitives::witness::WitnessDecoder::try_from(value: U) -> core::
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::witness::WitnessDecoder where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::witness::WitnessDecoder::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::witness::WitnessDecoder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::witness::WitnessDecoder where T: core::clone::Clone
+pub type bitcoin_primitives::witness::WitnessDecoder::Owned = T
+pub fn bitcoin_primitives::witness::WitnessDecoder::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::witness::WitnessDecoder::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::witness::WitnessDecoder where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::witness::WitnessDecoder::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::witness::WitnessDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::witness::WitnessDecoder::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::witness::WitnessDecoder where T: ?core::marker::Sized
 pub fn bitcoin_primitives::witness::WitnessDecoder::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::witness::WitnessDecoder where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::witness::WitnessDecoder::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::witness::WitnessDecoder
 pub fn bitcoin_primitives::witness::WitnessDecoder::from(t: T) -> T
 pub struct bitcoin_primitives::witness::WitnessDecoderError(_)
@@ -3469,6 +3731,10 @@ pub struct bitcoin_primitives::witness::WitnessEncoder<'e>(_)
 impl bitcoin_consensus_encoding::encode::Encoder for bitcoin_primitives::witness::WitnessEncoder<'_>
 pub fn bitcoin_primitives::witness::WitnessEncoder<'_>::advance(&mut self) -> bool
 pub fn bitcoin_primitives::witness::WitnessEncoder<'_>::current_chunk(&self) -> &[u8]
+impl<'e> core::clone::Clone for bitcoin_primitives::witness::WitnessEncoder<'e>
+pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::clone(&self) -> bitcoin_primitives::witness::WitnessEncoder<'e>
+impl<'e> core::fmt::Debug for bitcoin_primitives::witness::WitnessEncoder<'e>
+pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e> core::marker::Freeze for bitcoin_primitives::witness::WitnessEncoder<'e>
 impl<'e> core::marker::Send for bitcoin_primitives::witness::WitnessEncoder<'e>
 impl<'e> core::marker::Sync for bitcoin_primitives::witness::WitnessEncoder<'e>
@@ -3484,12 +3750,18 @@ pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::try_from(value: U) -> co
 impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::witness::WitnessEncoder<'e> where U: core::convert::TryFrom<T>
 pub type bitcoin_primitives::witness::WitnessEncoder<'e>::Error = <U as core::convert::TryFrom<T>>::Error
 pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::witness::WitnessEncoder<'e> where T: core::clone::Clone
+pub type bitcoin_primitives::witness::WitnessEncoder<'e>::Owned = T
+pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::to_owned(&self) -> T
 impl<T> core::any::Any for bitcoin_primitives::witness::WitnessEncoder<'e> where T: 'static + ?core::marker::Sized
 pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::type_id(&self) -> core::any::TypeId
 impl<T> core::borrow::Borrow<T> for bitcoin_primitives::witness::WitnessEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::borrow(&self) -> &T
 impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::witness::WitnessEncoder<'e> where T: ?core::marker::Sized
 pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::witness::WitnessEncoder<'e> where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::witness::WitnessEncoder<'e>::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::witness::WitnessEncoder<'e>
 pub fn bitcoin_primitives::witness::WitnessEncoder<'e>::from(t: T) -> T
 pub enum bitcoin_primitives::BlockChecked
