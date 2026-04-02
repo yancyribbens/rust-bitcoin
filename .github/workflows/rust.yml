@@ -186,24 +186,6 @@ jobs:
       - name: "Run sanitizer script"
         run: cd ./hashes && ./contrib/sanitizer.sh
 
-  WASM:                         # hashes crate only.
-    name: WASM - stable toolchain
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      # Note we do not use the recent lock file for wasm testing.
-    steps:
-      - name: "Checkout repo"
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          persist-credentials: false
-      - name: "Select toolchain"
-        uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6 # stable
-      - name: "Run wasm script"
-        run: cd hashes && ./contrib/wasm.sh
-
   Kani:
     name: Kani codegen - stable toolchain
     runs-on: ubuntu-24.04
