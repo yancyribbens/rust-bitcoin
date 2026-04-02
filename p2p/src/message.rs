@@ -2267,7 +2267,7 @@ mod test {
     use super::*;
     use crate::address::{AddrV2, Address};
     use crate::bip152::BlockTransactionsRequest;
-    use crate::message_blockdata::{GetBlocksMessage, GetHeadersMessage, Inventory};
+    use crate::message_blockdata::{BlockLocator, GetBlocksMessage, GetHeadersMessage, Inventory};
     use crate::message_bloom::{BloomFlags, FilterAdd, FilterLoad};
     use crate::message_compact_blocks::SendCmpct;
     use crate::message_filter::{
@@ -2307,18 +2307,18 @@ mod test {
             NetworkMessage::NotFound(InventoryPayload(vec![Inventory::Error([0u8; 32])])),
             NetworkMessage::GetBlocks(GetBlocksMessage {
                 version: ProtocolVersion::from_nonstandard(70001),
-                locator_hashes: vec![
+                locator_hashes: BlockLocator::from(vec![
                     BlockHash::from_byte_array(hash([1u8; 32]).to_byte_array()),
                     BlockHash::from_byte_array(hash([4u8; 32]).to_byte_array()),
-                ],
+                ]),
                 stop_hash: BlockHash::from_byte_array(hash([5u8; 32]).to_byte_array()),
             }),
             NetworkMessage::GetHeaders(GetHeadersMessage {
                 version: ProtocolVersion::from_nonstandard(70001),
-                locator_hashes: vec![
+                locator_hashes: BlockLocator::from(vec![
                     BlockHash::from_byte_array(hash([10u8; 32]).to_byte_array()),
                     BlockHash::from_byte_array(hash([40u8; 32]).to_byte_array()),
-                ],
+                ]),
                 stop_hash: BlockHash::from_byte_array(hash([50u8; 32]).to_byte_array()),
             }),
             NetworkMessage::MemPool,
