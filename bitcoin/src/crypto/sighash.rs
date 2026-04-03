@@ -1293,10 +1293,6 @@ impl From<Infallible> for P2wpkhError {
     fn from(never: Infallible) -> Self { match never {} }
 }
 
-impl From<transaction::InputsIndexError> for P2wpkhError {
-    fn from(value: transaction::InputsIndexError) -> Self { Self::Sighash(value) }
-}
-
 impl fmt::Display for P2wpkhError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -1314,6 +1310,10 @@ impl std::error::Error for P2wpkhError {
             Self::NotP2wpkhScript => None,
         }
     }
+}
+
+impl From<transaction::InputsIndexError> for P2wpkhError {
+    fn from(value: transaction::InputsIndexError) -> Self { Self::Sighash(value) }
 }
 
 /// Using `SIGHASH_SINGLE` requires an output at the same index as the input.
@@ -1460,10 +1460,6 @@ pub enum SigningDataError<E> {
     Sighash(E),
 }
 
-impl<E> From<Infallible> for SigningDataError<E> {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
 impl<E> SigningDataError<E> {
     /// Returns the sighash variant, panicking if it's I/O.
     ///
@@ -1478,10 +1474,8 @@ impl<E> SigningDataError<E> {
     fn sighash<E2: Into<E>>(error: E2) -> Self { Self::Sighash(error.into()) }
 }
 
-// We cannot simultaneously impl `From<E>`. it was determined that this alternative requires less
-// manual `map_err` calls.
-impl<E> From<io::Error> for SigningDataError<E> {
-    fn from(value: io::Error) -> Self { Self::Io(value) }
+impl<E> From<Infallible> for SigningDataError<E> {
+    fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl<E: fmt::Display> fmt::Display for SigningDataError<E> {
@@ -1501,6 +1495,12 @@ impl<E: std::error::Error + 'static> std::error::Error for SigningDataError<E> {
             Self::Sighash(error) => Some(error),
         }
     }
+}
+
+// We cannot simultaneously impl `From<E>`. it was determined that this alternative requires less
+// manual `map_err` calls.
+impl<E> From<io::Error> for SigningDataError<E> {
+    fn from(value: io::Error) -> Self { Self::Io(value) }
 }
 
 #[cfg(feature = "arbitrary")]

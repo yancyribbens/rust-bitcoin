@@ -21,14 +21,6 @@ pub(super) enum ErrorInner {
     TooShort(TooShortError),
 }
 
-impl From<Infallible> for Error {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl From<Infallible> for ErrorInner {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
 impl Error {
     /// Returns the invalid base58 character, if encountered.
     pub fn invalid_character(&self) -> Option<u8> {
@@ -53,6 +45,14 @@ impl Error {
             _ => None,
         }
     }
+}
+
+impl From<Infallible> for Error {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
+impl From<Infallible> for ErrorInner {
+    fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl fmt::Display for Error {
@@ -124,6 +124,7 @@ pub(super) struct TooShortError {
     /// The length of the decoded data.
     pub(super) length: usize,
 }
+
 impl From<Infallible> for TooShortError {
     fn from(never: Infallible) -> Self { match never {} }
 }
@@ -150,19 +151,19 @@ pub(super) struct InvalidCharacterErrorInner {
     pub(super) invalid: u8,
 }
 
+impl InvalidCharacterError {
+    pub(super) fn new(invalid: u8) -> Self { Self(InvalidCharacterErrorInner { invalid }) }
+
+    /// Returns the invalid base58 character.
+    pub fn invalid_character(&self) -> u8 { self.0.invalid }
+}
+
 impl From<Infallible> for InvalidCharacterError {
     fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl From<Infallible> for InvalidCharacterErrorInner {
     fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl InvalidCharacterError {
-    pub(super) fn new(invalid: u8) -> Self { Self(InvalidCharacterErrorInner { invalid }) }
-
-    /// Returns the invalid base58 character.
-    pub fn invalid_character(&self) -> u8 { self.0.invalid }
 }
 
 impl fmt::Display for InvalidCharacterError {

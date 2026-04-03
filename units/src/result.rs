@@ -400,10 +400,6 @@ pub mod error {
     #[non_exhaustive]
     pub struct NumOpError(pub(super) MathOp);
 
-    impl From<Infallible> for NumOpError {
-        fn from(never: Infallible) -> Self { match never {} }
-    }
-
     impl NumOpError {
         /// Constructs a [`NumOpError`] caused by `op`.
         pub(crate) const fn while_doing(op: MathOp) -> Self { Self(op) }
@@ -416,6 +412,10 @@ pub mod error {
 
         /// Returns the [`MathOp`] that caused this error.
         pub fn operation(self) -> MathOp { self.0 }
+    }
+
+    impl From<Infallible> for NumOpError {
+        fn from(never: Infallible) -> Self { match never {} }
     }
 
     impl fmt::Display for NumOpError {

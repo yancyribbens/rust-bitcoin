@@ -657,10 +657,6 @@ pub enum IncompleteBuilderError {
     HiddenParts(TaprootBuilder),
 }
 
-impl From<Infallible> for IncompleteBuilderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
 impl IncompleteBuilderError {
     /// Converts error into the original incomplete [`TaprootBuilder`] instance.
     pub fn into_builder(self) -> TaprootBuilder {
@@ -668,6 +664,10 @@ impl IncompleteBuilderError {
             Self::NotFinalized(builder) | Self::HiddenParts(builder) => builder,
         }
     }
+}
+
+impl From<Infallible> for IncompleteBuilderError {
+    fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl core::fmt::Display for IncompleteBuilderError {

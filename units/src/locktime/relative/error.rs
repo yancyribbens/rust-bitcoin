@@ -14,15 +14,15 @@ use super::{NumberOf512Seconds, NumberOfBlocks};
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DisabledLockTimeError(pub(super) u32);
 
-impl From<Infallible> for DisabledLockTimeError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
 impl DisabledLockTimeError {
     /// Accessor for the `u32` whose "disable" flag was set, preventing
     /// it from being parsed as a relative locktime.
     #[inline]
     pub fn disabled_locktime_value(&self) -> u32 { self.0 }
+}
+
+impl From<Infallible> for DisabledLockTimeError {
+    fn from(never: Infallible) -> Self { match never {} }
 }
 
 impl fmt::Display for DisabledLockTimeError {

@@ -872,8 +872,8 @@ impl From<Infallible> for UnexpectedEofError {
     fn from(never: Infallible) -> Self { match never {} }
 }
 
-impl core::fmt::Display for UnexpectedEofError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+impl fmt::Display for UnexpectedEofError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "not enough witness elements for decoder, missing {}", self.missing_elements)
     }
 }
