@@ -21,6 +21,14 @@ use crate::{Decoder2Error, Decoder3Error, Decoder4Error, Decoder6Error, Unexpect
 #[cfg(feature = "alloc")]
 const MAX_VECTOR_ALLOCATE: usize = 1_000_000;
 
+/// Maximum number of elements in a decoded vector.
+///
+/// This is an anti-DoS limit based on Bitcoin's 4MB block weight limit.
+/// Applied to both byte vectors [`ByteVecDecoder`] and typed vectors [`VecDecoder`],
+/// regardless of whether the element type is a single byte or a larger structure.
+#[cfg(feature = "alloc")]
+const MAX_VEC_SIZE: usize = 4_000_000;
+
 /// A decoder that decodes a byte vector.
 ///
 /// The encoding is expected to start with the number of encoded bytes (length prefix).
@@ -35,10 +43,13 @@ pub struct ByteVecDecoder {
 
 #[cfg(feature = "alloc")]
 impl ByteVecDecoder {
-    /// Constructs a new byte decoder.
-    pub const fn new() -> Self {
+    /// Constructs a new byte decoder with the default limit of 4,000,000 bytes.
+    pub const fn new() -> Self { Self::new_with_limit(MAX_VEC_SIZE) }
+
+    /// Constructs a new byte decoder with a custom limit of bytes.
+    pub const fn new_with_limit(limit: usize) -> Self {
         Self {
-            prefix_decoder: Some(CompactSizeDecoder::new()),
+            prefix_decoder: Some(CompactSizeDecoder::new_with_limit(limit)),
             buffer: Vec::new(),
             bytes_expected: 0,
             bytes_written: 0,
@@ -177,10 +188,13 @@ where
 
 #[cfg(feature = "alloc")]
 impl<T: Decodable> VecDecoder<T> {
-    /// Constructs a new byte decoder.
-    pub const fn new() -> Self {
+    /// Constructs a new typed vector decoder with the default limit of 4,000,000 elements.
+    pub const fn new() -> Self { Self::new_with_limit(MAX_VEC_SIZE) }
+
+    /// Constructs a new typed vector decoder with a custom limit of elements.
+    pub const fn new_with_limit(limit: usize) -> Self {
         Self {
-            prefix_decoder: Some(CompactSizeDecoder::new()),
+            prefix_decoder: Some(CompactSizeDecoder::new_with_limit(limit)),
             length: 0,
             buffer: Vec::new(),
             decoder: None,
