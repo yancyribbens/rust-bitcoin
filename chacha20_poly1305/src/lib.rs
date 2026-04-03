@@ -22,39 +22,15 @@ extern crate std;
 pub mod chacha20;
 pub mod poly1305;
 
-use core::fmt;
-
 use chacha20::ChaCha20;
 use poly1305::Poly1305;
 
 pub use self::chacha20::{Key, Nonce};
+#[doc(no_inline)]
+pub use self::error::Error;
 
 /// Zero array for padding slices.
 const ZEROES: [u8; 16] = [0u8; 16];
-
-/// Errors encrypting and decrypting messages with `ChaCha20` and `Poly1305` authentication tags.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum Error {
-    /// Additional data showing up when it is not expected.
-    UnauthenticatedAdditionalData,
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::UnauthenticatedAdditionalData => write!(f, "Unauthenticated aad."),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::UnauthenticatedAdditionalData => None,
-        }
-    }
-}
 
 /// Encrypt and decrypt content along with an authentication tag.
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -174,6 +150,35 @@ fn encode_lengths(aad_len: u64, content_len: u64) -> [u8; 16] {
     content_len_buffer.copy_from_slice(&content_len_bytes[..]);
 
     len_buffer
+}
+
+/// Error types for the `ChaCha20Poly1305` AEAD.
+pub mod error {
+    use core::fmt;
+
+    /// Errors encrypting and decrypting messages with `ChaCha20` and `Poly1305` authentication tags.
+    #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+    pub enum Error {
+        /// Additional data showing up when it is not expected.
+        UnauthenticatedAdditionalData,
+    }
+
+    impl fmt::Display for Error {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::UnauthenticatedAdditionalData => write!(f, "Unauthenticated aad."),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for Error {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::UnauthenticatedAdditionalData => None,
+            }
+        }
+    }
 }
 
 #[cfg(test)]

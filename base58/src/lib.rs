@@ -55,7 +55,7 @@ use crate::error::{IncorrectChecksumError, TooShortError};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[cfg(feature = "alloc")]
-#[doc(inline)]
+#[doc(no_inline)]
 pub use self::error::{Error, InvalidCharacterError};
 
 #[rustfmt::skip]
