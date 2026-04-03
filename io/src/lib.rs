@@ -38,7 +38,8 @@ mod error;
 #[cfg(feature = "hashes")]
 mod hash;
 
-#[cfg(all(not(feature = "std"), feature = "alloc"))]
+#[cfg(feature = "alloc")]
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::cmp;
 #[cfg(feature = "std")]
@@ -653,7 +654,8 @@ include!("../../include/newtype.rs"); // Explained in `REPO_DIR/docs/README.md`.
 
 #[cfg(test)]
 mod tests {
-    #[cfg(all(not(feature = "std"), feature = "alloc"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(not(feature = "std"))]
     use alloc::{string::ToString, vec};
     #[cfg(feature = "std")]
     use std::{string::ToString, vec};

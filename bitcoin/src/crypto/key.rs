@@ -35,7 +35,8 @@ pub use encapsulate::{
     CompressedPublicKey, Keypair, PrivateKey, PublicKey, SerializedXOnlyPublicKey, TweakedKeypair,
     TweakedPublicKey, XOnlyPublicKey,
 };
-#[cfg(all(feature = "rand", feature = "std"))]
+#[cfg(feature = "rand")]
+#[cfg(feature = "std")]
 pub use secp256k1::rand;
 
 /// Encapsulation module to provide a clear barrier for construction/destruction of types.
@@ -213,7 +214,9 @@ mod encapsulate {
     /// # Examples
     ///
     /// ```
-    /// # #[cfg(all(feature = "rand", feature = "std"))] {
+    /// # #[cfg(feature = "rand")]
+    /// # #[cfg(feature = "std")]
+    /// # {
     /// # use bitcoin::key::{Keypair, TweakedKeypair, TweakedPublicKey};
     /// # let keypair = TweakedKeypair::dangerous_assume_tweaked(Keypair::generate());
     /// // There are various conversion methods available to get a tweaked pubkey from a tweaked keypair.
@@ -395,14 +398,17 @@ impl Keypair {
     /// # Examples
     ///
     /// ```
-    /// # #[cfg(all(feature = "rand", feature = "std"))] {
+    /// # #[cfg(feature = "rand")]
+    /// # #[cfg(feature = "std")]
+    /// # {
     /// use bitcoin::Keypair;
     ///
     /// let keypair = Keypair::generate();
     /// # }
     /// ```
     #[inline]
-    #[cfg(all(feature = "rand", feature = "std"))]
+    #[cfg(feature = "rand")]
+    #[cfg(feature = "std")]
     pub fn generate() -> Self {
         let kp = secp256k1::Keypair::new(&mut rand::rng());
         Self::from_secp(kp)
@@ -448,7 +454,8 @@ impl Keypair {
         {
             secp256k1::schnorr::sign_no_aux_rand(msg, self.as_inner())
         }
-        #[cfg(all(feature = "rand", feature = "std"))]
+        #[cfg(feature = "rand")]
+        #[cfg(feature = "std")]
         {
             secp256k1::schnorr::sign(msg, self.as_inner())
         }
@@ -987,7 +994,8 @@ impl From<&CompressedPublicKey> for WPubkeyHash {
 impl PrivateKey {
     /// Constructs a new compressed ECDSA private key using the secp256k1 algorithm and
     /// a secure random number generator.
-    #[cfg(all(feature = "rand", feature = "std"))]
+    #[cfg(feature = "rand")]
+    #[cfg(feature = "std")]
     pub fn generate() -> Self {
         let secret_key = secp256k1::SecretKey::new(&mut rand::rng());
         Self::from_secp(secret_key)
@@ -2190,7 +2198,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "rand", feature = "std"))]
+    #[cfg(feature = "rand")]
+    #[cfg(feature = "std")]
     fn public_key_constructors() {
         let kp = Keypair::generate();
 
@@ -2307,7 +2316,8 @@ mod tests {
 
     #[test]
     fn keypair_from_str_roundtrip() {
-        #[cfg(all(feature = "rand", feature = "std"))]
+        #[cfg(feature = "rand")]
+        #[cfg(feature = "std")]
         let keypair = Keypair::generate();
         #[cfg(not(all(feature = "rand", feature = "std")))]
         let keypair = {
@@ -2326,7 +2336,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "rand", feature = "std"))]
+    #[cfg(feature = "rand")]
+    #[cfg(feature = "std")]
     fn keypair_secp_roundtrip() {
         let bitcoin_key = Keypair::generate();
         let secp_key =
@@ -2335,7 +2346,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "rand", feature = "std"))]
+    #[cfg(feature = "rand")]
+    #[cfg(feature = "std")]
     fn public_key_secp_roundtrip() {
         let bitcoin_key = Keypair::generate().to_public_key();
         let secp_key =
@@ -2353,7 +2365,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "rand", feature = "std"))]
+    #[cfg(feature = "rand")]
+    #[cfg(feature = "std")]
     fn xonly_secp_roundtrip() {
         let bitcoin_key = Keypair::generate().to_x_only_public_key();
         let secp_key =
@@ -2362,7 +2375,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "rand", feature = "std"))]
+    #[cfg(feature = "rand")]
+    #[cfg(feature = "std")]
     fn private_key_secp_roundtrip() {
         let bitcoin_key = PrivateKey::generate();
         let secp_key =

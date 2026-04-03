@@ -274,7 +274,8 @@ mod sealed {
     impl Validation for super::Unchecked {}
 }
 
-#[cfg(all(feature = "hex", feature = "alloc"))]
+#[cfg(feature = "alloc")]
+#[cfg(feature = "hex")]
 impl core::str::FromStr for Block<Unchecked>
 where
     Self: encoding::Decodable,
@@ -286,7 +287,8 @@ where
     }
 }
 
-#[cfg(all(feature = "hex", feature = "alloc"))]
+#[cfg(feature = "alloc")]
+#[cfg(feature = "hex")]
 impl<V: Validation> fmt::Display for Block<V>
 where
     Self: encoding::Encodable,
@@ -297,14 +299,16 @@ where
     }
 }
 
-#[cfg(all(feature = "hex", feature = "alloc"))]
+#[cfg(feature = "alloc")]
+#[cfg(feature = "hex")]
 impl<V: Validation> fmt::LowerHex for Block<V> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         fmt::LowerHex::fmt(&HexPrimitive(self), f)
     }
 }
 
-#[cfg(all(feature = "hex", feature = "alloc"))]
+#[cfg(feature = "alloc")]
+#[cfg(feature = "hex")]
 impl<V: Validation> fmt::UpperHex for Block<V> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         fmt::UpperHex::fmt(&HexPrimitive(self), f)
@@ -312,23 +316,28 @@ impl<V: Validation> fmt::UpperHex for Block<V> {
 }
 
 /// An error that occurs during parsing of a [`Block`] from a hex string.
-#[cfg(all(feature = "hex", feature = "alloc"))]
+#[cfg(feature = "alloc")]
+#[cfg(feature = "hex")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParseBlockError(ParsePrimitiveError<Block>);
 
-#[cfg(all(feature = "hex", feature = "alloc"))]
+#[cfg(feature = "alloc")]
+#[cfg(feature = "hex")]
 impl From<Infallible> for ParseBlockError {
     fn from(never: Infallible) -> Self { match never {} }
 }
 
-#[cfg(all(feature = "hex", feature = "alloc"))]
+#[cfg(feature = "alloc")]
+#[cfg(feature = "hex")]
 impl fmt::Display for ParseBlockError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write_err!(f, "parse block error"; self.0)
     }
 }
 
-#[cfg(all(feature = "hex", feature = "alloc", feature = "std"))]
+#[cfg(feature = "alloc")]
+#[cfg(feature = "hex")]
+#[cfg(feature = "std")]
 impl std::error::Error for ParseBlockError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
@@ -633,7 +642,8 @@ impl fmt::Display for ParseHeaderError {
     }
 }
 
-#[cfg(all(feature = "hex", feature = "std"))]
+#[cfg(feature = "hex")]
+#[cfg(feature = "std")]
 impl std::error::Error for ParseHeaderError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
@@ -1016,13 +1026,16 @@ mod tests {
     use alloc::string::ToString;
     #[cfg(feature = "alloc")]
     use alloc::{format, vec};
-    #[cfg(all(feature = "alloc", feature = "hex"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
     use core::str::FromStr as _;
 
     #[cfg(feature = "alloc")]
     use encoding::Decodable as _;
     use encoding::{Decoder as _, Encodable as _, Encoder as _};
-    #[cfg(all(feature = "serde", feature = "hex", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    #[cfg(feature = "serde")]
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -1517,7 +1530,8 @@ mod tests {
 
     // Test vector provided by tm0 in issue #5023
     #[test]
-    #[cfg(all(feature = "alloc", feature = "hex"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
     fn merkle_tree_hash_collision() {
         // https://learnmeabitcoin.com/explorer/block/00000000000008a662b4a95a46e4c54cb04852525ac0ef67d1bcac85238416d4
         // this block has 7 transactions
@@ -1616,7 +1630,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "alloc", feature = "hex"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
     fn block_check_witness_commitment_with_witness() {
         let mut txin = crate::TxIn::EMPTY_COINBASE;
         // Single witness item of 32 bytes.
@@ -1660,7 +1675,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "alloc", feature = "hex"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
     fn block_check_witness_commitment_invalid_witness() {
         let mut txin = crate::TxIn::EMPTY_COINBASE;
         let witness_bytes: [u8; 32] = [11u8; 32];
@@ -1821,7 +1837,9 @@ mod tests {
     }
 
     /// A type that has a `Block` field and a `Header` field.
-    #[cfg(all(feature = "serde", feature = "hex", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    #[cfg(feature = "serde")]
     #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
     struct Adt {
         #[serde(with = "crate::serde_as_consensus")]
@@ -1831,7 +1849,9 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "serde", feature = "hex", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    #[cfg(feature = "serde")]
     fn can_serde_as_consensus_json() {
         let orig = Adt { header: dummy_header(), block: dummy_block() };
 
@@ -1845,7 +1865,9 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "serde", feature = "hex", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "hex")]
+    #[cfg(feature = "serde")]
     fn can_serde_as_consensus_bincode() {
         let orig = Adt { header: dummy_header(), block: dummy_block() };
 

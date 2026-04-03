@@ -202,7 +202,8 @@ pub mod error {
         }
     }
 
-    #[cfg(all(feature = "std", feature = "encoding"))]
+    #[cfg(feature = "encoding")]
+    #[cfg(feature = "std")]
     impl std::error::Error for BlockTimeDecoderError {
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
     }
@@ -221,12 +222,14 @@ impl<'a> Arbitrary<'a> for BlockTime {
 mod tests {
     #[cfg(feature = "alloc")]
     use alloc::string::ToString;
-    #[cfg(all(feature = "encoding", feature = "std"))]
+    #[cfg(feature = "encoding")]
+    #[cfg(feature = "std")]
     use std::error::Error;
 
     #[cfg(feature = "encoding")]
     use encoding::Decoder as _;
-    #[cfg(all(feature = "encoding", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "encoding")]
     use encoding::UnexpectedEofError;
 
     use super::*;
@@ -250,7 +253,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "encoding", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "encoding")]
     fn block_time_decoding_error() {
         let bytes = [0xb0, 0x52, 0x39]; // 3 bytes is an EOF error
 

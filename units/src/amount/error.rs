@@ -469,7 +469,8 @@ impl fmt::Display for AmountDecoderError {
     }
 }
 
-#[cfg(all(feature = "std", feature = "encoding"))]
+#[cfg(feature = "encoding")]
+#[cfg(feature = "std")]
 impl std::error::Error for AmountDecoderError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         use AmountDecoderErrorInner as E;

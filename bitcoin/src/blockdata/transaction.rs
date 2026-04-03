@@ -1651,7 +1651,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "std", feature = "bitcoinconsensus"))]
+    #[cfg(feature = "bitcoinconsensus")]
+    #[cfg(feature = "std")]
     fn transaction_verify() {
         use std::collections::HashMap;
 
