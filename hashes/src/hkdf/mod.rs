@@ -12,23 +12,12 @@ use core::fmt;
 
 use crate::{HashEngine, Hmac, HmacEngine, IsByteArray};
 
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::MaxLengthError;
+
 /// Output keying material max length multiple.
 const MAX_OUTPUT_BLOCKS: usize = 255;
-
-/// Size of output exceeds maximum length allowed.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct MaxLengthError {
-    max: usize,
-}
-
-impl fmt::Display for MaxLengthError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "exceeds {} byte max output material limit", self.max)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for MaxLengthError {}
 
 /// HMAC-based Extract-and-Expand Key Derivation Function (HKDF).
 #[derive(Clone)]
@@ -148,6 +137,26 @@ impl<T: HashEngine> fmt::Debug for Hkdf<T> {
         let fingerprint = Fingerprint(core::array::from_fn(|i| hash.as_byte_array()[i]));
         f.debug_tuple("Hkdf").field(&format_args!("#{:?}", fingerprint)).finish()
     }
+}
+
+/// Error types for the HKDF hash.
+pub mod error {
+    use core::fmt;
+
+    /// Size of output exceeds maximum length allowed.
+    #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+    pub struct MaxLengthError {
+        pub(super) max: usize,
+    }
+
+    impl fmt::Display for MaxLengthError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "exceeds {} byte max output material limit", self.max)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for MaxLengthError {}
 }
 
 #[cfg(test)]

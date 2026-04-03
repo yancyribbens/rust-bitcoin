@@ -16,6 +16,10 @@ use crate::{incomplete_block_len, sha256d};
 #[cfg(doc)]
 use crate::{sha256t, sha256t_tag};
 
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::MidstateError;
+
 crate::internal_macros::general_hash_type! {
     /// Output of the SHA256 hash function.
     pub struct Hash([u8; 32]);
@@ -261,35 +265,44 @@ impl convert::AsRef<[u8]> for Midstate {
     fn as_ref(&self) -> &[u8] { &self.bytes }
 }
 
-/// [`Midstate`] invariant violated (not a multiple of 64).
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MidstateError {
-    /// The invalid number of bytes hashed.
-    invalid_n_bytes_hashed: u64,
-    block_aligned_midstate: Midstate,
-    unprocessed_bytes: [u8; BLOCK_SIZE],
-    unprocessed_bytes_len: usize,
-}
+/// Error types for the SHA256 hash
+pub mod error {
+    use core::fmt;
 
-impl MidstateError {
-    /// Returns block-aligned midstate
-    pub const fn midstate(&self) -> &Midstate { &self.block_aligned_midstate }
+    use super::{Midstate, BLOCK_SIZE};
 
-    /// returns the unprocessed bytes remaining in the buffer.
-    pub fn unprocessed_bytes(&self) -> &[u8] {
-        &self.unprocessed_bytes[..self.unprocessed_bytes_len]
+    /// [`Midstate`] invariant violated (not a multiple of 64).
+    ///
+    /// [`Midstate`]: super::Midstate
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct MidstateError {
+        /// The invalid number of bytes hashed.
+        pub(super) invalid_n_bytes_hashed: u64,
+        pub(super) block_aligned_midstate: Midstate,
+        pub(super) unprocessed_bytes: [u8; BLOCK_SIZE],
+        pub(super) unprocessed_bytes_len: usize,
     }
-}
 
-impl fmt::Display for MidstateError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "invalid number of bytes hashed {} (should have been a multiple of 64)",
-            self.invalid_n_bytes_hashed
-        )
+    impl MidstateError {
+        /// Returns block-aligned midstate
+        pub const fn midstate(&self) -> &Midstate { &self.block_aligned_midstate }
+
+        /// returns the unprocessed bytes remaining in the buffer.
+        pub fn unprocessed_bytes(&self) -> &[u8] {
+            &self.unprocessed_bytes[..self.unprocessed_bytes_len]
+        }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for MidstateError {}
+    impl fmt::Display for MidstateError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                f,
+                "invalid number of bytes hashed {} (should have been a multiple of 64)",
+                self.invalid_n_bytes_hashed
+            )
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for MidstateError {}
+}
