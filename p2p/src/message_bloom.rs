@@ -35,6 +35,7 @@ pub struct FilterLoad {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`FilterLoad`] message.
+    #[derive(Debug, Clone)]
     pub struct FilterLoadEncoder<'e>(
         Encoder2<
             Encoder2<CompactSizeEncoder, BytesEncoder<'e>>,
@@ -69,6 +70,7 @@ type FilterLoadInnerDecoder =
     Decoder4<ByteVecDecoder, ArrayDecoder<4>, ArrayDecoder<4>, BloomFlagsDecoder>;
 
 /// The decoder for the [`FilterLoad`] message.
+#[derive(Debug, Clone)]
 pub struct FilterLoadDecoder(FilterLoadInnerDecoder);
 
 impl encoding::Decoder for FilterLoadDecoder {
@@ -142,6 +144,7 @@ pub enum BloomFlags {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for [`BloomFlags`].
+    #[derive(Debug, Clone)]
     pub struct BloomFlagsEncoder<'e>(ArrayEncoder<1>);
 }
 
@@ -160,6 +163,7 @@ impl encoding::Encodable for BloomFlags {
 type BloomFlagsInnerDecoder = ArrayDecoder<1>;
 
 /// The decoder for [`BloomFlags`].
+#[derive(Debug, Clone)]
 pub struct BloomFlagsDecoder(BloomFlagsInnerDecoder);
 
 impl BloomFlagsDecoder {
@@ -264,6 +268,7 @@ pub struct FilterAdd {
 
 encoding::encoder_newtype_exact! {
     /// The encoder of the [`FilterAdd`] message.
+    #[derive(Debug, Clone)]
     pub struct FilterAddEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
 
@@ -281,6 +286,7 @@ impl encoding::Encodable for FilterAdd {
 type FilterAddInnerDecoder = ByteVecDecoder;
 
 /// The decoder for the [`FilterAdd`] message.
+#[derive(Debug, Clone)]
 pub struct FilterAddDecoder(FilterAddInnerDecoder);
 
 impl encoding::Decoder for FilterAddDecoder {

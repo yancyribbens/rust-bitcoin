@@ -159,6 +159,7 @@ impl encoding::Decodable for CommandString {
 /// Encoder for the [`CommandString`] type
 // We can't use the [`encoder_newtype!`] macro due to the lifetime conflicting
 // when constructing the encoder in `V1NetworkMessage`.
+#[derive(Debug, Clone)]
 pub struct CommandStringEncoder(encoding::ArrayEncoder<12>);
 
 impl CommandStringEncoder {
@@ -182,6 +183,7 @@ impl encoding::ExactSizeEncoder for CommandStringEncoder {
 }
 
 /// Decoder for [`CommandString`].
+#[derive(Debug, Clone)]
 pub struct CommandStringDecoder {
     inner: encoding::ArrayDecoder<12>,
 }
@@ -306,6 +308,7 @@ impl encoding::Encodable for V1MessageHeader {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`V1MessageHeader`] type.
+    #[derive(Debug, Clone)]
     pub struct V1MessageHeaderEncoder<'e>(
         encoding::Encoder4<
             crate::MagicEncoder<'e>,
@@ -323,6 +326,7 @@ type V1MessageHeaderInnerDecoder = encoding::Decoder4<
 >;
 
 /// The Decoder for `V1MessageHeader`
+#[derive(Debug, Clone)]
 pub struct V1MessageHeaderDecoder(V1MessageHeaderInnerDecoder);
 
 impl encoding::Decoder for V1MessageHeaderDecoder {
@@ -386,6 +390,7 @@ pub struct InventoryPayload(pub Vec<message_blockdata::Inventory>);
 
 encoding::encoder_newtype! {
     /// The encoder for an [`InventoryPayload`].
+    #[derive(Debug, Clone)]
     pub struct InventoryPayloadEncoder<'e>(Encoder2<CompactSizeEncoder, SliceEncoder<'e, message_blockdata::Inventory>>);
 }
 
@@ -406,6 +411,7 @@ impl encoding::Encodable for InventoryPayload {
 type InventoryInnerDecoder = VecDecoder<message_blockdata::Inventory>;
 
 /// Decoder type for [`InventoryPayload`].
+#[derive(Debug, Clone)]
 pub struct InventoryPayloadDecoder(InventoryInnerDecoder);
 
 impl encoding::Decoder for InventoryPayloadDecoder {
@@ -458,6 +464,7 @@ pub struct AddrPayload(pub Vec<AddrV1Message>);
 
 encoding::encoder_newtype! {
     /// The encoder for an [`AddrPayload`].
+    #[derive(Debug, Clone)]
     pub struct AddrPayloadEncoder<'e>(Encoder2<CompactSizeEncoder, SliceEncoder<'e, AddrV1Message>>);
 }
 
@@ -475,6 +482,7 @@ impl encoding::Encodable for AddrPayload {
 type AddrPayloadInnerDecoder = VecDecoder<AddrV1Message>;
 
 /// Decoder type for [`AddrPayload`].
+#[derive(Debug, Clone)]
 pub struct AddrPayloadDecoder(AddrPayloadInnerDecoder);
 
 impl encoding::Decoder for AddrPayloadDecoder {
@@ -525,6 +533,7 @@ pub struct AddrV2Payload(pub Vec<AddrV2Message>);
 
 encoding::encoder_newtype! {
     /// The encoder for an [`AddrV2Payload`].
+    #[derive(Debug, Clone)]
     pub struct AddrV2PayloadEncoder<'e>(Encoder2<CompactSizeEncoder, SliceEncoder<'e, AddrV2Message>>);
 }
 
@@ -545,6 +554,7 @@ impl encoding::Encodable for AddrV2Payload {
 type AddrV2PayloadInnerDecoder = VecDecoder<AddrV2Message>;
 
 /// Decoder type for [`AddrV2Payload`].
+#[derive(Debug, Clone)]
 pub struct AddrV2PayloadDecoder(AddrV2PayloadInnerDecoder);
 
 impl encoding::Decoder for AddrV2PayloadDecoder {
@@ -662,6 +672,7 @@ impl bitcoin::consensus::encode::Decodable for FeeFilter {
 
 encoding::encoder_newtype_exact! {
     /// Encoder for [`FeeFilter`] type.
+    #[derive(Debug, Clone)]
     pub struct FeeFilterEncoder<'e>(encoding::ArrayEncoder<8>);
 }
 
@@ -676,6 +687,7 @@ impl encoding::Encodable for FeeFilter {
 }
 
 /// Decoder for [`FeeFilter`] type.
+#[derive(Debug, Clone)]
 pub struct FeeFilterDecoder(encoding::ArrayDecoder<8>);
 
 impl FeeFilterDecoder {
@@ -739,6 +751,7 @@ impl Ping {
 
 encoding::encoder_newtype! {
     /// The encoder for the [`Ping`] type.
+    #[derive(Debug, Clone)]
     pub struct PingEncoder<'e>(encoding::ArrayEncoder<8>);
 }
 
@@ -754,6 +767,7 @@ impl encoding::Encodable for Ping {
 }
 
 /// The Decoder for [`Ping`]
+#[derive(Debug, Clone)]
 pub struct PingDecoder(encoding::ArrayDecoder<8>);
 
 impl encoding::Decoder for PingDecoder {
@@ -813,6 +827,7 @@ impl Pong {
 
 encoding::encoder_newtype! {
     /// The encoder for the [`Pong`] type.
+    #[derive(Debug, Clone)]
     pub struct PongEncoder<'e>(encoding::ArrayEncoder<8>);
 }
 
@@ -828,6 +843,7 @@ impl encoding::Encodable for Pong {
 }
 
 /// The Decoder for [`Pong`]
+#[derive(Debug, Clone)]
 pub struct PongDecoder(encoding::ArrayDecoder<8>);
 
 impl encoding::Decoder for PongDecoder {
@@ -1134,6 +1150,7 @@ impl Encodable for V1NetworkMessage {
     }
 }
 
+#[derive(Debug, Clone)]
 struct NetworkMessageEncoder {
     buffer: Vec<u8>,
     exhausted: bool,
@@ -1166,6 +1183,7 @@ impl encoding::Encoder for NetworkMessageEncoder {
 
 encoding::encoder_newtype! {
     /// Encoder for [`V1NetworkMessage`].
+    #[derive(Debug, Clone)]
     pub struct V1NetworkMessageEncoder<'e>(
         encoding::Encoder2<
             encoding::Encoder4<
@@ -1195,6 +1213,7 @@ impl encoding::Encodable for V1NetworkMessage {
     }
 }
 
+#[derive(Debug, Clone)]
 struct NetworkMessageDecoder {
     command: CommandString,
     payload_len: usize,
@@ -1481,6 +1500,7 @@ impl encoding::Decoder for NetworkMessageDecoder {
     fn read_limit(&self) -> usize { self.payload_len - self.buffer.len() }
 }
 
+#[derive(Debug, Clone)]
 enum DecoderState {
     ReadingHeader {
         header_decoder: encoding::Decoder4<
@@ -1503,6 +1523,7 @@ enum DecoderState {
 /// This decoder implements a two-phase decoding process for Bitcoin V1 P2P messages.
 /// It first decodes the fixed-sized header. It then uses the payload length information
 /// to decode the dynamically sized network message.
+#[derive(Debug, Clone)]
 pub struct V1NetworkMessageDecoder {
     state: DecoderState,
 }
@@ -1721,6 +1742,7 @@ impl NetworkHeader {
 
 encoding::encoder_newtype_exact! {
     /// The encoder type for a [`NetworkHeader`].
+    #[derive(Debug, Clone)]
     pub struct NetworkHeaderEncoder<'e>(Encoder2<HeaderEncoder<'e>, ArrayEncoder<1>>);
 }
 
@@ -1738,6 +1760,7 @@ impl encoding::Encodable for NetworkHeader {
 type NetworkHeaderInnerDecoder = Decoder2<HeaderDecoder, ArrayDecoder<1>>;
 
 /// The decoder type for a [`NetworkHeader`].
+#[derive(Debug, Clone)]
 pub struct NetworkHeaderDecoder(NetworkHeaderInnerDecoder);
 
 impl encoding::Decoder for NetworkHeaderDecoder {
@@ -1823,6 +1846,7 @@ impl_vec_wrapper!(HeadersMessage, NetworkHeader);
 
 encoding::encoder_newtype! {
     /// The encoder type for a [`HeadersMessage`].
+    #[derive(Debug, Clone)]
     pub struct HeadersMessageEncoder<'e>(Encoder2<CompactSizeEncoder, SliceEncoder<'e, NetworkHeader>>);
 }
 
@@ -1840,6 +1864,7 @@ impl encoding::Encodable for HeadersMessage {
 type HeadersMessageInnerDecoder = VecDecoder<NetworkHeader>;
 
 /// The decoder type for a [`HeadersMessage`].
+#[derive(Debug, Clone)]
 pub struct HeadersMessageDecoder(HeadersMessageInnerDecoder);
 
 impl encoding::Decoder for HeadersMessageDecoder {

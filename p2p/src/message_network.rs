@@ -90,6 +90,7 @@ impl VersionMessage {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for the [`VersionMessage`] type.
+    #[derive(Debug, Clone)]
     pub struct VersionMessageEncoder<'e>(
         encoding::Encoder2<
             encoding::Encoder3<
@@ -208,6 +209,7 @@ type VersionMessageInnerDecoder = encoding::Decoder2<
 >;
 
 /// The Decoder for [`VersionMessage`].
+#[derive(Debug, Clone)]
 pub struct VersionMessageDecoder(VersionMessageInnerDecoder);
 
 /// An error consensus decoding a [`VersionMessage`].
@@ -254,6 +256,7 @@ pub struct UserAgent {
 
 encoding::encoder_newtype_exact! {
     /// The encoder for a [`UserAgent`] string.
+    #[derive(Debug, Clone)]
     pub struct UserAgentEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
 
@@ -271,6 +274,7 @@ impl encoding::Encodable for UserAgent {
 type UserAgentInnerDecoder = ByteVecDecoder;
 
 /// The decoder for the [`UserAgent`] message.
+#[derive(Debug, Clone)]
 pub struct UserAgentDecoder(UserAgentInnerDecoder);
 
 impl encoding::Decoder for UserAgentDecoder {
@@ -500,6 +504,7 @@ pub enum RejectReason {
 
 encoding::encoder_newtype_exact! {
     /// The encoder type for a [`RejectReason`].
+    #[derive(Debug, Clone)]
     pub struct RejectReasonEncoder<'e>(ArrayEncoder<1>);
 }
 
@@ -512,6 +517,7 @@ impl encoding::Encodable for RejectReason {
 }
 
 /// The decoder type for a [`RejectReason`].
+#[derive(Debug, Clone)]
 pub struct RejectReasonDecoder(ArrayDecoder<1>);
 
 impl encoding::Decoder for RejectReasonDecoder {
@@ -620,6 +626,7 @@ pub struct Reject {
 
 encoding::encoder_newtype_exact! {
     /// The encoder type for a [`Reject`] message.
+    #[derive(Debug, Clone)]
     pub struct RejectEncoder<'e>(
         Encoder4<
             Encoder2<CompactSizeEncoder, BytesEncoder<'e>>,
@@ -653,6 +660,7 @@ type RejectInnerDecoder =
     Decoder4<ByteVecDecoder, RejectReasonDecoder, ByteVecDecoder, ArrayDecoder<32>>;
 
 /// The decoder type for a [`Reject`] message.
+#[derive(Debug, Clone)]
 pub struct RejectDecoder(RejectInnerDecoder);
 
 impl encoding::Decoder for RejectDecoder {
@@ -753,6 +761,7 @@ impl Alert {
 
 encoding::encoder_newtype_exact! {
     /// The encoder type for an [`Alert`] message.
+    #[derive(Debug, Clone)]
     pub struct AlertEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
 
@@ -770,6 +779,7 @@ impl encoding::Encodable for Alert {
 type AlertInnerDecoder = ByteVecDecoder;
 
 /// The decoder for the [`Alert`] message.
+#[derive(Debug, Clone)]
 pub struct AlertDecoder(AlertInnerDecoder);
 
 impl encoding::Decoder for AlertDecoder {

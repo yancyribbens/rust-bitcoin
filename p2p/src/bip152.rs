@@ -82,6 +82,7 @@ impl convert::AsRef<Transaction> for PrefilledTransaction {
 
 encoding::encoder_newtype! {
     /// The encoder for a [`PrefilledTransaction`] message.
+    #[derive(Debug, Clone)]
     pub struct PrefilledTransactionEncoder<'e>(Encoder2<CompactSizeEncoder, TransactionEncoder<'e>>);
 }
 
@@ -102,6 +103,7 @@ impl encoding::Encodable for PrefilledTransaction {
 type PrefilledTransactionInnerDecoder = Decoder2<CompactSizeDecoder, TransactionDecoder>;
 
 /// The decoder for a [`PrefilledTransaction`] message.
+#[derive(Debug, Clone)]
 pub struct PrefilledTransactionDecoder(PrefilledTransactionInnerDecoder);
 
 impl PrefilledTransactionDecoder {
@@ -288,6 +290,7 @@ impl Decodable for ShortId {
 
 encoding::encoder_newtype_exact! {
     /// Encoder type for a [`ShortId`].
+    #[derive(Debug, Clone)]
     pub struct ShortIdEncoder<'e>(ArrayEncoder<6>);
 }
 
@@ -302,6 +305,7 @@ impl encoding::Encodable for ShortId {
 type ShortIdInnerDecoder = ArrayDecoder<6>;
 
 /// Decoder type for a [`ShortId`].
+#[derive(Debug, Clone)]
 pub struct ShortIdDecoder(ShortIdInnerDecoder);
 
 impl encoding::Decoder for ShortIdDecoder {
@@ -376,6 +380,7 @@ type HeaderAndShortIdsInnerEncoder<'e> = Encoder4<
 
 encoding::encoder_newtype! {
     /// Encoder type for a [`HeaderAndShortIds`] message.
+    #[derive(Debug, Clone)]
     pub struct HeaderAndShortIdsEncoder<'e>(
         HeaderAndShortIdsInnerEncoder<'e>
     );
@@ -407,6 +412,7 @@ type HeaderAndShortIdsInnerDecoder =
     Decoder4<HeaderDecoder, ArrayDecoder<8>, VecDecoder<ShortId>, VecDecoder<PrefilledTransaction>>;
 
 /// Decoder type for the [`HeaderAndShortIds`] message.
+#[derive(Debug, Clone)]
 pub struct HeaderAndShortIdsDecoder(HeaderAndShortIdsInnerDecoder);
 
 impl HeaderAndShortIdsDecoder {
@@ -609,6 +615,7 @@ impl encoding::Encodable for Offset {
     fn encoder(&self) -> Self::Encoder<'_> { CompactSizeEncoder::new(self.0) }
 }
 
+#[derive(Debug, Clone)]
 struct OffsetDecoder(CompactSizeDecoder);
 
 impl encoding::Decoder for OffsetDecoder {
@@ -695,6 +702,7 @@ impl BlockTransactionsRequest {
 
 encoding::encoder_newtype! {
     /// The encoder for [`BlockTransactionsRequest`].
+    #[derive(Debug, Clone)]
     pub struct BlockTransactionsRequestEncoder<'e>(
         Encoder2<
             BlockHashEncoder<'e>,
@@ -720,6 +728,7 @@ impl encoding::Encodable for BlockTransactionsRequest {
 type BlockTransactionsRequestInnerDecoder = Decoder2<BlockHashDecoder, VecDecoder<Offset>>;
 
 /// The encoder type for a [`BlockTransactionsRequest`].
+#[derive(Debug, Clone)]
 pub struct BlockTransactionsRequestDecoder(BlockTransactionsRequestInnerDecoder);
 
 impl encoding::Decoder for BlockTransactionsRequestDecoder {
@@ -848,6 +857,7 @@ pub struct BlockTransactions {
 
 encoding::encoder_newtype! {
     /// Encoder type for [`BlockTransactions`].
+    #[derive(Debug, Clone)]
     pub struct BlockTransactionsEncoder<'e>(
         Encoder2<
             BlockHashEncoder<'e>,
@@ -876,6 +886,7 @@ impl encoding::Encodable for BlockTransactions {
 type BlockTransactionsInnerDecoder = Decoder2<BlockHashDecoder, VecDecoder<Transaction>>;
 
 /// Decoder type for a [`BlockTransactions`] message.
+#[derive(Debug, Clone)]
 pub struct BlockTransactionsDecoder(BlockTransactionsInnerDecoder);
 
 impl encoding::Decoder for BlockTransactionsDecoder {

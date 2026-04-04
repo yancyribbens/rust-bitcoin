@@ -129,6 +129,7 @@ impl MerkleBlock {
 
 encoding::encoder_newtype! {
     /// The encoder type for a [`MerkleBlock`].
+    #[derive(Debug, Clone)]
     pub struct MerkleBlockEncoder<'e>(Encoder2<HeaderEncoder<'e>, PartialMerkleTreeEncoder<'e>>);
 }
 
@@ -143,6 +144,7 @@ impl encoding::Encodable for MerkleBlock {
 type MerkleBlockInnerDecoder = Decoder2<HeaderDecoder, PartialMerkleTreeDecoder>;
 
 /// The decoder for a [`MerkleBlock`].
+#[derive(Debug, Clone)]
 pub struct MerkleBlockDecoder(MerkleBlockInnerDecoder);
 
 impl encoding::Decoder for MerkleBlockDecoder {
@@ -476,6 +478,7 @@ impl PartialMerkleTree {
     }
 }
 
+#[derive(Debug, Clone)]
 struct BitVecEncoder {
     buffer: Vec<u8>,
     exhausted: bool,
@@ -512,6 +515,7 @@ impl encoding::Encoder for BitVecEncoder {
 
 encoding::encoder_newtype! {
     /// The encoder for a [`PartialMerkleTree`].
+    #[derive(Debug, Clone)]
     pub struct PartialMerkleTreeEncoder<'e>(
         Encoder3<
             ArrayEncoder<4>,
@@ -543,6 +547,7 @@ type PartialMerkleTreeInnerDecoder =
     Decoder3<ArrayDecoder<4>, VecDecoder<TxMerkleNode>, ByteVecDecoder>;
 
 /// The decoder type for a [`PartialMerkleTree`].
+#[derive(Debug, Clone)]
 pub struct PartialMerkleTreeDecoder(PartialMerkleTreeInnerDecoder);
 
 impl encoding::Decoder for PartialMerkleTreeDecoder {
