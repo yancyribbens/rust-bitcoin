@@ -1,21 +1,13 @@
 #![cfg_attr(fuzzing, no_main)]
 #![cfg_attr(not(fuzzing), allow(unused))]
 
-use arbitrary::{Arbitrary, Unstructured};
 use libfuzzer_sys::fuzz_target;
 
 #[cfg(not(fuzzing))]
 fn main() {}
 
-fn do_test(data: &[u8]) {
-    let mut unstructured = Unstructured::new(data);
-
-    let Ok(bytes_a) = <&[u8]>::arbitrary(&mut unstructured) else {
-        return;
-    };
-    let Ok(bytes_b) = <&[u8]>::arbitrary(&mut unstructured) else {
-        return;
-    };
+fn do_test(data: (&[u8], &[u8])) {
+    let (bytes_a, bytes_b) = data;
 
     let Ok(psbt_a) = bitcoin::psbt::Psbt::deserialize(bytes_a) else {
         return;
@@ -33,6 +25,6 @@ fn do_test(data: &[u8]) {
     assert_eq!(psbt_b.combine(psbt_a).is_ok(), psbt_a_clone.combine(psbt_b).is_ok());
 }
 
-fuzz_target!(|data| {
+fuzz_target!(|data: (&[u8], &[u8])| {
     do_test(data);
 });
