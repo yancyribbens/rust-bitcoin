@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Andrew Poelstra <apoelstra@wpsoftware.net>"]
 license = "CC0-1.0"
 repository = "https://github.com/rust-bitcoin/rust-bitcoin"
+homepage = "https://rust-bitcoin.org"
 description = "Peer-to-peer messages defined by the Bitcoin protocol"
 categories = ["cryptography::cryptocurrencies"]
 keywords = ["bitcoin", "peer-to-peer"]

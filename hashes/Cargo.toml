@@ -4,6 +4,7 @@ version = "0.20.0"
 authors = ["Andrew Poelstra <apoelstra@wpsoftware.net>"]
 license = "CC0-1.0"
 repository = "https://github.com/rust-bitcoin/rust-bitcoin"
+homepage = "https://rust-bitcoin.org"
 documentation = "https://docs.rs/bitcoin_hashes/"
 description = "Hash functions used by the rust-bitcoin ecosystem"
 categories = ["algorithms", "cryptography", "no-std"]

@@ -4,6 +4,7 @@ version = "0.33.0-beta"
 authors = ["Andrew Poelstra <apoelstra@wpsoftware.net>"]
 license = "CC0-1.0"
 repository = "https://github.com/rust-bitcoin/rust-bitcoin/"
+homepage = "https://rust-bitcoin.org"
 documentation = "https://docs.rs/bitcoin/"
 description = "General purpose library for using and interoperating with Bitcoin."
 categories = ["cryptography::cryptocurrencies"]

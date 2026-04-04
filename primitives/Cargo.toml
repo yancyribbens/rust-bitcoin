@@ -4,6 +4,7 @@ version = "0.102.0"
 authors = ["Andrew Poelstra <apoelstra@wpsoftware.net>", "Tobin C. Harding <me@tobin.cc>"]
 license = "CC0-1.0"
 repository = "https://github.com/rust-bitcoin/rust-bitcoin"
+homepage = "https://rust-bitcoin.org"
 description = "Primitive types used by the rust-bitcoin ecosystem"
 categories = ["cryptography::cryptocurrencies", "no-std"]
 keywords = ["bitcoin", "types"]
