@@ -82,9 +82,9 @@ pub use self::{
 pub use primitives::script::ScriptBufDecoderError;
 #[doc(inline)]
 pub use primitives::script::{
-    RedeemScript, RedeemScriptBuf, RedeemScriptSizeError, RedeemScriptTag, Script, ScriptBuf,
-    ScriptBufDecoder, ScriptEncoder, ScriptHash, ScriptHashableTag, ScriptPubKey, ScriptPubKeyBuf,
-    ScriptPubKeyTag, ScriptSig, ScriptSigBuf, ScriptSigTag, SignetBlockScript,
+    error, RedeemScript, RedeemScriptBuf, RedeemScriptSizeError, RedeemScriptTag, Script,
+    ScriptBuf, ScriptBufDecoder, ScriptEncoder, ScriptHash, ScriptHashableTag, ScriptPubKey,
+    ScriptPubKeyBuf, ScriptPubKeyTag, ScriptSig, ScriptSigBuf, ScriptSigTag, SignetBlockScript,
     SignetBlockScriptBuf, SignetBlockScriptTag, Tag, TapScript, TapScriptBuf, TapScriptTag,
     WScriptHash, WitnessScript, WitnessScriptBuf, WitnessScriptSizeError, WitnessScriptTag,
 };

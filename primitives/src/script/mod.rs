@@ -8,6 +8,8 @@ mod tag;
 #[cfg(test)]
 mod tests;
 
+pub mod error;
+
 use core::cmp::Ordering;
 use core::fmt;
 #[cfg(feature = "serde")]
@@ -26,13 +28,13 @@ use crate::prelude::{Borrow, BorrowMut, Box, Cow, ToOwned, Vec};
 #[doc(inline)]
 pub use self::{
     borrowed::{Script, ScriptEncoder},
-    owned::{ScriptBuf, ScriptBufDecoder, ScriptBufDecoderError},
+    owned::{ScriptBuf, ScriptBufDecoder},
     tag::{Tag, RedeemScriptTag, ScriptPubKeyTag, ScriptSigTag, SignetBlockScriptTag, TapScriptTag, WitnessScriptTag},
 };
+#[doc(no_inline)]
+pub use self::error::{RedeemScriptSizeError, ScriptBufDecoderError, WitnessScriptSizeError};
 #[doc(inline)]
-pub use crate::hash_types::{
-    RedeemScriptSizeError, ScriptHash, WScriptHash, WitnessScriptSizeError,
-};
+pub use crate::hash_types::{ScriptHash, WScriptHash};
 
 /// A P2SH redeem script.
 pub type RedeemScriptBuf = ScriptBuf<RedeemScriptTag>;

@@ -17,7 +17,7 @@ type BorrowedControlBlock<'a> = ControlBlock<&'a TaprootMerkleBranch, &'a Serial
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
-pub use primitives::witness::{Iter, Witness, WitnessDecoder, WitnessEncoder};
+pub use primitives::witness::{error, Iter, Witness, WitnessDecoder, WitnessEncoder};
 #[doc(no_inline)]
 pub use primitives::witness::{UnexpectedEofError, WitnessDecoderError};
 

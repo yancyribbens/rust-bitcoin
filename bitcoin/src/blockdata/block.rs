@@ -25,7 +25,7 @@ use crate::{internal_macros, BlockTime, Target, Weight, Work};
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
 pub use primitives::block::{
-    Block, BlockDecoder, BlockEncoder, BlockHash, BlockHashDecoder, BlockHashEncoder,
+    error, Block, BlockDecoder, BlockEncoder, BlockHash, BlockHashDecoder, BlockHashEncoder,
     Checked, Unchecked, Validation, Version, VersionDecoder, VersionEncoder, Header,
     HeaderDecoder, HeaderEncoder, WitnessCommitment, compute_merkle_root, compute_witness_root,
 };
@@ -36,7 +36,7 @@ pub use primitives::block::{
 };
 #[doc(inline)]
 pub use units::block::{
-    error, BlockHeight, BlockHeightDecoder, BlockHeightEncoder, BlockHeightInterval, BlockMtp,
+    BlockHeight, BlockHeightDecoder, BlockHeightEncoder, BlockHeightInterval, BlockMtp,
     BlockMtpInterval,
 };
 #[doc(no_inline)]

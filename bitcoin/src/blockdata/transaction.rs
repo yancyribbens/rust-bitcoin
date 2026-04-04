@@ -40,7 +40,7 @@ pub use primitives::transaction::{
 };
 #[doc(inline)]
 pub use primitives::transaction::{
-    BlockHashDecoder, Ntxid, OutPoint, OutPointDecoder, OutPointEncoder, Transaction,
+    error, BlockHashDecoder, Ntxid, OutPoint, OutPointDecoder, OutPointEncoder, Transaction,
     TransactionDecoder, TransactionEncoder, TxIn, TxInDecoder, TxInEncoder, TxOut, TxOutDecoder,
     TxOutEncoder, Txid, Version, VersionDecoder, VersionEncoder, WitnessesEncoder, Wtxid,
 };
