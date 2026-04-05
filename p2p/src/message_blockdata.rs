@@ -362,11 +362,8 @@ pub struct GetHeadersMessage {
     pub stop_hash: BlockHash,
 }
 
-type GetBlocksOrHeadersInnerEncoder<'e> = Encoder3<
-    ProtocolVersionEncoder<'e>,
-    BlockLocatorEncoder<'e>,
-    BlockHashEncoder<'e>,
->;
+type GetBlocksOrHeadersInnerEncoder<'e> =
+    Encoder3<ProtocolVersionEncoder<'e>, BlockLocatorEncoder<'e>, BlockHashEncoder<'e>>;
 
 encoding::encoder_newtype! {
     /// The encoder for [`GetBlocksMessage`].
