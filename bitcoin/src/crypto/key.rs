@@ -186,7 +186,7 @@ mod encapsulate {
     impl TweakedPublicKey {
         /// Returns the [`TweakedPublicKey`] for `keypair`.
         #[inline]
-        pub fn from_keypair(keypair: TweakedKeypair) -> Self {
+        pub fn from_keypair(keypair: &TweakedKeypair) -> Self {
             Self(keypair.as_keypair().to_x_only_public_key())
         }
 
@@ -221,7 +221,7 @@ mod encapsulate {
     /// # let keypair = TweakedKeypair::dangerous_assume_tweaked(Keypair::generate());
     /// // There are various conversion methods available to get a tweaked pubkey from a tweaked keypair.
     /// let (_pk, _parity) = keypair.public_parts();
-    /// let _pk = TweakedPublicKey::from_keypair(keypair.clone());
+    /// let _pk = TweakedPublicKey::from_keypair(&keypair);
     /// let _pk = TweakedPublicKey::from(keypair.clone());
     /// # }
     /// ```
@@ -916,7 +916,7 @@ impl FullPublicKey {
     /// # Errors
     ///
     /// Errors if the private key is not compressed.
-    pub fn from_private_key(sk: PrivateKey) -> Result<Self, UncompressedPublicKeyError> {
+    pub fn from_private_key(sk: &PrivateKey) -> Result<Self, UncompressedPublicKeyError> {
         sk.to_public_key().try_into()
     }
 
@@ -1040,8 +1040,8 @@ impl PrivateKey {
     ///
     /// Errors when the secret key is invalid: when it is all-zeros or would exceed
     /// the curve order when interpreted as a big-endian unsigned integer.
-    pub fn from_secret_bytes(data: [u8; 32]) -> Result<Self, secp256k1::Error> {
-        Ok(Self::from_secp(secp256k1::SecretKey::from_secret_bytes(data)?))
+    pub fn from_secret_bytes(data: &[u8; 32]) -> Result<Self, secp256k1::Error> {
+        Ok(Self::from_secp(secp256k1::SecretKey::from_secret_bytes(*data)?))
     }
 
     /// Deserializes a private key from a slice.
@@ -1526,7 +1526,7 @@ impl From<TweakedKeypair> for Keypair {
 
 impl From<TweakedKeypair> for TweakedPublicKey {
     #[inline]
-    fn from(pair: TweakedKeypair) -> Self { Self::from_keypair(pair) }
+    fn from(pair: TweakedKeypair) -> Self { Self::from_keypair(&pair) }
 }
 
 /// Error returned while generating key from slice.
@@ -2354,7 +2354,7 @@ mod tests {
                 "1ede31b0e7e47c2afc65ffd158b1b1b9d3b752bba8fd117dc8b9e944a390e8d9",
             )
             .unwrap();
-            let sk = PrivateKey::from_secret_bytes(bytes).unwrap();
+            let sk = PrivateKey::from_secret_bytes(&bytes).unwrap();
             Keypair::from_private_key(&sk)
         };
 
