@@ -222,7 +222,7 @@ mod encapsulate {
     /// // There are various conversion methods available to get a tweaked pubkey from a tweaked keypair.
     /// let (_pk, _parity) = keypair.public_parts();
     /// let _pk = TweakedPublicKey::from_keypair(&keypair);
-    /// let _pk = TweakedPublicKey::from(keypair.clone());
+    /// let _pk = TweakedPublicKey::from(&keypair);
     /// # }
     /// ```
     #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -490,7 +490,11 @@ impl From<Keypair> for secp256k1::PublicKey {
 }
 
 impl From<PrivateKey> for Keypair {
-    fn from(pk: PrivateKey) -> Self { Self::from_private_key(&pk) }
+    fn from(pk: PrivateKey) -> Self { Self::from(&pk) }
+}
+
+impl From<&PrivateKey> for Keypair {
+    fn from(pk: &PrivateKey) -> Self { Self::from_private_key(pk) }
 }
 
 #[deprecated(since = "TBD", note = "use `LegacyPublicKey` instead")]
@@ -1524,9 +1528,19 @@ impl From<TweakedKeypair> for Keypair {
     fn from(pair: TweakedKeypair) -> Self { pair.into_keypair() }
 }
 
+impl<'a> From<&'a TweakedKeypair> for &'a Keypair {
+    #[inline]
+    fn from(pair: &'a TweakedKeypair) -> Self { pair.as_keypair() }
+}
+
 impl From<TweakedKeypair> for TweakedPublicKey {
     #[inline]
-    fn from(pair: TweakedKeypair) -> Self { Self::from_keypair(&pair) }
+    fn from(pair: TweakedKeypair) -> Self { Self::from(&pair) }
+}
+
+impl From<&TweakedKeypair> for TweakedPublicKey {
+    #[inline]
+    fn from(pair: &TweakedKeypair) -> Self { Self::from_keypair(pair) }
 }
 
 /// Error returned while generating key from slice.
