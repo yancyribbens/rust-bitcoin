@@ -10,7 +10,6 @@ use alloc::boxed::Box;
 use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
-use core::convert::Infallible;
 use core::{cmp, fmt};
 
 #[cfg(feature = "arbitrary")]
@@ -21,18 +20,28 @@ use encoding::{
     VecDecoder,
 };
 use hashes::sha256d;
-use internals::{write_err, ToU64 as _};
+use internals::ToU64 as _;
 use io::{self, BufRead, Read, Write};
 use primitives::block::{self, HeaderDecoder, HeaderEncoder};
 use primitives::transaction;
 use units::FeeRate;
 
+use self::error::V1NetworkMessageDecoderErrorInner;
 use crate::address::{AddrV1Message, AddrV2Message};
 use crate::consensus::{impl_consensus_encoding, impl_vec_wrapper};
 use crate::merkle_tree::MerkleBlock;
 use crate::{
     bip152, message_blockdata, message_bloom, message_compact_blocks, message_filter,
     message_network, Magic,
+};
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{
+    AddrPayloadDecoderError, AddrV2PayloadDecoderError, CommandStringDecoderError,
+    CommandStringError, HeadersMessageDecoderError, InventoryPayloadDecoderError,
+    NetworkHeaderDecoderError, PingDecoderError, PongDecoderError,
+    V1MessageHeaderDecoderError, V1NetworkMessageDecoderError,
 };
 
 /// The maximum number of [`super::message_blockdata::Inventory`] items in an `inv` message.
@@ -212,59 +221,6 @@ impl encoding::Decoder for CommandStringDecoder {
     fn read_limit(&self) -> usize { self.inner.read_limit() }
 }
 
-/// Error decoding a [`CommandString`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum CommandStringDecoderError {
-    /// Unexpected end of data.
-    UnexpectedEof(encoding::UnexpectedEofError),
-    /// Command string contains non-ASCII characters.
-    NotAscii,
-}
-
-impl fmt::Display for CommandStringDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::UnexpectedEof(e) => write!(f, "unexpected end of data: {}", e),
-            Self::NotAscii => write!(f, "command string must be ASCII"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for CommandStringDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::UnexpectedEof(e) => Some(e),
-            Self::NotAscii => None,
-        }
-    }
-}
-
-/// Error returned when a command string is invalid.
-///
-/// This is currently returned for command strings longer than 12.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct CommandStringError {
-    cow: Cow<'static, str>,
-}
-
-impl fmt::Display for CommandStringError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "the command string '{}' has length {} which is larger than 12",
-            self.cow,
-            self.cow.len()
-        )
-    }
-}
-
-impl std::error::Error for CommandStringError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
 /// A Network message using the v1 p2p protocol.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct V1NetworkMessage {
@@ -366,16 +322,6 @@ impl encoding::Decodable for V1MessageHeader {
     }
 }
 
-/// An error consensus decoding a [`V1MessageHeader`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct V1MessageHeaderDecoderError(<V1MessageHeaderInnerDecoder as encoding::Decoder>::Error);
-
-impl fmt::Display for V1MessageHeaderDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        internals::write_err!(f, "message header decoder error"; self.0)
-    }
-}
-
 impl_consensus_encoding!(V1MessageHeader, magic, command, length, checksum);
 
 /// A Network message using the v2 p2p protocol defined in BIP-0324.
@@ -439,25 +385,6 @@ impl encoding::Decodable for InventoryPayload {
     }
 }
 
-/// An error decoding a [`InventoryPayload`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct InventoryPayloadDecoderError(<InventoryInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for InventoryPayloadDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for InventoryPayloadDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "inventory payload error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InventoryPayloadDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 /// A list of legacy p2p address messages.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct AddrPayload(pub Vec<AddrV1Message>);
@@ -506,25 +433,6 @@ impl encoding::Decoder for AddrPayloadDecoder {
 impl encoding::Decodable for AddrPayload {
     type Decoder = AddrPayloadDecoder;
     fn decoder() -> Self::Decoder { AddrPayloadDecoder(VecDecoder::new()) }
-}
-
-/// An error decoding a [`AddrPayload`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AddrPayloadDecoderError(<AddrPayloadInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for AddrPayloadDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for AddrPayloadDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "addrv1 payload error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for AddrPayloadDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
 
 /// A list of v2 address messages.
@@ -578,25 +486,6 @@ impl encoding::Decoder for AddrV2PayloadDecoder {
 impl encoding::Decodable for AddrV2Payload {
     type Decoder = AddrV2PayloadDecoder;
     fn decoder() -> Self::Decoder { AddrV2PayloadDecoder(VecDecoder::new()) }
-}
-
-/// An error decoding a [`AddrV2Payload`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AddrV2PayloadDecoderError(<AddrV2PayloadInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for AddrV2PayloadDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for AddrV2PayloadDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "addrv2 payload error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for AddrV2PayloadDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
 
 impl_vec_wrapper!(InventoryPayload, message_blockdata::Inventory);
@@ -794,25 +683,6 @@ impl encoding::Decodable for Ping {
     fn decoder() -> Self::Decoder { PingDecoder(encoding::ArrayDecoder::<8>::new()) }
 }
 
-/// An error consensus decoding a [`Ping`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PingDecoderError(<encoding::ArrayDecoder<8> as encoding::Decoder>::Error);
-
-impl From<Infallible> for PingDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for PingDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        internals::write_err!(f, "ping decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for PingDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 /// Serializer for Pong
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Pong(u64);
@@ -868,25 +738,6 @@ impl encoding::Decoder for PongDecoder {
 impl encoding::Decodable for Pong {
     type Decoder = PongDecoder;
     fn decoder() -> Self::Decoder { PongDecoder(encoding::ArrayDecoder::<8>::new()) }
-}
-
-/// An error consensus decoding a [`Pong`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PongDecoderError(<encoding::ArrayDecoder<8> as encoding::Decoder>::Error);
-
-impl From<Infallible> for PongDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for PongDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        internals::write_err!(f, "pong decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for PongDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
 
 /// A Network message payload. Proper documentation is available at
@@ -1636,47 +1487,6 @@ impl encoding::Decodable for V1NetworkMessage {
     }
 }
 
-/// Error decoding a raw network message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner);
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum V1NetworkMessageDecoderErrorInner {
-    /// Error decoding the message header.
-    Header,
-    /// Payload length exceeds maximum allowed message size.
-    PayloadTooLarge,
-    /// Error decoding the message payload.
-    Payload,
-}
-
-impl fmt::Display for V1NetworkMessageDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.0 {
-            V1NetworkMessageDecoderErrorInner::Header => {
-                write!(f, "error decoding message header")
-            }
-            V1NetworkMessageDecoderErrorInner::PayloadTooLarge => {
-                write!(f, "payload length exceeds maximum allowed message size")
-            }
-            V1NetworkMessageDecoderErrorInner::Payload => {
-                write!(f, "error decoding message payload")
-            }
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for V1NetworkMessageDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self.0 {
-            V1NetworkMessageDecoderErrorInner::Header => None,
-            V1NetworkMessageDecoderErrorInner::PayloadTooLarge => None,
-            V1NetworkMessageDecoderErrorInner::Payload => None,
-        }
-    }
-}
-
 impl Encodable for V2NetworkMessage {
     fn consensus_encode<W: Write + ?Sized>(&self, writer: &mut W) -> Result<usize, io::Error> {
         // A subset of message types are optimized to only use one byte to encode the command.
@@ -1798,25 +1608,6 @@ impl encoding::Decodable for NetworkHeader {
     }
 }
 
-/// An error decoding a [`NetworkHeader`] message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct NetworkHeaderDecoderError(<NetworkHeaderInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for NetworkHeaderDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for NetworkHeaderDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "network header error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for NetworkHeaderDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 impl Decodable for NetworkHeader {
     fn consensus_decode<R: BufRead + ?Sized>(reader: &mut R) -> Result<Self, encode::Error> {
         Ok(Self { header: Decodable::consensus_decode(reader)?, length: reader.read_u8()? })
@@ -1898,25 +1689,6 @@ impl encoding::Decodable for HeadersMessage {
     type Decoder = HeadersMessageDecoder;
 
     fn decoder() -> Self::Decoder { HeadersMessageDecoder(VecDecoder::new()) }
-}
-
-/// An error decoding a [`HeadersMessage`] message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct HeadersMessageDecoderError(<HeadersMessageInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for HeadersMessageDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for HeadersMessageDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "headersmessage error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for HeadersMessageDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
 
 impl Decodable for V1NetworkMessage {
@@ -2191,6 +1963,282 @@ fn sha2_checksum(data: &[u8]) -> [u8; 4] {
     let checksum = sha256d::hash(data);
     let checksum = checksum.to_byte_array();
     [checksum[0], checksum[1], checksum[2], checksum[3]]
+}
+
+/// Error types for network messages.
+pub mod error {
+    use alloc::borrow::Cow;
+    use core::convert::Infallible;
+    use core::fmt;
+
+    use internals::write_err;
+
+    /// Error decoding a [`CommandString`].
+    ///
+    /// [`CommandString`]: super::CommandString
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum CommandStringDecoderError {
+        /// Unexpected end of data.
+        UnexpectedEof(encoding::UnexpectedEofError),
+        /// Command string contains non-ASCII characters.
+        NotAscii,
+    }
+
+    impl fmt::Display for CommandStringDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::UnexpectedEof(e) => write!(f, "unexpected end of data: {}", e),
+                Self::NotAscii => write!(f, "command string must be ASCII"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for CommandStringDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::UnexpectedEof(e) => Some(e),
+                Self::NotAscii => None,
+            }
+        }
+    }
+
+    /// Error returned when a command string is invalid.
+    ///
+    /// This is currently returned for command strings longer than 12.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct CommandStringError {
+        pub(super) cow: Cow<'static, str>,
+    }
+
+    impl fmt::Display for CommandStringError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                f,
+                "the command string '{}' has length {} which is larger than 12",
+                self.cow,
+                self.cow.len()
+            )
+        }
+    }
+
+    impl std::error::Error for CommandStringError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// An error consensus decoding a [`V1MessageHeader`].
+    ///
+    /// [`V1MessageHeader`]: super::V1MessageHeader
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct V1MessageHeaderDecoderError(
+        pub(super) <super::V1MessageHeaderInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl fmt::Display for V1MessageHeaderDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "message header decoder error"; self.0)
+        }
+    }
+
+    /// An error decoding a [`InventoryPayload`].
+    ///
+    /// [`InventoryPayload`]: super::InventoryPayload
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct InventoryPayloadDecoderError(
+        pub(super) <super::InventoryInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for InventoryPayloadDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for InventoryPayloadDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "inventory payload error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for InventoryPayloadDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error decoding a [`AddrPayload`].
+    ///
+    /// [`AddrPayload`]: super::AddrPayload
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct AddrPayloadDecoderError(
+        pub(super) <super::AddrPayloadInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for AddrPayloadDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for AddrPayloadDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "addrv1 payload error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for AddrPayloadDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error decoding a [`AddrV2Payload`].
+    ///
+    /// [`AddrV2Payload`]: super::AddrV2Payload
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct AddrV2PayloadDecoderError(
+        pub(super) <super::AddrV2PayloadInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for AddrV2PayloadDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for AddrV2PayloadDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "addrv2 payload error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for AddrV2PayloadDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error consensus decoding a [`Ping`].
+    ///
+    /// [`Ping`]: super::Ping
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct PingDecoderError(pub(super) <encoding::ArrayDecoder<8> as encoding::Decoder>::Error);
+
+    impl From<Infallible> for PingDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for PingDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "ping decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for PingDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error consensus decoding a [`Pong`].
+    ///
+    /// [`Pong`]: super::Pong
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct PongDecoderError(pub(super) <encoding::ArrayDecoder<8> as encoding::Decoder>::Error);
+
+    impl From<Infallible> for PongDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for PongDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "pong decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for PongDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// Error decoding a raw network message.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct V1NetworkMessageDecoderError(pub(super) V1NetworkMessageDecoderErrorInner);
+
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub(super) enum V1NetworkMessageDecoderErrorInner {
+        /// Error decoding the message header.
+        Header,
+        /// Payload length exceeds maximum allowed message size.
+        PayloadTooLarge,
+        /// Error decoding the message payload.
+        Payload,
+    }
+
+    impl fmt::Display for V1NetworkMessageDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self.0 {
+                V1NetworkMessageDecoderErrorInner::Header => {
+                    write!(f, "error decoding message header")
+                }
+                V1NetworkMessageDecoderErrorInner::PayloadTooLarge => {
+                    write!(f, "payload length exceeds maximum allowed message size")
+                }
+                V1NetworkMessageDecoderErrorInner::Payload => {
+                    write!(f, "error decoding message payload")
+                }
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for V1NetworkMessageDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self.0 {
+                V1NetworkMessageDecoderErrorInner::Header => None,
+                V1NetworkMessageDecoderErrorInner::PayloadTooLarge => None,
+                V1NetworkMessageDecoderErrorInner::Payload => None,
+            }
+        }
+    }
+
+    /// An error decoding a [`NetworkHeader`] message.
+    ///
+    /// [`NetworkHeader`]: super::NetworkHeader
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct NetworkHeaderDecoderError(
+        pub(super) <super::NetworkHeaderInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for NetworkHeaderDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for NetworkHeaderDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "network header error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for NetworkHeaderDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error decoding a [`HeadersMessage`] message.
+    ///
+    /// [`HeadersMessage`]: super::HeadersMessage
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct HeadersMessageDecoderError(
+        pub(super) <super::HeadersMessageInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for HeadersMessageDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for HeadersMessageDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "headersmessage error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for HeadersMessageDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
 }
 
 #[cfg(feature = "arbitrary")]
