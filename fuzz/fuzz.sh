@@ -23,7 +23,7 @@ cargo --version
 rustc --version
 
 # Testing
-cargo install --force cargo-fuzz
+cargo install --force --locked --version 0.12.0 cargo-fuzz
 for targetFile in $targetFiles; do
   targetName=$(targetFileToName "$targetFile")
   echo "Fuzzing target $targetName ($targetFile)"
