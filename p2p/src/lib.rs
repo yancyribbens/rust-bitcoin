@@ -14,6 +14,7 @@ mod network_ext;
 #[cfg(feature = "std")]
 pub mod address;
 pub mod bip152;
+pub mod error;
 pub mod merkle_tree;
 #[cfg(feature = "std")]
 pub mod message;
@@ -37,9 +38,7 @@ pub extern crate arbitrary;
 pub extern crate hex_stable as hex;
 
 use alloc::borrow::ToOwned;
-use alloc::string::String;
 use core::borrow::{Borrow, BorrowMut};
-use core::convert::Infallible;
 use core::str::FromStr;
 use core::{fmt, ops};
 
@@ -47,7 +46,7 @@ use core::{fmt, ops};
 use arbitrary::{Arbitrary, Unstructured};
 use bitcoin::consensus::encode::{self, Decodable, Encodable};
 use encoding::{ArrayDecoder, ArrayEncoder};
-use internals::{impl_to_hex_from_lower_hex, write_err};
+use internals::impl_to_hex_from_lower_hex;
 use io::{BufRead, Write};
 use network::{Network, TestnetVersion};
 
@@ -62,6 +61,13 @@ pub use self::{
 #[rustfmt::skip]
 #[doc(inline)]
 pub use self::{address::Address, message::CheckedData};
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{
+    MagicDecoderError, ParseMagicError, ProtocolVersionDecoderError,
+    ServiceFlagsDecoderError, UnknownMagicError, UnknownNetworkError,
+};
 
 /// Version of the protocol as appearing in network version handshakes and some message headers.
 ///
@@ -175,24 +181,6 @@ impl encoding::Decodable for ProtocolVersion {
     fn decoder() -> Self::Decoder { ProtocolVersionDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
-/// An error consensus decoding an `ProtocolVersion`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ProtocolVersionDecoderError(<encoding::ArrayDecoder<4> as encoding::Decoder>::Error);
-
-impl From<Infallible> for ProtocolVersionDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for ProtocolVersionDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "protocolversion error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ProtocolVersionDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
 /// Flags to indicate which network services a node supports.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ServiceFlags(u64);
@@ -402,25 +390,6 @@ impl encoding::Decodable for ServiceFlags {
     fn decoder() -> Self::Decoder { ServiceFlagsDecoder(encoding::ArrayDecoder::<8>::new()) }
 }
 
-/// An error consensus decoding an `ServiceFlags`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ServiceFlagsDecoderError(<encoding::ArrayDecoder<8> as encoding::Decoder>::Error);
-
-impl From<Infallible> for ServiceFlagsDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for ServiceFlagsDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "serviceflags error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ServiceFlagsDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 /// Network magic bytes to identify the cryptocurrency network the message was intended for.
 #[derive(Copy, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
 pub struct Magic([u8; 4]);
@@ -568,25 +537,6 @@ impl encoding::Decodable for Magic {
     fn decoder() -> Self::Decoder { MagicDecoder(ArrayDecoder::new()) }
 }
 
-/// Errors occuring when decoding a network [`Magic`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MagicDecoderError(<MagicInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for MagicDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for MagicDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "magic error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for MagicDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 impl AsRef<[u8]> for Magic {
     fn as_ref(&self) -> &[u8] { &self.0 }
 }
@@ -617,57 +567,6 @@ impl BorrowMut<[u8]> for Magic {
 
 impl BorrowMut<[u8; 4]> for Magic {
     fn borrow_mut(&mut self) -> &mut [u8; 4] { &mut self.0 }
-}
-
-/// An error in parsing magic bytes.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct ParseMagicError {
-    /// The error that occurred when parsing the string.
-    error: hex::DecodeFixedLengthBytesError,
-    /// The byte string that failed to parse.
-    magic: String,
-}
-
-impl fmt::Display for ParseMagicError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "failed to parse {} as network magic", self.magic)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ParseMagicError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.error) }
-}
-
-/// Error in creating a Network from Magic bytes.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct UnknownMagicError(Magic);
-
-impl fmt::Display for UnknownMagicError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "unknown network magic {}", self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UnknownMagicError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// Error in creating a Magic from a Network.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct UnknownNetworkError(Network);
-
-impl fmt::Display for UnknownNetworkError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "unknown network {}", self.0) }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UnknownNetworkError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
 #[cfg(feature = "arbitrary")]
