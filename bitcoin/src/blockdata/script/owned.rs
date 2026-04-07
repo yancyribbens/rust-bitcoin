@@ -11,7 +11,7 @@ use super::{
 };
 use crate::internal_macros;
 use crate::key::{
-    PubkeyHash, PublicKey, TapTweak, TweakedPublicKey, UntweakedPublicKey, WPubkeyHash,
+    LegacyPublicKey, PubkeyHash, TapTweak, TweakedPublicKey, UntweakedPublicKey, WPubkeyHash,
 };
 use crate::opcodes::all::*;
 use crate::opcodes::{self, Opcode};
@@ -171,7 +171,7 @@ crate::internal_macros::define_extension_trait! {
         }
 
         /// Generates P2PK-type of scriptPubkey.
-        fn new_p2pk(pubkey: PublicKey) -> Self {
+        fn new_p2pk(pubkey: LegacyPublicKey) -> Self {
             Builder::new().push_key(pubkey).push_opcode(OP_CHECKSIG).into_script()
         }
 

@@ -29,7 +29,7 @@ mod message_signing {
     use secp256k1::ecdsa::{RecoverableSignature, RecoveryId};
 
     use crate::address::{Address, AddressType};
-    use crate::crypto::key::PublicKey;
+    use crate::crypto::key::LegacyPublicKey;
 
     /// An error used for dealing with Bitcoin Signed Messages.
     #[derive(Debug, Clone, PartialEq, Eq)]
@@ -130,12 +130,12 @@ mod message_signing {
         pub fn recover_pubkey(
             &self,
             msg_hash: sha256d::Hash,
-        ) -> Result<PublicKey, MessageSignatureError> {
+        ) -> Result<LegacyPublicKey, MessageSignatureError> {
             let msg = secp256k1::Message::from_digest(msg_hash.to_byte_array());
             let pubkey = self.signature.recover_ecdsa(msg)?;
             Ok(match self.compressed {
-                true => PublicKey::from_secp(pubkey),
-                false => PublicKey::from_secp_uncompressed(pubkey),
+                true => LegacyPublicKey::from_secp(pubkey),
+                false => LegacyPublicKey::from_secp_uncompressed(pubkey),
             })
         }
 
@@ -237,7 +237,7 @@ mod tests {
     #[cfg(feature = "secp-recovery")]
     #[cfg(feature = "std")]
     fn message_signature() {
-        use crate::{Address, AddressType, CompressedPublicKey, Network, NetworkKind, PrivateKey};
+        use crate::{Address, AddressType, FullPublicKey, Network, NetworkKind, PrivateKey};
 
         let message = "rust-bitcoin MessageSignature test";
         let msg_hash = super::signed_msg_hash(message);
@@ -269,7 +269,7 @@ mod tests {
         let p2pkh = Address::p2pkh(pubkey, Network::Bitcoin);
         assert_eq!(signature2.is_signed_by_address(&p2pkh, msg_hash), Ok(true));
 
-        assert_eq!(pubkey, CompressedPublicKey::from_private_key(privkey).unwrap());
+        assert_eq!(pubkey, FullPublicKey::from_private_key(privkey).unwrap());
         let signature_base64 = signature.to_base64();
         let signature_round_trip =
             super::MessageSignature::from_base64(&signature_base64).expect("message signature");
@@ -282,7 +282,7 @@ mod tests {
     fn incorrect_message_signature() {
         use base64::prelude::{Engine as _, BASE64_STANDARD};
 
-        use crate::crypto::key::PublicKey;
+        use crate::crypto::key::LegacyPublicKey;
         use crate::{Address, NetworkKind};
 
         let message = "a different message from what was signed";
@@ -295,9 +295,10 @@ mod tests {
         let signature =
             super::MessageSignature::from_base64(signature_base64).expect("message signature");
 
-        let pubkey =
-            PublicKey::from_slice(&BASE64_STANDARD.decode(pubkey_base64).expect("base64 string"))
-                .expect("pubkey slice");
+        let pubkey = LegacyPublicKey::from_slice(
+            &BASE64_STANDARD.decode(pubkey_base64).expect("base64 string"),
+        )
+        .expect("pubkey slice");
 
         let p2pkh = Address::p2pkh(pubkey, NetworkKind::Main);
         assert_eq!(signature.is_signed_by_address(&p2pkh, msg_hash), Ok(false));

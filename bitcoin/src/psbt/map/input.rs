@@ -8,7 +8,7 @@ use arbitrary::{Arbitrary, Unstructured};
 use hashes::{hash160, ripemd160, sha256, sha256d};
 
 use crate::bip32::KeySource;
-use crate::crypto::key::{PublicKey, XOnlyPublicKey};
+use crate::crypto::key::{LegacyPublicKey, XOnlyPublicKey};
 use crate::crypto::{ecdsa, taproot};
 use crate::prelude::{btree_map, BTreeMap, Borrow, Box, ToOwned, Vec};
 use crate::psbt::map::Map;
@@ -80,7 +80,7 @@ pub struct Input {
     pub witness_utxo: Option<TxOut>,
     /// A map from public keys to their corresponding signature as would be
     /// pushed to the stack from a scriptSig or witness for a non-Taproot inputs.
-    pub partial_sigs: BTreeMap<PublicKey, ecdsa::Signature>,
+    pub partial_sigs: BTreeMap<LegacyPublicKey, ecdsa::Signature>,
     /// The sighash type to be used for this input. Signatures for this input
     /// must use the sighash type.
     pub sighash_type: Option<PsbtSighashType>,
@@ -271,7 +271,7 @@ impl Input {
             }
             PSBT_IN_PARTIAL_SIG => {
                 impl_psbt_insert_pair! {
-                    self.partial_sigs <= <raw_key: PublicKey>|<raw_value: ecdsa::Signature>
+                    self.partial_sigs <= <raw_key: LegacyPublicKey>|<raw_value: ecdsa::Signature>
                 }
             }
             PSBT_IN_SIGHASH_TYPE => {

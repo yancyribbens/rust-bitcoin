@@ -30,8 +30,9 @@ use bitcoin::sighash::{EcdsaSighashType, TapSighashType};
 use bitcoin::taproot::{self, ControlBlock, LeafVersion, TapTree, TaprootBuilder};
 use bitcoin::witness::Witness;
 use bitcoin::{
-    ecdsa, hex, transaction, Address, Amount, NetworkKind, OutPoint, PublicKey, ScriptPubKeyBuf,
-    ScriptSigBuf, Sequence, TapScriptBuf, Target, Transaction, TxIn, TxOut, Txid, WifKey, Work,
+    ecdsa, hex, transaction, Address, Amount, LegacyPublicKey, NetworkKind, OutPoint,
+    ScriptPubKeyBuf, ScriptSigBuf, Sequence, TapScriptBuf, Target, Transaction, TxIn, TxOut, Txid,
+    WifKey, Work,
 };
 
 #[test]
@@ -111,7 +112,7 @@ fn serde_regression_witness() {
 #[test]
 fn serde_regression_address() {
     let s = include_str!("data/serde/public_key_hex");
-    let pk = s.trim().parse::<PublicKey>().unwrap();
+    let pk = s.trim().parse::<LegacyPublicKey>().unwrap();
     let addr = Address::p2pkh(pk, NetworkKind::Main);
 
     let got = serialize(&addr).unwrap();
@@ -183,7 +184,7 @@ fn serde_regression_private_key() {
 #[test]
 fn serde_regression_public_key() {
     let s = include_str!("data/serde/public_key_hex");
-    let pk = s.trim().parse::<PublicKey>().unwrap();
+    let pk = s.trim().parse::<LegacyPublicKey>().unwrap();
 
     let got = serialize(&pk).unwrap();
     let want = include_bytes!("data/serde/public_key_bincode") as &[_];

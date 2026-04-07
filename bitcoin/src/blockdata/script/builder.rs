@@ -3,7 +3,7 @@
 use core::fmt;
 
 use super::{opcode_to_verify, Error, PushBytes, Script, ScriptBuf};
-use crate::key::{PublicKey, XOnlyPublicKey};
+use crate::key::{LegacyPublicKey, XOnlyPublicKey};
 use crate::locktime::absolute;
 use crate::opcodes::all::*;
 use crate::opcodes::Opcode;
@@ -136,7 +136,7 @@ impl<T> Builder<T> {
     }
 
     /// Adds instructions to push a public key onto the stack.
-    pub fn push_key(self, key: PublicKey) -> Self {
+    pub fn push_key(self, key: LegacyPublicKey) -> Self {
         if key.compressed() {
             self.push_slice(key.serialize_compressed())
         } else {
