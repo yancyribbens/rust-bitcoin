@@ -1579,7 +1579,9 @@ impl fmt::Display for InvalidMerkleBranchSizeError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidMerkleBranchSizeError {}
+impl std::error::Error for InvalidMerkleBranchSizeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Merkle tree depth must not be more than 128.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1605,7 +1607,9 @@ impl fmt::Display for InvalidMerkleTreeDepthError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidMerkleTreeDepthError {}
+impl std::error::Error for InvalidMerkleTreeDepthError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// The last bit of tapleaf version must be zero.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1627,7 +1631,9 @@ impl fmt::Display for InvalidTaprootLeafVersionError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidTaprootLeafVersionError {}
+impl std::error::Error for InvalidTaprootLeafVersionError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Invalid control block size.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1653,7 +1659,9 @@ impl fmt::Display for InvalidControlBlockSizeError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidControlBlockSizeError {}
+impl std::error::Error for InvalidControlBlockSizeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for TapLeafHash {

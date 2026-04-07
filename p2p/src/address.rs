@@ -968,7 +968,17 @@ impl fmt::Display for UnroutableAddressError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for UnroutableAddressError {}
+impl std::error::Error for UnroutableAddressError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::TorV2 => None,
+            Self::TorV3 => None,
+            Self::I2p => None,
+            Self::Cjdns => None,
+            Self::Unknown => None,
+        }
+    }
+}
 
 /// Error types for [`AddrV2`] to [`IpAddr`] conversion.
 #[derive(Debug, PartialEq, Eq)]
@@ -994,7 +1004,16 @@ impl fmt::Display for AddrV2ToIpAddrError {
     }
 }
 
-impl std::error::Error for AddrV2ToIpAddrError {}
+impl std::error::Error for AddrV2ToIpAddrError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::TorV3 => None,
+            Self::I2p => None,
+            Self::Cjdns => None,
+            Self::Unknown => None,
+        }
+    }
+}
 
 /// Error types for [`AddrV2`] to [`Ipv4Addr`] conversion.
 #[derive(Debug, PartialEq, Eq)]
@@ -1023,7 +1042,17 @@ impl fmt::Display for AddrV2ToIpv4AddrError {
     }
 }
 
-impl std::error::Error for AddrV2ToIpv4AddrError {}
+impl std::error::Error for AddrV2ToIpv4AddrError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Ipv6 => None,
+            Self::TorV3 => None,
+            Self::I2p => None,
+            Self::Cjdns => None,
+            Self::Unknown => None,
+        }
+    }
+}
 
 /// Error types for [`AddrV2`] to [`Ipv6Addr`] conversion.
 #[derive(Debug, PartialEq, Eq)]
@@ -1052,7 +1081,17 @@ impl fmt::Display for AddrV2ToIpv6AddrError {
     }
 }
 
-impl std::error::Error for AddrV2ToIpv6AddrError {}
+impl std::error::Error for AddrV2ToIpv6AddrError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Ipv4 => None,
+            Self::TorV3 => None,
+            Self::I2p => None,
+            Self::Cjdns => None,
+            Self::Unknown => None,
+        }
+    }
+}
 
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for Address {

@@ -920,7 +920,16 @@ pub mod error {
 
     #[cfg(feature = "alloc")]
     #[cfg(feature = "std")]
-    impl std::error::Error for InvalidBlockError {}
+    impl std::error::Error for InvalidBlockError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::InvalidMerkleRoot => None,
+                Self::InvalidWitnessCommitment => None,
+                Self::NoTransactions => None,
+                Self::InvalidCoinbase => None,
+            }
+        }
+    }
 
     /// An error that occurs during parsing of a [`Header`] from a hex string.
     #[cfg(feature = "hex")]

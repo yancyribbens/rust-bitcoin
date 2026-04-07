@@ -33,7 +33,9 @@ impl fmt::Display for DisabledLockTimeError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for DisabledLockTimeError {}
+impl std::error::Error for DisabledLockTimeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Error returned when attempting to satisfy lock fails.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -161,7 +163,9 @@ impl fmt::Display for TimeOverflowError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for TimeOverflowError {}
+impl std::error::Error for TimeOverflowError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Error returned when `NumberOfBlocks::is_satisfied_by` is incorrectly called.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -184,7 +188,9 @@ impl fmt::Display for InvalidHeightError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidHeightError {}
+impl std::error::Error for InvalidHeightError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Error returned when `NumberOf512Seconds::is_satisfied_by` is incorrectly called.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -207,7 +213,9 @@ impl fmt::Display for InvalidTimeError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidTimeError {}
+impl std::error::Error for InvalidTimeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 #[cfg(test)]
 mod tests {

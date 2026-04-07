@@ -88,7 +88,9 @@ impl fmt::Display for RedeemScriptSizeError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for RedeemScriptSizeError {}
+impl std::error::Error for RedeemScriptSizeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 // The new hash wrapper type.
 type HashType = ScriptHash;

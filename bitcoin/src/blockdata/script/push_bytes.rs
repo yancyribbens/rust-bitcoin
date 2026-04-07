@@ -447,7 +447,14 @@ pub enum ScriptIntError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for ScriptIntError {}
+impl std::error::Error for ScriptIntError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::NumericOverflow => None,
+            Self::NonMinimal => None,
+        }
+    }
+}
 
 impl fmt::Display for ScriptIntError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

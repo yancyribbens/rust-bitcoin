@@ -517,7 +517,9 @@ pub mod error {
     }
 
     #[cfg(feature = "std")]
-    impl std::error::Error for MissingPrefixError {}
+    impl std::error::Error for MissingPrefixError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
 
     /// Error when hex string contains a prefix (e.g. 0x).
     #[derive(Debug, Clone, Eq, PartialEq)]
@@ -541,7 +543,9 @@ pub mod error {
     }
 
     #[cfg(feature = "std")]
-    impl std::error::Error for ContainsPrefixError {}
+    impl std::error::Error for ContainsPrefixError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
 }
 
 #[cfg(test)]

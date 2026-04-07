@@ -185,7 +185,9 @@ impl fmt::Display for OutOfRangeError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for OutOfRangeError {}
+impl std::error::Error for OutOfRangeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Error returned when the input string has higher precision than satoshis.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -211,7 +213,9 @@ impl fmt::Display for TooPreciseError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for TooPreciseError {}
+impl std::error::Error for TooPreciseError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Error returned when the input string is too large.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -241,7 +245,9 @@ impl fmt::Display for InputTooLargeError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InputTooLargeError {}
+impl std::error::Error for InputTooLargeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Error returned when digits were expected in the input but there were none.
 ///
@@ -266,7 +272,9 @@ impl fmt::Display for MissingDigitsError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for MissingDigitsError {}
+impl std::error::Error for MissingDigitsError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(super) enum MissingDigitsKind {
@@ -300,7 +308,9 @@ impl fmt::Display for InvalidCharacterError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for InvalidCharacterError {}
+impl std::error::Error for InvalidCharacterError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// Error returned when a valid character (e.g. '_') is in an invalid/bad position.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -330,7 +340,9 @@ impl fmt::Display for BadPositionError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for BadPositionError {}
+impl std::error::Error for BadPositionError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+}
 
 /// An error during amount parsing.
 #[derive(Debug, Clone, PartialEq, Eq)]

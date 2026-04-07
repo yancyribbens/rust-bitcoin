@@ -645,7 +645,9 @@ pub mod error {
     }
 
     #[cfg(feature = "std")]
-    impl std::error::Error for TooBigForRelativeHeightError {}
+    impl std::error::Error for TooBigForRelativeHeightError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
 
     /// An error consensus decoding an `BlockHeight`.
     #[cfg(feature = "encoding")]

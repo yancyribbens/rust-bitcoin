@@ -1667,7 +1667,15 @@ impl fmt::Display for V1NetworkMessageDecoderError {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for V1NetworkMessageDecoderError {}
+impl std::error::Error for V1NetworkMessageDecoderError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self.0 {
+            V1NetworkMessageDecoderErrorInner::Header => None,
+            V1NetworkMessageDecoderErrorInner::PayloadTooLarge => None,
+            V1NetworkMessageDecoderErrorInner::Payload => None,
+        }
+    }
+}
 
 impl Encodable for V2NetworkMessage {
     fn consensus_encode<W: Write + ?Sized>(&self, writer: &mut W) -> Result<usize, io::Error> {
