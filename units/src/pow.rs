@@ -526,17 +526,6 @@ impl<'de> serde::Deserialize<'de> for U256 {
 
                     Ok(U256(upper, lower))
                 }
-
-                fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
-                where
-                    E: de::Error,
-                {
-                    if let Ok(hex) = core::str::from_utf8(v) {
-                        self.visit_str(hex)
-                    } else {
-                        Err(E::invalid_value(::serde::de::Unexpected::Bytes(v), &self))
-                    }
-                }
             }
             d.deserialize_str(HexVisitor)
         } else {
