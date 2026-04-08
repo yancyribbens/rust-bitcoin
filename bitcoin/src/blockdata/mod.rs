@@ -39,7 +39,7 @@ pub mod locktime {
 
         use io::{BufRead, Write};
 
-        pub use crate::consensus::encode::{self, Decodable, Encodable};
+        use crate::consensus::encode::{self, Decodable, Encodable};
 
         // Re-export everything from the `units::locktime::absolute` module.
         #[rustfmt::skip]        // Keep public re-exports separate.
