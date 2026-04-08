@@ -438,6 +438,7 @@ macro_rules! hash_newtype_known_attrs {
 
 /// Functions used by serde impls of all hashes.
 #[cfg(feature = "serde")]
+#[doc(hidden)]
 pub mod serde_details {
     use core::marker::PhantomData;
     use core::str::FromStr;
