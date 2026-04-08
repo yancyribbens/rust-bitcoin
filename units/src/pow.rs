@@ -519,12 +519,8 @@ impl<'de> serde::Deserialize<'de> for U256 {
                         return Err(de::Error::invalid_length(s.len(), &self));
                     }
 
-                    let upper = parse_int::hex_u128_unprefixed(&s[..32])
-                        .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(s), &self))?;
-                    let lower = parse_int::hex_u128_unprefixed(&s[32..])
-                        .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(s), &self))?;
-
-                    Ok(U256(upper, lower))
+                    U256::from_unprefixed_hex(s)
+                        .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(s), &self))
                 }
             }
             d.deserialize_str(HexVisitor)
