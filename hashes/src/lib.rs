@@ -201,20 +201,32 @@ pub trait HashEngine: Clone {
 /// Encodes an object into a hash engine.
 ///
 /// Consumes and returns the hash engine to make it easier to call [`HashEngine::finalize`] directly
-/// on the result.
+/// on the result.  See also [`drain_to_engine`].
 pub fn encode_to_engine<T, H>(object: &T, mut engine: H) -> H
 where
     T: encoding::Encodable + ?Sized,
     H: HashEngine,
 {
     let mut encoder = object.encoder();
+    drain_to_engine(&mut encoder, &mut engine);
+    engine
+}
+
+/// Drains an encoder into a hash engine.
+///
+/// Drains [`Encoder`] into a [`HashEngine`] and does not consume any input.
+/// See also [`encode_to_engine`].
+pub fn drain_to_engine<T, H>(encoder: &mut T, engine: &mut H)
+where
+    T: Encoder + ?Sized,
+    H: HashEngine,
+{
     loop {
         engine.input(encoder.current_chunk());
         if !encoder.advance() {
             break;
         }
     }
-    engine
 }
 
 /// Trait which applies to hashes of all types.
