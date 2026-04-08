@@ -62,7 +62,7 @@ impl Hash {
         Hash(hash)
     }
 
-    /// Iterate the sha256 algorithm to turn a sha256 hash into a sha256d hash
+    /// Iterate the sha256 algorithm to turn a sha256 hash into a sha256d hash.
     #[must_use]
     pub fn hash_again(&self) -> sha256d::Hash { sha256d::Hash::from_byte_array(hash(&self.0).0) }
 
@@ -284,7 +284,7 @@ pub mod error {
     }
 
     impl MidstateError {
-        /// Returns block-aligned midstate
+        /// Returns block-aligned midstate.
         pub const fn midstate(&self) -> &Midstate { &self.block_aligned_midstate }
 
         /// returns the unprocessed bytes remaining in the buffer.
