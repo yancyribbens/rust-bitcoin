@@ -12,23 +12,29 @@
 //! [BIP-0341]: <https://github.com/bitcoin/bips/blob/150ab6f5c3aca9da05fccc5b435e9667853407f4/bip-0341.mediawiki>
 //! [BIP-0143]: <https://github.com/bitcoin/bips/blob/99701f68a88ce33b2d0838eb84e115cef505b4c2/bip-0143.mediawiki>
 
-use core::convert::Infallible;
 use core::{fmt, str};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
 use hashes::{hash_newtype, sha256, sha256d, sha256t, sha256t_tag};
-use internals::write_err;
 use io::Write;
 
 use crate::consensus::{encode, Encodable};
-use crate::prelude::{Borrow, BorrowMut, String, ToOwned};
+use crate::prelude::{Borrow, BorrowMut, ToOwned};
 use crate::script::{ScriptExt as _, ScriptHashableTag};
 use crate::taproot::{LeafVersion, TapLeafHash, TapLeafTag, TAPROOT_ANNEX_PREFIX};
 use crate::transaction::TransactionExt as _;
 use crate::witness::Witness;
 use crate::{
     transaction, Amount, ScriptPubKey, Sequence, TapScript, Transaction, TxOut, WitnessScript,
+};
+
+#[rustfmt::skip]            // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{
+    AnnexError, InvalidSighashTypeError, NonStandardSighashTypeError, SighashTypeParseError,
+    SigningDataError, SingleMissingOutputError, P2wpkhError, PrevoutsIndexError, PrevoutsKindError,
+    PrevoutsSizeError, TaprootError,
 };
 
 /// Used for signature hash for invalid use of SIGHASH_SINGLE.
@@ -262,70 +268,6 @@ where
     }
 }
 
-/// The number of supplied prevouts differs from the number of inputs in the transaction.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct PrevoutsSizeError;
-
-impl fmt::Display for PrevoutsSizeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "number of supplied prevouts differs from the number of inputs in transaction")
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for PrevoutsSizeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// A single prevout was provided but all prevouts are needed without `ANYONECANPAY`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct PrevoutsKindError;
-
-impl fmt::Display for PrevoutsKindError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "single prevout provided but all prevouts are needed without `ANYONECANPAY`")
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for PrevoutsKindError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// [`Prevouts`] index related errors.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum PrevoutsIndexError {
-    /// Invalid index when accessing a [`Prevouts::One`] kind.
-    InvalidOneIndex,
-    /// Invalid index when accessing a [`Prevouts::All`] kind.
-    InvalidAllIndex,
-}
-
-impl From<Infallible> for PrevoutsIndexError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for PrevoutsIndexError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::InvalidOneIndex => write!(f, "invalid index when accessing a Prevouts::One kind"),
-            Self::InvalidAllIndex => write!(f, "invalid index when accessing a Prevouts::All kind"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for PrevoutsIndexError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::InvalidOneIndex | Self::InvalidAllIndex => None,
-        }
-    }
-}
-
 impl<'s> ScriptPath<'s> {
     /// Constructs a new `ScriptPath` structure.
     pub fn new(script: &'s TapScript, leaf_version: LeafVersion) -> Self {
@@ -537,58 +479,6 @@ impl TapSighashType {
             x => return Err(InvalidSighashTypeError(x.into())),
         })
     }
-}
-
-/// Integer is not a consensus valid sighash type.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct InvalidSighashTypeError(pub u32);
-
-impl fmt::Display for InvalidSighashTypeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid sighash type {}", self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InvalidSighashTypeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// This type is consensus valid but an input including it would prevent the transaction from
-/// being relayed on today's Bitcoin network.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct NonStandardSighashTypeError(pub u32);
-
-impl fmt::Display for NonStandardSighashTypeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "non-standard sighash type {}", self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for NonStandardSighashTypeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// Error returned for failure during parsing one of the sighash types.
-///
-/// This is currently returned for unrecognized sighash strings.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct SighashTypeParseError {
-    /// The unrecognized string we attempted to parse.
-    pub unrecognized: String,
-}
-
-impl fmt::Display for SighashTypeParseError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "unrecognized SIGHASH string '{}'", self.unrecognized)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for SighashTypeParseError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
 impl<R: Borrow<Transaction>> SighashCache<R> {
@@ -1213,168 +1103,6 @@ impl Encodable for Annex<'_> {
     }
 }
 
-/// Error computing a Taproot sighash.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum TaprootError {
-    /// Index out of bounds when accessing transaction input vector.
-    InputsIndex(transaction::InputsIndexError),
-    /// Using `SIGHASH_SINGLE` requires an output at the same index as the input.
-    SingleMissingOutput(SingleMissingOutputError),
-    /// Prevouts size error.
-    PrevoutsSize(PrevoutsSizeError),
-    /// Prevouts index error.
-    PrevoutsIndex(PrevoutsIndexError),
-    /// Prevouts kind error.
-    PrevoutsKind(PrevoutsKindError),
-    /// Invalid Sighash type.
-    InvalidSighashType(u32),
-}
-
-impl From<Infallible> for TaprootError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for TaprootError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::InputsIndex(ref e) => write_err!(f, "inputs index"; e),
-            Self::SingleMissingOutput(ref e) => write_err!(f, "sighash single"; e),
-            Self::PrevoutsSize(ref e) => write_err!(f, "prevouts size"; e),
-            Self::PrevoutsIndex(ref e) => write_err!(f, "prevouts index"; e),
-            Self::PrevoutsKind(ref e) => write_err!(f, "prevouts kind"; e),
-            Self::InvalidSighashType(hash_ty) =>
-                write!(f, "invalid Taproot sighash type : {} ", hash_ty),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for TaprootError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::InputsIndex(ref e) => Some(e),
-            Self::SingleMissingOutput(ref e) => Some(e),
-            Self::PrevoutsSize(ref e) => Some(e),
-            Self::PrevoutsIndex(ref e) => Some(e),
-            Self::PrevoutsKind(ref e) => Some(e),
-            Self::InvalidSighashType(_) => None,
-        }
-    }
-}
-
-impl From<transaction::InputsIndexError> for TaprootError {
-    fn from(e: transaction::InputsIndexError) -> Self { Self::InputsIndex(e) }
-}
-
-impl From<PrevoutsSizeError> for TaprootError {
-    fn from(e: PrevoutsSizeError) -> Self { Self::PrevoutsSize(e) }
-}
-
-impl From<PrevoutsKindError> for TaprootError {
-    fn from(e: PrevoutsKindError) -> Self { Self::PrevoutsKind(e) }
-}
-
-impl From<PrevoutsIndexError> for TaprootError {
-    fn from(e: PrevoutsIndexError) -> Self { Self::PrevoutsIndex(e) }
-}
-
-/// Error computing a P2WPKH sighash.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum P2wpkhError {
-    /// Error computing the sighash.
-    Sighash(transaction::InputsIndexError),
-    /// Script is not a witness program for a p2wpkh output.
-    NotP2wpkhScript,
-}
-
-impl From<Infallible> for P2wpkhError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for P2wpkhError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Sighash(ref e) => write_err!(f, "error encoding SegWit v0 signing data"; e),
-            Self::NotP2wpkhScript => write!(f, "script is not a script pubkey for a p2wpkh output"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for P2wpkhError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Sighash(ref e) => Some(e),
-            Self::NotP2wpkhScript => None,
-        }
-    }
-}
-
-impl From<transaction::InputsIndexError> for P2wpkhError {
-    fn from(value: transaction::InputsIndexError) -> Self { Self::Sighash(value) }
-}
-
-/// Using `SIGHASH_SINGLE` requires an output at the same index as the input.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct SingleMissingOutputError {
-    /// Input index.
-    pub input_index: usize,
-    /// Length of the output vector.
-    pub outputs_length: usize,
-}
-
-impl fmt::Display for SingleMissingOutputError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "sighash single requires an output at the same index as the input \
-             (input index: {}, outputs length: {})",
-            self.input_index, self.outputs_length
-        )
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for SingleMissingOutputError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
-}
-
-/// Annex must be at least one byte long and the first bytes must be `0x50`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum AnnexError {
-    /// The annex is empty.
-    Empty,
-    /// Incorrect prefix byte in the annex.
-    IncorrectPrefix(u8),
-}
-
-impl From<Infallible> for AnnexError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for AnnexError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Empty => write!(f, "the annex is empty"),
-            Self::IncorrectPrefix(byte) =>
-                write!(f, "incorrect prefix byte in the annex {:02x}, expecting 0x50", byte),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for AnnexError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Empty | Self::IncorrectPrefix(_) => None,
-        }
-    }
-}
-
 fn is_invalid_use_of_sighash_single(sighash: u32, input_index: usize, outputs_len: usize) -> bool {
     let ty = EcdsaSighashType::from_consensus(sighash);
     ty.is_single() && input_index >= outputs_len
@@ -1450,57 +1178,358 @@ impl<E> EncodeSigningDataResult<E> {
     }
 }
 
-/// Error returned when writing signing data fails.
-#[derive(Debug)]
-pub enum SigningDataError<E> {
-    /// Can happen only when using `*_encode_signing_*` methods with custom writers, engines
-    /// like those used in `*_signature_hash` methods do not error.
-    Io(io::Error),
-    /// An argument to the called sighash function was invalid.
-    Sighash(E),
-}
+/// Error types for signature hashing.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
 
-impl<E> SigningDataError<E> {
-    /// Returns the sighash variant, panicking if it's I/O.
+    use internals::write_err;
+
+    use crate::prelude::String;
+    use crate::transaction;
+
+    /// The number of supplied prevouts differs from the number of inputs in the transaction.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct PrevoutsSizeError;
+
+    impl fmt::Display for PrevoutsSizeError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "number of supplied prevouts differs from the number of inputs in transaction"
+            )
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for PrevoutsSizeError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// A single prevout was provided but all prevouts are needed without `ANYONECANPAY`.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct PrevoutsKindError;
+
+    impl fmt::Display for PrevoutsKindError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "single prevout provided but all prevouts are needed without `ANYONECANPAY`")
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for PrevoutsKindError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// [`Prevouts`] index related errors.
     ///
-    /// This is used when encoding to hash engine when we know that I/O doesn't fail.
-    fn unwrap_sighash(self) -> E {
-        match self {
-            Self::Sighash(error) => error,
-            Self::Io(error) => panic!("hash engine error {}", error),
+    /// [`Prevouts`]: super::Prevouts
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum PrevoutsIndexError {
+        /// Invalid index when accessing a [`Prevouts::One`] kind.
+        ///
+        /// [`Prevouts::One`]: super::Prevouts::One
+        InvalidOneIndex,
+        /// Invalid index when accessing a [`Prevouts::All`] kind.
+        ///
+        /// [`Prevouts::All`]: super::Prevouts::All
+        InvalidAllIndex,
+    }
+
+    impl From<Infallible> for PrevoutsIndexError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for PrevoutsIndexError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::InvalidOneIndex =>
+                    write!(f, "invalid index when accessing a Prevouts::One kind"),
+                Self::InvalidAllIndex =>
+                    write!(f, "invalid index when accessing a Prevouts::All kind"),
+            }
         }
     }
 
-    fn sighash<E2: Into<E>>(error: E2) -> Self { Self::Sighash(error.into()) }
-}
-
-impl<E> From<Infallible> for SigningDataError<E> {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl<E: fmt::Display> fmt::Display for SigningDataError<E> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Io(error) => write_err!(f, "failed to write sighash data"; error),
-            Self::Sighash(error) => write_err!(f, "failed to compute sighash data"; error),
+    #[cfg(feature = "std")]
+    impl std::error::Error for PrevoutsIndexError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::InvalidOneIndex | Self::InvalidAllIndex => None,
+            }
         }
     }
-}
 
-#[cfg(feature = "std")]
-impl<E: std::error::Error + 'static> std::error::Error for SigningDataError<E> {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Io(error) => Some(error),
-            Self::Sighash(error) => Some(error),
+    /// Integer is not a consensus valid sighash type.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct InvalidSighashTypeError(pub u32);
+
+    impl fmt::Display for InvalidSighashTypeError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "invalid sighash type {}", self.0)
         }
     }
-}
 
-// We cannot simultaneously impl `From<E>`. it was determined that this alternative requires less
-// manual `map_err` calls.
-impl<E> From<io::Error> for SigningDataError<E> {
-    fn from(value: io::Error) -> Self { Self::Io(value) }
+    #[cfg(feature = "std")]
+    impl std::error::Error for InvalidSighashTypeError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// This type is consensus valid but an input including it would prevent the transaction from
+    /// being relayed on today's Bitcoin network.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct NonStandardSighashTypeError(pub u32);
+
+    impl fmt::Display for NonStandardSighashTypeError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "non-standard sighash type {}", self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for NonStandardSighashTypeError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// Error returned for failure during parsing one of the sighash types.
+    ///
+    /// This is currently returned for unrecognized sighash strings.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct SighashTypeParseError {
+        /// The unrecognized string we attempted to parse.
+        pub unrecognized: String,
+    }
+
+    impl fmt::Display for SighashTypeParseError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "unrecognized SIGHASH string '{}'", self.unrecognized)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for SighashTypeParseError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// Error computing a Taproot sighash.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum TaprootError {
+        /// Index out of bounds when accessing transaction input vector.
+        InputsIndex(transaction::InputsIndexError),
+        /// Using `SIGHASH_SINGLE` requires an output at the same index as the input.
+        SingleMissingOutput(SingleMissingOutputError),
+        /// Prevouts size error.
+        PrevoutsSize(PrevoutsSizeError),
+        /// Prevouts index error.
+        PrevoutsIndex(PrevoutsIndexError),
+        /// Prevouts kind error.
+        PrevoutsKind(PrevoutsKindError),
+        /// Invalid Sighash type.
+        InvalidSighashType(u32),
+    }
+
+    impl From<Infallible> for TaprootError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for TaprootError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::InputsIndex(ref e) => write_err!(f, "inputs index"; e),
+                Self::SingleMissingOutput(ref e) => write_err!(f, "sighash single"; e),
+                Self::PrevoutsSize(ref e) => write_err!(f, "prevouts size"; e),
+                Self::PrevoutsIndex(ref e) => write_err!(f, "prevouts index"; e),
+                Self::PrevoutsKind(ref e) => write_err!(f, "prevouts kind"; e),
+                Self::InvalidSighashType(hash_ty) =>
+                    write!(f, "invalid Taproot sighash type : {} ", hash_ty),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for TaprootError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::InputsIndex(ref e) => Some(e),
+                Self::SingleMissingOutput(ref e) => Some(e),
+                Self::PrevoutsSize(ref e) => Some(e),
+                Self::PrevoutsIndex(ref e) => Some(e),
+                Self::PrevoutsKind(ref e) => Some(e),
+                Self::InvalidSighashType(_) => None,
+            }
+        }
+    }
+
+    impl From<transaction::InputsIndexError> for TaprootError {
+        fn from(e: transaction::InputsIndexError) -> Self { Self::InputsIndex(e) }
+    }
+
+    impl From<PrevoutsSizeError> for TaprootError {
+        fn from(e: PrevoutsSizeError) -> Self { Self::PrevoutsSize(e) }
+    }
+
+    impl From<PrevoutsKindError> for TaprootError {
+        fn from(e: PrevoutsKindError) -> Self { Self::PrevoutsKind(e) }
+    }
+
+    impl From<PrevoutsIndexError> for TaprootError {
+        fn from(e: PrevoutsIndexError) -> Self { Self::PrevoutsIndex(e) }
+    }
+
+    /// Error computing a P2WPKH sighash.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum P2wpkhError {
+        /// Error computing the sighash.
+        Sighash(transaction::InputsIndexError),
+        /// Script is not a witness program for a p2wpkh output.
+        NotP2wpkhScript,
+    }
+
+    impl From<Infallible> for P2wpkhError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for P2wpkhError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Sighash(ref e) => write_err!(f, "error encoding SegWit v0 signing data"; e),
+                Self::NotP2wpkhScript =>
+                    write!(f, "script is not a script pubkey for a p2wpkh output"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for P2wpkhError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Sighash(ref e) => Some(e),
+                Self::NotP2wpkhScript => None,
+            }
+        }
+    }
+
+    impl From<transaction::InputsIndexError> for P2wpkhError {
+        fn from(value: transaction::InputsIndexError) -> Self { Self::Sighash(value) }
+    }
+
+    /// Using `SIGHASH_SINGLE` requires an output at the same index as the input.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct SingleMissingOutputError {
+        /// Input index.
+        pub input_index: usize,
+        /// Length of the output vector.
+        pub outputs_length: usize,
+    }
+
+    impl fmt::Display for SingleMissingOutputError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "sighash single requires an output at the same index as the input \
+                (input index: {}, outputs length: {})",
+                self.input_index, self.outputs_length
+            )
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for SingleMissingOutputError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// Annex must be at least one byte long and the first bytes must be `0x50`.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum AnnexError {
+        /// The annex is empty.
+        Empty,
+        /// Incorrect prefix byte in the annex.
+        IncorrectPrefix(u8),
+    }
+
+    impl From<Infallible> for AnnexError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for AnnexError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Empty => write!(f, "the annex is empty"),
+                Self::IncorrectPrefix(byte) =>
+                    write!(f, "incorrect prefix byte in the annex {:02x}, expecting 0x50", byte),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for AnnexError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Empty | Self::IncorrectPrefix(_) => None,
+            }
+        }
+    }
+
+    /// Error returned when writing signing data fails.
+    #[derive(Debug)]
+    pub enum SigningDataError<E> {
+        /// Can happen only when using `*_encode_signing_*` methods with custom writers, engines
+        /// like those used in `*_signature_hash` methods do not error.
+        Io(io::Error),
+        /// An argument to the called sighash function was invalid.
+        Sighash(E),
+    }
+
+    impl<E> From<Infallible> for SigningDataError<E> {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl<E> SigningDataError<E> {
+        /// Returns the sighash variant, panicking if it's I/O.
+        ///
+        /// This is used when encoding to hash engine when we know that I/O doesn't fail.
+        pub(super) fn unwrap_sighash(self) -> E {
+            match self {
+                Self::Sighash(error) => error,
+                Self::Io(error) => panic!("hash engine error {}", error),
+            }
+        }
+
+        pub(super) fn sighash<E2: Into<E>>(error: E2) -> Self { Self::Sighash(error.into()) }
+    }
+
+    // We cannot simultaneously impl `From<E>`. it was determined that this alternative requires less
+    // manual `map_err` calls.
+    impl<E> From<io::Error> for SigningDataError<E> {
+        fn from(value: io::Error) -> Self { Self::Io(value) }
+    }
+
+    impl<E: fmt::Display> fmt::Display for SigningDataError<E> {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::Io(error) => write_err!(f, "failed to write sighash data"; error),
+                Self::Sighash(error) => write_err!(f, "failed to compute sighash data"; error),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl<E: std::error::Error + 'static> std::error::Error for SigningDataError<E> {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Io(error) => Some(error),
+                Self::Sighash(error) => Some(error),
+            }
+        }
+    }
 }
 
 #[cfg(feature = "arbitrary")]
@@ -1536,6 +1565,8 @@ impl<'a> Arbitrary<'a> for TapSighashType {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "serde")]
+    use alloc::string::String;
     use alloc::string::ToString;
     use alloc::vec::Vec;
 
