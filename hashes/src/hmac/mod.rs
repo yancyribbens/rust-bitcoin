@@ -87,7 +87,7 @@ impl<T: HashEngine> HmacEngine<T> {
     ///
     /// # Panics
     ///
-    /// Larger hashes will result in a panic.
+    /// Panics if `T::BLOCK_SIZE` exceeds 128 bytes.
     pub fn new(key: &[u8]) -> Self
     where
         T: Default,
