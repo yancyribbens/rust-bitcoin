@@ -44,11 +44,13 @@ pub mod locktime {
         // Re-export everything from the `units::locktime::absolute` module.
         #[rustfmt::skip]        // Keep public re-exports separate.
         #[doc(inline)]
-        pub use units::locktime::absolute::{error, Height, LockTime, MedianTimePast};
+        pub use units::locktime::absolute::{
+            error, Height, LockTime, LockTimeDecoder, LockTimeEncoder, MedianTimePast
+        };
         #[doc(no_inline)]
         pub use units::locktime::absolute::{
-            ConversionError, IncompatibleHeightError, IncompatibleTimeError, ParseHeightError,
-            ParseTimeError,
+            ConversionError, IncompatibleHeightError, IncompatibleTimeError, LockTimeDecoderError,
+            ParseHeightError, ParseTimeError,
         };
 
         #[deprecated(since = "TBD", note = "use `MedianTimePast` instead")]
