@@ -366,7 +366,7 @@ impl encoding::Decodable for V1MessageHeader {
     }
 }
 
-/// An error consensus decoding a [`V1MessageHeaderDecoderError`].
+/// An error consensus decoding a [`V1MessageHeader`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct V1MessageHeaderDecoderError(<V1MessageHeaderInnerDecoder as encoding::Decoder>::Error);
 
@@ -794,7 +794,7 @@ impl encoding::Decodable for Ping {
     fn decoder() -> Self::Decoder { PingDecoder(encoding::ArrayDecoder::<8>::new()) }
 }
 
-/// An error consensus decoding a [`PingDecoderError`].
+/// An error consensus decoding a [`Ping`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PingDecoderError(<encoding::ArrayDecoder<8> as encoding::Decoder>::Error);
 
@@ -870,7 +870,7 @@ impl encoding::Decodable for Pong {
     fn decoder() -> Self::Decoder { PongDecoder(encoding::ArrayDecoder::<8>::new()) }
 }
 
-/// An error consensus decoding a [`PongDecoderError`].
+/// An error consensus decoding a [`Pong`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PongDecoderError(<encoding::ArrayDecoder<8> as encoding::Decoder>::Error);
 

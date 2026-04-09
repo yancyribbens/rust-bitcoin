@@ -230,7 +230,7 @@ impl encoding::Decodable for Address {
     }
 }
 
-/// An error consensus decoding a [`AddressDecoderError`].
+/// An error consensus decoding an [`Address`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddressDecoderError(<AddressInnerDecoder as encoding::Decoder>::Error);
 
