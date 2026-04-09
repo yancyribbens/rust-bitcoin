@@ -258,7 +258,7 @@ pub struct AddrV1Message {
     pub address: Address,
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder for an [`AddrV1Message`].
     #[derive(Debug, Clone)]
     pub struct AddrV1MessageEncoder<'e>(Encoder2<ArrayEncoder<4>, AddressEncoder<'e>>);
@@ -881,7 +881,7 @@ impl ToSocketAddrs for AddrV2Message {
     }
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder type for an [`AddrV2Message`].
     #[derive(Debug, Clone)]
     pub struct AddrV2MessageEncoder<'e>(Encoder4<ArrayEncoder<4>, CompactSizeEncoder, AddrV2Encoder<'e>, ArrayEncoder<2>>);
