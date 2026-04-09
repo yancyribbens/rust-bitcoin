@@ -239,20 +239,20 @@ pub mod amount {
     #[cfg(feature = "serde")]
     pub use units::amount::serde;
     #[doc(inline)]
-    pub use units::amount::{Amount, SignedAmount};
+    pub use units::amount::{Amount, AmountDecoder, AmountEncoder, SignedAmount};
     #[doc(no_inline)]
     pub use units::amount::{
-        Denomination, Display, OutOfRangeError, ParseAmountError, ParseDenominationError,
-        ParseError,
+        AmountDecoderError, Denomination, Display, OutOfRangeError, ParseAmountError,
+        ParseDenominationError, ParseError,
     };
 
     /// Error types for bitcoin amounts.
     pub mod error {
         pub use units::amount::error::{
-            InputTooLargeError, InvalidCharacterError, MissingDenominationError,
-            MissingDigitsError, OutOfRangeError, ParseAmountError, ParseDenominationError,
-            ParseError, PossiblyConfusingDenominationError, TooPreciseError,
-            UnknownDenominationError,
+            AmountDecoderError, BadPositionError, InputTooLargeError, InvalidCharacterError,
+            MissingDenominationError, MissingDigitsError, OutOfRangeError, ParseAmountError,
+            ParseDenominationError, ParseError, PossiblyConfusingDenominationError,
+            TooPreciseError, UnknownDenominationError,
         };
     }
 
