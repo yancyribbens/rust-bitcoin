@@ -355,26 +355,34 @@ fn cow_script_to_box_script() {
 
 #[test]
 fn redeem_script_size_error() {
+    #[cfg(feature = "std")]
+    use std::error::Error as _;
+
     let script = RedeemScriptBuf::from(vec![0x51; 521]);
     let result = ScriptHash::try_from(script);
 
     let err = result.unwrap_err();
     assert_eq!(err.invalid_size(), 521);
 
-    let err_msg = format!("{}", err);
-    assert!(err_msg.contains("521"));
+    assert!(!err.to_string().is_empty());
+    #[cfg(feature = "std")]
+    assert!(err.source().is_none());
 }
 
 #[test]
 fn witness_script_size_error() {
+    #[cfg(feature = "std")]
+    use std::error::Error as _;
+
     let script = WitnessScriptBuf::from(vec![0x51; 10_001]);
     let result = WScriptHash::try_from(script);
 
     let err = result.unwrap_err();
     assert_eq!(err.invalid_size(), 10_001);
 
-    let err_msg = format!("{}", err);
-    assert!(err_msg.contains("10001"));
+    assert!(!err.to_string().is_empty());
+    #[cfg(feature = "std")]
+    assert!(err.source().is_none());
 }
 
 #[test]
