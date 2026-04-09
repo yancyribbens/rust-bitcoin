@@ -2,6 +2,7 @@
 
 use alloc::string::ToString;
 use alloc::{format, vec};
+use core::ops::Bound;
 
 use encoding::{Decodable, Decoder as _};
 use hashes::{hash160, sha256};
@@ -195,6 +196,13 @@ fn test_index() {
     assert_eq!(script[..].as_bytes(), &[1, 2, 3, 4, 5]);
     assert_eq!(script[1..=3].as_bytes(), &[2, 3, 4]);
     assert_eq!(script[..=2].as_bytes(), &[1, 2, 3]);
+}
+
+#[test]
+fn test_index_bound_tuple() {
+    let script = Script::from_bytes(&[1, 2, 3, 4, 5]);
+
+    assert_eq!(script[(Bound::Included(1), Bound::Excluded(4))].as_bytes(), &[2, 3, 4]);
 }
 
 #[test]
@@ -435,6 +443,14 @@ fn script_display() {
 }
 
 #[test]
+fn script_pubkey_display_and_debug() {
+    let script = ScriptPubKey::from_bytes(&[0x00, 0xa1, 0xb2]);
+
+    assert_eq!(format!("{}", script), "OP_0 OP_LESSTHANOREQUAL OP_CSV");
+    assert_eq!(format!("{:?}", script), "Script(OP_0 OP_LESSTHANOREQUAL OP_CSV)");
+}
+
+#[test]
 fn script_display_pushdata() {
     // OP_PUSHDATA1
     let script = Script::from_bytes(&[0x4c, 0x02, 0xab, 0xcd]);
@@ -460,6 +476,14 @@ fn script_buf_display() {
         assert_eq!(format!("{:X}", script_buf), "00A1B2");
     }
     assert!(!format!("{:?}", script_buf).is_empty());
+}
+
+#[test]
+fn script_pubkey_buf_display_and_debug() {
+    let script_buf = ScriptPubKeyBuf::from(vec![0x00, 0xa1, 0xb2]);
+
+    assert_eq!(format!("{}", script_buf), "OP_0 OP_LESSTHANOREQUAL OP_CSV");
+    assert_eq!(format!("{:?}", script_buf), "Script(OP_0 OP_LESSTHANOREQUAL OP_CSV)");
 }
 
 #[test]
