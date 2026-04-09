@@ -265,7 +265,7 @@ impl convert::AsRef<[u8]> for Midstate {
     fn as_ref(&self) -> &[u8] { &self.bytes }
 }
 
-/// Error types for the SHA256 hash
+/// Error types for the SHA256 hash.
 pub mod error {
     use core::fmt;
 
