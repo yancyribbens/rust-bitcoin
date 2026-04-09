@@ -749,7 +749,7 @@ impl Ping {
     pub fn new(nonce: u64) -> Self { Self(nonce) }
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder for the [`Ping`] type.
     #[derive(Debug, Clone)]
     pub struct PingEncoder<'e>(encoding::ArrayEncoder<8>);
@@ -825,7 +825,7 @@ impl Pong {
     }
 }
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
     /// The encoder for the [`Pong`] type.
     #[derive(Debug, Clone)]
     pub struct PongEncoder<'e>(encoding::ArrayEncoder<8>);
