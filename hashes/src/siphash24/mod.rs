@@ -107,7 +107,7 @@ impl Hash {
 
 /// Internal state of the [`HashEngine`].
 #[derive(Debug, Clone)]
-pub struct State {
+struct State {
     // v0, v2 and v1, v3 show up in pairs in the algorithm,
     // and simd implementations of SipHash will use vectors
     // of v02 and v13. By placing them in this order in the struct,
