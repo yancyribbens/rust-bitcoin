@@ -56,6 +56,10 @@ exclude_re = [
     "primitives/.* WitnessDecoder::reserve_batch", # Mutations cause an infinite loop
     "primitives/.* replace \\+ with \\* in MerkleNode::calculate_root", # Replacing + with * causes an infinite loop
     "primitives/.* replace == with != in MerkleNode::calculate_root", # Replacing == with != isn't caught unless alloc is disabled.
+    # TODO: remove after x86 SIMD support lands (https://github.com/rust-bitcoin/rust-bitcoin/issues/5540)
+    "primitives/.* calculate_root_batched", # Behind cfg(target_arch = "aarch64"), not compiled on x86_64 CI runner
+    "primitives/.* <impl MerkleNode for TxMerkleNode>::calculate_root", # Behind cfg(target_arch = "aarch64"), not compiled on x86_64 CI runner
+    "primitives/.* <impl MerkleNode for WitnessMerkleNode>::calculate_root", # Behind cfg(target_arch = "aarch64"), not compiled on x86_64 CI runner
 
     # consensus_encoding - most of these are for mutations in the logic used to determine when to stop encoding or decoding.
     "consensus_encoding/.* <impl Decoder for ArrayDecoder<N>>::push_bytes", # Mutations cause an infinite loop
