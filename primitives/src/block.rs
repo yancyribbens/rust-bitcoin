@@ -356,42 +356,21 @@ where
 #[cfg(feature = "alloc")]
 type BlockInnerDecoder = Decoder2<HeaderDecoder, VecDecoder<Transaction>>;
 
-/// The decoder for the [`Block`] type.
-///
-/// This decoder can only produce a `Block<Unchecked>`.
 #[cfg(feature = "alloc")]
-#[derive(Debug, Clone)]
-pub struct BlockDecoder(BlockInnerDecoder);
+crate::decoder_newtype! {
+    /// The decoder for the [`Block`] type.
+    ///
+    /// This decoder can only produce a `Block<Unchecked>`.
+    #[derive(Debug, Clone)]
+    pub struct BlockDecoder(BlockInnerDecoder);
 
-#[cfg(feature = "alloc")]
-impl BlockDecoder {
     /// Constructs a new [`Block`] decoder.
     pub const fn new() -> Self { Self(Decoder2::new(HeaderDecoder::new(), VecDecoder::new())) }
-}
 
-#[cfg(feature = "alloc")]
-impl Default for BlockDecoder {
-    fn default() -> Self { Self::new() }
-}
-
-#[cfg(feature = "alloc")]
-impl encoding::Decoder for BlockDecoder {
-    type Output = Block;
-    type Error = BlockDecoderError;
-
-    #[inline]
-    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        self.0.push_bytes(bytes).map_err(BlockDecoderError)
-    }
-
-    #[inline]
-    fn end(self) -> Result<Self::Output, Self::Error> {
-        let (header, transactions) = self.0.end().map_err(BlockDecoderError)?;
+    fn end(result: Result<(Header, Vec<Transaction>), <BlockInnerDecoder as encoding::Decoder>::Error>) -> Result<Block, BlockDecoderError> {
+        let (header, transactions) = result.map_err(BlockDecoderError)?;
         Ok(Self::Output::new_unchecked(header, transactions))
     }
-
-    #[inline]
-    fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
 #[cfg(feature = "alloc")]
@@ -584,11 +563,11 @@ type HeaderInnerDecoder = Decoder6<
     encoding::ArrayDecoder<4>, // Nonce
 >;
 
-/// The decoder for the [`Header`] type.
-#[derive(Debug, Clone)]
-pub struct HeaderDecoder(HeaderInnerDecoder);
+crate::decoder_newtype! {
+    /// The decoder for the [`Header`] type.
+    #[derive(Debug, Clone)]
+    pub struct HeaderDecoder(HeaderInnerDecoder);
 
-impl HeaderDecoder {
     /// Constructs a new [`Header`] decoder.
     pub const fn new() -> Self {
         Self(Decoder6::new(
@@ -601,6 +580,20 @@ impl HeaderDecoder {
         ))
     }
 
+    fn map_push_bytes_err(err: <HeaderInnerDecoder as encoding::Decoder>::Error) -> HeaderDecoderError {
+        Self::from_inner(err)
+    }
+
+    fn end(
+        result: Result<<HeaderInnerDecoder as encoding::Decoder>::Output, <HeaderInnerDecoder as encoding::Decoder>::Error>
+    ) -> Result<Header, HeaderDecoderError> {
+        let (version, prev_blockhash, merkle_root, time, bits, nonce) = result.map_err(Self::from_inner)?;
+        let nonce = u32::from_le_bytes(nonce);
+        Ok(Header { version, prev_blockhash, merkle_root, time, bits, nonce })
+    }
+}
+
+impl HeaderDecoder {
     fn from_inner(e: <HeaderInnerDecoder as encoding::Decoder>::Error) -> HeaderDecoderError {
         match e {
             encoding::Decoder6Error::First(e) => HeaderDecoderError::Version(e),
@@ -611,31 +604,6 @@ impl HeaderDecoder {
             encoding::Decoder6Error::Sixth(e) => HeaderDecoderError::Nonce(e),
         }
     }
-}
-
-impl Default for HeaderDecoder {
-    fn default() -> Self { Self::new() }
-}
-
-impl encoding::Decoder for HeaderDecoder {
-    type Output = Header;
-    type Error = HeaderDecoderError;
-
-    #[inline]
-    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        self.0.push_bytes(bytes).map_err(Self::from_inner)
-    }
-
-    #[inline]
-    fn end(self) -> Result<Self::Output, Self::Error> {
-        let (version, prev_blockhash, merkle_root, time, bits, nonce) =
-            self.0.end().map_err(Self::from_inner)?;
-        let nonce = u32::from_le_bytes(nonce);
-        Ok(Header { version, prev_blockhash, merkle_root, time, bits, nonce })
-    }
-
-    #[inline]
-    fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
 impl encoding::Decodable for Header {
@@ -774,36 +742,19 @@ impl encoding::Encodable for Version {
     }
 }
 
-/// The decoder for the [`Version`] type.
-#[derive(Debug, Clone)]
-pub struct VersionDecoder(encoding::ArrayDecoder<4>);
+crate::decoder_newtype! {
+    /// The decoder for the [`Version`] type.
+    #[derive(Debug, Clone)]
+    pub struct VersionDecoder(encoding::ArrayDecoder<4>);
 
-impl VersionDecoder {
     /// Constructs a new [`Version`] decoder.
     pub const fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
-}
 
-impl Default for VersionDecoder {
-    fn default() -> Self { Self::new() }
-}
-
-impl encoding::Decoder for VersionDecoder {
-    type Output = Version;
-    type Error = VersionDecoderError;
-
-    #[inline]
-    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        self.0.push_bytes(bytes).map_err(VersionDecoderError)
-    }
-
-    #[inline]
-    fn end(self) -> Result<Self::Output, Self::Error> {
-        let n = i32::from_le_bytes(self.0.end().map_err(VersionDecoderError)?);
+    fn end(result: Result<[u8; 4], encoding::UnexpectedEofError>) -> Result<Version, VersionDecoderError> {
+        let value = result.map_err(VersionDecoderError)?;
+        let n = i32::from_le_bytes(value);
         Ok(Version::from_consensus(n))
     }
-
-    #[inline]
-    fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
 impl encoding::Decodable for Version {

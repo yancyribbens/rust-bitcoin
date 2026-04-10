@@ -72,38 +72,18 @@ encoding::encoder_newtype_exact! {
     pub struct TxMerkleNodeEncoder<'e>(encoding::ArrayRefEncoder<'e, 32>);
 }
 
-/// The decoder for the [`TxMerkleNode`] type.
-#[derive(Debug, Clone)]
-pub struct TxMerkleNodeDecoder(encoding::ArrayDecoder<32>);
+crate::decoder_newtype! {
+    /// The decoder for the [`TxMerkleNode`] type.
+    #[derive(Debug, Clone)]
+    pub struct TxMerkleNodeDecoder(encoding::ArrayDecoder<32>);
 
-impl TxMerkleNodeDecoder {
     /// Constructs a new [`TxMerkleNode`] decoder.
-    #[inline]
     pub const fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
-}
 
-impl Default for TxMerkleNodeDecoder {
-    #[inline]
-    fn default() -> Self { Self::new() }
-}
-
-impl encoding::Decoder for TxMerkleNodeDecoder {
-    type Output = TxMerkleNode;
-    type Error = TxMerkleNodeDecoderError;
-
-    #[inline]
-    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        self.0.push_bytes(bytes).map_err(TxMerkleNodeDecoderError)
+    fn end(result: Result<[u8; 32], encoding::UnexpectedEofError>) -> Result<TxMerkleNode, TxMerkleNodeDecoderError> {
+        let bytes = result.map_err(TxMerkleNodeDecoderError)?;
+        Ok(TxMerkleNode::from_byte_array(bytes))
     }
-
-    #[inline]
-    fn end(self) -> Result<Self::Output, Self::Error> {
-        let a = self.0.end().map_err(TxMerkleNodeDecoderError)?;
-        Ok(TxMerkleNode::from_byte_array(a))
-    }
-
-    #[inline]
-    fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
 /// An error consensus decoding an `TxMerkleNode`.
