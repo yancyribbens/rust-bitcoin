@@ -50,6 +50,7 @@ mod sealed {
 /// # Errors
 ///
 /// On error this function allocates to copy the input string into the error return.
+#[inline]
 pub fn int_from_str<T: Integer>(s: &str) -> Result<T, ParseIntError> { int(s) }
 
 /// Parses the input string as an integer returning an error carrying rich context.
@@ -57,6 +58,7 @@ pub fn int_from_str<T: Integer>(s: &str) -> Result<T, ParseIntError> { int(s) }
 /// # Errors
 ///
 /// On error the input string is moved into the error return without allocating.
+#[inline]
 #[cfg(feature = "alloc")]
 pub fn int_from_string<T: Integer>(s: alloc::string::String) -> Result<T, ParseIntError> { int(s) }
 
@@ -65,6 +67,7 @@ pub fn int_from_string<T: Integer>(s: alloc::string::String) -> Result<T, ParseI
 /// # Errors
 ///
 /// On error the input string is converted into the error return without allocating.
+#[inline]
 #[cfg(feature = "alloc")]
 pub fn int_from_box<T: Integer>(s: alloc::boxed::Box<str>) -> Result<T, ParseIntError> { int(s) }
 
@@ -112,6 +115,7 @@ macro_rules! impl_parse_str_from_int_infallible {
         impl $crate::_export::_core::str::FromStr for $to {
             type Err = $crate::parse_int::ParseIntError;
 
+            #[inline]
             fn from_str(s: &str) -> $crate::_export::_core::result::Result<Self, Self::Err> {
                 $crate::_export::_core::convert::TryFrom::try_from(s)
             }
@@ -120,6 +124,7 @@ macro_rules! impl_parse_str_from_int_infallible {
         impl $crate::_export::_core::convert::TryFrom<&str> for $to {
             type Error = $crate::parse_int::ParseIntError;
 
+            #[inline]
             fn try_from(s: &str) -> $crate::_export::_core::result::Result<Self, Self::Error> {
                 $crate::parse_int::int_from_str::<$inner>(s).map($to::$fn)
             }
@@ -129,6 +134,7 @@ macro_rules! impl_parse_str_from_int_infallible {
         impl $crate::_export::_core::convert::TryFrom<alloc::string::String> for $to {
             type Error = $crate::parse_int::ParseIntError;
 
+            #[inline]
             fn try_from(
                 s: alloc::string::String,
             ) -> $crate::_export::_core::result::Result<Self, Self::Error> {
@@ -140,6 +146,7 @@ macro_rules! impl_parse_str_from_int_infallible {
         impl $crate::_export::_core::convert::TryFrom<alloc::boxed::Box<str>> for $to {
             type Error = $crate::parse_int::ParseIntError;
 
+            #[inline]
             fn try_from(
                 s: alloc::boxed::Box<str>,
             ) -> $crate::_export::_core::result::Result<Self, Self::Error> {
@@ -180,6 +187,7 @@ macro_rules! impl_parse_str {
         impl $crate::_export::_core::str::FromStr for $to {
             type Err = $err;
 
+            #[inline]
             fn from_str(s: &str) -> $crate::_export::_core::result::Result<Self, Self::Err> {
                 $inner_fn(s)
             }
@@ -195,6 +203,7 @@ macro_rules! impl_tryfrom_str {
             impl $crate::_export::_core::convert::TryFrom<$from> for $to {
                 type Error = $err;
 
+                #[inline]
                 fn try_from(s: $from) -> $crate::_export::_core::result::Result<Self, Self::Error> {
                     $inner_fn(s)
                 }
@@ -209,6 +218,7 @@ pub(crate) use impl_tryfrom_str;
 /// # Errors
 ///
 /// If the input string does not contain a prefix.
+#[inline]
 pub fn hex_remove_prefix(s: &str) -> Result<&str, PrefixedHexError> {
     if let Some(checked) = s.strip_prefix("0x") {
         Ok(checked)
@@ -224,6 +234,7 @@ pub fn hex_remove_prefix(s: &str) -> Result<&str, PrefixedHexError> {
 /// # Errors
 ///
 /// If the input string contains a prefix.
+#[inline]
 pub fn hex_check_unprefixed(s: &str) -> Result<&str, UnprefixedHexError> {
     if s.starts_with("0x") || s.starts_with("0X") {
         return Err(error::ContainsPrefixError::new(s).into());
@@ -247,6 +258,7 @@ macro_rules! parse_hex_for {
         #[doc = "# Errors\n\nIf the input string is not a valid hex encoding of a `"]
         #[doc = stringify!($int_type)]
         #[doc = "`."]
+        #[inline]
         pub fn $any_hex_fn(s: &str) -> Result<$int_type, ParseIntError> {
             let unchecked = hex_remove_optional_prefix(s);
             $uncheck_hex_fn(unchecked)
@@ -260,6 +272,7 @@ macro_rules! parse_hex_for {
         #[doc = "- If the input string is not a valid hex encoding of a `"]
         #[doc = stringify!($int_type)]
         #[doc = "`."]
+        #[inline]
         pub fn $prefix_hex_fn(s: &str) -> Result<$int_type, PrefixedHexError> {
             let checked = hex_remove_prefix(s)?;
             Ok($uncheck_hex_fn(checked)?)
@@ -273,6 +286,7 @@ macro_rules! parse_hex_for {
         #[doc = "- If the input string is not a valid hex encoding of a `"]
         #[doc = stringify!($int_type)]
         #[doc = "`."]
+        #[inline]
         pub fn $unprefix_hex_fn(s: &str) -> Result<$int_type, UnprefixedHexError> {
             let checked = hex_check_unprefixed(s)?;
             Ok($uncheck_hex_fn(checked)?)
@@ -287,6 +301,7 @@ macro_rules! parse_hex_for {
         #[doc = "- If the input string is not a valid hex encoding of a `"]
         #[doc = stringify!($int_type)]
         #[doc = "`."]
+        #[inline]
         pub fn $uncheck_hex_fn(s: &str) -> Result<$int_type, ParseIntError> {
             <$int_type>::from_str_radix(s, 16).map_err(|error| ParseIntError {
                 input: s.into(),
@@ -328,6 +343,7 @@ parse_hex_for!(
 );
 
 /// Strips the hex prefix off `s` if one is present.
+#[inline]
 pub(crate) fn hex_remove_optional_prefix(s: &str) -> &str {
     if let Some(stripped) = s.strip_prefix("0x") {
         stripped
@@ -381,14 +397,17 @@ pub mod error {
 
     #[cfg(feature = "std")]
     impl std::error::Error for ParseIntError {
+        #[inline]
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.source) }
     }
 
     impl From<ParseIntError> for core::num::ParseIntError {
+        #[inline]
         fn from(value: ParseIntError) -> Self { value.source }
     }
 
     impl AsRef<core::num::ParseIntError> for ParseIntError {
+        #[inline]
         fn as_ref(&self) -> &core::num::ParseIntError { &self.source }
     }
 
@@ -426,6 +445,7 @@ pub mod error {
 
     #[cfg(feature = "std")]
     impl std::error::Error for PrefixedHexError {
+        #[inline]
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
             use PrefixedHexErrorInner as E;
 
@@ -437,10 +457,12 @@ pub mod error {
     }
 
     impl From<MissingPrefixError> for PrefixedHexError {
+        #[inline]
         fn from(e: MissingPrefixError) -> Self { Self(PrefixedHexErrorInner::MissingPrefix(e)) }
     }
 
     impl From<ParseIntError> for PrefixedHexError {
+        #[inline]
         fn from(e: ParseIntError) -> Self { Self(PrefixedHexErrorInner::ParseInt(e)) }
     }
 
@@ -477,6 +499,7 @@ pub mod error {
 
     #[cfg(feature = "std")]
     impl std::error::Error for UnprefixedHexError {
+        #[inline]
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
             use UnprefixedHexErrorInner as E;
 
@@ -488,10 +511,12 @@ pub mod error {
     }
 
     impl From<ContainsPrefixError> for UnprefixedHexError {
+        #[inline]
         fn from(e: ContainsPrefixError) -> Self { Self(UnprefixedHexErrorInner::ContainsPrefix(e)) }
     }
 
     impl From<ParseIntError> for UnprefixedHexError {
+        #[inline]
         fn from(e: ParseIntError) -> Self { Self(UnprefixedHexErrorInner::ParseInt(e)) }
     }
 
@@ -518,6 +543,7 @@ pub mod error {
 
     #[cfg(feature = "std")]
     impl std::error::Error for MissingPrefixError {
+        #[inline]
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
     }
 
@@ -529,6 +555,7 @@ pub mod error {
 
     impl ContainsPrefixError {
         /// Constructs a new error from the string that contains the prefix.
+        #[inline]
         pub(crate) fn new(hex: &str) -> Self { Self { hex: hex.into() } }
     }
 
@@ -544,6 +571,7 @@ pub mod error {
 
     #[cfg(feature = "std")]
     impl std::error::Error for ContainsPrefixError {
+        #[inline]
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
     }
 }

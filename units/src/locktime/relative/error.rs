@@ -34,6 +34,7 @@ impl fmt::Display for DisabledLockTimeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for DisabledLockTimeError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -62,6 +63,7 @@ impl fmt::Display for IsSatisfiedByError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for IsSatisfiedByError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
             Self::Blocks(ref e) => Some(e),
@@ -97,6 +99,7 @@ impl fmt::Display for IsSatisfiedByHeightError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for IsSatisfiedByHeightError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
             Self::Satisfaction(ref e) => Some(e),
@@ -132,6 +135,7 @@ impl fmt::Display for IsSatisfiedByTimeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for IsSatisfiedByTimeError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
             Self::Satisfaction(ref e) => Some(e),
@@ -164,6 +168,7 @@ impl fmt::Display for TimeOverflowError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for TimeOverflowError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -189,6 +194,7 @@ impl fmt::Display for InvalidHeightError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for InvalidHeightError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -214,6 +220,7 @@ impl fmt::Display for InvalidTimeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for InvalidTimeError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 

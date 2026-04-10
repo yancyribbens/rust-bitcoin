@@ -109,6 +109,7 @@ impl fmt::Display for ParseAmountError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for ParseAmountError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         use ParseAmountErrorInner as E;
 
@@ -136,6 +137,7 @@ impl OutOfRangeError {
     /// Returns the minimum and maximum allowed values for the type that was parsed.
     ///
     /// This can be used to give a hint to the user which values are allowed.
+    #[inline]
     pub fn valid_range(self) -> (i64, u64) {
         match self.is_signed {
             true => (i64::MIN, i64::MAX as u64),
@@ -144,15 +146,19 @@ impl OutOfRangeError {
     }
 
     /// Returns true if the input value was larger than the maximum allowed value.
+    #[inline]
     pub fn is_above_max(self) -> bool { self.is_greater_than_max }
 
     /// Returns true if the input value was smaller than the minimum allowed value.
+    #[inline]
     pub fn is_below_min(self) -> bool { !self.is_greater_than_max }
 
     #[cfg(test)]
+    #[inline]
     pub(crate) fn too_big(is_signed: bool) -> Self { Self { is_signed, is_greater_than_max: true } }
 
     #[cfg(test)]
+    #[inline]
     pub(crate) fn too_small() -> Self {
         Self {
             // implied - negative() is used for the other
@@ -161,6 +167,7 @@ impl OutOfRangeError {
         }
     }
 
+    #[inline]
     pub(crate) fn negative() -> Self {
         Self {
             // implied - too_small() is used for the other
@@ -186,6 +193,7 @@ impl fmt::Display for OutOfRangeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for OutOfRangeError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -214,6 +222,7 @@ impl fmt::Display for TooPreciseError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for TooPreciseError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -246,6 +255,7 @@ impl fmt::Display for InputTooLargeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for InputTooLargeError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -262,6 +272,7 @@ impl From<Infallible> for MissingDigitsError {
 }
 
 impl fmt::Display for MissingDigitsError {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.kind {
             MissingDigitsKind::Empty => f.write_str("the input is empty"),
@@ -273,6 +284,7 @@ impl fmt::Display for MissingDigitsError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for MissingDigitsError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -309,6 +321,7 @@ impl fmt::Display for InvalidCharacterError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for InvalidCharacterError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -341,6 +354,7 @@ impl fmt::Display for BadPositionError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for BadPositionError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -369,6 +383,7 @@ impl fmt::Display for ParseDenominationError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for ParseDenominationError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
             Self::Unknown(ref e) => Some(e),
@@ -394,6 +409,7 @@ impl fmt::Display for MissingDenominationError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for MissingDenominationError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -407,6 +423,7 @@ impl From<Infallible> for UnknownDenominationError {
 }
 
 impl fmt::Display for UnknownDenominationError {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.0.unknown_variant("bitcoin denomination", f)
     }
@@ -414,6 +431,7 @@ impl fmt::Display for UnknownDenominationError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for UnknownDenominationError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -434,6 +452,7 @@ impl fmt::Display for PossiblyConfusingDenominationError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for PossiblyConfusingDenominationError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -445,11 +464,13 @@ pub struct AmountDecoderError(pub(super) AmountDecoderErrorInner);
 #[cfg(feature = "encoding")]
 impl AmountDecoderError {
     /// Constructs an EOF error.
+    #[inline]
     pub(super) fn eof(e: encoding::UnexpectedEofError) -> Self {
         Self(AmountDecoderErrorInner::UnexpectedEof(e))
     }
 
     /// Constructs an out of range (`Amount::from_sat`) error.
+    #[inline]
     pub(super) fn out_of_range(e: OutOfRangeError) -> Self {
         Self(AmountDecoderErrorInner::OutOfRange(e))
     }
@@ -484,6 +505,7 @@ impl fmt::Display for AmountDecoderError {
 #[cfg(feature = "encoding")]
 #[cfg(feature = "std")]
 impl std::error::Error for AmountDecoderError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         use AmountDecoderErrorInner as E;
 

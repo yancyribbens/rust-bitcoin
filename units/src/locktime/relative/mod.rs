@@ -200,6 +200,7 @@ impl LockTime {
     /// # Errors
     ///
     /// If `chain_tip` as not _after_ `utxo_mined_at` i.e., if you get the args mixed up.
+    #[inline]
     pub fn is_satisfied_by(
         self,
         chain_tip_height: BlockHeight,
@@ -368,6 +369,7 @@ impl From<LockTime> for Sequence {
 
 #[cfg(feature = "serde")]
 impl serde::Serialize for LockTime {
+    #[inline]
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -378,6 +380,7 @@ impl serde::Serialize for LockTime {
 
 #[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for LockTime {
+    #[inline]
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -489,6 +492,7 @@ impl From<u16> for NumberOfBlocks {
 parse_int::impl_parse_str_from_int_infallible!(NumberOfBlocks, u16, from);
 
 impl fmt::Display for NumberOfBlocks {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.0, f) }
 }
 
@@ -629,6 +633,7 @@ crate::internal_macros::impl_fmt_traits_for_u32_wrapper!(NumberOf512Seconds);
 parse_int::impl_parse_str_from_int_infallible!(NumberOf512Seconds, u16, from_512_second_intervals);
 
 impl fmt::Display for NumberOf512Seconds {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.0, f) }
 }
 

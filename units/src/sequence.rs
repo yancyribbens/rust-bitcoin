@@ -268,6 +268,7 @@ encoding::encoder_newtype_exact! {
 #[cfg(feature = "encoding")]
 impl encoding::Encodable for Sequence {
     type Encoder<'e> = SequenceEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         SequenceEncoder::new(encoding::ArrayEncoder::without_length_prefix(
             self.to_consensus_u32().to_le_bytes(),
@@ -294,6 +295,7 @@ crate::decoder_newtype! {
 #[cfg(feature = "encoding")]
 impl encoding::Decodable for Sequence {
     type Decoder = SequenceDecoder;
+    #[inline]
     fn decoder() -> Self::Decoder { SequenceDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
@@ -327,6 +329,7 @@ pub mod error {
     #[cfg(feature = "encoding")]
     #[cfg(feature = "std")]
     impl std::error::Error for SequenceDecoderError {
+        #[inline]
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
     }
 }
