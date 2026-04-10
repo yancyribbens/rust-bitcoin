@@ -46,6 +46,10 @@ where
     T: Default,
 {
     /// Initializes a HKDF by performing the extract step.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `T::BLOCK_SIZE` exceeds 128 bytes.
     pub fn new(salt: &[u8], ikm: &[u8]) -> Self {
         let mut engine: HmacEngine<T> = HmacEngine::new(salt);
         engine.input(ikm);
