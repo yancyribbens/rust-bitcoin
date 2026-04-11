@@ -99,7 +99,7 @@ mod encapsulate {
 
         /// Returns a reference to the inner [`secp256k1::Keypair`].
         #[inline]
-        pub fn as_inner(&self) -> &secp256k1::Keypair { &self.0 }
+        pub(super) fn as_inner(&self) -> &secp256k1::Keypair { &self.0 }
     }
 
     /// A Bitcoin ECDSA public key.
@@ -173,7 +173,7 @@ mod encapsulate {
 
         /// Returns a reference to the inner secp256k1 secret key.
         #[inline]
-        pub fn as_inner(&self) -> &secp256k1::SecretKey { &self.inner }
+        pub(super) fn as_inner(&self) -> &secp256k1::SecretKey { &self.inner }
 
         /// Returns whether this private key should be serialized as compressed.
         #[inline]
@@ -193,7 +193,7 @@ mod encapsulate {
     impl TweakedPublicKey {
         /// Returns the [`TweakedPublicKey`] for `keypair`.
         #[inline]
-        pub fn from_keypair(keypair: TweakedKeypair) -> Self {
+        pub fn from_keypair(keypair: &TweakedKeypair) -> Self {
             Self(keypair.as_keypair().to_x_only_public_key())
         }
 
@@ -228,8 +228,8 @@ mod encapsulate {
     /// # let keypair = TweakedKeypair::dangerous_assume_tweaked(Keypair::generate());
     /// // There are various conversion methods available to get a tweaked pubkey from a tweaked keypair.
     /// let (_pk, _parity) = keypair.public_parts();
-    /// let _pk = TweakedPublicKey::from_keypair(keypair.clone());
-    /// let _pk = TweakedPublicKey::from(keypair.clone());
+    /// let _pk = TweakedPublicKey::from_keypair(&keypair);
+    /// let _pk = TweakedPublicKey::from(&keypair);
     /// # }
     /// ```
     #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -497,7 +497,11 @@ impl From<Keypair> for secp256k1::PublicKey {
 }
 
 impl From<PrivateKey> for Keypair {
-    fn from(pk: PrivateKey) -> Self { Self::from_private_key(&pk) }
+    fn from(pk: PrivateKey) -> Self { Self::from(&pk) }
+}
+
+impl From<&PrivateKey> for Keypair {
+    fn from(pk: &PrivateKey) -> Self { Self::from_private_key(pk) }
 }
 
 #[deprecated(since = "TBD", note = "use `LegacyPublicKey` instead")]
@@ -923,7 +927,7 @@ impl FullPublicKey {
     /// # Errors
     ///
     /// Errors if the private key is not compressed.
-    pub fn from_private_key(sk: PrivateKey) -> Result<Self, UncompressedPublicKeyError> {
+    pub fn from_private_key(sk: &PrivateKey) -> Result<Self, UncompressedPublicKeyError> {
         sk.to_public_key().try_into()
     }
 
@@ -1047,8 +1051,8 @@ impl PrivateKey {
     ///
     /// Errors when the secret key is invalid: when it is all-zeros or would exceed
     /// the curve order when interpreted as a big-endian unsigned integer.
-    pub fn from_secret_bytes(data: [u8; 32]) -> Result<Self, secp256k1::Error> {
-        Ok(Self::from_secp(secp256k1::SecretKey::from_secret_bytes(data)?))
+    pub fn from_secret_bytes(data: &[u8; 32]) -> Result<Self, secp256k1::Error> {
+        Ok(Self::from_secp(secp256k1::SecretKey::from_secret_bytes(*data)?))
     }
 
     /// Deserializes a private key from a slice.
@@ -1531,9 +1535,19 @@ impl From<TweakedKeypair> for Keypair {
     fn from(pair: TweakedKeypair) -> Self { pair.into_keypair() }
 }
 
+impl<'a> From<&'a TweakedKeypair> for &'a Keypair {
+    #[inline]
+    fn from(pair: &'a TweakedKeypair) -> Self { pair.as_keypair() }
+}
+
 impl From<TweakedKeypair> for TweakedPublicKey {
     #[inline]
-    fn from(pair: TweakedKeypair) -> Self { Self::from_keypair(pair) }
+    fn from(pair: TweakedKeypair) -> Self { Self::from(&pair) }
+}
+
+impl From<&TweakedKeypair> for TweakedPublicKey {
+    #[inline]
+    fn from(pair: &TweakedKeypair) -> Self { Self::from_keypair(pair) }
 }
 
 impl SerializedXOnlyPublicKey {
@@ -2381,7 +2395,7 @@ mod tests {
                 "1ede31b0e7e47c2afc65ffd158b1b1b9d3b752bba8fd117dc8b9e944a390e8d9",
             )
             .unwrap();
-            let sk = PrivateKey::from_secret_bytes(bytes).unwrap();
+            let sk = PrivateKey::from_secret_bytes(&bytes).unwrap();
             Keypair::from_private_key(&sk)
         };
 
