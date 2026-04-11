@@ -407,6 +407,7 @@ encoding::encoder_newtype_exact! {
 #[cfg(feature = "encoding")]
 impl encoding::Encodable for LockTime {
     type Encoder<'e> = LockTimeEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         LockTimeEncoder::new(encoding::ArrayEncoder::without_length_prefix(
             self.to_consensus_u32().to_le_bytes(),
@@ -433,6 +434,7 @@ crate::decoder_newtype! {
 #[cfg(feature = "encoding")]
 impl encoding::Decodable for LockTime {
     type Decoder = LockTimeDecoder;
+    #[inline]
     fn decoder() -> Self::Decoder { LockTimeDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
@@ -474,6 +476,7 @@ impl fmt::Display for LockTime {
 
 #[cfg(feature = "serde")]
 impl serde::Serialize for LockTime {
+    #[inline]
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -484,6 +487,7 @@ impl serde::Serialize for LockTime {
 
 #[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for LockTime {
+    #[inline]
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -591,6 +595,7 @@ impl Height {
 crate::internal_macros::impl_fmt_traits_for_u32_wrapper!(Height);
 
 impl fmt::Display for Height {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.0, f) }
 }
 
@@ -631,6 +636,7 @@ impl MedianTimePast {
     /// locktime: `[500_000_000, 2^32 - 1]`. Because there is a consensus rule that MTP
     /// be monotonically increasing, and the MTP of the first 11 blocks exceeds `500_000_000`
     /// for every real-life chain, this error typically cannot be hit in practice.
+    #[inline]
     pub fn new(timestamps: [crate::BlockTime; 11]) -> Result<Self, ConversionError> {
         crate::BlockMtp::new(timestamps).try_into()
     }
@@ -723,6 +729,7 @@ impl MedianTimePast {
 crate::internal_macros::impl_fmt_traits_for_u32_wrapper!(MedianTimePast);
 
 impl fmt::Display for MedianTimePast {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.0, f) }
 }
 
@@ -742,9 +749,11 @@ where
 }
 
 /// Returns true if `n` is a block height i.e., less than 500,000,000.
+#[inline]
 pub const fn is_block_height(n: u32) -> bool { n < LOCK_TIME_THRESHOLD }
 
 /// Returns true if `n` is a UNIX timestamp i.e., greater than or equal to 500,000,000.
+#[inline]
 pub const fn is_block_time(n: u32) -> bool { n >= LOCK_TIME_THRESHOLD }
 
 #[cfg(feature = "arbitrary")]

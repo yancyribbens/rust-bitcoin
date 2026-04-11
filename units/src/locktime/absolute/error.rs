@@ -32,6 +32,7 @@ impl fmt::Display for LockTimeDecoderError {
 #[cfg(feature = "encoding")]
 #[cfg(feature = "std")]
 impl std::error::Error for LockTimeDecoderError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
 
@@ -46,9 +47,11 @@ pub struct IncompatibleHeightError {
 
 impl IncompatibleHeightError {
     /// Returns the value of the lock-by-time lock.
+    #[inline]
     pub fn lock(&self) -> MedianTimePast { self.lock }
 
     /// Returns the height that was erroneously used to try and satisfy a lock-by-time lock.
+    #[inline]
     pub fn incompatible(&self) -> Height { self.incompatible }
 }
 
@@ -69,6 +72,7 @@ impl fmt::Display for IncompatibleHeightError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for IncompatibleHeightError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -83,9 +87,11 @@ pub struct IncompatibleTimeError {
 
 impl IncompatibleTimeError {
     /// Returns the value of the lock-by-height lock.
+    #[inline]
     pub fn lock(&self) -> Height { self.lock }
 
     /// Returns the MTP that was erroneously used to try and satisfy a lock-by-height lock.
+    #[inline]
     pub fn incompatible(&self) -> MedianTimePast { self.incompatible }
 }
 
@@ -106,6 +112,7 @@ impl fmt::Display for IncompatibleTimeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for IncompatibleTimeError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
@@ -118,6 +125,7 @@ impl From<Infallible> for ParseHeightError {
 }
 
 impl fmt::Display for ParseHeightError {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.0.display(f, "block height", 0, LOCK_TIME_THRESHOLD - 1)
     }
@@ -126,10 +134,12 @@ impl fmt::Display for ParseHeightError {
 #[cfg(feature = "std")]
 impl std::error::Error for ParseHeightError {
     // To be consistent with `write_err` we need to **not** return source if overflow occurred
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { self.0.source() }
 }
 
 impl From<ParseError> for ParseHeightError {
+    #[inline]
     fn from(value: ParseError) -> Self { Self(value) }
 }
 
@@ -142,6 +152,7 @@ impl From<Infallible> for ParseTimeError {
 }
 
 impl fmt::Display for ParseTimeError {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.0.display(f, "block time", LOCK_TIME_THRESHOLD, u32::MAX)
     }
@@ -150,10 +161,12 @@ impl fmt::Display for ParseTimeError {
 #[cfg(feature = "std")]
 impl std::error::Error for ParseTimeError {
     // To be consistent with `write_err` we need to **not** return source if overflow occurred
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { self.0.source() }
 }
 
 impl From<ParseError> for ParseTimeError {
+    #[inline]
     fn from(value: ParseError) -> Self { Self(value) }
 }
 
@@ -172,6 +185,7 @@ pub(super) enum ParseError {
 }
 
 impl ParseError {
+    #[inline]
     pub(super) fn invalid_int<S: Into<InputString>>(
         s: S,
     ) -> impl FnOnce(core::num::ParseIntError) -> Self {
@@ -234,6 +248,7 @@ impl ParseError {
     }
 
     // To be consistent with `write_err` we need to **not** return source if overflow occurred
+    #[inline]
     #[cfg(feature = "std")]
     pub(super) fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         use core::num::IntErrorKind;
@@ -258,14 +273,17 @@ impl From<Infallible> for ParseError {
 }
 
 impl From<ConversionError> for ParseError {
+    #[inline]
     fn from(value: ConversionError) -> Self { Self::Conversion(value.input.into()) }
 }
 
 impl From<PrefixedHexError> for ParseError {
+    #[inline]
     fn from(value: PrefixedHexError) -> Self { Self::PrefixedHex(value) }
 }
 
 impl From<UnprefixedHexError> for ParseError {
+    #[inline]
     fn from(value: UnprefixedHexError) -> Self { Self::UnprefixedHex(value) }
 }
 
@@ -281,11 +299,13 @@ pub struct ConversionError {
 
 impl ConversionError {
     /// Constructs a new `ConversionError` from an invalid `n` when expecting a height value.
+    #[inline]
     pub(super) const fn invalid_height(n: u32) -> Self {
         Self { unit: LockTimeUnit::Blocks, input: n }
     }
 
     /// Constructs a new `ConversionError` from an invalid `n` when expecting a time value.
+    #[inline]
     pub(super) const fn invalid_time(n: u32) -> Self {
         Self { unit: LockTimeUnit::Seconds, input: n }
     }
@@ -303,6 +323,7 @@ impl fmt::Display for ConversionError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for ConversionError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 

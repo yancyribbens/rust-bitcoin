@@ -275,6 +275,7 @@ crate::internal_macros::impl_op_for_references! {
 
 // Implement AddAssign on NumOpResults for all wrapped types that already implement AddAssign on themselves
 impl<T: ops::AddAssign> ops::AddAssign<T> for NumOpResult<T> {
+    #[inline]
     fn add_assign(&mut self, rhs: T) {
         if let Self::Valid(ref mut lhs) = self {
             *lhs += rhs;
@@ -283,6 +284,7 @@ impl<T: ops::AddAssign> ops::AddAssign<T> for NumOpResult<T> {
 }
 
 impl<T: ops::AddAssign + Copy> ops::AddAssign<Self> for NumOpResult<T> {
+    #[inline]
     fn add_assign(&mut self, rhs: Self) {
         match (&self, rhs) {
             (Self::Valid(_), Self::Valid(rhs)) => *self += rhs,
@@ -293,6 +295,7 @@ impl<T: ops::AddAssign + Copy> ops::AddAssign<Self> for NumOpResult<T> {
 
 // Implement SubAssign on NumOpResults for all wrapped types that already implement SubAssign on themselves
 impl<T: ops::SubAssign> ops::SubAssign<T> for NumOpResult<T> {
+    #[inline]
     fn sub_assign(&mut self, rhs: T) {
         if let Self::Valid(ref mut lhs) = self {
             *lhs -= rhs;
@@ -301,6 +304,7 @@ impl<T: ops::SubAssign> ops::SubAssign<T> for NumOpResult<T> {
 }
 
 impl<T: ops::SubAssign + Copy> ops::SubAssign<Self> for NumOpResult<T> {
+    #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         match (&self, rhs) {
             (Self::Valid(_), Self::Valid(rhs)) => *self -= rhs,
@@ -359,18 +363,23 @@ impl MathOp {
     }
 
     /// Returns `true` if this operation error'ed due to division by zero.
+    #[inline]
     pub fn is_div_by_zero(self) -> bool { !self.is_overflow() }
 
     /// Returns `true` if this operation error'ed due to addition.
+    #[inline]
     pub fn is_addition(self) -> bool { self == Self::Add }
 
     /// Returns `true` if this operation error'ed due to subtraction.
+    #[inline]
     pub fn is_subtraction(self) -> bool { self == Self::Sub }
 
     /// Returns `true` if this operation error'ed due to multiplication.
+    #[inline]
     pub fn is_multiplication(self) -> bool { self == Self::Mul }
 
     /// Returns `true` if this operation error'ed due to negation.
+    #[inline]
     pub fn is_negation(self) -> bool { self == Self::Neg }
 }
 
@@ -402,15 +411,19 @@ pub mod error {
 
     impl NumOpError {
         /// Constructs a [`NumOpError`] caused by `op`.
+        #[inline]
         pub(crate) const fn while_doing(op: MathOp) -> Self { Self(op) }
 
         /// Returns `true` if this operation error'ed due to overflow.
+        #[inline]
         pub fn is_overflow(self) -> bool { self.0.is_overflow() }
 
         /// Returns `true` if this operation error'ed due to division by zero.
+        #[inline]
         pub fn is_div_by_zero(self) -> bool { self.0.is_div_by_zero() }
 
         /// Returns the [`MathOp`] that caused this error.
+        #[inline]
         pub fn operation(self) -> MathOp { self.0 }
     }
 
@@ -426,6 +439,7 @@ pub mod error {
 
     #[cfg(feature = "std")]
     impl std::error::Error for NumOpError {
+        #[inline]
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
     }
 }

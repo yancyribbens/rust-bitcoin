@@ -79,6 +79,7 @@ impl BlockTime {
 crate::internal_macros::impl_fmt_traits_for_u32_wrapper!(BlockTime, to_u32);
 
 impl fmt::Display for BlockTime {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.to_u32(), f) }
 }
 
@@ -126,6 +127,7 @@ encoding::encoder_newtype_exact! {
 #[cfg(feature = "encoding")]
 impl encoding::Encodable for BlockTime {
     type Encoder<'e> = BlockTimeEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         BlockTimeEncoder::new(encoding::ArrayEncoder::without_length_prefix(
             self.to_u32().to_le_bytes(),
@@ -152,6 +154,7 @@ crate::decoder_newtype! {
 #[cfg(feature = "encoding")]
 impl encoding::Decodable for BlockTime {
     type Decoder = BlockTimeDecoder;
+    #[inline]
     fn decoder() -> Self::Decoder { BlockTimeDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
@@ -185,6 +188,7 @@ pub mod error {
     #[cfg(feature = "encoding")]
     #[cfg(feature = "std")]
     impl std::error::Error for BlockTimeDecoderError {
+        #[inline]
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
     }
 }

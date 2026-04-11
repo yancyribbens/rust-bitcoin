@@ -112,6 +112,7 @@ impl Denomination {
     pub const SAT: Self = Self::Satoshi;
 
     /// The number of decimal places more than a satoshi.
+    #[inline]
     fn precision(self) -> i8 {
         match self {
             Self::Bitcoin => -8,
@@ -125,6 +126,7 @@ impl Denomination {
     }
 
     /// Returns a string representation of this denomination.
+    #[inline]
     fn as_str(self) -> &'static str {
         match self {
             Self::Bitcoin => "BTC",
@@ -138,6 +140,7 @@ impl Denomination {
     }
 
     /// The different `str` forms of denominations that are recognized.
+    #[inline]
     fn forms(s: &str) -> Option<Self> {
         match s {
             "BTC" | "btc" => Some(Self::Bitcoin),
@@ -157,6 +160,7 @@ impl Denomination {
 const CONFUSING_FORMS: [&str; 6] = ["CBTC", "Cbtc", "MBTC", "Mbtc", "UBTC", "Ubtc"];
 
 impl fmt::Display for Denomination {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { f.write_str(self.as_str()) }
 }
 
@@ -353,6 +357,7 @@ impl From<Infallible> for InnerParseError {
 }
 
 impl InnerParseError {
+    #[inline]
     fn convert(self, is_signed: bool) -> ParseAmountError {
         match self {
             Self::Overflow { is_negative } =>
@@ -395,6 +400,7 @@ struct FormatOptions {
 }
 
 impl FormatOptions {
+    #[inline]
     fn from_formatter(f: &fmt::Formatter) -> Self {
         Self {
             fill: f.fill(),
@@ -408,6 +414,7 @@ impl FormatOptions {
 }
 
 impl Default for FormatOptions {
+    #[inline]
     fn default() -> Self {
         Self {
             fill: ' ',
@@ -592,6 +599,7 @@ pub struct Display {
 
 impl Display {
     /// Makes subsequent calls to `Display::fmt` display denomination.
+    #[inline]
     #[must_use]
     pub fn show_denomination(mut self) -> Self {
         match &mut self.style {
@@ -604,6 +612,7 @@ impl Display {
 }
 
 impl fmt::Display for Display {
+    #[inline]
     #[rustfmt::skip]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let format_options = FormatOptions::from_formatter(f);

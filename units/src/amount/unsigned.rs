@@ -71,6 +71,7 @@ mod encapsulate {
         /// # use bitcoin_units::Amount;
         /// assert_eq!(Amount::ONE_BTC.to_sat(), 100_000_000);
         /// ```
+        #[inline]
         pub const fn to_sat(self) -> u64 { self.0 }
 
         /// Constructs a new [`Amount`] from the given number of satoshis.
@@ -88,6 +89,7 @@ mod encapsulate {
         /// assert_eq!(amount.to_sat(), sat);
         /// # Ok::<_, amount::OutOfRangeError>(())
         /// ```
+        #[inline]
         pub const fn from_sat(satoshi: u64) -> Result<Self, OutOfRangeError> {
             if satoshi > Self::MAX_MONEY.to_sat() {
                 Err(OutOfRangeError { is_signed: false, is_greater_than_max: true })
@@ -118,6 +120,7 @@ impl Amount {
     ///
     /// Accepts an `u32` which is guaranteed to be in range for the type, but which can only
     /// represent roughly 0 to 42.95 BTC.
+    #[inline]
     #[allow(clippy::missing_panics_doc)]
     pub const fn from_sat_u32(satoshi: u32) -> Self {
         let sats = const_casts::u32_to_u64(satoshi);
@@ -144,12 +147,14 @@ impl Amount {
     /// assert_eq!(amount.to_sat(), 1_000_000);
     /// # Ok::<_, amount::ParseAmountError>(())
     /// ```
+    #[inline]
     #[cfg(feature = "alloc")]
     pub fn from_btc(btc: f64) -> Result<Self, ParseAmountError> {
         Self::from_float_in(btc, Denomination::Bitcoin)
     }
 
     /// Converts from a value expressing a whole number of bitcoin to an [`Amount`].
+    #[inline]
     #[allow(clippy::missing_panics_doc)]
     pub fn from_int_btc<T: Into<u16>>(whole_bitcoin: T) -> Self {
         Self::from_btc_u16(whole_bitcoin.into())
@@ -157,6 +162,7 @@ impl Amount {
 
     /// Converts from a value expressing a whole number of bitcoin to an [`Amount`]
     /// in const context.
+    #[inline]
     #[allow(clippy::missing_panics_doc)]
     pub const fn from_btc_u16(whole_bitcoin: u16) -> Self {
         let btc = const_casts::u16_to_u64(whole_bitcoin);
@@ -176,6 +182,7 @@ impl Amount {
     /// # Errors
     ///
     /// If the amount is too precise, negative, or greater than 21,000,000.
+    #[inline]
     pub fn from_str_in(s: &str, denom: Denomination) -> Result<Self, ParseAmountError> {
         let (is_neg, amount) =
             parse_signed_to_satoshi(s, denom).map_err(|error| error.convert(false))?;
@@ -204,6 +211,7 @@ impl Amount {
     /// assert_eq!(amount, Amount::from_sat_u32(10_000_000));
     /// # Ok::<_, amount::ParseError>(())
     /// ```
+    #[inline]
     pub fn from_str_with_denomination(s: &str) -> Result<Self, ParseError> {
         let (amt, denom) = split_amount_and_denomination(s)?;
         Self::from_str_in(amt, denom).map_err(|e| ParseError(ParseErrorInner::Amount(e)))
@@ -221,6 +229,7 @@ impl Amount {
     /// assert_eq!(amount.to_float_in(Denomination::Bitcoin), 0.001);
     /// # Ok::<_, amount::OutOfRangeError>(())
     /// ```
+    #[inline]
     #[cfg(feature = "alloc")]
     #[allow(clippy::missing_panics_doc)]
     pub fn to_float_in(self, denom: Denomination) -> f64 {
@@ -239,6 +248,7 @@ impl Amount {
     /// assert_eq!(amount.to_btc(), amount.to_float_in(Denomination::Bitcoin));
     /// # Ok::<_, amount::OutOfRangeError>(())
     /// ```
+    #[inline]
     #[cfg(feature = "alloc")]
     pub fn to_btc(self) -> f64 { self.to_float_in(Denomination::Bitcoin) }
 
@@ -249,6 +259,7 @@ impl Amount {
     /// If the amount is too big, too precise or negative.
     ///
     /// Please be aware of the risk of using floating-point numbers.
+    #[inline]
     #[cfg(feature = "alloc")]
     pub fn from_float_in(value: f64, denom: Denomination) -> Result<Self, ParseAmountError> {
         if value < 0.0 {
@@ -304,6 +315,7 @@ impl Amount {
     /// assert_eq!(output, "0.1");
     /// # Ok::<_, amount::OutOfRangeError>(())
     /// ```
+    #[inline]
     #[must_use]
     pub fn display_in(self, denomination: Denomination) -> Display {
         Display {
@@ -318,6 +330,7 @@ impl Amount {
     ///
     /// This will use BTC for values greater than or equal to 1 BTC and satoshis otherwise. To
     /// avoid confusion the denomination is always shown.
+    #[inline]
     #[must_use]
     pub fn display_dynamic(self) -> Display {
         Display {
@@ -339,6 +352,7 @@ impl Amount {
     /// assert_eq!(amount.to_string_in(Denomination::Bitcoin), "0.1");
     /// # Ok::<_, amount::OutOfRangeError>(())
     /// ```
+    #[inline]
     #[cfg(feature = "alloc")]
     pub fn to_string_in(self, denom: Denomination) -> String { self.display_in(denom).to_string() }
 
@@ -353,6 +367,7 @@ impl Amount {
     /// assert_eq!(amount.to_string_with_denomination(Denomination::Bitcoin), "0.1 BTC");
     /// # Ok::<_, amount::OutOfRangeError>(())
     /// ```
+    #[inline]
     #[cfg(feature = "alloc")]
     pub fn to_string_with_denomination(self, denom: Denomination) -> String {
         self.display_in(denom).show_denomination().to_string()
@@ -361,6 +376,7 @@ impl Amount {
     /// Checked addition.
     ///
     /// Returns [`None`] if the sum is larger than [`Amount::MAX`].
+    #[inline]
     #[must_use]
     pub const fn checked_add(self, rhs: Self) -> Option<Self> {
         // No `map()` in const context.
@@ -374,6 +390,7 @@ impl Amount {
     /// Checked subtraction.
     ///
     /// Returns [`None`] if overflow occurred.
+    #[inline]
     #[must_use]
     pub const fn checked_sub(self, rhs: Self) -> Option<Self> {
         // No `map()` in const context.
@@ -389,6 +406,7 @@ impl Amount {
     /// Checked multiplication.
     ///
     /// Returns [`None`] if the product is larger than [`Amount::MAX`].
+    #[inline]
     #[must_use]
     pub const fn checked_mul(self, rhs: u64) -> Option<Self> {
         // No `map()` in const context.
@@ -406,6 +424,7 @@ impl Amount {
     /// Be aware that integer division loses the remainder if no exact division can be made.
     ///
     /// Returns [`None`] if overflow occurred.
+    #[inline]
     #[must_use]
     pub const fn checked_div(self, rhs: u64) -> Option<Self> {
         // No `map()` in const context.
@@ -421,6 +440,7 @@ impl Amount {
     /// Checked remainder.
     ///
     /// Returns [`None`] if overflow occurred.
+    #[inline]
     #[must_use]
     pub const fn checked_rem(self, rhs: u64) -> Option<Self> {
         // No `map()` in const context.
@@ -434,6 +454,7 @@ impl Amount {
     }
 
     /// Converts to a signed amount.
+    #[inline]
     #[rustfmt::skip] // Moves code comments to the wrong line.
     #[allow(clippy::missing_panics_doc)]
     pub fn to_signed(self) -> SignedAmount {
@@ -445,6 +466,7 @@ impl Amount {
     ///
     /// Since `SignedAmount::MIN` is equivalent to `-Amount::MAX` subtraction of two signed amounts
     /// can never overflow a `SignedAmount`.
+    #[inline]
     #[must_use]
     pub fn signed_sub(self, rhs: Self) -> SignedAmount {
         (self.to_signed() - rhs.to_signed())
@@ -541,6 +563,7 @@ impl Amount {
 crate::internal_macros::impl_fmt_traits_for_u32_wrapper!(Amount, to_sat);
 
 impl default::Default for Amount {
+    #[inline]
     fn default() -> Self { Self::ZERO }
 }
 
@@ -553,6 +576,7 @@ impl fmt::Debug for Amount {
 // No one should depend on a binding contract for Display for this type.
 // Just using Bitcoin denominated string.
 impl fmt::Display for Amount {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         fmt::Display::fmt(&self.display_in(Denomination::Bitcoin).show_denomination(), f)
     }
@@ -585,6 +609,7 @@ impl FromStr for Amount {
 impl TryFrom<SignedAmount> for Amount {
     type Error = OutOfRangeError;
 
+    #[inline]
     fn try_from(value: SignedAmount) -> Result<Self, Self::Error> { value.to_unsigned() }
 }
 
@@ -598,6 +623,7 @@ encoding::encoder_newtype_exact! {
 #[cfg(feature = "encoding")]
 impl encoding::Encodable for Amount {
     type Encoder<'e> = AmountEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         AmountEncoder::new(encoding::ArrayEncoder::without_length_prefix(
             self.to_sat().to_le_bytes(),
@@ -628,6 +654,7 @@ crate::decoder_newtype! {
 #[cfg(feature = "encoding")]
 impl encoding::Decodable for Amount {
     type Decoder = AmountDecoder;
+    #[inline]
     fn decoder() -> Self::Decoder { AmountDecoder(encoding::ArrayDecoder::<8>::new()) }
 }
 

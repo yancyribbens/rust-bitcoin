@@ -64,6 +64,7 @@ pub mod as_sat {
 
     use crate::SignedAmount;
 
+    #[inline]
     pub fn serialize<A, S: Serializer>(a: &A, s: S) -> Result<S::Ok, S::Error>
     where
         A: Into<SignedAmount> + Copy,
@@ -72,6 +73,7 @@ pub mod as_sat {
         i64::serialize(&amount.to_sat(), s)
     }
 
+    #[inline]
     pub fn deserialize<'d, A, D: Deserializer<'d>>(d: D) -> Result<A, D::Error>
     where
         A: TryFrom<SignedAmount>,
@@ -96,6 +98,7 @@ pub mod as_sat {
 
         use crate::SignedAmount;
 
+        #[inline]
         #[allow(clippy::ref_option)] // API forced by serde.
         pub fn serialize<A, S: Serializer>(a: &Option<A>, s: S) -> Result<S::Ok, S::Error>
         where
@@ -128,6 +131,7 @@ pub mod as_sat {
                     write!(formatter, "an Option<i64>")
                 }
 
+                #[inline]
                 fn visit_none<E>(self) -> Result<Self::Value, E>
                 where
                     E: de::Error,
@@ -135,6 +139,7 @@ pub mod as_sat {
                     Ok(None)
                 }
 
+                #[inline]
                 fn visit_some<D>(self, d: D) -> Result<Self::Value, D::Error>
                 where
                     D: Deserializer<'de>,
@@ -228,6 +233,7 @@ pub mod as_btc {
     use super::DisplayFullError;
     use crate::amount::{Denomination, SignedAmount};
 
+    #[inline]
     pub fn serialize<A, S: Serializer>(a: &A, s: S) -> Result<S::Ok, S::Error>
     where
         A: Into<SignedAmount> + Copy,
@@ -236,6 +242,7 @@ pub mod as_btc {
         f64::serialize(&amount.to_float_in(Denomination::Bitcoin), s)
     }
 
+    #[inline]
     pub fn deserialize<'d, A, D: Deserializer<'d>>(d: D) -> Result<A, D::Error>
     where
         A: TryFrom<SignedAmount>,
@@ -262,6 +269,7 @@ pub mod as_btc {
 
         use crate::amount::{Denomination, SignedAmount};
 
+        #[inline]
         #[allow(clippy::ref_option)] // API forced by serde.
         pub fn serialize<A, S: Serializer>(a: &Option<A>, s: S) -> Result<S::Ok, S::Error>
         where
@@ -294,6 +302,7 @@ pub mod as_btc {
                     write!(formatter, "an Option<f64>")
                 }
 
+                #[inline]
                 fn visit_none<E>(self) -> Result<Self::Value, E>
                 where
                     E: de::Error,
@@ -301,6 +310,7 @@ pub mod as_btc {
                     Ok(None)
                 }
 
+                #[inline]
                 fn visit_some<D>(self, d: D) -> Result<Self::Value, D::Error>
                 where
                     D: Deserializer<'de>,
@@ -395,6 +405,7 @@ pub mod as_str {
     use super::DisplayFullError;
     use crate::amount::{Denomination, SignedAmount};
 
+    #[inline]
     pub fn serialize<A, S: Serializer>(a: &A, s: S) -> Result<S::Ok, S::Error>
     where
         A: Into<SignedAmount> + Copy,
@@ -403,6 +414,7 @@ pub mod as_str {
         str::serialize(&amount.to_string_in(Denomination::Bitcoin), s)
     }
 
+    #[inline]
     pub fn deserialize<'d, A, D: Deserializer<'d>>(d: D) -> Result<A, D::Error>
     where
         A: TryFrom<SignedAmount>,
@@ -429,6 +441,7 @@ pub mod as_str {
 
         use crate::amount::{Denomination, SignedAmount};
 
+        #[inline]
         #[allow(clippy::ref_option)] // API forced by serde.
         pub fn serialize<A, S: Serializer>(a: &Option<A>, s: S) -> Result<S::Ok, S::Error>
         where
@@ -461,6 +474,7 @@ pub mod as_str {
                     write!(formatter, "an Option<String>")
                 }
 
+                #[inline]
                 fn visit_none<E>(self) -> Result<Self::Value, E>
                 where
                     E: de::Error,
@@ -468,6 +482,7 @@ pub mod as_str {
                     Ok(None)
                 }
 
+                #[inline]
                 fn visit_some<D>(self, d: D) -> Result<Self::Value, D::Error>
                 where
                     D: Deserializer<'de>,

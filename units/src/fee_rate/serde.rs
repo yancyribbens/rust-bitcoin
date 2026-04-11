@@ -35,10 +35,12 @@ pub mod as_sat_per_kwu_floor {
 
     use crate::{Amount, FeeRate};
 
+    #[inline]
     pub fn serialize<S: Serializer>(f: &FeeRate, s: S) -> Result<S::Ok, S::Error> {
         u64::serialize(&f.to_sat_per_kwu_floor(), s)
     }
 
+    #[inline]
     pub fn deserialize<'d, D: Deserializer<'d>>(d: D) -> Result<FeeRate, D::Error> {
         let sat = u64::deserialize(d)?;
         FeeRate::from_per_kwu(
@@ -59,6 +61,7 @@ pub mod as_sat_per_kwu_floor {
 
         use crate::FeeRate;
 
+        #[inline]
         #[allow(clippy::ref_option)] // API forced by serde.
         pub fn serialize<S: Serializer>(f: &Option<FeeRate>, s: S) -> Result<S::Ok, S::Error> {
             match *f {
@@ -77,6 +80,7 @@ pub mod as_sat_per_kwu_floor {
                     write!(f, "an Option<u64>")
                 }
 
+                #[inline]
                 fn visit_none<E>(self) -> Result<Self::Value, E>
                 where
                     E: de::Error,
@@ -84,6 +88,7 @@ pub mod as_sat_per_kwu_floor {
                     Ok(None)
                 }
 
+                #[inline]
                 fn visit_some<D>(self, d: D) -> Result<Self::Value, D::Error>
                 where
                     D: Deserializer<'de>,
@@ -160,11 +165,13 @@ pub mod as_sat_per_vb_floor {
 
     use crate::{Amount, FeeRate};
 
+    #[inline]
     pub fn serialize<S: Serializer>(f: &FeeRate, s: S) -> Result<S::Ok, S::Error> {
         u64::serialize(&f.to_sat_per_vb_floor(), s)
     }
 
     // Errors on overflow.
+    #[inline]
     pub fn deserialize<'d, D: Deserializer<'d>>(d: D) -> Result<FeeRate, D::Error> {
         let sat = u64::deserialize(d)?;
         FeeRate::from_per_vb(
@@ -186,6 +193,7 @@ pub mod as_sat_per_vb_floor {
 
         use crate::fee_rate::FeeRate;
 
+        #[inline]
         #[allow(clippy::ref_option)] // API forced by serde.
         pub fn serialize<S: Serializer>(f: &Option<FeeRate>, s: S) -> Result<S::Ok, S::Error> {
             match *f {
@@ -204,6 +212,7 @@ pub mod as_sat_per_vb_floor {
                     write!(f, "an Option<u64>")
                 }
 
+                #[inline]
                 fn visit_none<E>(self) -> Result<Self::Value, E>
                 where
                     E: de::Error,
@@ -211,6 +220,7 @@ pub mod as_sat_per_vb_floor {
                     Ok(None)
                 }
 
+                #[inline]
                 fn visit_some<D>(self, d: D) -> Result<Self::Value, D::Error>
                 where
                     D: Deserializer<'de>,
@@ -288,11 +298,13 @@ pub mod as_sat_per_vb_ceil {
 
     use crate::{Amount, FeeRate};
 
+    #[inline]
     pub fn serialize<S: Serializer>(f: &FeeRate, s: S) -> Result<S::Ok, S::Error> {
         u64::serialize(&f.to_sat_per_vb_ceil(), s)
     }
 
     // Errors on overflow.
+    #[inline]
     pub fn deserialize<'d, D: Deserializer<'d>>(d: D) -> Result<FeeRate, D::Error> {
         let sat = u64::deserialize(d)?;
         FeeRate::from_per_vb(
@@ -314,6 +326,7 @@ pub mod as_sat_per_vb_ceil {
 
         use crate::fee_rate::FeeRate;
 
+        #[inline]
         #[allow(clippy::ref_option)] // API forced by serde.
         pub fn serialize<S: Serializer>(f: &Option<FeeRate>, s: S) -> Result<S::Ok, S::Error> {
             match *f {
@@ -332,6 +345,7 @@ pub mod as_sat_per_vb_ceil {
                     write!(f, "an Option<u64>")
                 }
 
+                #[inline]
                 fn visit_none<E>(self) -> Result<Self::Value, E>
                 where
                     E: de::Error,
@@ -339,6 +353,7 @@ pub mod as_sat_per_vb_ceil {
                     Ok(None)
                 }
 
+                #[inline]
                 fn visit_some<D>(self, d: D) -> Result<Self::Value, D::Error>
                 where
                     D: Deserializer<'de>,
@@ -423,5 +438,6 @@ impl fmt::Display for OverflowError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for OverflowError {
+    #[inline]
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }

@@ -67,16 +67,19 @@ macro_rules! impl_u32_wrapper {
         }
 
         impl fmt::Display for $newtype {
+            #[inline]
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.0, f) }
         }
 
         crate::parse_int::impl_parse_str_from_int_infallible!($newtype, u32, from);
 
         impl From<u32> for $newtype {
+            #[inline]
             fn from(inner: u32) -> Self { Self::from_u32(inner) }
         }
 
         impl From<$newtype> for u32 {
+            #[inline]
             fn from(height: $newtype) -> Self { height.to_u32() }
         }
 
@@ -139,18 +142,22 @@ impl BlockHeight {
     pub const MAX: Self = Self(u32::MAX);
 
     /// Constructs a new block height from a `u32`.
+    #[inline]
     pub const fn from_u32(inner: u32) -> Self { Self(inner) }
 
     /// Returns block height as a `u32`.
+    #[inline]
     pub const fn to_u32(self) -> u32 { self.0 }
 
     /// Attempt to subtract two [`BlockHeight`]s, returning `None` if overflow occurred.
+    #[inline]
     #[must_use]
     pub fn checked_sub(self, other: Self) -> Option<BlockHeightInterval> {
         self.to_u32().checked_sub(other.to_u32()).map(BlockHeightInterval)
     }
 
     /// Attempt to add an interval to this [`BlockHeight`], returning `None` if overflow occurred.
+    #[inline]
     #[must_use]
     pub fn checked_add(self, other: BlockHeightInterval) -> Option<Self> {
         self.to_u32().checked_add(other.to_u32()).map(Self)
@@ -182,6 +189,7 @@ impl From<absolute::Height> for BlockHeight {
     ///
     /// An absolute locktime block height has a maximum value of [`absolute::LOCK_TIME_THRESHOLD`]
     /// minus one, while [`BlockHeight`] may take the full range of `u32`.
+    #[inline]
     fn from(h: absolute::Height) -> Self { Self::from_u32(h.to_u32()) }
 }
 
@@ -192,6 +200,7 @@ impl TryFrom<BlockHeight> for absolute::Height {
     ///
     /// An absolute locktime block height has a maximum value of [`absolute::LOCK_TIME_THRESHOLD`]
     /// minus one, while [`BlockHeight`] may take the full range of `u32`.
+    #[inline]
     fn try_from(h: BlockHeight) -> Result<Self, Self::Error> { Self::from_u32(h.to_u32()) }
 }
 
@@ -205,6 +214,7 @@ encoding::encoder_newtype_exact! {
 #[cfg(feature = "encoding")]
 impl encoding::Encodable for BlockHeight {
     type Encoder<'e> = BlockHeightEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         BlockHeightEncoder::new(encoding::ArrayEncoder::without_length_prefix(
             self.to_u32().to_le_bytes(),
@@ -231,6 +241,7 @@ crate::decoder_newtype! {
 #[cfg(feature = "encoding")]
 impl encoding::Decodable for BlockHeight {
     type Decoder = BlockHeightDecoder;
+    #[inline]
     fn decoder() -> Self::Decoder { BlockHeightDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
@@ -256,18 +267,22 @@ impl BlockHeightInterval {
     pub const MAX: Self = Self(u32::MAX);
 
     /// Constructs a new block interval from a `u32`.
+    #[inline]
     pub const fn from_u32(inner: u32) -> Self { Self(inner) }
 
     /// Returns block interval as a `u32`.
+    #[inline]
     pub const fn to_u32(self) -> u32 { self.0 }
 
     /// Attempt to subtract two [`BlockHeightInterval`]s, returning `None` if overflow occurred.
+    #[inline]
     #[must_use]
     pub fn checked_sub(self, other: Self) -> Option<Self> {
         self.to_u32().checked_sub(other.to_u32()).map(Self)
     }
 
     /// Attempt to add two [`BlockHeightInterval`]s, returning `None` if overflow occurred.
+    #[inline]
     #[must_use]
     pub fn checked_add(self, other: Self) -> Option<Self> {
         self.to_u32().checked_add(other.to_u32()).map(Self)
@@ -281,6 +296,7 @@ impl From<relative::NumberOfBlocks> for BlockHeightInterval {
     ///
     /// A relative locktime block height has a maximum value of `u16::MAX` where as a
     /// [`BlockHeightInterval`] is a thin wrapper around a `u32`, the two types are not interchangeable.
+    #[inline]
     fn from(h: relative::NumberOfBlocks) -> Self { Self::from_u32(h.to_height().into()) }
 }
 
@@ -291,6 +307,7 @@ impl TryFrom<BlockHeightInterval> for relative::NumberOfBlocks {
     ///
     /// A relative locktime block height has a maximum value of `u16::MAX` where as a
     /// [`BlockHeightInterval`] is a thin wrapper around a `u32`, the two types are not interchangeable.
+    #[inline]
     fn try_from(h: BlockHeightInterval) -> Result<Self, Self::Error> {
         u16::try_from(h.to_u32())
             .map(Self::from)
@@ -323,9 +340,11 @@ impl BlockMtp {
     pub const MAX: Self = Self(u32::MAX);
 
     /// Constructs a new block MTP from a `u32`.
+    #[inline]
     pub const fn from_u32(inner: u32) -> Self { Self(inner) }
 
     /// Returns block MTP as a `u32`.
+    #[inline]
     pub const fn to_u32(self) -> u32 { self.0 }
 
     /// Constructs a [`BlockMtp`] by computing the median‐time‐past from the last 11 block timestamps
@@ -333,18 +352,21 @@ impl BlockMtp {
     /// Because block timestamps are not monotonic, this function internally sorts them;
     /// it is therefore not important what order they appear in the array; use whatever
     /// is most convenient.
+    #[inline]
     pub fn new(mut timestamps: [crate::BlockTime; 11]) -> Self {
         timestamps.sort_unstable();
         Self::from_u32(u32::from(timestamps[5]))
     }
 
     /// Attempt to subtract two [`BlockMtp`]s, returning `None` if overflow occurred.
+    #[inline]
     #[must_use]
     pub fn checked_sub(self, other: Self) -> Option<BlockMtpInterval> {
         self.to_u32().checked_sub(other.to_u32()).map(BlockMtpInterval)
     }
 
     /// Attempt to add an interval to this [`BlockMtp`], returning `None` if overflow occurred.
+    #[inline]
     #[must_use]
     pub fn checked_add(self, other: BlockMtpInterval) -> Option<Self> {
         self.to_u32().checked_add(other.to_u32()).map(Self)
@@ -358,6 +380,7 @@ impl From<absolute::MedianTimePast> for BlockMtp {
     ///
     /// An absolute locktime MTP has a minimum value of [`absolute::LOCK_TIME_THRESHOLD`],
     /// while [`BlockMtp`] may take the full range of `u32`.
+    #[inline]
     fn from(h: absolute::MedianTimePast) -> Self { Self::from_u32(h.to_u32()) }
 }
 
@@ -368,6 +391,7 @@ impl TryFrom<BlockMtp> for absolute::MedianTimePast {
     ///
     /// An absolute locktime MTP has a minimum value of [`absolute::LOCK_TIME_THRESHOLD`],
     /// while [`BlockMtp`] may take the full range of `u32`.
+    #[inline]
     fn try_from(h: BlockMtp) -> Result<Self, Self::Error> { Self::from_u32(h.to_u32()) }
 }
 
@@ -393,9 +417,11 @@ impl BlockMtpInterval {
     pub const MAX: Self = Self(u32::MAX);
 
     /// Constructs a new block MTP interval from a `u32`.
+    #[inline]
     pub const fn from_u32(inner: u32) -> Self { Self(inner) }
 
     /// Returns block MTP interval as a `u32`.
+    #[inline]
     pub const fn to_u32(self) -> u32 { self.0 }
 
     /// Converts a [`BlockMtpInterval`] to a [`locktime::relative::NumberOf512Seconds`], rounding down.
@@ -431,12 +457,14 @@ impl BlockMtpInterval {
     }
 
     /// Attempt to subtract two [`BlockMtpInterval`]s, returning `None` if overflow occurred.
+    #[inline]
     #[must_use]
     pub fn checked_sub(self, other: Self) -> Option<Self> {
         self.to_u32().checked_sub(other.to_u32()).map(Self)
     }
 
     /// Attempt to add two [`BlockMtpInterval`]s, returning `None` if overflow occurred.
+    #[inline]
     #[must_use]
     pub fn checked_add(self, other: Self) -> Option<Self> {
         self.to_u32().checked_add(other.to_u32()).map(Self)
@@ -451,6 +479,7 @@ impl From<relative::NumberOf512Seconds> for BlockMtpInterval {
     /// A relative locktime MTP interval has a resolution of 512 seconds, and a maximum value
     /// of `u16::MAX` 512-second intervals. [`BlockMtpInterval`] may take the full range of
     /// `u32`.
+    #[inline]
     fn from(h: relative::NumberOf512Seconds) -> Self { Self::from_u32(h.to_seconds()) }
 }
 
@@ -562,6 +591,7 @@ crate::internal_macros::impl_add_assign!(BlockMtpInterval);
 crate::internal_macros::impl_sub_assign!(BlockMtpInterval);
 
 impl core::iter::Sum for BlockHeightInterval {
+    #[inline]
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         let sum = iter.map(Self::to_u32).sum();
         Self::from_u32(sum)
@@ -569,6 +599,7 @@ impl core::iter::Sum for BlockHeightInterval {
 }
 
 impl<'a> core::iter::Sum<&'a Self> for BlockHeightInterval {
+    #[inline]
     fn sum<I>(iter: I) -> Self
     where
         I: Iterator<Item = &'a Self>,
@@ -579,6 +610,7 @@ impl<'a> core::iter::Sum<&'a Self> for BlockHeightInterval {
 }
 
 impl core::iter::Sum for BlockMtpInterval {
+    #[inline]
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         let sum = iter.map(Self::to_u32).sum();
         Self::from_u32(sum)
@@ -586,6 +618,7 @@ impl core::iter::Sum for BlockMtpInterval {
 }
 
 impl<'a> core::iter::Sum<&'a Self> for BlockMtpInterval {
+    #[inline]
     fn sum<I>(iter: I) -> Self
     where
         I: Iterator<Item = &'a Self>,

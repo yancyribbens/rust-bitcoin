@@ -292,6 +292,7 @@ impl CompactTarget {
     ///
     /// - If the input string does not contain a `0x` (or `0X`) prefix.
     /// - If the input string is not a valid hex encoding of a `u32`.
+    #[inline]
     pub fn from_hex(s: &str) -> Result<Self, PrefixedHexError>
     where
         Self: Sized,
@@ -306,6 +307,7 @@ impl CompactTarget {
     ///
     /// - If the input string contains a `0x` (or `0X`) prefix.
     /// - If the input string is not a valid hex encoding of a `u32`.
+    #[inline]
     pub fn from_unprefixed_hex(s: &str) -> Result<Self, UnprefixedHexError>
     where
         Self: Sized,
@@ -338,6 +340,7 @@ encoding::encoder_newtype_exact! {
 #[cfg(feature = "encoding")]
 impl encoding::Encodable for CompactTarget {
     type Encoder<'e> = CompactTargetEncoder<'e>;
+    #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         CompactTargetEncoder::new(encoding::ArrayEncoder::without_length_prefix(
             self.to_consensus().to_le_bytes(),
@@ -364,6 +367,7 @@ crate::decoder_newtype! {
 #[cfg(feature = "encoding")]
 impl encoding::Decodable for CompactTarget {
     type Decoder = CompactTargetDecoder;
+    #[inline]
     fn decoder() -> Self::Decoder { CompactTargetDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
