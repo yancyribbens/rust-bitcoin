@@ -9,8 +9,6 @@ use alloc::borrow::Cow;
 use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
-use core::convert::Infallible;
-use core::fmt;
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
@@ -20,12 +18,18 @@ use encoding::{
     Encoder2, Encoder4,
 };
 use hashes::sha256d;
-use internals::write_err;
 use io::{BufRead, Write};
 
 use crate::address::{Address, AddressDecoder};
 use crate::consensus::{impl_consensus_encoding, impl_vec_wrapper};
 use crate::{ProtocolVersion, ServiceFlags};
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{
+    AlertDecoderError, RejectDecoderError, RejectReasonDecoderError, UserAgentDecoderError,
+    VersionMessageDecoderError,
+};
 
 // Some simple messages
 
@@ -212,25 +216,6 @@ type VersionMessageInnerDecoder = encoding::Decoder2<
 #[derive(Debug, Clone)]
 pub struct VersionMessageDecoder(VersionMessageInnerDecoder);
 
-/// An error consensus decoding a [`VersionMessage`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct VersionMessageDecoderError(<VersionMessageInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for VersionMessageDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for VersionMessageDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "version message decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for VersionMessageDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 impl_consensus_encoding!(
     VersionMessage,
     version,
@@ -302,38 +287,6 @@ impl encoding::Decodable for UserAgent {
     type Decoder = UserAgentDecoder;
 
     fn decoder() -> Self::Decoder { UserAgentDecoder(UserAgentInnerDecoder::new()) }
-}
-
-/// An error decoding a [`UserAgent`] message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum UserAgentDecoderError {
-    /// Inner decoder error.
-    Decoder(<UserAgentInnerDecoder as encoding::Decoder>::Error),
-    /// The string did not contain valid UTF-8.
-    InvalidUtf8,
-}
-
-impl From<Infallible> for UserAgentDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for UserAgentDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Decoder(d) => write_err!(f, "useragent error"; d),
-            Self::InvalidUtf8 => write!(f, "invalid utf-8."),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UserAgentDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Decoder(d) => Some(d),
-            Self::InvalidUtf8 => None,
-        }
-    }
 }
 
 impl_consensus_encoding!(UserAgent, user_agent);
@@ -556,38 +509,6 @@ impl encoding::Decodable for RejectReason {
     fn decoder() -> Self::Decoder { RejectReasonDecoder(ArrayDecoder::new()) }
 }
 
-/// Errors occuring when decoding a [`RejectReason`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum RejectReasonDecoderError {
-    /// Inner decoder error.
-    Decoder(<ArrayDecoder<1> as encoding::Decoder>::Error),
-    /// Unknown reject code.
-    UnknownRejectCode(u8),
-}
-
-impl From<Infallible> for RejectReasonDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for RejectReasonDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Decoder(d) => write_err!(f, "rejectreason error"; d),
-            Self::UnknownRejectCode(code) => write!(f, "unknown reject code {}", code),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for RejectReasonDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Decoder(e) => Some(e),
-            Self::UnknownRejectCode(_) => None,
-        }
-    }
-}
-
 impl Encodable for RejectReason {
     fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
         w.write_all(&[*self as u8])?;
@@ -702,38 +623,6 @@ impl encoding::Decodable for Reject {
     }
 }
 
-/// Errors occuring when decoding a [`Reject`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum RejectDecoderError {
-    /// Inner decoder error.
-    Decoder(<RejectInnerDecoder as encoding::Decoder>::Error),
-    /// Invalid UTF-8 string.
-    InvalidUtf8,
-}
-
-impl From<Infallible> for RejectDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for RejectDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Decoder(d) => write_err!(f, "reject error"; d),
-            Self::InvalidUtf8 => write!(f, "invalid utf-8"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for RejectDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Decoder(d) => Some(d),
-            Self::InvalidUtf8 => None,
-        }
-    }
-}
-
 impl_consensus_encoding!(Reject, message, ccode, reason, hash);
 
 /// A deprecated message type that was used to notify users of system changes. Due to a number of
@@ -806,26 +695,161 @@ impl encoding::Decodable for Alert {
     fn decoder() -> Self::Decoder { AlertDecoder(AlertInnerDecoder::new()) }
 }
 
-/// An error decoding a [`Alert`] message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AlertDecoderError(<AlertInnerDecoder as encoding::Decoder>::Error);
+impl_vec_wrapper!(Alert, Vec<u8>);
 
-impl From<Infallible> for AlertDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+/// Error types for network messages.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
 
-impl fmt::Display for AlertDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "alert error"; self.0)
+    use internals::write_err;
+
+    /// An error consensus decoding a [`VersionMessage`].
+    ///
+    /// [`VersionMessage`]: super::VersionMessage
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct VersionMessageDecoderError(
+        pub(super) <super::VersionMessageInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for VersionMessageDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for VersionMessageDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "version message decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for VersionMessageDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error decoding a [`UserAgent`] message.
+    ///
+    /// [`UserAgent`]: super::UserAgent
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum UserAgentDecoderError {
+        /// Inner decoder error.
+        Decoder(<super::UserAgentInnerDecoder as encoding::Decoder>::Error),
+        /// The string did not contain valid UTF-8.
+        InvalidUtf8,
+    }
+
+    impl From<Infallible> for UserAgentDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for UserAgentDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Decoder(d) => write_err!(f, "useragent error"; d),
+                Self::InvalidUtf8 => write!(f, "invalid utf-8."),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for UserAgentDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Decoder(d) => Some(d),
+                Self::InvalidUtf8 => None,
+            }
+        }
+    }
+
+    /// Errors occuring when decoding a [`RejectReason`].
+    ///
+    /// [`RejectReason`]: super::RejectReason
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum RejectReasonDecoderError {
+        /// Inner decoder error.
+        Decoder(<encoding::ArrayDecoder<1> as encoding::Decoder>::Error),
+        /// Unknown reject code.
+        UnknownRejectCode(u8),
+    }
+
+    impl From<Infallible> for RejectReasonDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for RejectReasonDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Decoder(d) => write_err!(f, "rejectreason error"; d),
+                Self::UnknownRejectCode(code) => write!(f, "unknown reject code {}", code),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for RejectReasonDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Decoder(e) => Some(e),
+                Self::UnknownRejectCode(_) => None,
+            }
+        }
+    }
+
+    /// Errors occuring when decoding a [`Reject`].
+    ///
+    /// [`Reject`]: super::Reject
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum RejectDecoderError {
+        /// Inner decoder error.
+        Decoder(<super::RejectInnerDecoder as encoding::Decoder>::Error),
+        /// Invalid UTF-8 string.
+        InvalidUtf8,
+    }
+
+    impl From<Infallible> for RejectDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for RejectDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Decoder(d) => write_err!(f, "reject error"; d),
+                Self::InvalidUtf8 => write!(f, "invalid utf-8"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for RejectDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Decoder(d) => Some(d),
+                Self::InvalidUtf8 => None,
+            }
+        }
+    }
+
+    /// An error decoding an [`Alert`] message.
+    ///
+    /// [`Alert`]: super::Alert
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct AlertDecoderError(pub(super) <super::AlertInnerDecoder as encoding::Decoder>::Error);
+
+    impl From<Infallible> for AlertDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for AlertDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "alert error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for AlertDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
     }
 }
-
-#[cfg(feature = "std")]
-impl std::error::Error for AlertDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
-impl_vec_wrapper!(Alert, Vec<u8>);
 
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for ClientSoftwareVersion {

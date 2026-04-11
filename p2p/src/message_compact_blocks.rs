@@ -3,15 +3,15 @@
 //!
 //! BIP-0152  Compact Blocks network messages
 
-use core::convert::Infallible;
-use core::fmt;
-
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
 use encoding::{ArrayDecoder, ArrayEncoder, Decoder2, Encoder2};
-use internals::write_err;
 
 use crate::consensus::impl_consensus_encoding;
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::SendCmpctDecoderError;
 
 /// sendcmpct message
 #[derive(PartialEq, Eq, Clone, Debug, Copy, PartialOrd, Ord, Hash)]
@@ -73,26 +73,38 @@ impl encoding::Decodable for SendCmpct {
     }
 }
 
-/// Errors occuring when decoding a [`SendCmpct`] message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SendCmpctDecoderError(<SendCmpctInnerDecoder as encoding::Decoder>::Error);
+impl_consensus_encoding!(SendCmpct, send_compact, version);
 
-impl From<Infallible> for SendCmpctDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+/// Error types for [`SendCmpct`] messages.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
 
-impl fmt::Display for SendCmpctDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "sendcmpct error"; self.0)
+    use internals::write_err;
+
+    /// Errors occuring when decoding a [`SendCmpct`] message.
+    ///
+    /// [`SendCmpct`]: super::SendCmpct
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct SendCmpctDecoderError(
+        pub(super) <super::SendCmpctInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for SendCmpctDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for SendCmpctDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "sendcmpct error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for SendCmpctDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
     }
 }
-
-#[cfg(feature = "std")]
-impl std::error::Error for SendCmpctDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
-impl_consensus_encoding!(SendCmpct, send_compact, version);
 
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for SendCmpct {

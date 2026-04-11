@@ -6,8 +6,6 @@
 //! Bitcoin data (blocks and transactions) around.
 
 use alloc::vec::Vec;
-use core::convert::Infallible;
-use core::fmt;
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
@@ -16,7 +14,6 @@ use encoding::{
     ArrayDecoder, ArrayEncoder, CompactSizeEncoder, Decoder2, Decoder3, Encoder2, Encoder3,
     SliceEncoder, VecDecoder,
 };
-use internals::write_err;
 use io::{BufRead, Write};
 use primitives::block::{BlockHashDecoder, BlockHashEncoder};
 use primitives::transaction::{Txid, Wtxid};
@@ -24,6 +21,13 @@ use primitives::BlockHash;
 
 use crate::consensus::impl_consensus_encoding;
 use crate::{ProtocolVersion, ProtocolVersionDecoder, ProtocolVersionEncoder};
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{
+    BlockLocatorDecoderError, GetBlocksMessageDecoderError, GetHeadersMessageDecoderError,
+    InventoryDecoderError,
+};
 
 /// An inventory item.
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Hash, PartialOrd, Ord)]
@@ -177,25 +181,6 @@ impl encoding::Decodable for Inventory {
     }
 }
 
-/// An error consensus decoding an [`Inventory`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct InventoryDecoderError(<InventoryInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for InventoryDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for InventoryDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "inventory error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InventoryDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 /// A block locator.
 ///
 /// Maximum number of hashes in a block locator, matching Bitcoin Core's `MAX_LOCATOR_SZ`.
@@ -317,25 +302,6 @@ impl encoding::Decoder for BlockLocatorDecoder {
 impl encoding::Decodable for BlockLocator {
     type Decoder = BlockLocatorDecoder;
     fn decoder() -> Self::Decoder { BlockLocatorDecoder::new() }
-}
-
-/// An error consensus decoding a [`BlockLocator`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BlockLocatorDecoderError(<BlockLocatorInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for BlockLocatorDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for BlockLocatorDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "block locator error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for BlockLocatorDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
 
 // Some simple messages
@@ -480,51 +446,109 @@ impl encoding::Decodable for GetHeadersMessage {
     }
 }
 
-/// An error consensus decoding a [`GetBlocksMessage`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct GetBlocksMessageDecoderError(
-    <GetBlocksOrHeadersInnerDecoder as encoding::Decoder>::Error,
-);
-
-impl From<Infallible> for GetBlocksMessageDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for GetBlocksMessageDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "getblocks decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for GetBlocksMessageDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
-/// An error consensus decoding a [`GetHeadersMessage`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct GetHeadersMessageDecoderError(
-    <GetBlocksOrHeadersInnerDecoder as encoding::Decoder>::Error,
-);
-
-impl From<Infallible> for GetHeadersMessageDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for GetHeadersMessageDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_err!(f, "getheaders decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for GetHeadersMessageDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 impl_consensus_encoding!(GetBlocksMessage, version, locator_hashes, stop_hash);
 
 impl_consensus_encoding!(GetHeadersMessage, version, locator_hashes, stop_hash);
+
+/// Error types for blockdata messages.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
+
+    use internals::write_err;
+
+    /// An error consensus decoding an [`Inventory`].
+    ///
+    /// [`Inventory`]: super::Inventory
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct InventoryDecoderError(
+        pub(super) <super::InventoryInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for InventoryDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for InventoryDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "inventory error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for InventoryDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error consensus decoding a [`BlockLocator`].
+    ///
+    /// [`BlockLocator`]: super::BlockLocator
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct BlockLocatorDecoderError(
+        pub(super) <super::BlockLocatorInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for BlockLocatorDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for BlockLocatorDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "block locator error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for BlockLocatorDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error consensus decoding a [`GetBlocksMessage`].
+    ///
+    /// [`GetBlocksMessage`]: super::GetBlocksMessage
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct GetBlocksMessageDecoderError(
+        pub(super) <super::GetBlocksOrHeadersInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for GetBlocksMessageDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for GetBlocksMessageDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "getblocks decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for GetBlocksMessageDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error consensus decoding a [`GetHeadersMessage`].
+    ///
+    /// [`GetHeadersMessage`]: super::GetHeadersMessage
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct GetHeadersMessageDecoderError(
+        pub(super) <super::GetBlocksOrHeadersInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for GetHeadersMessageDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for GetHeadersMessageDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "getheaders decoder error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for GetHeadersMessageDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+}
 
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for BlockLocator {

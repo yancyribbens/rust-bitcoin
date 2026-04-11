@@ -7,7 +7,6 @@
 
 use alloc::vec;
 use alloc::vec::Vec;
-use core::convert::Infallible;
 use core::{fmt, iter};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6, ToSocketAddrs};
 
@@ -19,10 +18,17 @@ use encoding::{
     CompactSizeU64Decoder, Decoder2, Decoder4, Encoder2, Encoder4,
 };
 use internals::array::ArrayExt;
-use internals::write_err;
 use io::{BufRead, Read, Write};
 
 use crate::ServiceFlags;
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{
+    AddrV1MessageDecoderError, AddrV2DecoderError, AddrV2MessageDecoderError,
+    AddrV2ToIpAddrError, AddrV2ToIpv4AddrError, AddrV2ToIpv6AddrError, AddressDecoderError,
+    UnroutableAddressError,
+};
 
 /// A message which can be sent on the Bitcoin network
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -230,25 +236,6 @@ impl encoding::Decodable for Address {
     }
 }
 
-/// An error consensus decoding an [`Address`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AddressDecoderError(<AddressInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for AddressDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for AddressDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        internals::write_err!(f, "address decoder error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for AddressDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 /// Data type received in an `addr` message.
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct AddrV1Message {
@@ -310,25 +297,6 @@ impl encoding::Decodable for AddrV1Message {
             Address::decoder(),
         ))
     }
-}
-
-/// An error occuring when decoding a [`AddrV1Message`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AddrV1MessageDecoderError(<AddrV1MessageInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for AddrV1MessageDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for AddrV1MessageDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "addrv1 message error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for AddrV1MessageDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
 
 crate::consensus::impl_consensus_encoding!(AddrV1Message, time, address);
@@ -672,56 +640,6 @@ impl encoding::Decodable for AddrV2 {
     }
 }
 
-/// An error decoding a [`AddrV2`] message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum AddrV2DecoderError {
-    /// Inner decoder failure.
-    Decoder(<AddrV2InnerDecoder as encoding::Decoder>::Error),
-    /// The address cannot be decoded given the buffer size.
-    InvalidAddressLength {
-        /// The expected size given the address type.
-        expected: usize,
-        /// Actual size of the buffer.
-        got: usize,
-    },
-    /// Expected CJDNS address but got an invalid mask.
-    NotCjdns,
-    /// `OnionCat` address sent as IPV6 is invalid.
-    WrappedOnionCat,
-    /// Wrapped IPV4 sent as IPV6 is invalid.
-    WrappedIpv4,
-}
-
-impl From<Infallible> for AddrV2DecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for AddrV2DecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Decoder(d) => write_err!(f, "addrv2 error"; d),
-            Self::InvalidAddressLength { expected, got } =>
-                write!(f, "invalid length. expected {}, got {}", expected, got),
-            Self::NotCjdns => write!(f, "CJDNS address must start with a reserved byte."),
-            Self::WrappedOnionCat => write!(f, "OnionCat address sent as IPv6 is invalid."),
-            Self::WrappedIpv4 => write!(f, "wrapped IPv4 sent as IPv6 is invalid."),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for AddrV2DecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Decoder(d) => Some(d),
-            Self::InvalidAddressLength { expected: _, got: _ } => None,
-            Self::NotCjdns => None,
-            Self::WrappedOnionCat => None,
-            Self::WrappedIpv4 => None,
-        }
-    }
-}
-
 impl Encodable for AddrV2 {
     fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
         fn encode_addr<W: Write + ?Sized>(
@@ -942,178 +860,340 @@ impl encoding::Decodable for AddrV2Message {
     }
 }
 
-/// An error occuring when decoding a [`AddrV2Message`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AddrV2MessageDecoderError(<AddrV2MessageInnerDecoder as encoding::Decoder>::Error);
+/// Error types for address messages.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
 
-impl From<Infallible> for AddrV2MessageDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+    use internals::write_err;
 
-impl fmt::Display for AddrV2MessageDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "addrv2 message error"; self.0)
+    /// An error consensus decoding an [`Address`].
+    ///
+    /// [`Address`]: super::Address
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct AddressDecoderError(
+        pub(super) <super::AddressInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for AddressDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for AddrV2MessageDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
-/// Error returned when an address cannot be converted to an IP-based address.
-///
-/// Addresses like Tor, I2P, and CJDNS use different routing mechanisms
-/// and cannot be represented as standard IP addresses or socket addresses.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[non_exhaustive]
-pub enum UnroutableAddressError {
-    /// Tor V2 onion address.
-    TorV2,
-    /// Tor V3 onion address.
-    TorV3,
-    /// I2P address.
-    I2p,
-    /// CJDNS address.
-    Cjdns,
-    /// Unknown address type.
-    Unknown,
-}
-
-impl fmt::Display for UnroutableAddressError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::TorV2 => write!(f, "Tor v2 addresses cannot be converted to IP addresses"),
-            Self::TorV3 => write!(f, "Tor v3 addresses cannot be converted to IP addresses"),
-            Self::I2p => write!(f, "I2P addresses cannot be converted to IP addresses"),
-            Self::Cjdns => write!(f, "CJDNS addresses cannot be converted to IP addresses"),
-            Self::Unknown => write!(f, "unknown address type cannot be converted to IP addresses"),
+    impl fmt::Display for AddressDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            internals::write_err!(f, "address decoder error"; self.0)
         }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for UnroutableAddressError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::TorV2 => None,
-            Self::TorV3 => None,
-            Self::I2p => None,
-            Self::Cjdns => None,
-            Self::Unknown => None,
+    #[cfg(feature = "std")]
+    impl std::error::Error for AddressDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error occuring when decoding a [`AddrV1Message`].
+    ///
+    /// [`AddrV1Message`]: super::AddrV1Message
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct AddrV1MessageDecoderError(
+        pub(super) <super::AddrV1MessageInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for AddrV1MessageDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for AddrV1MessageDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "addrv1 message error"; self.0)
         }
     }
-}
 
-/// Error types for [`AddrV2`] to [`IpAddr`] conversion.
-#[derive(Debug, PartialEq, Eq)]
-pub enum AddrV2ToIpAddrError {
-    /// A [`AddrV2::TorV3`] address cannot be converted to a [`IpAddr`].
-    TorV3,
-    /// A [`AddrV2::I2p`] address cannot be converted to a [`IpAddr`].
-    I2p,
-    /// A [`AddrV2::Cjdns`] address cannot be converted to a [`IpAddr`],
-    Cjdns,
-    /// A [`AddrV2::Unknown`] address cannot be converted to a [`IpAddr`].
-    Unknown,
-}
+    #[cfg(feature = "std")]
+    impl std::error::Error for AddrV1MessageDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
 
-impl fmt::Display for AddrV2ToIpAddrError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TorV3 => write!(f, "TorV3 addresses cannot be converted to IpAddr"),
-            Self::I2p => write!(f, "I2P addresses cannot be converted to IpAddr"),
-            Self::Cjdns => write!(f, "Cjdns addresses cannot be converted to IpAddr"),
-            Self::Unknown => write!(f, "Unknown address type cannot be converted to IpAddr"),
+    /// An error decoding a [`AddrV2`] message.
+    ///
+    /// [`AddrV2`]: super::AddrV2
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum AddrV2DecoderError {
+        /// Inner decoder failure.
+        Decoder(<super::AddrV2InnerDecoder as encoding::Decoder>::Error),
+        /// The address cannot be decoded given the buffer size.
+        InvalidAddressLength {
+            /// The expected size given the address type.
+            expected: usize,
+            /// Actual size of the buffer.
+            got: usize,
+        },
+        /// Expected CJDNS address but got an invalid mask.
+        NotCjdns,
+        /// `OnionCat` address sent as IPV6 is invalid.
+        WrappedOnionCat,
+        /// Wrapped IPV4 sent as IPV6 is invalid.
+        WrappedIpv4,
+    }
+
+    impl From<Infallible> for AddrV2DecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for AddrV2DecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Decoder(d) => write_err!(f, "addrv2 error"; d),
+                Self::InvalidAddressLength { expected, got } =>
+                    write!(f, "invalid length. expected {}, got {}", expected, got),
+                Self::NotCjdns => write!(f, "CJDNS address must start with a reserved byte."),
+                Self::WrappedOnionCat => write!(f, "OnionCat address sent as IPv6 is invalid."),
+                Self::WrappedIpv4 => write!(f, "wrapped IPv4 sent as IPv6 is invalid."),
+            }
         }
     }
-}
 
-impl std::error::Error for AddrV2ToIpAddrError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::TorV3 => None,
-            Self::I2p => None,
-            Self::Cjdns => None,
-            Self::Unknown => None,
+    #[cfg(feature = "std")]
+    impl std::error::Error for AddrV2DecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Decoder(d) => Some(d),
+                Self::InvalidAddressLength { expected: _, got: _ } => None,
+                Self::NotCjdns => None,
+                Self::WrappedOnionCat => None,
+                Self::WrappedIpv4 => None,
+            }
         }
     }
-}
 
-/// Error types for [`AddrV2`] to [`Ipv4Addr`] conversion.
-#[derive(Debug, PartialEq, Eq)]
-pub enum AddrV2ToIpv4AddrError {
-    /// A [`AddrV2::Ipv6`] address cannot be converted to a [`Ipv4Addr`].
-    Ipv6,
-    /// A [`AddrV2::TorV3`] address cannot be converted to a [`Ipv4Addr`].
-    TorV3,
-    /// A [`AddrV2::I2p`] address cannot be converted to a [`Ipv4Addr`].
-    I2p,
-    /// A [`AddrV2::Cjdns`] address cannot be converted to a [`Ipv4Addr`],
-    Cjdns,
-    /// A [`AddrV2::Unknown`] address cannot be converted to a [`Ipv4Addr`].
-    Unknown,
-}
+    /// An error occuring when decoding a [`AddrV2Message`].
+    ///
+    /// [`AddrV2Message`]: super::AddrV2Message
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct AddrV2MessageDecoderError(
+        pub(super) <super::AddrV2MessageInnerDecoder as encoding::Decoder>::Error,
+    );
 
-impl fmt::Display for AddrV2ToIpv4AddrError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Ipv6 => write!(f, "Ipv6 addresses cannot be converted to Ipv4Addr"),
-            Self::TorV3 => write!(f, "TorV3 addresses cannot be converted to Ipv4Addr"),
-            Self::I2p => write!(f, "I2P addresses cannot be converted to Ipv4Addr"),
-            Self::Cjdns => write!(f, "Cjdns addresses cannot be converted to Ipv4Addr"),
-            Self::Unknown => write!(f, "Unknown address type cannot be converted to Ipv4Addr"),
+    impl From<Infallible> for AddrV2MessageDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for AddrV2MessageDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "addrv2 message error"; self.0)
         }
     }
-}
 
-impl std::error::Error for AddrV2ToIpv4AddrError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Ipv6 => None,
-            Self::TorV3 => None,
-            Self::I2p => None,
-            Self::Cjdns => None,
-            Self::Unknown => None,
+    #[cfg(feature = "std")]
+    impl std::error::Error for AddrV2MessageDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// Error returned when an address cannot be converted to an IP-based address.
+    ///
+    /// Addresses like Tor, I2P, and CJDNS use different routing mechanisms
+    /// and cannot be represented as standard IP addresses or socket addresses.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[non_exhaustive]
+    pub enum UnroutableAddressError {
+        /// Tor V2 onion address.
+        TorV2,
+        /// Tor V3 onion address.
+        TorV3,
+        /// I2P address.
+        I2p,
+        /// CJDNS address.
+        Cjdns,
+        /// Unknown address type.
+        Unknown,
+    }
+
+    impl fmt::Display for UnroutableAddressError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::TorV2 => write!(f, "Tor v2 addresses cannot be converted to IP addresses"),
+                Self::TorV3 => write!(f, "Tor v3 addresses cannot be converted to IP addresses"),
+                Self::I2p => write!(f, "I2P addresses cannot be converted to IP addresses"),
+                Self::Cjdns => write!(f, "CJDNS addresses cannot be converted to IP addresses"),
+                Self::Unknown =>
+                    write!(f, "unknown address type cannot be converted to IP addresses"),
+            }
         }
     }
-}
 
-/// Error types for [`AddrV2`] to [`Ipv6Addr`] conversion.
-#[derive(Debug, PartialEq, Eq)]
-pub enum AddrV2ToIpv6AddrError {
-    /// A [`AddrV2::Ipv4`] address cannot be converted to a [`Ipv6Addr`].
-    Ipv4,
-    /// A [`AddrV2::TorV3`] address cannot be converted to a [`Ipv6Addr`].
-    TorV3,
-    /// A [`AddrV2::I2p`] address cannot be converted to a [`Ipv6Addr`].
-    I2p,
-    /// A [`AddrV2::Cjdns`] address cannot be converted to a [`Ipv6Addr`],
-    Cjdns,
-    /// A [`AddrV2::Unknown`] address cannot be converted to a [`Ipv6Addr`].
-    Unknown,
-}
-
-impl fmt::Display for AddrV2ToIpv6AddrError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Ipv4 => write!(f, "Ipv4 addresses cannot be converted to Ipv6Addr"),
-            Self::TorV3 => write!(f, "TorV3 addresses cannot be converted to Ipv6Addr"),
-            Self::I2p => write!(f, "I2P addresses cannot be converted to Ipv6Addr"),
-            Self::Cjdns => write!(f, "Cjdns addresses cannot be converted to Ipv6Addr"),
-            Self::Unknown => write!(f, "Unknown address type cannot be converted to Ipv6Addr"),
+    #[cfg(feature = "std")]
+    impl std::error::Error for UnroutableAddressError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::TorV2 => None,
+                Self::TorV3 => None,
+                Self::I2p => None,
+                Self::Cjdns => None,
+                Self::Unknown => None,
+            }
         }
     }
-}
 
-impl std::error::Error for AddrV2ToIpv6AddrError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Ipv4 => None,
-            Self::TorV3 => None,
-            Self::I2p => None,
-            Self::Cjdns => None,
-            Self::Unknown => None,
+    /// Error types for [`AddrV2`] to [`IpAddr`] conversion.
+    ///
+    /// [`AddrV2`]: super::AddrV2
+    /// [`IpAddr`]: super::IpAddr
+    #[derive(Debug, PartialEq, Eq)]
+    pub enum AddrV2ToIpAddrError {
+        /// A [`AddrV2::TorV3`] address cannot be converted to a [`IpAddr`].
+        ///
+        /// [`AddrV2::TorV3`]: super::AddrV2::TorV3
+        /// [`IpAddr`]: super::IpAddr
+        TorV3,
+        /// A [`AddrV2::I2p`] address cannot be converted to a [`IpAddr`].
+        ///
+        /// [`AddrV2::I2p`]: super::AddrV2::I2p
+        /// [`IpAddr`]: super::IpAddr
+        I2p,
+        /// A [`AddrV2::Cjdns`] address cannot be converted to a [`IpAddr`],
+        ///
+        /// [`AddrV2::Cjdns`]: super::AddrV2::Cjdns
+        /// [`IpAddr`]: super::IpAddr
+        Cjdns,
+        /// A [`AddrV2::Unknown`] address cannot be converted to a [`IpAddr`].
+        ///
+        /// [`AddrV2::Unknown`]: super::AddrV2::Unknown
+        /// [`IpAddr`]: super::IpAddr
+        Unknown,
+    }
+
+    impl fmt::Display for AddrV2ToIpAddrError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::TorV3 => write!(f, "TorV3 addresses cannot be converted to IpAddr"),
+                Self::I2p => write!(f, "I2P addresses cannot be converted to IpAddr"),
+                Self::Cjdns => write!(f, "Cjdns addresses cannot be converted to IpAddr"),
+                Self::Unknown => write!(f, "Unknown address type cannot be converted to IpAddr"),
+            }
+        }
+    }
+
+    impl std::error::Error for AddrV2ToIpAddrError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::TorV3 => None,
+                Self::I2p => None,
+                Self::Cjdns => None,
+                Self::Unknown => None,
+            }
+        }
+    }
+
+    /// Error types for [`AddrV2`] to [`Ipv4Addr`] conversion.
+    ///
+    /// [`AddrV2`]: super::AddrV2
+    /// [`Ipv4Addr`]: super::Ipv4Addr
+    #[derive(Debug, PartialEq, Eq)]
+    pub enum AddrV2ToIpv4AddrError {
+        /// A [`AddrV2::Ipv6`] address cannot be converted to a [`Ipv4Addr`].
+        ///
+        /// [`AddrV2::Ipv6`]: super::AddrV2::Ipv6
+        /// [`Ipv4Addr`]: super::Ipv4Addr
+        Ipv6,
+        /// A [`AddrV2::TorV3`] address cannot be converted to a [`Ipv4Addr`].
+        ///
+        /// [`AddrV2::TorV3`]: super::AddrV2::TorV3
+        /// [`Ipv4Addr`]: super::Ipv4Addr
+        TorV3,
+        /// A [`AddrV2::I2p`] address cannot be converted to a [`Ipv4Addr`].
+        ///
+        /// [`AddrV2::I2p`]: super::AddrV2::I2p
+        /// [`Ipv4Addr`]: super::Ipv4Addr
+        I2p,
+        /// A [`AddrV2::Cjdns`] address cannot be converted to a [`Ipv4Addr`],
+        ///
+        /// [`AddrV2::Cjdns`]: super::AddrV2::Cjdns
+        /// [`Ipv4Addr`]: super::Ipv4Addr
+        Cjdns,
+        /// A [`AddrV2::Unknown`] address cannot be converted to a [`Ipv4Addr`].
+        ///
+        /// [`AddrV2::Unknown`]: super::AddrV2::Unknown
+        /// [`Ipv4Addr`]: super::Ipv4Addr
+        Unknown,
+    }
+
+    impl fmt::Display for AddrV2ToIpv4AddrError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Ipv6 => write!(f, "Ipv6 addresses cannot be converted to Ipv4Addr"),
+                Self::TorV3 => write!(f, "TorV3 addresses cannot be converted to Ipv4Addr"),
+                Self::I2p => write!(f, "I2P addresses cannot be converted to Ipv4Addr"),
+                Self::Cjdns => write!(f, "Cjdns addresses cannot be converted to Ipv4Addr"),
+                Self::Unknown => write!(f, "Unknown address type cannot be converted to Ipv4Addr"),
+            }
+        }
+    }
+
+    impl std::error::Error for AddrV2ToIpv4AddrError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Ipv6 => None,
+                Self::TorV3 => None,
+                Self::I2p => None,
+                Self::Cjdns => None,
+                Self::Unknown => None,
+            }
+        }
+    }
+
+    /// Error types for [`AddrV2`] to [`Ipv6Addr`] conversion.
+    ///
+    /// [`AddrV2`]: super::AddrV2
+    /// [`Ipv6Addr`]: super::Ipv6Addr
+    #[derive(Debug, PartialEq, Eq)]
+    pub enum AddrV2ToIpv6AddrError {
+        /// A [`AddrV2::Ipv4`] address cannot be converted to a [`Ipv6Addr`].
+        ///
+        /// [`AddrV2::Ipv4`]: super::AddrV2::Ipv4
+        /// [`Ipv6Addr`]: super::Ipv6Addr
+        Ipv4,
+        /// A [`AddrV2::TorV3`] address cannot be converted to a [`Ipv6Addr`].
+        ///
+        /// [`AddrV2::TorV3`]: super::AddrV2::TorV3
+        /// [`Ipv6Addr`]: super::Ipv6Addr
+        TorV3,
+        /// A [`AddrV2::I2p`] address cannot be converted to a [`Ipv6Addr`].
+        ///
+        /// [`AddrV2::I2p`]: super::AddrV2::I2p
+        /// [`Ipv6Addr`]: super::Ipv6Addr
+        I2p,
+        /// A [`AddrV2::Cjdns`] address cannot be converted to a [`Ipv6Addr`].
+        ///
+        /// [`AddrV2::Cjdns`]: super::AddrV2::Cjdns
+        /// [`Ipv6Addr`]: super::Ipv6Addr
+        Cjdns,
+        /// A [`AddrV2::Unknown`] address cannot be converted to a [`Ipv6Addr`].
+        ///
+        /// [`AddrV2::Unknown`]: super::AddrV2::Unknown
+        /// [`Ipv6Addr`]: super::Ipv6Addr
+        Unknown,
+    }
+
+    impl fmt::Display for AddrV2ToIpv6AddrError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Ipv4 => write!(f, "Ipv4 addresses cannot be converted to Ipv6Addr"),
+                Self::TorV3 => write!(f, "TorV3 addresses cannot be converted to Ipv6Addr"),
+                Self::I2p => write!(f, "I2P addresses cannot be converted to Ipv6Addr"),
+                Self::Cjdns => write!(f, "Cjdns addresses cannot be converted to Ipv6Addr"),
+                Self::Unknown => write!(f, "Unknown address type cannot be converted to Ipv6Addr"),
+            }
+        }
+    }
+
+    impl std::error::Error for AddrV2ToIpv6AddrError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Ipv4 => None,
+                Self::TorV3 => None,
+                Self::I2p => None,
+                Self::Cjdns => None,
+                Self::Unknown => None,
+            }
         }
     }
 }

@@ -11,8 +11,6 @@
 
 use alloc::vec;
 use alloc::vec::Vec;
-use core::convert::Infallible;
-use core::fmt;
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
@@ -21,12 +19,16 @@ use encoding::{
     ArrayDecoder, ArrayEncoder, ByteVecDecoder, CompactSizeEncoder, Decoder2, Decoder3, Encoder2,
     Encoder3, SliceEncoder, VecDecoder,
 };
-use internals::{write_err, ToU64 as _};
+use internals::ToU64 as _;
 use io::{BufRead, Write};
 use primitives::block::{self, Block, Checked, HeaderDecoder, HeaderEncoder};
 use primitives::merkle_tree::TxMerkleNode;
 use primitives::transaction::{Transaction, Txid};
 use primitives::Weight;
+
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{MerkleBlockDecoderError, MerkleBlockError, PartialMerkleTreeDecoderError};
 
 /// Data structure that represents a block header paired to a partial Merkle tree.
 ///
@@ -171,25 +173,6 @@ impl encoding::Decodable for MerkleBlock {
     fn decoder() -> Self::Decoder {
         MerkleBlockDecoder(Decoder2::new(block::Header::decoder(), PartialMerkleTree::decoder()))
     }
-}
-
-/// An error occuring when decoding a [`MerkleBlock`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MerkleBlockDecoderError(<MerkleBlockInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for MerkleBlockDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for MerkleBlockDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "merkleblock error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for MerkleBlockDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
 }
 
 impl Encodable for MerkleBlock {
@@ -589,27 +572,6 @@ impl encoding::Decodable for PartialMerkleTree {
     }
 }
 
-/// An error occuring when decoding a [`PartialMerkleTree`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PartialMerkleTreeDecoderError(
-    <PartialMerkleTreeInnerDecoder as encoding::Decoder>::Error,
-);
-
-impl From<Infallible> for PartialMerkleTreeDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for PartialMerkleTreeDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "partial merkletree error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for PartialMerkleTreeDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 impl Encodable for PartialMerkleTree {
     fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
         let mut ret = self.num_transactions.consensus_encode(w)?;
@@ -655,68 +617,122 @@ impl Decodable for PartialMerkleTree {
     }
 }
 
-/// An error when verifying the Merkle block.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum MerkleBlockError {
-    /// Merkle root in the header doesn't match to the root calculated from partial Merkle tree.
-    MerkleRootMismatch,
-    /// Partial Merkle tree contains no transactions.
-    NoTransactions,
-    /// There are too many transactions.
-    TooManyTransactions,
-    /// There are too many hashes
-    TooManyHashes,
-    /// There must be at least one bit per node in the partial tree,
-    /// and at least one node per hash
-    NotEnoughBits,
-    /// Not all bits were consumed
-    NotAllBitsConsumed,
-    /// Not all hashes were consumed
-    NotAllHashesConsumed,
-    /// Overflowed the bits array
-    BitsArrayOverflow,
-    /// Overflowed the hashes array
-    HashesArrayOverflow,
-    /// The left and right branches should never be identical
-    IdenticalHashesFound,
-}
+/// Error types for merkle tree messages.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
 
-impl From<Infallible> for MerkleBlockError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
+    use internals::write_err;
 
-impl fmt::Display for MerkleBlockError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::MerkleRootMismatch => write!(f, "Merkle header root doesn't match to the root calculated from the partial Merkle tree"),
-            Self::NoTransactions => write!(f, "partial Merkle tree contains no transactions"),
-            Self::TooManyTransactions => write!(f, "too many transactions"),
-            Self::TooManyHashes => write!(f, "proof contains more hashes than transactions"),
-            Self::NotEnoughBits => write!(f, "proof contains fewer bits than hashes"),
-            Self::NotAllBitsConsumed => write!(f, "not all bits were consumed"),
-            Self::NotAllHashesConsumed => write!(f, "not all hashes were consumed"),
-            Self::BitsArrayOverflow => write!(f, "overflowed the bits array"),
-            Self::HashesArrayOverflow => write!(f, "overflowed the hashes array"),
-            Self::IdenticalHashesFound => write!(f, "found identical transaction hashes"),
+    /// An error occuring when decoding a [`MerkleBlock`].
+    ///
+    /// [`MerkleBlock`]: super::MerkleBlock
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct MerkleBlockDecoderError(
+        pub(super) <super::MerkleBlockInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for MerkleBlockDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for MerkleBlockDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "merkleblock error"; self.0)
         }
     }
-}
 
-#[cfg(feature = "std")]
-impl std::error::Error for MerkleBlockError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::MerkleRootMismatch
-            | Self::NoTransactions
-            | Self::TooManyTransactions
-            | Self::TooManyHashes
-            | Self::NotEnoughBits
-            | Self::NotAllBitsConsumed
-            | Self::NotAllHashesConsumed
-            | Self::BitsArrayOverflow
-            | Self::HashesArrayOverflow
-            | Self::IdenticalHashesFound => None,
+    #[cfg(feature = "std")]
+    impl std::error::Error for MerkleBlockDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error occuring when decoding a [`PartialMerkleTree`].
+    ///
+    /// [`PartialMerkleTree`]: super::PartialMerkleTree
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct PartialMerkleTreeDecoderError(
+        pub(super) <super::PartialMerkleTreeInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for PartialMerkleTreeDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for PartialMerkleTreeDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "partial merkletree error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for PartialMerkleTreeDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// An error when verifying the Merkle block.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum MerkleBlockError {
+        /// Merkle root in the header doesn't match to the root calculated from partial Merkle tree.
+        MerkleRootMismatch,
+        /// Partial Merkle tree contains no transactions.
+        NoTransactions,
+        /// There are too many transactions.
+        TooManyTransactions,
+        /// There are too many hashes
+        TooManyHashes,
+        /// There must be at least one bit per node in the partial tree,
+        /// and at least one node per hash
+        NotEnoughBits,
+        /// Not all bits were consumed
+        NotAllBitsConsumed,
+        /// Not all hashes were consumed
+        NotAllHashesConsumed,
+        /// Overflowed the bits array
+        BitsArrayOverflow,
+        /// Overflowed the hashes array
+        HashesArrayOverflow,
+        /// The left and right branches should never be identical
+        IdenticalHashesFound,
+    }
+
+    impl From<Infallible> for MerkleBlockError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for MerkleBlockError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::MerkleRootMismatch => write!(f, "Merkle header root doesn't match to the root calculated from the partial Merkle tree"),
+                Self::NoTransactions => write!(f, "partial Merkle tree contains no transactions"),
+                Self::TooManyTransactions => write!(f, "too many transactions"),
+                Self::TooManyHashes => write!(f, "proof contains more hashes than transactions"),
+                Self::NotEnoughBits => write!(f, "proof contains fewer bits than hashes"),
+                Self::NotAllBitsConsumed => write!(f, "not all bits were consumed"),
+                Self::NotAllHashesConsumed => write!(f, "not all hashes were consumed"),
+                Self::BitsArrayOverflow => write!(f, "overflowed the bits array"),
+                Self::HashesArrayOverflow => write!(f, "overflowed the hashes array"),
+                Self::IdenticalHashesFound => write!(f, "found identical transaction hashes"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for MerkleBlockError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::MerkleRootMismatch
+                | Self::NoTransactions
+                | Self::TooManyTransactions
+                | Self::TooManyHashes
+                | Self::NotEnoughBits
+                | Self::NotAllBitsConsumed
+                | Self::NotAllHashesConsumed
+                | Self::BitsArrayOverflow
+                | Self::HashesArrayOverflow
+                | Self::IdenticalHashesFound => None,
+            }
         }
     }
 }

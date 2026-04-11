@@ -5,10 +5,7 @@
 //! Implementation of compact blocks data structure and algorithms.
 
 use alloc::vec::Vec;
-use core::convert::Infallible;
-use core::{convert, fmt, mem};
-#[cfg(feature = "std")]
-use std::error;
+use core::{convert, mem};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
@@ -20,42 +17,17 @@ use encoding::{
 };
 use hashes::{sha256, siphash24};
 use internals::array::ArrayExt as _;
-use internals::write_err;
 use io::{BufRead, Write};
 use primitives::block::{BlockHashDecoder, BlockHashEncoder, Header, HeaderDecoder, HeaderEncoder};
 use primitives::transaction::{TransactionDecoder, TransactionEncoder};
 
-/// A BIP-0152 error
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum Error {
-    /// An unknown version number was used.
-    UnknownVersion,
-    /// The prefill slice provided was invalid.
-    InvalidPrefill,
-}
-
-impl From<Infallible> for Error {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::UnknownVersion => write!(f, "an unknown version number was used"),
-            Self::InvalidPrefill => write!(f, "the prefill slice provided was invalid"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::UnknownVersion | Self::InvalidPrefill => None,
-        }
-    }
-}
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[doc(no_inline)]
+pub use self::error::{
+    BlockTransactionsDecoderError, BlockTransactionsRequestDecoderError, Error,
+    HeaderAndShortIdsDecoderError, PrefilledTransactionDecoderError, ShortIdDecoderError,
+    TxIndexOutOfRangeError,
+};
 
 /// A [`PrefilledTransaction`] structure is used in [`HeaderAndShortIds`] to
 /// provide a list of a few transactions explicitly.
@@ -143,38 +115,6 @@ impl encoding::Decodable for PrefilledTransaction {
             CompactSizeDecoder::new(),
             TransactionDecoder::new(),
         ))
-    }
-}
-
-/// An error occuring when decoding a [`PrefilledTransaction`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum PrefilledTransactionDecoderError {
-    /// Inner decoder error.
-    Decoder(<PrefilledTransactionInnerDecoder as encoding::Decoder>::Error),
-    /// The differential encoding may be no more than 16 bits.
-    InvalidIndex(usize),
-}
-
-impl From<Infallible> for PrefilledTransactionDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for PrefilledTransactionDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Decoder(d) => write_err!(f, "prefilled transaction error"; d),
-            Self::InvalidIndex(idx) => write!(f, "index overflowed u16 {}", idx),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for PrefilledTransactionDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Decoder(d) => Some(d),
-            Self::InvalidIndex(_idx) => None,
-        }
     }
 }
 
@@ -333,25 +273,6 @@ impl encoding::Decodable for ShortId {
     fn decoder() -> Self::Decoder { ShortIdDecoder(ShortIdInnerDecoder::new()) }
 }
 
-/// An error decoding a [`ShortId`].
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ShortIdDecoderError(<ShortIdInnerDecoder as encoding::Decoder>::Error);
-
-impl From<Infallible> for ShortIdDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for ShortIdDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "shortid error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ShortIdDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 /// A structure to relay a block header, short IDs, and a select few transactions.
 ///
 /// A [`HeaderAndShortIds`] structure is used to relay a block header, the short
@@ -460,38 +381,6 @@ impl encoding::Decodable for HeaderAndShortIds {
             VecDecoder::<ShortId>::new(),
             VecDecoder::<PrefilledTransaction>::new(),
         ))
-    }
-}
-
-/// Errors occuring when decoding a [`HeaderAndShortIds`] message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum HeaderAndShortIdsDecoderError {
-    /// Inner decoder error.
-    Decoder(<HeaderAndShortIdsInnerDecoder as encoding::Decoder>::Error),
-    /// Block indexes overflowed.
-    IndexOverflow,
-}
-
-impl From<Infallible> for HeaderAndShortIdsDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for HeaderAndShortIdsDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Decoder(d) => write_err!(f, "headerandshortids error"; d),
-            Self::IndexOverflow => write!(f, "block index overflowed"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for HeaderAndShortIdsDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Decoder(d) => Some(d),
-            Self::IndexOverflow => None,
-        }
     }
 }
 
@@ -758,27 +647,6 @@ impl encoding::Decodable for BlockTransactionsRequest {
     }
 }
 
-/// An error decoding a [`BlockTransactionsRequest`] message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BlockTransactionsRequestDecoderError(
-    <BlockTransactionsRequestInnerDecoder as encoding::Decoder>::Error,
-);
-
-impl From<Infallible> for BlockTransactionsRequestDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for BlockTransactionsRequestDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "blocktxnrequest error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for BlockTransactionsRequestDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 impl Encodable for BlockTransactionsRequest {
     fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
         let mut len = self.block_hash.consensus_encode(w)?;
@@ -821,28 +689,6 @@ impl Decodable for BlockTransactionsRequest {
             },
         })
     }
-}
-
-/// A transaction index is requested that is out of range from the
-/// corresponding block.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct TxIndexOutOfRangeError(u64);
-
-impl fmt::Display for TxIndexOutOfRangeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "a transaction index is requested that is \
-            out of range from the corresponding block: {}",
-            self.0,
-        )
-    }
-}
-
-#[cfg(feature = "std")]
-impl error::Error for TxIndexOutOfRangeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
 /// A [`BlockTransactions`] structure is used to provide some of the transactions
@@ -919,27 +765,6 @@ impl encoding::Decodable for BlockTransactions {
     }
 }
 
-/// An error occuring decoding a [`BlockTransactions`] message.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BlockTransactionsDecoderError(
-    <BlockTransactionsInnerDecoder as encoding::Decoder>::Error,
-);
-
-impl From<Infallible> for BlockTransactionsDecoderError {
-    fn from(never: Infallible) -> Self { match never {} }
-}
-
-impl fmt::Display for BlockTransactionsDecoderError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_err!(f, "blocktxn error"; self.0)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for BlockTransactionsDecoderError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
-}
-
 crate::consensus::impl_consensus_encoding!(BlockTransactions, block_hash, transactions);
 
 impl BlockTransactions {
@@ -967,6 +792,204 @@ impl BlockTransactions {
                 txs
             },
         })
+    }
+}
+
+/// Error types for BIP-0152 compact blocks.
+pub mod error {
+    use core::convert::Infallible;
+    use core::fmt;
+
+    use internals::write_err;
+
+    /// A BIP-0152 error.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub enum Error {
+        /// An unknown version number was used.
+        UnknownVersion,
+        /// The prefill slice provided was invalid.
+        InvalidPrefill,
+    }
+
+    impl From<Infallible> for Error {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for Error {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match *self {
+                Self::UnknownVersion => write!(f, "an unknown version number was used"),
+                Self::InvalidPrefill => write!(f, "the prefill slice provided was invalid"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for Error {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::UnknownVersion | Self::InvalidPrefill => None,
+            }
+        }
+    }
+
+    /// An error occuring when decoding a [`PrefilledTransaction`].
+    ///
+    /// [`PrefilledTransaction`]: super::PrefilledTransaction
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum PrefilledTransactionDecoderError {
+        /// Inner decoder error.
+        Decoder(<super::PrefilledTransactionInnerDecoder as encoding::Decoder>::Error),
+        /// The differential encoding may be no more than 16 bits.
+        InvalidIndex(usize),
+    }
+
+    impl From<Infallible> for PrefilledTransactionDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for PrefilledTransactionDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Decoder(d) => write_err!(f, "prefilled transaction error"; d),
+                Self::InvalidIndex(idx) => write!(f, "index overflowed u16 {}", idx),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for PrefilledTransactionDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Decoder(d) => Some(d),
+                Self::InvalidIndex(_idx) => None,
+            }
+        }
+    }
+
+    /// An error decoding a [`ShortId`].
+    ///
+    /// [`ShortId`]: super::ShortId
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct ShortIdDecoderError(
+        pub(super) <super::ShortIdInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for ShortIdDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for ShortIdDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "shortid error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for ShortIdDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// Errors occuring when decoding a [`HeaderAndShortIds`] message.
+    ///
+    /// [`HeaderAndShortIds`]: super::HeaderAndShortIds
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum HeaderAndShortIdsDecoderError {
+        /// Inner decoder error.
+        Decoder(<super::HeaderAndShortIdsInnerDecoder as encoding::Decoder>::Error),
+        /// Block indexes overflowed.
+        IndexOverflow,
+    }
+
+    impl From<Infallible> for HeaderAndShortIdsDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for HeaderAndShortIdsDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Self::Decoder(d) => write_err!(f, "headerandshortids error"; d),
+                Self::IndexOverflow => write!(f, "block index overflowed"),
+            }
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for HeaderAndShortIdsDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Decoder(d) => Some(d),
+                Self::IndexOverflow => None,
+            }
+        }
+    }
+
+    /// An error decoding a [`BlockTransactionsRequest`] message.
+    ///
+    /// [`BlockTransactionsRequest`]: super::BlockTransactionsRequest
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct BlockTransactionsRequestDecoderError(
+        pub(super) <super::BlockTransactionsRequestInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for BlockTransactionsRequestDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for BlockTransactionsRequestDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "blocktxnrequest error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for BlockTransactionsRequestDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// A transaction index is requested that is out of range from the corresponding block.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[non_exhaustive]
+    pub struct TxIndexOutOfRangeError(pub(super) u64);
+
+    impl fmt::Display for TxIndexOutOfRangeError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                f,
+                "a transaction index is requested that is \
+                out of range from the corresponding block: {}",
+                self.0,
+            )
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for TxIndexOutOfRangeError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    }
+
+    /// An error occuring decoding a [`BlockTransactions`] message.
+    ///
+    /// [`BlockTransactions`]: super::BlockTransactions
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct BlockTransactionsDecoderError(
+        pub(super) <super::BlockTransactionsInnerDecoder as encoding::Decoder>::Error,
+    );
+
+    impl From<Infallible> for BlockTransactionsDecoderError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for BlockTransactionsDecoderError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write_err!(f, "blocktxn error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for BlockTransactionsDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
     }
 }
 
