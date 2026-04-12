@@ -465,6 +465,52 @@ impl fmt::Debug for U256 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "{:#x}", self) }
 }
 
+impl fmt::Binary for U256 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.is_zero() {
+            return f.pad_integral(true, "0b", "0");
+        }
+
+        let mut buf = [0u8; 256];
+        let mut i = 256usize;
+        let mut value = *self;
+
+        #[allow(clippy::indexing_slicing)]
+        while value > Self::ZERO {
+            i -= 1;
+            buf[i] = b'0' + (value.low_u64() & 1) as u8;
+            value = value >> 1;
+        }
+
+        let ascii_slice = buf.get(i..).expect("i <= buf.len()");
+        let s = core::str::from_utf8(ascii_slice).expect("binary digits are valid UTF8");
+        f.pad_integral(true, "0b", s)
+    }
+}
+
+impl fmt::Octal for U256 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.is_zero() {
+            return f.pad_integral(true, "0o", "0");
+        }
+
+        let mut buf = [0u8; 86];
+        let mut i = 86usize;
+        let mut value = *self;
+
+        #[allow(clippy::indexing_slicing)]
+        while value > Self::ZERO {
+            i -= 1;
+            buf[i] = b'0' + (value.low_u64() & 7) as u8;
+            value = value >> 3;
+        }
+
+        let ascii_slice = buf.get(i..).expect("i <= buf.len()");
+        let s = core::str::from_utf8(ascii_slice).expect("octal digits are valid UTF8");
+        f.pad_integral(true, "0o", s)
+    }
+}
+
 /// Splits a 32 byte array into two 16 byte arrays.
 fn split_in_half(a: [u8; 32]) -> ([u8; 16], [u8; 16]) {
     let mut high = [0_u8; 16];
