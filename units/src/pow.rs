@@ -12,6 +12,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::parse_int::{self, ParseIntError, PrefixedHexError, UnprefixedHexError};
 
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[cfg(feature = "encoding")]
+#[doc(no_inline)]
+pub use self::error::CompactTargetDecoderError;
+
 /// Implement traits and methods shared by `Target` and `Work`.
 macro_rules! do_impl {
     ($ty:ident, $err_ty:ident) => {
@@ -247,11 +252,6 @@ impl Target {
     pub fn to_work(self) -> Work { Work(self.0.inverse()) }
 }
 do_impl!(Target, ParseTargetError);
-
-#[rustfmt::skip]                // Keep public re-exports separate.
-#[cfg(feature = "encoding")]
-#[doc(no_inline)]
-pub use self::error::CompactTargetDecoderError;
 
 /// Encoding of 256-bit target as 32-bit float.
 ///
