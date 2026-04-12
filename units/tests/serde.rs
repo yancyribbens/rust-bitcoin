@@ -57,6 +57,9 @@ struct Serde {
 
     abs_locktime: AbsoluteLockTime,
     rel_locktime: RelativeLockTime,
+
+    target: Target,
+    work: Work,
 }
 
 impl Serde {
@@ -91,6 +94,9 @@ impl Serde {
             seq: Sequence::MAX,
             abs_locktime: AbsoluteLockTime::Blocks(Height::MAX),
             rel_locktime: RelativeLockTime::Blocks(NumberOfBlocks::MAX),
+
+            target: Target::MAX_ATTAINABLE_MAINNET,
+            work: Target::MAX_ATTAINABLE_MAINNET.to_work()
         }
     }
 }
