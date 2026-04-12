@@ -292,6 +292,7 @@ fn incomplete_block_len<H: HashEngine>(eng: &H) -> usize {
 /// # Errors
 ///
 /// Returns an error if writing to the formatter fails.
+#[doc(hidden)]
 pub fn debug_hex<'a>(
     bytes: impl IntoIterator<Item = &'a u8>,
     f: &mut fmt::Formatter,
