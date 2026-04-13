@@ -22,8 +22,9 @@ use crate::{BlockHeight, BlockMtp, Sequence};
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(no_inline)]
 pub use self::error::{
-    DisabledLockTimeError, InvalidHeightError, InvalidTimeError, IsSatisfiedByError,
-    IsSatisfiedByHeightError, IsSatisfiedByTimeError, TimeOverflowError,
+    DisabledLockTimeError, IncompatibleHeightError, IncompatibleTimeError, InvalidHeightError,
+    InvalidTimeError, IsSatisfiedByError, IsSatisfiedByHeightError, IsSatisfiedByTimeError,
+    TimeOverflowError,
 };
 
 /// A relative lock time value, representing either a block height or time (512 second intervals).
@@ -236,7 +237,7 @@ impl LockTime {
             Self::Blocks(blocks) => blocks
                 .is_satisfied_by(chain_tip, utxo_mined_at)
                 .map_err(IsSatisfiedByHeightError::Satisfaction),
-            Self::Time(time) => Err(IsSatisfiedByHeightError::Incompatible(time)),
+            Self::Time(time) => Err(IsSatisfiedByHeightError::Incompatible(IncompatibleHeightError(time))),
         }
     }
 
@@ -258,7 +259,7 @@ impl LockTime {
             Self::Time(time) => time
                 .is_satisfied_by(chain_tip, utxo_mined_at)
                 .map_err(IsSatisfiedByTimeError::Satisfaction),
-            Self::Blocks(blocks) => Err(IsSatisfiedByTimeError::Incompatible(blocks)),
+            Self::Blocks(blocks) => Err(IsSatisfiedByTimeError::Incompatible(IncompatibleTimeError(blocks))),
         }
     }
 
@@ -838,7 +839,7 @@ mod tests {
         let err = lock_by_time.is_satisfied_by_height(chain_tip, mined_at).unwrap_err();
 
         let expected_time = NumberOf512Seconds::from_512_second_intervals(70);
-        assert_eq!(err, IsSatisfiedByHeightError::Incompatible(expected_time));
+        assert_eq!(err, IsSatisfiedByHeightError::Incompatible(IncompatibleHeightError(expected_time)));
         assert!(!format!("{}", err).is_empty());
     }
 
@@ -866,7 +867,7 @@ mod tests {
         let err = lock_by_height.is_satisfied_by_time(chain_tip, mined_at).unwrap_err();
 
         let expected_height = NumberOfBlocks::from(10);
-        assert_eq!(err, IsSatisfiedByTimeError::Incompatible(expected_height));
+        assert_eq!(err, IsSatisfiedByTimeError::Incompatible(IncompatibleTimeError(expected_height)));
         assert!(!format!("{}", err).is_empty());
     }
 
