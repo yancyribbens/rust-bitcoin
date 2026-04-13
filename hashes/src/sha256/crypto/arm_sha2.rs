@@ -72,7 +72,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
 
     tmp0 = vaddq_u32(msg0, vld1q_u32(K.as_ptr().add(0x00)));
 
-    // Rounds 0-3
+    // Rounds 1-4
     msg0 = vsha256su0q_u32(msg0, msg1);
     tmp2 = state0;
     tmp1 = vaddq_u32(msg1, vld1q_u32(K.as_ptr().add(0x04)));
@@ -80,7 +80,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp0);
     msg0 = vsha256su1q_u32(msg0, msg2, msg3);
 
-    // Rounds 4-7
+    // Rounds 5-8
     msg1 = vsha256su0q_u32(msg1, msg2);
     tmp2 = state0;
     tmp0 = vaddq_u32(msg2, vld1q_u32(K.as_ptr().add(0x08)));
@@ -88,7 +88,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp1);
     msg1 = vsha256su1q_u32(msg1, msg3, msg0);
 
-    // Rounds 8-11
+    // Rounds 9-12
     msg2 = vsha256su0q_u32(msg2, msg3);
     tmp2 = state0;
     tmp1 = vaddq_u32(msg3, vld1q_u32(K.as_ptr().add(0x0c)));
@@ -96,7 +96,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp0);
     msg2 = vsha256su1q_u32(msg2, msg0, msg1);
 
-    // Rounds 12-15
+    // Rounds 13-16
     msg3 = vsha256su0q_u32(msg3, msg0);
     tmp2 = state0;
     tmp0 = vaddq_u32(msg0, vld1q_u32(K.as_ptr().add(0x10)));
@@ -104,7 +104,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp1);
     msg3 = vsha256su1q_u32(msg3, msg1, msg2);
 
-    // Rounds 16-19
+    // Rounds 17-20
     msg0 = vsha256su0q_u32(msg0, msg1);
     tmp2 = state0;
     tmp1 = vaddq_u32(msg1, vld1q_u32(K.as_ptr().add(0x14)));
@@ -112,7 +112,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp0);
     msg0 = vsha256su1q_u32(msg0, msg2, msg3);
 
-    // Rounds 20-23
+    // Rounds 21-24
     msg1 = vsha256su0q_u32(msg1, msg2);
     tmp2 = state0;
     tmp0 = vaddq_u32(msg2, vld1q_u32(K.as_ptr().add(0x18)));
@@ -120,7 +120,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp1);
     msg1 = vsha256su1q_u32(msg1, msg3, msg0);
 
-    // Rounds 24-27
+    // Rounds 25-28
     msg2 = vsha256su0q_u32(msg2, msg3);
     tmp2 = state0;
     tmp1 = vaddq_u32(msg3, vld1q_u32(K.as_ptr().add(0x1c)));
@@ -128,7 +128,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp0);
     msg2 = vsha256su1q_u32(msg2, msg0, msg1);
 
-    // Rounds 28-31
+    // Rounds 29-32
     msg3 = vsha256su0q_u32(msg3, msg0);
     tmp2 = state0;
     tmp0 = vaddq_u32(msg0, vld1q_u32(K.as_ptr().add(0x20)));
@@ -136,7 +136,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp1);
     msg3 = vsha256su1q_u32(msg3, msg1, msg2);
 
-    // Rounds 32-35
+    // Rounds 33-36
     msg0 = vsha256su0q_u32(msg0, msg1);
     tmp2 = state0;
     tmp1 = vaddq_u32(msg1, vld1q_u32(K.as_ptr().add(0x24)));
@@ -144,7 +144,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp0);
     msg0 = vsha256su1q_u32(msg0, msg2, msg3);
 
-    // Rounds 36-39
+    // Rounds 37-40
     msg1 = vsha256su0q_u32(msg1, msg2);
     tmp2 = state0;
     tmp0 = vaddq_u32(msg2, vld1q_u32(K.as_ptr().add(0x28)));
@@ -152,7 +152,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp1);
     msg1 = vsha256su1q_u32(msg1, msg3, msg0);
 
-    // Rounds 40-43
+    // Rounds 41-44
     msg2 = vsha256su0q_u32(msg2, msg3);
     tmp2 = state0;
     tmp1 = vaddq_u32(msg3, vld1q_u32(K.as_ptr().add(0x2c)));
@@ -160,7 +160,7 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp0);
     msg2 = vsha256su1q_u32(msg2, msg0, msg1);
 
-    // Rounds 44-47
+    // Rounds 45-48
     msg3 = vsha256su0q_u32(msg3, msg0);
     tmp2 = state0;
     tmp0 = vaddq_u32(msg0, vld1q_u32(K.as_ptr().add(0x30)));
@@ -168,25 +168,25 @@ pub(super) unsafe fn process_block(state: &mut [u32; 8], block: &[u8]) {
     state1 = vsha256h2q_u32(state1, tmp2, tmp1);
     msg3 = vsha256su1q_u32(msg3, msg1, msg2);
 
-    // Rounds 48-51
+    // Rounds 49-52
     tmp2 = state0;
     tmp1 = vaddq_u32(msg1, vld1q_u32(K.as_ptr().add(0x34)));
     state0 = vsha256hq_u32(state0, state1, tmp0);
     state1 = vsha256h2q_u32(state1, tmp2, tmp0);
 
-    // Rounds 52-55
+    // Rounds 53-56
     tmp2 = state0;
     tmp0 = vaddq_u32(msg2, vld1q_u32(K.as_ptr().add(0x38)));
     state0 = vsha256hq_u32(state0, state1, tmp1);
     state1 = vsha256h2q_u32(state1, tmp2, tmp1);
 
-    // Rounds 56-59
+    // Rounds 57-60
     tmp2 = state0;
     tmp1 = vaddq_u32(msg3, vld1q_u32(K.as_ptr().add(0x3c)));
     state0 = vsha256hq_u32(state0, state1, tmp0);
     state1 = vsha256h2q_u32(state1, tmp2, tmp0);
 
-    // Rounds 60-63
+    // Rounds 61-64
     tmp2 = state0;
     state0 = vsha256hq_u32(state0, state1, tmp1);
     state1 = vsha256h2q_u32(state1, tmp2, tmp1);
