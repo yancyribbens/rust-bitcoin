@@ -597,7 +597,6 @@ impl<'a> Arbitrary<'a> for Inventory {
 
 #[cfg(test)]
 mod tests {
-    use bitcoin::consensus::encode::{deserialize, serialize};
     use hex_unstable::hex;
 
     use super::*;
@@ -607,15 +606,15 @@ mod tests {
         let from_sat = hex!("72110100014a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b0000000000000000000000000000000000000000000000000000000000000000");
         let genhash = hex!("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-        let decode: Result<GetBlocksMessage, _> = deserialize(&from_sat);
+        let decode: Result<GetBlocksMessage, _> = encoding::decode_from_slice(&from_sat);
         assert!(decode.is_ok());
         let real_decode = decode.unwrap();
         assert_eq!(real_decode.version.0, 70002);
         assert_eq!(real_decode.locator_hashes.hashes().len(), 1);
-        assert_eq!(serialize(&real_decode.locator_hashes.hashes()[0]), genhash);
+        assert_eq!(encoding::encode_to_vec(&real_decode.locator_hashes.hashes()[0]), genhash);
         assert_eq!(real_decode.stop_hash, BlockHash::GENESIS_PREVIOUS_BLOCK_HASH);
 
-        assert_eq!(serialize(&real_decode), from_sat);
+        assert_eq!(encoding::encode_to_vec(&real_decode), from_sat);
     }
 
     #[test]
@@ -623,14 +622,14 @@ mod tests {
         let from_sat = hex!("72110100014a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b0000000000000000000000000000000000000000000000000000000000000000");
         let genhash = hex!("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
-        let decode: Result<GetHeadersMessage, _> = deserialize(&from_sat);
+        let decode: Result<GetHeadersMessage, _> = encoding::decode_from_slice(&from_sat);
         assert!(decode.is_ok());
         let real_decode = decode.unwrap();
         assert_eq!(real_decode.version.0, 70002);
         assert_eq!(real_decode.locator_hashes.hashes().len(), 1);
-        assert_eq!(serialize(&real_decode.locator_hashes.hashes()[0]), genhash);
+        assert_eq!(encoding::encode_to_vec(&real_decode.locator_hashes.hashes()[0]), genhash);
         assert_eq!(real_decode.stop_hash, BlockHash::GENESIS_PREVIOUS_BLOCK_HASH);
 
-        assert_eq!(serialize(&real_decode), from_sat);
+        assert_eq!(encoding::encode_to_vec(&real_decode), from_sat);
     }
 }
