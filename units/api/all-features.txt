@@ -4597,7 +4597,7 @@ pub unsafe fn bitcoin_units::locktime::relative::error::IsSatisfiedByError::clon
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IsSatisfiedByError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByError::from(t: T) -> T
 pub enum bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
-pub bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::Incompatible(bitcoin_units::locktime::relative::NumberOf512Seconds)
+pub bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::Incompatible(bitcoin_units::locktime::relative::error::IncompatibleHeightError)
 pub bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::Satisfaction(bitcoin_units::locktime::relative::error::InvalidHeightError)
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
@@ -4645,7 +4645,7 @@ pub unsafe fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::from(t: T) -> T
 pub enum bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError
-pub bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError::Incompatible(bitcoin_units::locktime::relative::NumberOfBlocks)
+pub bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError::Incompatible(bitcoin_units::locktime::relative::error::IncompatibleTimeError)
 pub bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError::Satisfaction(bitcoin_units::locktime::relative::error::InvalidTimeError)
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError::clone(&self) -> bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError
@@ -4740,6 +4740,98 @@ impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error:
 pub unsafe fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::from(t: T) -> T
+pub struct bitcoin_units::locktime::relative::error::IncompatibleHeightError(_)
+impl core::clone::Clone for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::cmp::Eq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::cmp::PartialEq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::eq(&self, other: &bitcoin_units::locktime::relative::error::IncompatibleHeightError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Freeze for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Send for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Sync for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Unpin for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::UnsafeUnpin for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl<T, U> core::convert::Into<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::From<T>
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::Into<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Error = core::convert::Infallible
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::clone::Clone
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Owned = T
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::from(t: T) -> T
+pub struct bitcoin_units::locktime::relative::error::IncompatibleTimeError(_)
+impl core::clone::Clone for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone(&self) -> bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::cmp::Eq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::cmp::PartialEq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::eq(&self, other: &bitcoin_units::locktime::relative::error::IncompatibleTimeError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Freeze for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Send for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Sync for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Unpin for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::UnsafeUnpin for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl<T, U> core::convert::Into<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::From<T>
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::Into<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Error = core::convert::Infallible
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::clone::Clone
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Owned = T
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::from(t: T) -> T
 pub struct bitcoin_units::locktime::relative::error::InvalidHeightError
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::InvalidHeightError
@@ -4927,7 +5019,7 @@ pub unsafe fn bitcoin_units::locktime::relative::error::IsSatisfiedByError::clon
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IsSatisfiedByError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByError::from(t: T) -> T
 pub enum bitcoin_units::locktime::relative::IsSatisfiedByHeightError
-pub bitcoin_units::locktime::relative::IsSatisfiedByHeightError::Incompatible(bitcoin_units::locktime::relative::NumberOf512Seconds)
+pub bitcoin_units::locktime::relative::IsSatisfiedByHeightError::Incompatible(bitcoin_units::locktime::relative::error::IncompatibleHeightError)
 pub bitcoin_units::locktime::relative::IsSatisfiedByHeightError::Satisfaction(bitcoin_units::locktime::relative::error::InvalidHeightError)
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
@@ -4975,7 +5067,7 @@ pub unsafe fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::from(t: T) -> T
 pub enum bitcoin_units::locktime::relative::IsSatisfiedByTimeError
-pub bitcoin_units::locktime::relative::IsSatisfiedByTimeError::Incompatible(bitcoin_units::locktime::relative::NumberOfBlocks)
+pub bitcoin_units::locktime::relative::IsSatisfiedByTimeError::Incompatible(bitcoin_units::locktime::relative::error::IncompatibleTimeError)
 pub bitcoin_units::locktime::relative::IsSatisfiedByTimeError::Satisfaction(bitcoin_units::locktime::relative::error::InvalidTimeError)
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError::clone(&self) -> bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError
@@ -5152,6 +5244,98 @@ impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error:
 pub unsafe fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::from(t: T) -> T
+pub struct bitcoin_units::locktime::relative::IncompatibleHeightError(_)
+impl core::clone::Clone for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::cmp::Eq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::cmp::PartialEq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::eq(&self, other: &bitcoin_units::locktime::relative::error::IncompatibleHeightError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Freeze for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Send for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Sync for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Unpin for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::UnsafeUnpin for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl<T, U> core::convert::Into<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::From<T>
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::Into<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Error = core::convert::Infallible
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::clone::Clone
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Owned = T
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::from(t: T) -> T
+pub struct bitcoin_units::locktime::relative::IncompatibleTimeError(_)
+impl core::clone::Clone for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone(&self) -> bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::cmp::Eq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::cmp::PartialEq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::eq(&self, other: &bitcoin_units::locktime::relative::error::IncompatibleTimeError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Freeze for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Send for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Sync for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Unpin for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::UnsafeUnpin for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl<T, U> core::convert::Into<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::From<T>
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::Into<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Error = core::convert::Infallible
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::clone::Clone
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Owned = T
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::from(t: T) -> T
 pub struct bitcoin_units::locktime::relative::InvalidHeightError
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::InvalidHeightError
@@ -6372,7 +6556,7 @@ pub unsafe fn bitcoin_units::locktime::relative::error::IsSatisfiedByError::clon
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IsSatisfiedByError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByError::from(t: T) -> T
 pub enum bitcoin_units::relative::error::IsSatisfiedByHeightError
-pub bitcoin_units::relative::error::IsSatisfiedByHeightError::Incompatible(bitcoin_units::locktime::relative::NumberOf512Seconds)
+pub bitcoin_units::relative::error::IsSatisfiedByHeightError::Incompatible(bitcoin_units::locktime::relative::error::IncompatibleHeightError)
 pub bitcoin_units::relative::error::IsSatisfiedByHeightError::Satisfaction(bitcoin_units::locktime::relative::error::InvalidHeightError)
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
@@ -6420,7 +6604,7 @@ pub unsafe fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::from(t: T) -> T
 pub enum bitcoin_units::relative::error::IsSatisfiedByTimeError
-pub bitcoin_units::relative::error::IsSatisfiedByTimeError::Incompatible(bitcoin_units::locktime::relative::NumberOfBlocks)
+pub bitcoin_units::relative::error::IsSatisfiedByTimeError::Incompatible(bitcoin_units::locktime::relative::error::IncompatibleTimeError)
 pub bitcoin_units::relative::error::IsSatisfiedByTimeError::Satisfaction(bitcoin_units::locktime::relative::error::InvalidTimeError)
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError::clone(&self) -> bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError
@@ -6515,6 +6699,98 @@ impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error:
 pub unsafe fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::from(t: T) -> T
+pub struct bitcoin_units::relative::error::IncompatibleHeightError(_)
+impl core::clone::Clone for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::cmp::Eq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::cmp::PartialEq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::eq(&self, other: &bitcoin_units::locktime::relative::error::IncompatibleHeightError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Freeze for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Send for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Sync for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Unpin for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::UnsafeUnpin for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl<T, U> core::convert::Into<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::From<T>
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::Into<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Error = core::convert::Infallible
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::clone::Clone
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Owned = T
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::from(t: T) -> T
+pub struct bitcoin_units::relative::error::IncompatibleTimeError(_)
+impl core::clone::Clone for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone(&self) -> bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::cmp::Eq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::cmp::PartialEq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::eq(&self, other: &bitcoin_units::locktime::relative::error::IncompatibleTimeError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Freeze for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Send for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Sync for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Unpin for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::UnsafeUnpin for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl<T, U> core::convert::Into<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::From<T>
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::Into<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Error = core::convert::Infallible
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::clone::Clone
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Owned = T
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::from(t: T) -> T
 pub struct bitcoin_units::relative::error::InvalidHeightError
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::InvalidHeightError
@@ -6702,7 +6978,7 @@ pub unsafe fn bitcoin_units::locktime::relative::error::IsSatisfiedByError::clon
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IsSatisfiedByError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByError::from(t: T) -> T
 pub enum bitcoin_units::relative::IsSatisfiedByHeightError
-pub bitcoin_units::relative::IsSatisfiedByHeightError::Incompatible(bitcoin_units::locktime::relative::NumberOf512Seconds)
+pub bitcoin_units::relative::IsSatisfiedByHeightError::Incompatible(bitcoin_units::locktime::relative::error::IncompatibleHeightError)
 pub bitcoin_units::relative::IsSatisfiedByHeightError::Satisfaction(bitcoin_units::locktime::relative::error::InvalidHeightError)
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
@@ -6750,7 +7026,7 @@ pub unsafe fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByHeightError::from(t: T) -> T
 pub enum bitcoin_units::relative::IsSatisfiedByTimeError
-pub bitcoin_units::relative::IsSatisfiedByTimeError::Incompatible(bitcoin_units::locktime::relative::NumberOfBlocks)
+pub bitcoin_units::relative::IsSatisfiedByTimeError::Incompatible(bitcoin_units::locktime::relative::error::IncompatibleTimeError)
 pub bitcoin_units::relative::IsSatisfiedByTimeError::Satisfaction(bitcoin_units::locktime::relative::error::InvalidTimeError)
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError
 pub fn bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError::clone(&self) -> bitcoin_units::locktime::relative::error::IsSatisfiedByTimeError
@@ -6927,6 +7203,98 @@ impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error:
 pub unsafe fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::DisabledLockTimeError
 pub fn bitcoin_units::locktime::relative::error::DisabledLockTimeError::from(t: T) -> T
+pub struct bitcoin_units::relative::IncompatibleHeightError(_)
+impl core::clone::Clone for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::cmp::Eq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::cmp::PartialEq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::eq(&self, other: &bitcoin_units::locktime::relative::error::IncompatibleHeightError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Freeze for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Send for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Sync for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::Unpin for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::marker::UnsafeUnpin for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+impl<T, U> core::convert::Into<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::From<T>
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::Into<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Error = core::convert::Infallible
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::clone::Clone
+pub type bitcoin_units::locktime::relative::error::IncompatibleHeightError::Owned = T
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error::IncompatibleHeightError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IncompatibleHeightError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleHeightError::from(t: T) -> T
+pub struct bitcoin_units::relative::IncompatibleTimeError(_)
+impl core::clone::Clone for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone(&self) -> bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::cmp::Eq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::cmp::PartialEq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::eq(&self, other: &bitcoin_units::locktime::relative::error::IncompatibleTimeError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Freeze for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Send for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Sync for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::Unpin for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::marker::UnsafeUnpin for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+impl<T, U> core::convert::Into<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::From<T>
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::Into<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Error = core::convert::Infallible
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::clone::Clone
+pub type bitcoin_units::locktime::relative::error::IncompatibleTimeError::Owned = T
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: ?core::marker::Sized
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::locktime::relative::error::IncompatibleTimeError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::locktime::relative::error::IncompatibleTimeError
+pub fn bitcoin_units::locktime::relative::error::IncompatibleTimeError::from(t: T) -> T
 pub struct bitcoin_units::relative::InvalidHeightError
 impl core::clone::Clone for bitcoin_units::locktime::relative::error::InvalidHeightError
 pub fn bitcoin_units::locktime::relative::error::InvalidHeightError::clone(&self) -> bitcoin_units::locktime::relative::error::InvalidHeightError
