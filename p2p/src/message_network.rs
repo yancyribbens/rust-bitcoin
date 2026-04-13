@@ -934,7 +934,6 @@ impl<'a> Arbitrary<'a> for Alert {
 mod tests {
     use alloc::string::ToString;
 
-    use bitcoin::consensus::encode::{deserialize, serialize};
     use hex_unstable::hex;
 
     use super::*;
@@ -974,8 +973,8 @@ mod tests {
         let reject_tx_conflict = hex!("027478121474786e2d6d656d706f6f6c2d636f6e666c69637405df54d3860b3c41806a3546ab48279300affacf4b88591b229141dcf2f47004");
         let reject_tx_nonfinal = hex!("02747840096e6f6e2d66696e616c259bbe6c83db8bbdfca7ca303b19413dc245d9f2371b344ede5f8b1339a5460b");
 
-        let decode_result_conflict: Result<Reject, _> = deserialize(&reject_tx_conflict);
-        let decode_result_nonfinal: Result<Reject, _> = deserialize(&reject_tx_nonfinal);
+        let decode_result_conflict: Result<Reject, _> = encoding::decode_from_slice(&reject_tx_conflict);
+        let decode_result_nonfinal: Result<Reject, _> = encoding::decode_from_slice(&reject_tx_nonfinal);
 
         assert!(decode_result_conflict.is_ok());
         assert!(decode_result_nonfinal.is_ok());
@@ -1002,14 +1001,14 @@ mod tests {
             nonfinal.hash
         );
 
-        assert_eq!(serialize(&conflict), reject_tx_conflict);
-        assert_eq!(serialize(&nonfinal), reject_tx_nonfinal);
+        assert_eq!(encoding::encode_to_vec(&conflict), reject_tx_conflict);
+        assert_eq!(encoding::encode_to_vec(&nonfinal), reject_tx_nonfinal);
     }
 
     #[test]
     fn alert_message_test() {
         let alert_hex = hex!("60010000000000000000000000ffffff7f00000000ffffff7ffeffff7f01ffffff7f00000000ffffff7f00ffffff7f002f555247454e543a20416c657274206b657920636f6d70726f6d697365642c207570677261646520726571756972656400");
-        let alert: Alert = deserialize(&alert_hex).unwrap();
+        let alert: Alert = encoding::decode_from_slice(&alert_hex).unwrap();
         assert!(alert.is_final_alert());
     }
 
