@@ -10,8 +10,6 @@ use core::ops::{Add, Div, Mul, Not, Rem, Shl, Shr, Sub};
 use core::{cmp, fmt};
 
 use io::{BufRead, Write};
-#[cfg(feature = "serde")]
-use units::parse_int;
 
 use crate::block::{BlockHash, BlockHeight, BlockHeightInterval, Header};
 use crate::consensus::encode::{self, Decodable, Encodable};

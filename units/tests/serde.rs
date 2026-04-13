@@ -10,7 +10,7 @@ use bitcoin_units::absolute::{Height, LockTime as AbsoluteLockTime, MedianTimePa
 use bitcoin_units::relative::{LockTime as RelativeLockTime, NumberOf512Seconds, NumberOfBlocks};
 use bitcoin_units::{
     amount, fee_rate, Amount, BlockHeight, BlockHeightInterval, BlockTime, FeeRate, Sequence,
-    SignedAmount, Weight,
+    SignedAmount, Target, Weight, Work,
 };
 use serde::{Deserialize, Serialize};
 
@@ -57,6 +57,9 @@ struct Serde {
 
     abs_locktime: AbsoluteLockTime,
     rel_locktime: RelativeLockTime,
+
+    target: Target,
+    work: Work,
 }
 
 impl Serde {
@@ -91,6 +94,9 @@ impl Serde {
             seq: Sequence::MAX,
             abs_locktime: AbsoluteLockTime::Blocks(Height::MAX),
             rel_locktime: RelativeLockTime::Blocks(NumberOfBlocks::MAX),
+
+            target: Target::MAX_ATTAINABLE_MAINNET,
+            work: Target::MAX_ATTAINABLE_MAINNET.to_work()
         }
     }
 }
@@ -826,4 +832,35 @@ fn serde_as_locktime_from_time() {
 
     let value: serde_json::Value = serde_json::from_str(json).unwrap();
     assert_eq!(t, serde_json::from_value(value).unwrap());
+}
+
+// Used to get a 256 bit integer as a byte array.
+fn le_bytes() -> [u8; 32] {
+    let x: u128 = 0xDEAD_BEEF_CAFE_BABE_DEAD_BEEF_CAFE_BABE;
+    let y: u128 = 0xCAFE_DEAD_BABE_BEEF_CAFE_DEAD_BABE_BEEF;
+
+    let mut bytes = [0_u8; 32];
+
+    bytes[..16].copy_from_slice(&x.to_le_bytes());
+    bytes[16..].copy_from_slice(&y.to_le_bytes());
+
+    bytes
+}
+
+#[test]
+fn serde_regression_work() {
+    let work = Work::from_le_bytes(le_bytes());
+
+    let got = serialize(&work).unwrap();
+    let want = include_bytes!("data/u256_bincode") as &[_];
+    assert_eq!(got, want);
+}
+
+#[test]
+fn serde_regression_target() {
+    let target = Target::from_le_bytes(le_bytes());
+
+    let got = serialize(&target).unwrap();
+    let want = include_bytes!("data/u256_bincode") as &[_];
+    assert_eq!(got, want);
 }

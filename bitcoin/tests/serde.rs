@@ -31,8 +31,8 @@ use bitcoin::taproot::{self, ControlBlock, LeafVersion, TapTree, TaprootBuilder}
 use bitcoin::witness::Witness;
 use bitcoin::{
     ecdsa, hex, transaction, Address, Amount, LegacyPublicKey, NetworkKind, OutPoint,
-    ScriptPubKeyBuf, ScriptSigBuf, Sequence, TapScriptBuf, Target, Transaction, TxIn, TxOut, Txid,
-    WifKey, Work,
+    ScriptPubKeyBuf, ScriptSigBuf, Sequence, TapScriptBuf, Transaction, TxIn, TxOut, Txid,
+    WifKey,
 };
 
 #[test]
@@ -329,36 +329,5 @@ fn serde_regression_taptree() {
 
     let got = serialize(&tree).unwrap();
     let want = include_bytes!("data/serde/taptree_bincode") as &[_];
-    assert_eq!(got, want)
-}
-
-// Used to get a 256 bit integer as a byte array.
-fn le_bytes() -> [u8; 32] {
-    let x: u128 = 0xDEAD_BEEF_CAFE_BABE_DEAD_BEEF_CAFE_BABE;
-    let y: u128 = 0xCAFE_DEAD_BABE_BEEF_CAFE_DEAD_BABE_BEEF;
-
-    let mut bytes = [0_u8; 32];
-
-    bytes[..16].copy_from_slice(&x.to_le_bytes());
-    bytes[16..].copy_from_slice(&y.to_le_bytes());
-
-    bytes
-}
-
-#[test]
-fn serde_regression_work() {
-    let work = Work::from_le_bytes(le_bytes());
-
-    let got = serialize(&work).unwrap();
-    let want = include_bytes!("data/serde/u256_bincode") as &[_];
-    assert_eq!(got, want)
-}
-
-#[test]
-fn serde_regression_target() {
-    let target = Target::from_le_bytes(le_bytes());
-
-    let got = serialize(&target).unwrap();
-    let want = include_bytes!("data/serde/u256_bincode") as &[_];
     assert_eq!(got, want)
 }
