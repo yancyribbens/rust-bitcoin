@@ -339,7 +339,37 @@ impl HashEngine {
 
         // TODO: 8-way AVX2
         // TODO: 4-way SSE4.1
-        // TODO: 2-way x86 SHA-NI
+
+        // 2-way x86 SHA-NI
+        #[cfg(feature = "std")]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if std::is_x86_feature_detected!("sse4.1")
+                && std::is_x86_feature_detected!("sha")
+                && std::is_x86_feature_detected!("sse2")
+                && std::is_x86_feature_detected!("ssse3")
+            {
+                while count - i >= 2 {
+                    let out = <&mut [[u8; 32]; 2]>::try_from(&mut outputs[i..i + 2]).unwrap();
+                    let inp = <&[[u8; 64]; 2]>::try_from(&inputs[i..i + 2]).unwrap();
+                    unsafe { x86_shani::sha256d_64_2way(out, inp) };
+                    i += 2;
+                }
+            }
+        }
+
+        #[cfg(feature = "cpufeatures")]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if cpuid_sha256_x86::get() {
+                while count - i >= 2 {
+                    let out = <&mut [[u8; 32]; 2]>::try_from(&mut outputs[i..i + 2]).unwrap();
+                    let inp = <&[[u8; 64]; 2]>::try_from(&inputs[i..i + 2]).unwrap();
+                    unsafe { x86_shani::sha256d_64_2way(out, inp) };
+                    i += 2;
+                }
+            }
+        }
 
         // 2-way ARM SHA2
         #[cfg(feature = "std")]
