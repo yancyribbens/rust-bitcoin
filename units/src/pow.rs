@@ -10,7 +10,7 @@ use arbitrary::{Arbitrary, Unstructured};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::parse_int::{self, ParseIntError, PrefixedHexError, UnprefixedHexError};
+use crate::parse_int::{self, PrefixedHexError, UnprefixedHexError};
 
 /// Implement traits and methods shared by `Target` and `Work`.
 macro_rules! do_impl {
@@ -416,33 +416,11 @@ include!("../../include/u256.rs");
 
 impl U256 {
     /// Constructs a new `U256` from a prefixed hex string.
-    fn from_hex(s: &str) -> Result<Self, PrefixedHexError> {
-        let checked = parse_int::hex_remove_prefix(s)?;
-        Ok(Self::from_hex_internal(checked)?)
-    }
+    fn from_hex(s: &str) -> Result<Self, PrefixedHexError> { parse_int::hex_u256_prefixed(s) }
 
     /// Constructs a new `U256` from an unprefixed hex string.
     fn from_unprefixed_hex(s: &str) -> Result<Self, UnprefixedHexError> {
-        let checked = parse_int::hex_check_unprefixed(s)?;
-        Ok(Self::from_hex_internal(checked)?)
-    }
-
-    // Caller to ensure `s` does not contain a prefix.
-    fn from_hex_internal(s: &str) -> Result<Self, ParseIntError> {
-        let (high, low) = if s.len() <= 32 {
-            let low = parse_int::hex_u128_unchecked(s)?;
-            (0, low)
-        } else {
-            let high_len = s.len() - 32;
-            let high_s = &s[..high_len];
-            let low_s = &s[high_len..];
-
-            let high = parse_int::hex_u128_unchecked(high_s)?;
-            let low = parse_int::hex_u128_unchecked(low_s)?;
-            (high, low)
-        };
-
-        Ok(Self(high, low))
+        parse_int::hex_u256_unprefixed(s)
     }
 }
 

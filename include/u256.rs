@@ -10,7 +10,7 @@
 /// Big-endian 256 bit integer type.
 // (high, low): u.0 contains the high bits, u.1 contains the low bits.
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-struct U256(u128, u128);
+pub(crate) struct U256(u128, u128);
 
 #[allow(dead_code)]
 impl U256 {
@@ -22,7 +22,7 @@ impl U256 {
     const ONE: Self = Self(0, 1);
 
     /// Constructs a new `U256` from a big-endian array of `u8`s.
-    fn from_be_bytes(a: [u8; 32]) -> Self {
+    pub(crate) fn from_be_bytes(a: [u8; 32]) -> Self {
         let (high, low) = split_in_half(a);
         let big = u128::from_be_bytes(high);
         let little = u128::from_be_bytes(low);
@@ -30,7 +30,7 @@ impl U256 {
     }
 
     /// Constructs a new `U256` from a little-endian array of `u8`s.
-    fn from_le_bytes(a: [u8; 32]) -> Self {
+    pub(crate) fn from_le_bytes(a: [u8; 32]) -> Self {
         let (high, low) = split_in_half(a);
         let little = u128::from_le_bytes(high);
         let big = u128::from_le_bytes(low);
@@ -511,7 +511,7 @@ impl core::str::FromStr for U256 {
 /// Error returned when parsing a [`U256`] from a string.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
-enum ParseU256Error {
+pub(crate) enum ParseU256Error {
     /// Numeric value exceeded [`U256::MAX`].
     Overflow,
     /// Parsed string was empty.
