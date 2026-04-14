@@ -25,11 +25,7 @@ use core::str::FromStr;
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
 
-use self::error::{
-    BadPositionError, InputTooLargeError, InvalidCharacterError, MissingDenominationError,
-    MissingDigitsError, MissingDigitsKind, ParseAmountErrorInner, ParseErrorInner,
-    PossiblyConfusingDenominationError, TooPreciseError, UnknownDenominationError,
-};
+use self::error::{MissingDigitsKind, ParseAmountErrorInner, ParseErrorInner};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
@@ -41,7 +37,11 @@ pub use self::{
 #[doc(no_inline)]
 pub use self::error::AmountDecoderError;
 #[doc(no_inline)]
-pub use self::error::{OutOfRangeError, ParseAmountError, ParseDenominationError, ParseError};
+pub use self::error::{
+    BadPositionError, InputTooLargeError, InvalidCharacterError, MissingDenominationError,
+    MissingDigitsError, OutOfRangeError, ParseAmountError, ParseDenominationError, ParseError,
+    PossiblyConfusingDenominationError, TooPreciseError, UnknownDenominationError,
+};
 #[doc(inline)]
 #[cfg(feature = "encoding")]
 pub use self::unsigned::{AmountDecoder, AmountEncoder};
