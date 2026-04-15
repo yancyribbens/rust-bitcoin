@@ -1016,11 +1016,13 @@ pub fn bitcoin_consensus_encoding::Decoder6<A, B, C, D, E, F>::from(t: T) -> T
 pub struct bitcoin_consensus_encoding::EncodableByteIter<'e, T: bitcoin_consensus_encoding::Encodable + ?core::marker::Sized + 'e>
 impl<'e, T: bitcoin_consensus_encoding::Encodable + ?core::marker::Sized + 'e> bitcoin_consensus_encoding::EncodableByteIter<'e, T>
 pub fn bitcoin_consensus_encoding::EncodableByteIter<'e, T>::new(encodable: &'e T) -> Self
+pub fn bitcoin_consensus_encoding::EncodableByteIter<'e, T>::peek_chunk(&mut self) -> &[u8]
 impl<'e, T: bitcoin_consensus_encoding::Encodable + ?core::marker::Sized + 'e> core::clone::Clone for bitcoin_consensus_encoding::EncodableByteIter<'e, T> where <T as bitcoin_consensus_encoding::Encodable>::Encoder: core::clone::Clone
 pub fn bitcoin_consensus_encoding::EncodableByteIter<'e, T>::clone(&self) -> Self
 impl<'e, T: bitcoin_consensus_encoding::Encodable + ?core::marker::Sized + 'e> core::iter::traits::iterator::Iterator for bitcoin_consensus_encoding::EncodableByteIter<'e, T>
 pub type bitcoin_consensus_encoding::EncodableByteIter<'e, T>::Item = u8
 pub fn bitcoin_consensus_encoding::EncodableByteIter<'e, T>::next(&mut self) -> core::option::Option<Self::Item>
+pub fn bitcoin_consensus_encoding::EncodableByteIter<'e, T>::nth(&mut self, n: usize) -> core::option::Option<Self::Item>
 impl<'e, T: core::fmt::Debug + bitcoin_consensus_encoding::Encodable + ?core::marker::Sized + 'e> core::fmt::Debug for bitcoin_consensus_encoding::EncodableByteIter<'e, T> where <T as bitcoin_consensus_encoding::Encodable>::Encoder: core::fmt::Debug
 pub fn bitcoin_consensus_encoding::EncodableByteIter<'e, T>::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl<'e, T> core::iter::traits::exact_size::ExactSizeIterator for bitcoin_consensus_encoding::EncodableByteIter<'e, T> where T: bitcoin_consensus_encoding::Encodable + ?core::marker::Sized + 'e, <T as bitcoin_consensus_encoding::Encodable>::Encoder: bitcoin_consensus_encoding::ExactSizeEncoder

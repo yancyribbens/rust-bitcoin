@@ -184,6 +184,33 @@ pub struct EncodableByteIter<'e, T: Encodable + ?Sized + 'e> {
 impl<'e, T: Encodable + ?Sized + 'e> EncodableByteIter<'e, T> {
     /// Constructs a new byte iterator around a provided encodable.
     pub fn new(encodable: &'e T) -> Self { Self { enc: encodable.encoder(), position: 0 } }
+
+    /// Returns the remaining bytes in the next non-empty chunk.
+    ///
+    /// The returned value is either a non-empty chunk of bytes that were not yielded yet,
+    /// immediately following the already-yielded bytes or empty slice if the encoder finished.
+    ///
+    /// This call can be paired with `nth` to mark bytes as processed.
+    ///
+    /// Just like with encoders or this iterator, attempting to use this type after this method
+    /// returned an empty slice will lead to unspecified behavior and is considered a bug in the
+    /// caller.
+    pub fn peek_chunk(&mut self) -> &[u8] {
+        // Can't use `.get(self.position..)` due to borrowck bug.
+        if self.position < self.enc.current_chunk().len() {
+            &self.enc.current_chunk()[self.position..]
+        } else {
+            loop {
+                if !self.enc.advance() {
+                    return &[];
+                }
+                if !self.enc.current_chunk().is_empty() {
+                    self.position = 0;
+                    return self.enc.current_chunk();
+                }
+            }
+        }
+    }
 }
 
 // Manual impl rather than #[derive(Clone)] because derive would constrain `where T: Clone`,
@@ -201,12 +228,39 @@ impl<'e, T: Encodable + ?Sized + 'e> Iterator for EncodableByteIter<'e, T> {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(b) = self.enc.current_chunk().get(self.position) {
+                // length of slice is guaranteed to be at most `isize::MAX` thus is `n` so this cannot
+                // overflow.
                 self.position += 1;
                 return Some(*b);
             } else if !self.enc.advance() {
                 return None;
             }
             self.position = 0;
+        }
+    }
+
+    fn nth(&mut self, mut n: usize) -> Option<Self::Item> {
+        // This could be in a loop but we intentionally unroll one iteration so that addition is
+        // only required at the beginning.
+        if let Some(b) = self.position.checked_add(n).and_then(|pos| self.enc.current_chunk().get(pos)) {
+            // length of slice is guaranteed to be at most `isize::MAX` thus is `n` so this cannot
+            // overflow.
+            self.position += n + 1;
+            return Some(*b);
+        }
+        n -= self.enc.current_chunk().len() - self.position;
+        if !self.enc.advance() {
+            return None;
+        }
+        loop {
+            if let Some(b) = self.enc.current_chunk().get(n) {
+                self.position = n + 1;
+                return Some(*b);
+            }
+            n -= self.enc.current_chunk().len();
+            if !self.enc.advance() {
+                return None;
+            }
         }
     }
 }
