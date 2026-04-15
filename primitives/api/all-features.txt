@@ -2030,6 +2030,58 @@ impl<T> core::clone::CloneToUninit for bitcoin_primitives::script::WitnessScript
 pub unsafe fn bitcoin_primitives::script::WitnessScriptSizeError::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_primitives::script::WitnessScriptSizeError
 pub fn bitcoin_primitives::script::WitnessScriptSizeError::from(t: T) -> T
+#[non_exhaustive] pub enum bitcoin_primitives::script::FromHexError
+pub bitcoin_primitives::script::FromHexError::Decoder(bitcoin_consensus_encoding::error::DecodeError<bitcoin_primitives::script::error::ScriptBufDecoderError>)
+pub bitcoin_primitives::script::FromHexError::Hex(hex_conservative::error::DecodeVariableLengthBytesError)
+impl core::clone::Clone for bitcoin_primitives::script::error::FromHexError
+pub fn bitcoin_primitives::script::error::FromHexError::clone(&self) -> bitcoin_primitives::script::error::FromHexError
+impl core::cmp::Eq for bitcoin_primitives::script::error::FromHexError
+impl core::cmp::PartialEq for bitcoin_primitives::script::error::FromHexError
+pub fn bitcoin_primitives::script::error::FromHexError::eq(&self, other: &bitcoin_primitives::script::error::FromHexError) -> bool
+impl core::convert::From<bitcoin_consensus_encoding::error::DecodeError<bitcoin_primitives::script::error::ScriptBufDecoderError>> for bitcoin_primitives::script::error::FromHexError
+pub fn bitcoin_primitives::script::error::FromHexError::from(e: bitcoin_consensus_encoding::error::DecodeError<bitcoin_primitives::script::error::ScriptBufDecoderError>) -> Self
+impl core::convert::From<core::convert::Infallible> for bitcoin_primitives::script::error::FromHexError
+pub fn bitcoin_primitives::script::error::FromHexError::from(never: core::convert::Infallible) -> Self
+impl core::convert::From<hex_conservative::error::DecodeVariableLengthBytesError> for bitcoin_primitives::script::error::FromHexError
+pub fn bitcoin_primitives::script::error::FromHexError::from(e: hex_conservative::error::DecodeVariableLengthBytesError) -> Self
+impl core::error::Error for bitcoin_primitives::script::error::FromHexError
+pub fn bitcoin_primitives::script::error::FromHexError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_primitives::script::error::FromHexError
+pub fn bitcoin_primitives::script::error::FromHexError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_primitives::script::error::FromHexError
+pub fn bitcoin_primitives::script::error::FromHexError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_primitives::script::error::FromHexError
+impl core::marker::Freeze for bitcoin_primitives::script::error::FromHexError
+impl core::marker::Send for bitcoin_primitives::script::error::FromHexError
+impl core::marker::Sync for bitcoin_primitives::script::error::FromHexError
+impl core::marker::Unpin for bitcoin_primitives::script::error::FromHexError
+impl core::marker::UnsafeUnpin for bitcoin_primitives::script::error::FromHexError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_primitives::script::error::FromHexError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_primitives::script::error::FromHexError
+impl<T, U> core::convert::Into<U> for bitcoin_primitives::script::error::FromHexError where U: core::convert::From<T>
+pub fn bitcoin_primitives::script::error::FromHexError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_primitives::script::error::FromHexError where U: core::convert::Into<T>
+pub type bitcoin_primitives::script::error::FromHexError::Error = core::convert::Infallible
+pub fn bitcoin_primitives::script::error::FromHexError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_primitives::script::error::FromHexError where U: core::convert::TryFrom<T>
+pub type bitcoin_primitives::script::error::FromHexError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_primitives::script::error::FromHexError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_primitives::script::error::FromHexError where T: core::clone::Clone
+pub type bitcoin_primitives::script::error::FromHexError::Owned = T
+pub fn bitcoin_primitives::script::error::FromHexError::clone_into(&self, target: &mut T)
+pub fn bitcoin_primitives::script::error::FromHexError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_primitives::script::error::FromHexError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_primitives::script::error::FromHexError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_primitives::script::error::FromHexError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_primitives::script::error::FromHexError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_primitives::script::error::FromHexError where T: ?core::marker::Sized
+pub fn bitcoin_primitives::script::error::FromHexError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_primitives::script::error::FromHexError where T: ?core::marker::Sized
+pub fn bitcoin_primitives::script::error::FromHexError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_primitives::script::error::FromHexError where T: core::clone::Clone
+pub unsafe fn bitcoin_primitives::script::error::FromHexError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_primitives::script::error::FromHexError
+pub fn bitcoin_primitives::script::error::FromHexError::from(t: T) -> T
 pub enum bitcoin_primitives::script::RedeemScriptTag
 impl bitcoin_primitives::script::ScriptHashableTag for bitcoin_primitives::script::RedeemScriptTag
 impl bitcoin_primitives::script::Tag for bitcoin_primitives::script::RedeemScriptTag
