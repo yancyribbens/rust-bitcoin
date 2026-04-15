@@ -1381,7 +1381,6 @@ mod test {
         // We don't encode one element at a time, rather we encode the whole content slice at once.
         assert_eq!(encoder.current_chunk(), &[3u8, 1, 2, 3, 2, 4, 5][..]);
         assert!(!encoder.advance());
-        assert!(encoder.current_chunk().is_empty());
     }
 
     #[test]

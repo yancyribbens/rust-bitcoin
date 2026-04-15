@@ -174,7 +174,6 @@ fn encode_slice_encoder_mixed_empty_and_data() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[3]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -209,7 +208,6 @@ fn encode_encoder2_with_first_empty_encoder() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[1, 2, 3]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -219,11 +217,6 @@ fn encode_encoder_advance_multiple_times_when_exhausted() {
 
     assert_eq!(encoder.current_chunk(), &[10, 20]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
-    assert!(!encoder.advance());
-    assert!(!encoder.advance());
-    assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -231,7 +224,6 @@ fn encode_option_encoder_some() {
     let mut encoder = Some(ArrayEncoder::<3>::without_length_prefix([1, 2, 3]));
     assert_eq!(encoder.current_chunk(), &[1, 2, 3]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -239,7 +231,6 @@ fn encode_option_encoder_none() {
     let mut encoder: Option<ArrayEncoder<3>> = None;
     assert!(encoder.current_chunk().is_empty());
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -251,7 +242,6 @@ fn encode_array_with_data() {
     assert!(!encoder.is_empty());
     assert_eq!(encoder.current_chunk(), &[1u8, 2, 3, 4][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -263,7 +253,6 @@ fn encode_empty_array() {
     assert!(encoder.is_empty());
     assert!(encoder.current_chunk().is_empty());
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -275,8 +264,6 @@ fn encode_array_ref_with_data() {
     assert!(!encoder.is_empty());
     assert_eq!(encoder.current_chunk(), &[1u8, 2, 3, 4][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
-    assert_eq!(encoder.len(), 0);
 }
 
 #[test]
@@ -288,7 +275,6 @@ fn encode_empty_array_ref() {
     assert!(encoder.is_empty());
     assert!(encoder.current_chunk().is_empty());
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -303,7 +289,6 @@ fn encode_byte_slice_without_prefix() {
 
     assert_eq!(encoder.current_chunk(), &[1u8, 2, 3][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -318,7 +303,6 @@ fn encode_empty_byte_slice_without_prefix() {
 
     assert!(encoder.current_chunk().is_empty());
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -331,7 +315,6 @@ fn encode_slice_with_elements() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[0x78, 0x56, 0x00, 0x00][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -341,7 +324,6 @@ fn encode_empty_slice() {
     let mut encoder = SliceEncoder::without_length_prefix(slice);
 
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -353,7 +335,6 @@ fn encode_slice_with_zero_sized_arrays() {
     assert!(encoder.current_chunk().is_empty());
     // The slice advanced is optimized to skip over empty chunks.
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -370,7 +351,6 @@ fn encode_two_arrays() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[3u8, 4][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -387,7 +367,6 @@ fn encode_two_empty_arrays() {
     assert!(encoder.advance());
     assert!(encoder.current_chunk().is_empty());
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -407,7 +386,6 @@ fn encode_three_arrays() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[4u8, 5u8, 6u8][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -430,7 +408,6 @@ fn encode_four_arrays() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[0x40][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -459,7 +436,6 @@ fn encode_six_arrays() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[0x06][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -476,7 +452,6 @@ fn encode_mixed_composition_with_byte_slices() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[0xDD, 0xCC][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -496,7 +471,6 @@ fn encode_nested_composition() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[0x43, 0x44, 0x45][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -513,7 +487,6 @@ fn encode_slice_with_array_composition() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[0x20, 0x21][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -532,7 +505,6 @@ fn encode_array_with_slice_composition() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[0x03][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -561,7 +533,6 @@ fn encode_multiple_slices_composition() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[0xC3][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -581,7 +552,6 @@ fn encode_complex_nested_structure() {
     assert!(encoder.advance());
     assert_eq!(encoder.current_chunk(), &[0xBE, 0xEF][..]);
     assert!(!encoder.advance());
-    assert!(encoder.current_chunk().is_empty());
 }
 
 #[test]
@@ -591,39 +561,33 @@ fn encode_compact_size() {
     assert_eq!(e.current_chunk(), &[0x10][..]);
     assert_eq!(e.len(), 1);
     assert!(!e.advance());
-    assert!(e.current_chunk().is_empty());
 
     let mut e = CompactSizeEncoder::new(0xFCusize);
     assert_eq!(e.current_chunk(), &[0xFC][..]);
     assert_eq!(e.len(), 1);
     assert!(!e.advance());
-    assert!(e.current_chunk().is_empty());
 
     // 0xFD + u16
     let mut e = CompactSizeEncoder::new(0x00FDusize);
     assert_eq!(e.current_chunk(), &[0xFD, 0xFD, 0x00][..]);
     assert_eq!(e.len(), 3);
     assert!(!e.advance());
-    assert!(e.current_chunk().is_empty());
 
     let mut e = CompactSizeEncoder::new(0x0FFFusize);
     assert_eq!(e.current_chunk(), &[0xFD, 0xFF, 0x0F][..]);
     assert_eq!(e.len(), 3);
     assert!(!e.advance());
-    assert!(e.current_chunk().is_empty());
 
     // 0xFE + u32
     let mut e = CompactSizeEncoder::new(0x0001_0000usize);
     assert_eq!(e.current_chunk(), &[0xFE, 0x00, 0x00, 0x01, 0x00][..]);
     assert_eq!(e.len(), 5);
     assert!(!e.advance());
-    assert!(e.current_chunk().is_empty());
 
     let mut e = CompactSizeEncoder::new(0x0F0F_0F0Fusize);
     assert_eq!(e.current_chunk(), &[0xFE, 0x0F, 0x0F, 0x0F, 0x0F][..]);
     assert_eq!(e.len(), 5);
     assert!(!e.advance());
-    assert!(e.current_chunk().is_empty());
 
     // 0xFF + u64
     // This test only runs on systems with >= 64 bit usize.
@@ -632,7 +596,6 @@ fn encode_compact_size() {
         assert_eq!(e.current_chunk(), &[0xFF, 0xE0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0x00, 0x00][..]);
         assert_eq!(e.len(), 9);
         assert!(!e.advance());
-        assert!(e.current_chunk().is_empty());
     }
 
     // > u64::MAX encodes as u64::MAX.
@@ -642,7 +605,6 @@ fn encode_compact_size() {
         assert_eq!(e.current_chunk(), &[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF][..]);
         assert_eq!(e.len(), 9);
         assert!(!e.advance());
-        assert!(e.current_chunk().is_empty());
     }
 
     // new_u64 works on all platforms, no guard needed.
@@ -650,7 +612,6 @@ fn encode_compact_size() {
     assert_eq!(e.current_chunk(), &[0xFF, 0xE0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0x00, 0x00][..]);
     assert_eq!(e.len(), 9);
     assert!(!e.advance());
-    assert!(e.current_chunk().is_empty());
 }
 
 #[test]
