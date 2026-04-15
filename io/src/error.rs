@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: CC0-1.0
 
+//! Error types for the `io` crate.
+
 #[cfg(feature = "alloc")]
 #[cfg(not(feature = "std"))]
 use alloc::boxed::Box;
@@ -200,6 +202,42 @@ define_errorkind!(
     /// A custom error that does not fall under any other I/O error kind
     Other
 );
+
+/// An error that can occur when reading and decoding from a buffered reader.
+#[derive(Debug)]
+pub enum ReadError<D> {
+    /// An I/O error occurred while reading from the reader.
+    Io(Error),
+    /// The decoder encountered an error while parsing the data.
+    Decode(D),
+}
+
+impl<D: fmt::Display> fmt::Display for ReadError<D> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Io(e) => write!(f, "I/O error: {}", e),
+            Self::Decode(e) => write!(f, "decode error: {}", e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl<D> std::error::Error for ReadError<D>
+where
+    D: fmt::Debug + fmt::Display + std::error::Error + 'static,
+{
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Io(e) => Some(e),
+            Self::Decode(e) => Some(e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl<D> From<Error> for ReadError<D> {
+    fn from(e: Error) -> Self { Self::Io(e) }
+}
 
 #[cfg(feature = "alloc")]
 #[cfg(not(feature = "std"))]
