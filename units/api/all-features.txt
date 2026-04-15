@@ -5838,6 +5838,98 @@ impl<T> core::clone::CloneToUninit for bitcoin_units::pow::error::CompactTargetD
 pub unsafe fn bitcoin_units::pow::error::CompactTargetDecoderError::clone_to_uninit(&self, dest: *mut u8)
 impl<T> core::convert::From<T> for bitcoin_units::pow::error::CompactTargetDecoderError
 pub fn bitcoin_units::pow::error::CompactTargetDecoderError::from(t: T) -> T
+pub struct bitcoin_units::pow::error::ParseTargetError(_)
+impl core::clone::Clone for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::clone(&self) -> bitcoin_units::pow::error::ParseTargetError
+impl core::cmp::Eq for bitcoin_units::pow::error::ParseTargetError
+impl core::cmp::PartialEq for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::eq(&self, other: &bitcoin_units::pow::error::ParseTargetError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::Freeze for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::Send for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::Sync for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::Unpin for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::error::ParseTargetError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::error::ParseTargetError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::error::ParseTargetError
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::error::ParseTargetError where U: core::convert::From<T>
+pub fn bitcoin_units::pow::error::ParseTargetError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::error::ParseTargetError where U: core::convert::Into<T>
+pub type bitcoin_units::pow::error::ParseTargetError::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::error::ParseTargetError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::error::ParseTargetError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::error::ParseTargetError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::error::ParseTargetError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::error::ParseTargetError where T: core::clone::Clone
+pub type bitcoin_units::pow::error::ParseTargetError::Owned = T
+pub fn bitcoin_units::pow::error::ParseTargetError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::error::ParseTargetError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::error::ParseTargetError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseTargetError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::error::ParseTargetError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseTargetError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::error::ParseTargetError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseTargetError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::error::ParseTargetError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseTargetError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::error::ParseTargetError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::error::ParseTargetError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::from(t: T) -> T
+pub struct bitcoin_units::pow::error::ParseWorkError(_)
+impl core::clone::Clone for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::clone(&self) -> bitcoin_units::pow::error::ParseWorkError
+impl core::cmp::Eq for bitcoin_units::pow::error::ParseWorkError
+impl core::cmp::PartialEq for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::eq(&self, other: &bitcoin_units::pow::error::ParseWorkError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::Freeze for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::Send for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::Sync for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::Unpin for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::error::ParseWorkError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::error::ParseWorkError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::error::ParseWorkError
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::error::ParseWorkError where U: core::convert::From<T>
+pub fn bitcoin_units::pow::error::ParseWorkError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::error::ParseWorkError where U: core::convert::Into<T>
+pub type bitcoin_units::pow::error::ParseWorkError::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::error::ParseWorkError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::error::ParseWorkError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::error::ParseWorkError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::error::ParseWorkError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::error::ParseWorkError where T: core::clone::Clone
+pub type bitcoin_units::pow::error::ParseWorkError::Owned = T
+pub fn bitcoin_units::pow::error::ParseWorkError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::error::ParseWorkError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::error::ParseWorkError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseWorkError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::error::ParseWorkError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseWorkError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::error::ParseWorkError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseWorkError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::error::ParseWorkError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseWorkError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::error::ParseWorkError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::error::ParseWorkError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::from(t: T) -> T
 pub struct bitcoin_units::pow::CompactTarget(_)
 impl bitcoin_units::pow::CompactTarget
 pub fn bitcoin_units::pow::CompactTarget::from_consensus(bits: u32) -> Self
@@ -6058,97 +6150,97 @@ pub unsafe fn bitcoin_units::pow::CompactTargetEncoder<'e>::clone_to_uninit(&sel
 impl<T> core::convert::From<T> for bitcoin_units::pow::CompactTargetEncoder<'e>
 pub fn bitcoin_units::pow::CompactTargetEncoder<'e>::from(t: T) -> T
 pub struct bitcoin_units::pow::ParseTargetError(_)
-impl core::clone::Clone for bitcoin_units::pow::ParseTargetError
-pub fn bitcoin_units::pow::ParseTargetError::clone(&self) -> bitcoin_units::pow::ParseTargetError
-impl core::cmp::Eq for bitcoin_units::pow::ParseTargetError
-impl core::cmp::PartialEq for bitcoin_units::pow::ParseTargetError
-pub fn bitcoin_units::pow::ParseTargetError::eq(&self, other: &bitcoin_units::pow::ParseTargetError) -> bool
-impl core::convert::From<core::convert::Infallible> for bitcoin_units::pow::ParseTargetError
-pub fn bitcoin_units::pow::ParseTargetError::from(never: core::convert::Infallible) -> Self
-impl core::error::Error for bitcoin_units::pow::ParseTargetError
-pub fn bitcoin_units::pow::ParseTargetError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
-impl core::fmt::Debug for bitcoin_units::pow::ParseTargetError
-pub fn bitcoin_units::pow::ParseTargetError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::fmt::Display for bitcoin_units::pow::ParseTargetError
-pub fn bitcoin_units::pow::ParseTargetError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::marker::StructuralPartialEq for bitcoin_units::pow::ParseTargetError
-impl core::marker::Freeze for bitcoin_units::pow::ParseTargetError
-impl core::marker::Send for bitcoin_units::pow::ParseTargetError
-impl core::marker::Sync for bitcoin_units::pow::ParseTargetError
-impl core::marker::Unpin for bitcoin_units::pow::ParseTargetError
-impl core::marker::UnsafeUnpin for bitcoin_units::pow::ParseTargetError
-impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::ParseTargetError
-impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::ParseTargetError
-impl<T, U> core::convert::Into<U> for bitcoin_units::pow::ParseTargetError where U: core::convert::From<T>
-pub fn bitcoin_units::pow::ParseTargetError::into(self) -> U
-impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::ParseTargetError where U: core::convert::Into<T>
-pub type bitcoin_units::pow::ParseTargetError::Error = core::convert::Infallible
-pub fn bitcoin_units::pow::ParseTargetError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
-impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::ParseTargetError where U: core::convert::TryFrom<T>
-pub type bitcoin_units::pow::ParseTargetError::Error = <U as core::convert::TryFrom<T>>::Error
-pub fn bitcoin_units::pow::ParseTargetError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
-impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::ParseTargetError where T: core::clone::Clone
-pub type bitcoin_units::pow::ParseTargetError::Owned = T
-pub fn bitcoin_units::pow::ParseTargetError::clone_into(&self, target: &mut T)
-pub fn bitcoin_units::pow::ParseTargetError::to_owned(&self) -> T
-impl<T> alloc::string::ToString for bitcoin_units::pow::ParseTargetError where T: core::fmt::Display + ?core::marker::Sized
-pub fn bitcoin_units::pow::ParseTargetError::to_string(&self) -> alloc::string::String
-impl<T> core::any::Any for bitcoin_units::pow::ParseTargetError where T: 'static + ?core::marker::Sized
-pub fn bitcoin_units::pow::ParseTargetError::type_id(&self) -> core::any::TypeId
-impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::ParseTargetError where T: ?core::marker::Sized
-pub fn bitcoin_units::pow::ParseTargetError::borrow(&self) -> &T
-impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::ParseTargetError where T: ?core::marker::Sized
-pub fn bitcoin_units::pow::ParseTargetError::borrow_mut(&mut self) -> &mut T
-impl<T> core::clone::CloneToUninit for bitcoin_units::pow::ParseTargetError where T: core::clone::Clone
-pub unsafe fn bitcoin_units::pow::ParseTargetError::clone_to_uninit(&self, dest: *mut u8)
-impl<T> core::convert::From<T> for bitcoin_units::pow::ParseTargetError
-pub fn bitcoin_units::pow::ParseTargetError::from(t: T) -> T
+impl core::clone::Clone for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::clone(&self) -> bitcoin_units::pow::error::ParseTargetError
+impl core::cmp::Eq for bitcoin_units::pow::error::ParseTargetError
+impl core::cmp::PartialEq for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::eq(&self, other: &bitcoin_units::pow::error::ParseTargetError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::Freeze for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::Send for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::Sync for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::Unpin for bitcoin_units::pow::error::ParseTargetError
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::error::ParseTargetError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::error::ParseTargetError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::error::ParseTargetError
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::error::ParseTargetError where U: core::convert::From<T>
+pub fn bitcoin_units::pow::error::ParseTargetError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::error::ParseTargetError where U: core::convert::Into<T>
+pub type bitcoin_units::pow::error::ParseTargetError::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::error::ParseTargetError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::error::ParseTargetError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::error::ParseTargetError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::error::ParseTargetError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::error::ParseTargetError where T: core::clone::Clone
+pub type bitcoin_units::pow::error::ParseTargetError::Owned = T
+pub fn bitcoin_units::pow::error::ParseTargetError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::error::ParseTargetError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::error::ParseTargetError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseTargetError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::error::ParseTargetError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseTargetError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::error::ParseTargetError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseTargetError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::error::ParseTargetError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseTargetError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::error::ParseTargetError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::error::ParseTargetError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::error::ParseTargetError
+pub fn bitcoin_units::pow::error::ParseTargetError::from(t: T) -> T
 pub struct bitcoin_units::pow::ParseWorkError(_)
-impl core::clone::Clone for bitcoin_units::pow::ParseWorkError
-pub fn bitcoin_units::pow::ParseWorkError::clone(&self) -> bitcoin_units::pow::ParseWorkError
-impl core::cmp::Eq for bitcoin_units::pow::ParseWorkError
-impl core::cmp::PartialEq for bitcoin_units::pow::ParseWorkError
-pub fn bitcoin_units::pow::ParseWorkError::eq(&self, other: &bitcoin_units::pow::ParseWorkError) -> bool
-impl core::convert::From<core::convert::Infallible> for bitcoin_units::pow::ParseWorkError
-pub fn bitcoin_units::pow::ParseWorkError::from(never: core::convert::Infallible) -> Self
-impl core::error::Error for bitcoin_units::pow::ParseWorkError
-pub fn bitcoin_units::pow::ParseWorkError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
-impl core::fmt::Debug for bitcoin_units::pow::ParseWorkError
-pub fn bitcoin_units::pow::ParseWorkError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::fmt::Display for bitcoin_units::pow::ParseWorkError
-pub fn bitcoin_units::pow::ParseWorkError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::marker::StructuralPartialEq for bitcoin_units::pow::ParseWorkError
-impl core::marker::Freeze for bitcoin_units::pow::ParseWorkError
-impl core::marker::Send for bitcoin_units::pow::ParseWorkError
-impl core::marker::Sync for bitcoin_units::pow::ParseWorkError
-impl core::marker::Unpin for bitcoin_units::pow::ParseWorkError
-impl core::marker::UnsafeUnpin for bitcoin_units::pow::ParseWorkError
-impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::ParseWorkError
-impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::ParseWorkError
-impl<T, U> core::convert::Into<U> for bitcoin_units::pow::ParseWorkError where U: core::convert::From<T>
-pub fn bitcoin_units::pow::ParseWorkError::into(self) -> U
-impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::ParseWorkError where U: core::convert::Into<T>
-pub type bitcoin_units::pow::ParseWorkError::Error = core::convert::Infallible
-pub fn bitcoin_units::pow::ParseWorkError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
-impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::ParseWorkError where U: core::convert::TryFrom<T>
-pub type bitcoin_units::pow::ParseWorkError::Error = <U as core::convert::TryFrom<T>>::Error
-pub fn bitcoin_units::pow::ParseWorkError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
-impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::ParseWorkError where T: core::clone::Clone
-pub type bitcoin_units::pow::ParseWorkError::Owned = T
-pub fn bitcoin_units::pow::ParseWorkError::clone_into(&self, target: &mut T)
-pub fn bitcoin_units::pow::ParseWorkError::to_owned(&self) -> T
-impl<T> alloc::string::ToString for bitcoin_units::pow::ParseWorkError where T: core::fmt::Display + ?core::marker::Sized
-pub fn bitcoin_units::pow::ParseWorkError::to_string(&self) -> alloc::string::String
-impl<T> core::any::Any for bitcoin_units::pow::ParseWorkError where T: 'static + ?core::marker::Sized
-pub fn bitcoin_units::pow::ParseWorkError::type_id(&self) -> core::any::TypeId
-impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::ParseWorkError where T: ?core::marker::Sized
-pub fn bitcoin_units::pow::ParseWorkError::borrow(&self) -> &T
-impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::ParseWorkError where T: ?core::marker::Sized
-pub fn bitcoin_units::pow::ParseWorkError::borrow_mut(&mut self) -> &mut T
-impl<T> core::clone::CloneToUninit for bitcoin_units::pow::ParseWorkError where T: core::clone::Clone
-pub unsafe fn bitcoin_units::pow::ParseWorkError::clone_to_uninit(&self, dest: *mut u8)
-impl<T> core::convert::From<T> for bitcoin_units::pow::ParseWorkError
-pub fn bitcoin_units::pow::ParseWorkError::from(t: T) -> T
+impl core::clone::Clone for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::clone(&self) -> bitcoin_units::pow::error::ParseWorkError
+impl core::cmp::Eq for bitcoin_units::pow::error::ParseWorkError
+impl core::cmp::PartialEq for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::eq(&self, other: &bitcoin_units::pow::error::ParseWorkError) -> bool
+impl core::convert::From<core::convert::Infallible> for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::from(never: core::convert::Infallible) -> Self
+impl core::error::Error for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::Freeze for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::Send for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::Sync for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::Unpin for bitcoin_units::pow::error::ParseWorkError
+impl core::marker::UnsafeUnpin for bitcoin_units::pow::error::ParseWorkError
+impl core::panic::unwind_safe::RefUnwindSafe for bitcoin_units::pow::error::ParseWorkError
+impl core::panic::unwind_safe::UnwindSafe for bitcoin_units::pow::error::ParseWorkError
+impl<T, U> core::convert::Into<U> for bitcoin_units::pow::error::ParseWorkError where U: core::convert::From<T>
+pub fn bitcoin_units::pow::error::ParseWorkError::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for bitcoin_units::pow::error::ParseWorkError where U: core::convert::Into<T>
+pub type bitcoin_units::pow::error::ParseWorkError::Error = core::convert::Infallible
+pub fn bitcoin_units::pow::error::ParseWorkError::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for bitcoin_units::pow::error::ParseWorkError where U: core::convert::TryFrom<T>
+pub type bitcoin_units::pow::error::ParseWorkError::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn bitcoin_units::pow::error::ParseWorkError::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for bitcoin_units::pow::error::ParseWorkError where T: core::clone::Clone
+pub type bitcoin_units::pow::error::ParseWorkError::Owned = T
+pub fn bitcoin_units::pow::error::ParseWorkError::clone_into(&self, target: &mut T)
+pub fn bitcoin_units::pow::error::ParseWorkError::to_owned(&self) -> T
+impl<T> alloc::string::ToString for bitcoin_units::pow::error::ParseWorkError where T: core::fmt::Display + ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseWorkError::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for bitcoin_units::pow::error::ParseWorkError where T: 'static + ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseWorkError::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for bitcoin_units::pow::error::ParseWorkError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseWorkError::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for bitcoin_units::pow::error::ParseWorkError where T: ?core::marker::Sized
+pub fn bitcoin_units::pow::error::ParseWorkError::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for bitcoin_units::pow::error::ParseWorkError where T: core::clone::Clone
+pub unsafe fn bitcoin_units::pow::error::ParseWorkError::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for bitcoin_units::pow::error::ParseWorkError
+pub fn bitcoin_units::pow::error::ParseWorkError::from(t: T) -> T
 pub struct bitcoin_units::pow::Target(_)
 impl bitcoin_units::pow::Target
 pub const bitcoin_units::pow::Target::MAX: Self
@@ -6191,7 +6283,7 @@ pub fn bitcoin_units::pow::Target::hash<__H: core::hash::Hasher>(&self, state: &
 impl core::marker::Copy for bitcoin_units::pow::Target
 impl core::marker::StructuralPartialEq for bitcoin_units::pow::Target
 impl core::str::traits::FromStr for bitcoin_units::pow::Target
-pub type bitcoin_units::pow::Target::Err = bitcoin_units::pow::ParseTargetError
+pub type bitcoin_units::pow::Target::Err = bitcoin_units::pow::error::ParseTargetError
 pub fn bitcoin_units::pow::Target::from_str(s: &str) -> core::result::Result<Self, Self::Err>
 impl serde::ser::Serialize for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::serialize<__S>(&self, __serializer: __S) -> core::result::Result<<__S as serde::ser::Serializer>::Ok, <__S as serde::ser::Serializer>::Error> where __S: serde::ser::Serializer
@@ -6267,7 +6359,7 @@ impl core::ops::arith::Sub for bitcoin_units::pow::Work
 pub type bitcoin_units::pow::Work::Output = bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::sub(self, rhs: Self) -> Self
 impl core::str::traits::FromStr for bitcoin_units::pow::Work
-pub type bitcoin_units::pow::Work::Err = bitcoin_units::pow::ParseWorkError
+pub type bitcoin_units::pow::Work::Err = bitcoin_units::pow::error::ParseWorkError
 pub fn bitcoin_units::pow::Work::from_str(s: &str) -> core::result::Result<Self, Self::Err>
 impl serde::ser::Serialize for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::serialize<__S>(&self, __serializer: __S) -> core::result::Result<<__S as serde::ser::Serializer>::Ok, <__S as serde::ser::Serializer>::Error> where __S: serde::ser::Serializer
@@ -10803,7 +10895,7 @@ pub fn bitcoin_units::pow::Target::hash<__H: core::hash::Hasher>(&self, state: &
 impl core::marker::Copy for bitcoin_units::pow::Target
 impl core::marker::StructuralPartialEq for bitcoin_units::pow::Target
 impl core::str::traits::FromStr for bitcoin_units::pow::Target
-pub type bitcoin_units::pow::Target::Err = bitcoin_units::pow::ParseTargetError
+pub type bitcoin_units::pow::Target::Err = bitcoin_units::pow::error::ParseTargetError
 pub fn bitcoin_units::pow::Target::from_str(s: &str) -> core::result::Result<Self, Self::Err>
 impl serde::ser::Serialize for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::serialize<__S>(&self, __serializer: __S) -> core::result::Result<<__S as serde::ser::Serializer>::Ok, <__S as serde::ser::Serializer>::Error> where __S: serde::ser::Serializer
@@ -11182,7 +11274,7 @@ impl core::ops::arith::Sub for bitcoin_units::pow::Work
 pub type bitcoin_units::pow::Work::Output = bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::sub(self, rhs: Self) -> Self
 impl core::str::traits::FromStr for bitcoin_units::pow::Work
-pub type bitcoin_units::pow::Work::Err = bitcoin_units::pow::ParseWorkError
+pub type bitcoin_units::pow::Work::Err = bitcoin_units::pow::error::ParseWorkError
 pub fn bitcoin_units::pow::Work::from_str(s: &str) -> core::result::Result<Self, Self::Err>
 impl serde::ser::Serialize for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::serialize<__S>(&self, __serializer: __S) -> core::result::Result<<__S as serde::ser::Serializer>::Ok, <__S as serde::ser::Serializer>::Error> where __S: serde::ser::Serializer

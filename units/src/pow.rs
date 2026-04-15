@@ -12,6 +12,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::parse_int::{self, PrefixedHexError, UnprefixedHexError};
 
+#[rustfmt::skip]                // Keep public re-exports separate.
+#[cfg(feature = "encoding")]
+#[doc(no_inline)]
+pub use self::error::CompactTargetDecoderError;
+#[doc(no_inline)]
+pub use self::error::{ParseTargetError, ParseWorkError};
+
 /// Implement traits and methods shared by `Target` and `Work`.
 macro_rules! do_impl {
     ($ty:ident, $err_ty:ident) => {
@@ -93,25 +100,6 @@ macro_rules! do_impl {
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 U256::from_str(s).map($ty).map_err($err_ty)
             }
-        }
-
-        #[doc = "Error returned when parsing a [`"]
-        #[doc = stringify!($ty)]
-        #[doc = "`] from a string."]
-        #[derive(Debug, Clone, PartialEq, Eq)]
-        pub struct $err_ty(ParseU256Error);
-
-        impl From<core::convert::Infallible> for $err_ty {
-            fn from(never: core::convert::Infallible) -> Self { match never {} }
-        }
-
-        impl fmt::Display for $err_ty {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { self.0.fmt(f) }
-        }
-
-        #[cfg(feature = "std")]
-        impl std::error::Error for $err_ty {
-            fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
         }
     };
 }
@@ -248,11 +236,6 @@ impl Target {
 }
 do_impl!(Target, ParseTargetError);
 
-#[rustfmt::skip]                // Keep public re-exports separate.
-#[cfg(feature = "encoding")]
-#[doc(no_inline)]
-pub use self::error::CompactTargetDecoderError;
-
 /// Encoding of 256-bit target as 32-bit float.
 ///
 /// This is used to encode a target into the block header. Satoshi made this part of consensus code
@@ -373,13 +356,12 @@ impl encoding::Decodable for CompactTarget {
 
 /// Error types for proof-of-work related integer types.
 pub mod error {
-    #[cfg(feature = "encoding")]
     use core::convert::Infallible;
-    #[cfg(feature = "encoding")]
     use core::fmt;
 
-    #[cfg(feature = "encoding")]
     use internals::write_err;
+
+    use super::ParseU256Error;
 
     /// An error consensus decoding an `CompactTarget`.
     #[derive(Debug, Clone, PartialEq, Eq)]
@@ -401,6 +383,52 @@ pub mod error {
     #[cfg(feature = "std")]
     #[cfg(feature = "encoding")]
     impl std::error::Error for CompactTargetDecoderError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// Error returned when parsing a [`Work`] from a string.
+    ///
+    /// [`Work`]: super::Work
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct ParseWorkError(pub(super) ParseU256Error);
+
+    impl From<Infallible> for ParseWorkError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for ParseWorkError {
+        #[inline]
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "work parse error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseWorkError {
+        #[inline]
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    }
+
+    /// Error returned when parsing a [`Target`] from a string.
+    ///
+    /// [`Target`]: super::Target
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct ParseTargetError(pub(super) ParseU256Error);
+
+    impl From<Infallible> for ParseTargetError {
+        fn from(never: Infallible) -> Self { match never {} }
+    }
+
+    impl fmt::Display for ParseTargetError {
+        #[inline]
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write_err!(f, "target parse error"; self.0)
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl std::error::Error for ParseTargetError {
+        #[inline]
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
     }
 }
