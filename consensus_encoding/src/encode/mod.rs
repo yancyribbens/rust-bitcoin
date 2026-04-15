@@ -48,11 +48,32 @@ pub trait Encodable {
 }
 
 /// An encoder for a consensus-encodable object.
+///
+/// The consumers of type implementing this encoder trait should generally use it in a loop like
+/// this:
+///
+/// ```no-compile
+/// loop {
+///     process_current_chunk(encoder.current_chunk());
+///     if !encoder.advance() {
+///         break
+///     }
+/// }
+/// // do NOT use encoder after this point
+/// ```
+///
+/// Processing the chunks in an equivalent state machine (presumably future) is also permissible.
+///
+/// It is crucial that the callers use the methods in that order: obtain the slice via
+/// `current_chunk`, write it somewhere and, once fully written, try to advance the encoder.
+/// Attempting to call any method after [`advance`](Self::advance) returned `false` or calling
+/// `advance` before fully processing the chunks will lead to unspecified buggy behavior.
 pub trait Encoder {
     /// Yields the current encoded byteslice.
     ///
     /// Will always return the same value until [`Self::advance`] is called.
-    /// May return an empty list.
+    /// May return an empty slice, however implementors should avoid returning empty slices unless
+    /// the encoded type is truly empty.
     fn current_chunk(&self) -> &[u8];
 
     /// Moves the encoder to its next state.
@@ -64,6 +85,13 @@ pub trait Encoder {
     ///
     /// - `true` if the encoder has advanced to a new state and [`Self::current_chunk`] will return new data.
     /// - `false` if the encoder is exhausted and has no more states.
+    ///
+    /// # Important
+    ///
+    /// After `false` was returned the encoder is in unspecified state. Calling any of its methods
+    /// in such state is a bug (but not UB) unless the specific encoder documents otherwise. While
+    /// usually the encoder simply stays in the last possible state this MUST NOT be relied upon by
+    /// the callers.
     fn advance(&mut self) -> bool;
 }
 
@@ -145,6 +173,8 @@ macro_rules! encoder_newtype_exact {
 }
 
 /// Yields bytes from any [`Encodable`] instance.
+///
+/// **Important** this iterator is **not** fused! Call `fuse` if you need it to be fused.
 #[derive(Debug)]
 pub struct EncodableByteIter<'e, T: Encodable + ?Sized + 'e> {
     enc: T::Encoder<'e>,
@@ -192,9 +222,13 @@ where
 /// An encoder with a known size.
 pub trait ExactSizeEncoder: Encoder {
     /// The number of bytes remaining that the encoder will yield.
+    ///
+    /// **Important**: returns an unspecified value if [`Encoder::advance`] has returned `false`.
     fn len(&self) -> usize;
 
     /// Returns whether the encoder would yield an empty response.
+    ///
+    /// **Important**: returns an unspecified value if [`Encoder::advance`] has returned `false`.
     fn is_empty(&self) -> bool { self.len() == 0 }
 }
 
