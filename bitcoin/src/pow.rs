@@ -18,9 +18,11 @@ use crate::network::Params;
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
-pub use primitives::{CompactTarget, Target, Work};
-#[doc(inline)]
-pub use units::pow::error;
+pub use primitives::pow::{error, CompactTarget, CompactTargetEncoder, CompactTargetDecoder, Target, Work};
+#[doc(no_inline)]
+pub use self::error::CompactTargetDecoderError;
+#[doc(no_inline)]
+pub use primitives::pow::{ParseTargetError, ParseWorkError};
 
 /// Extension functionality for the [`Work`] type.
 // This can't be defined with the extension trait macro because it ignores the feature gate.
