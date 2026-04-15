@@ -264,7 +264,7 @@ impl encoding::Encodable for AddrV1Message {
 
 type AddrV1MessageInnerDecoder = Decoder2<ArrayDecoder<4>, AddressDecoder>;
 
-/// The decoder for an [`AddrV2Message`].
+/// The decoder for an [`AddrV1Message`].
 #[derive(Debug, Clone)]
 pub struct AddrV1MessageDecoder(AddrV1MessageInnerDecoder);
 
