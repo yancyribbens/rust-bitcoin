@@ -33,7 +33,7 @@ pub extern crate hashes;
 
 #[cfg(feature = "std")]
 mod bridge;
-mod error;
+pub mod error;
 
 #[cfg(feature = "hashes")]
 mod hash;
@@ -48,7 +48,8 @@ use std::vec::Vec;
 use encoding::{Decodable, Decoder, Encoder};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
-pub use self::error::{Error, ErrorKind};
+#[doc(no_inline)]
+pub use self::error::{Error, ErrorKind, ReadError};
 #[cfg(feature = "std")]
 pub use self::bridge::{FromStd, ToStd};
 #[cfg(feature = "hashes")]
@@ -611,42 +612,6 @@ where
     }
 
     decoder.end().map_err(ReadError::Decode)
-}
-
-/// An error that can occur when reading and decoding from a buffered reader.
-#[derive(Debug)]
-pub enum ReadError<D> {
-    /// An I/O error occurred while reading from the reader.
-    Io(Error),
-    /// The decoder encountered an error while parsing the data.
-    Decode(D),
-}
-
-impl<D: core::fmt::Display> core::fmt::Display for ReadError<D> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::Io(e) => write!(f, "I/O error: {}", e),
-            Self::Decode(e) => write!(f, "decode error: {}", e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<D> std::error::Error for ReadError<D>
-where
-    D: core::fmt::Debug + core::fmt::Display + std::error::Error + 'static,
-{
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Io(e) => Some(e),
-            Self::Decode(e) => Some(e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<D> From<Error> for ReadError<D> {
-    fn from(e: Error) -> Self { Self::Io(e) }
 }
 
 #[cfg(feature = "std")]
