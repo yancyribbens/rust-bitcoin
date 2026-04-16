@@ -115,7 +115,7 @@ pub(crate) trait MerkleNode: Copy + PartialEq {
 }
 
 #[cfg(feature = "std")]
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64"))]
 fn calculate_root_batched(mut nodes: Vec<[u8; 32]>) -> Option<[u8; 32]> {
     if nodes.is_empty() {
         return None;
@@ -169,7 +169,7 @@ impl MerkleNode for TxMerkleNode {
     }
 
     #[cfg(feature = "std")]
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64"))]
     fn calculate_root<I: Iterator<Item = Self::Leaf>>(iter: I) -> Option<Self> {
         let nodes: Vec<[u8; 32]> = iter.map(Txid::to_byte_array).collect();
         calculate_root_batched(nodes).map(Self::from_byte_array)
@@ -187,7 +187,7 @@ impl MerkleNode for WitnessMerkleNode {
     }
 
     #[cfg(feature = "std")]
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64"))]
     fn calculate_root<I: Iterator<Item = Self::Leaf>>(iter: I) -> Option<Self> {
         let nodes: Vec<[u8; 32]> = iter.map(Wtxid::to_byte_array).collect();
         calculate_root_batched(nodes).map(Self::from_byte_array)
