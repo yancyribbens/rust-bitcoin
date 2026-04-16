@@ -5,6 +5,7 @@
 //! This module provides keys used in Bitcoin that can be roundtrip
 //! (de)serialized.
 
+use core::borrow::Borrow;
 use core::fmt;
 use core::str::FromStr;
 
@@ -21,7 +22,7 @@ use crate::hex::{self, DecodeFixedLengthBytesError};
 use crate::internal_macros::impl_asref_push_bytes;
 use crate::network::NetworkKind;
 use crate::prelude::{DisplayHex, String, Vec};
-use crate::script::{self, WitnessScriptBuf};
+use crate::script::{self, PushBytes, WitnessScriptBuf};
 #[cfg(feature = "serde")]
 use crate::serde::{Deserialize, Deserializer, Serialize, Serializer};
 #[cfg(feature = "secp-recovery")]
@@ -30,6 +31,7 @@ use crate::taproot::{TapNodeHash, TapTweakHash};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 pub use secp256k1::{constants, Parity, Verification};
+pub use serialized_legacy_public_key::SerializedLegacyPublicKey;
 pub use encapsulate::{
     FullPublicKey, Keypair, LegacyPublicKey, PrivateKey, SerializedXOnlyPublicKey, TweakedKeypair,
     TweakedPublicKey, XOnlyPublicKey,
@@ -277,6 +279,64 @@ mod encapsulate {
 
         /// Returns a reference to the raw bytes.
         pub const fn as_byte_array(&self) -> &[u8; 32] { &self.0 }
+    }
+}
+
+mod serialized_legacy_public_key {
+    use internals::array_vec::ArrayVec;
+    use crate::script::PushBytes;
+
+    /// A serialized form of `LegacyPublicKey`.
+    ///
+    /// This type contains the legacy public key in serialized as either compressed or
+    /// uncompressed. The type implements the standard conversion traits so it behaves a lot like
+    /// an array. In addition, the type implements `AsRef<PushBytes>`, so you can pass it into
+    /// script.
+    #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+    pub struct SerializedLegacyPublicKey(ArrayVec<u8, 65>);
+
+    impl SerializedLegacyPublicKey {
+        pub(crate) fn new_compressed(compressed: &[u8; 33]) -> Self {
+            Self(ArrayVec::from_slice(compressed))
+        }
+
+        pub(crate) fn new_uncompressed(uncompressed: &[u8; 65]) -> Self {
+            Self(ArrayVec::from_slice(uncompressed))
+        }
+    }
+
+    // Keep the proof close to the type definition
+    impl core::borrow::Borrow<PushBytes> for SerializedLegacyPublicKey {
+        fn borrow(&self) -> &PushBytes {
+            <&PushBytes>::try_from(&*self.0).expect("65 <= u32::MAX")
+        }
+    }
+}
+
+impl core::ops::Deref for SerializedLegacyPublicKey {
+    type Target = [u8];
+
+    #[inline]
+    fn deref(&self) -> &Self::Target {
+        <Self as Borrow<PushBytes>>::borrow(self).as_bytes()
+    }
+}
+
+impl AsRef<PushBytes> for SerializedLegacyPublicKey {
+    fn as_ref(&self) -> &PushBytes {
+        self.borrow()
+    }
+}
+
+impl AsRef<[u8]> for SerializedLegacyPublicKey {
+    fn as_ref(&self) -> &[u8] {
+        self
+    }
+}
+
+impl Borrow<[u8]> for SerializedLegacyPublicKey {
+    fn borrow(&self) -> &[u8] {
+        self
     }
 }
 
@@ -650,8 +710,13 @@ impl LegacyPublicKey {
     }
 
     /// Serializes the public key to bytes.
-    #[deprecated(since = "TBD", note = "use to_vec instead")]
-    pub fn to_bytes(self) -> Vec<u8> { self.to_vec() }
+    pub fn to_bytes(self) -> SerializedLegacyPublicKey {
+        if self.compressed() {
+            SerializedLegacyPublicKey::new_compressed(&self.serialize_compressed())
+        } else {
+            SerializedLegacyPublicKey::new_uncompressed(&self.serialize_uncompressed())
+        }
+    }
 
     /// Serializes the public key to bytes.
     #[allow(clippy::missing_panics_doc)]
@@ -2452,5 +2517,23 @@ mod tests {
         let secp_key =
             secp256k1::SecretKey::from_secret_bytes(bitcoin_key.to_secret_bytes()).unwrap();
         assert_eq!(PrivateKey::from_secp(secp_key), bitcoin_key);
+    }
+
+    #[test]
+    #[cfg(feature = "rand")]
+    #[cfg(feature = "std")]
+    fn serialized_legacy_public_key_roundtrip() {
+        let key = Keypair::generate().to_public_key();
+        assert!(key.compressed());
+        let serialized = &key.to_bytes();
+        assert_eq!(serialized.len(), 33);
+        let deser = LegacyPublicKey::from_slice(serialized).unwrap();
+        assert_eq!(deser, key);
+
+        let key = LegacyPublicKey::from_secp_uncompressed(key.to_inner());
+        let serialized = &key.to_bytes();
+        assert_eq!(serialized.len(), 65);
+        let deser = LegacyPublicKey::from_slice(serialized).unwrap();
+        assert_eq!(deser, key);
     }
 }
