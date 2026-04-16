@@ -78,8 +78,7 @@ pub enum IsSatisfiedByHeightError {
     /// Satisfaction of the lock height value failed.
     Satisfaction(InvalidHeightError),
     /// Tried to satisfy a lock-by-height locktime using seconds.
-    // TODO: Hide inner value in a new struct error type.
-    Incompatible(NumberOf512Seconds),
+    Incompatible(IncompatibleHeightError),
 }
 
 impl From<Infallible> for IsSatisfiedByHeightError {
@@ -91,8 +90,7 @@ impl fmt::Display for IsSatisfiedByHeightError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Satisfaction(ref e) => write_err!(f, "satisfaction"; e),
-            Self::Incompatible(time) =>
-                write!(f, "tried to satisfy a lock-by-height locktime using seconds {}", time),
+            Self::Incompatible(ref e) => write_err!(f, "incompatible"; e),
         }
     }
 }
@@ -103,9 +101,29 @@ impl std::error::Error for IsSatisfiedByHeightError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
             Self::Satisfaction(ref e) => Some(e),
-            Self::Incompatible(_) => None,
+            Self::Incompatible(ref e) => Some(e),
         }
     }
+}
+
+/// Error returned when `is_satisfied_by_height` fails with a block time.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IncompatibleHeightError(pub(crate) NumberOf512Seconds);
+
+impl From<Infallible> for IncompatibleHeightError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
+impl fmt::Display for IncompatibleHeightError {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "tried to satisfy a lock-by-height locktime using seconds {}", self.0)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for IncompatibleHeightError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
 /// Error returned when `is_satisfied_by_time` fails.
@@ -114,8 +132,7 @@ pub enum IsSatisfiedByTimeError {
     /// Satisfaction of the lock time value failed.
     Satisfaction(InvalidTimeError),
     /// Tried to satisfy a lock-by-time locktime using number of blocks.
-    // TODO: Hide inner value in a new struct error type.
-    Incompatible(NumberOfBlocks),
+    Incompatible(IncompatibleTimeError),
 }
 
 impl From<Infallible> for IsSatisfiedByTimeError {
@@ -127,8 +144,8 @@ impl fmt::Display for IsSatisfiedByTimeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Satisfaction(ref e) => write_err!(f, "satisfaction"; e),
-            Self::Incompatible(blocks) =>
-                write!(f, "tried to satisfy a lock-by-time locktime using blocks {}", blocks),
+            Self::Incompatible(ref e) => write_err!(f, "incompatible"; e),
+
         }
     }
 }
@@ -139,9 +156,29 @@ impl std::error::Error for IsSatisfiedByTimeError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
             Self::Satisfaction(ref e) => Some(e),
-            Self::Incompatible(_) => None,
+            Self::Incompatible(ref e) => Some(e),
         }
     }
+}
+
+/// Error returned when `is_satisfied_by_time` fails with a block height.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IncompatibleTimeError(pub(crate) NumberOfBlocks);
+
+impl From<Infallible> for IncompatibleTimeError {
+    fn from(never: Infallible) -> Self { match never {} }
+}
+
+impl fmt::Display for IncompatibleTimeError {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "tried to satisfy a lock-by-time locktime using blocks {}", self.0)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for IncompatibleTimeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
 }
 
 /// Error returned when the input time in seconds was too large to be encoded to a 16 bit 512 second interval.
@@ -308,7 +345,7 @@ mod tests {
             .unwrap_err();
         assert!(!e.to_string().is_empty());
         #[cfg(feature = "std")]
-        assert!(e.source().is_none());
+        assert!(e.source().is_some());
         // Satisfaction type
         let e = height_lock
             .is_satisfied_by_height(BlockHeight::from_u32(5), BlockHeight::from_u32(10))
@@ -324,7 +361,7 @@ mod tests {
             .unwrap_err();
         assert!(!e.to_string().is_empty());
         #[cfg(feature = "std")]
-        assert!(e.source().is_none());
+        assert!(e.source().is_some());
         // Satisfaction type
         let e = time_lock
             .is_satisfied_by_time(BlockMtp::from_u32(5), BlockMtp::from_u32(10))
