@@ -145,7 +145,6 @@ impl fmt::Display for IsSatisfiedByTimeError {
         match *self {
             Self::Satisfaction(ref e) => write_err!(f, "satisfaction"; e),
             Self::Incompatible(ref e) => write_err!(f, "incompatible"; e),
-
         }
     }
 }
