@@ -548,6 +548,7 @@ mod tests {
     #[cfg(feature = "alloc")]
     use alloc::format;
     #[cfg(feature = "alloc")]
+    #[cfg(feature = "encoding")]
     use alloc::string::ToString;
     #[cfg(feature = "std")]
     use std::error::Error as _;
@@ -611,7 +612,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(feature = "alloc", feature = "serde"))]
+    #[cfg(feature = "alloc")]
+    #[cfg(feature = "serde")]
     fn u256_serde() {
         let check = |uint, hex| {
             let json = format!("\"{}\"", hex);
