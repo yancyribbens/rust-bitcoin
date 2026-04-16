@@ -48,7 +48,7 @@ include!("../include/array_newtype.rs");
 
 #[rustfmt::skip]
 macro_rules! impl_asref_push_bytes {
-    ($($hashtype:ident),*) => {
+    ($($hashtype:ty),* $(,)?) => {
         $(
             impl AsRef<$crate::script::PushBytes> for $hashtype {
                 fn as_ref(&self) -> &$crate::script::PushBytes {
