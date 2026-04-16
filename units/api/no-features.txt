@@ -4483,11 +4483,15 @@ impl core::cmp::PartialOrd for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::partial_cmp(&self, other: &bitcoin_units::pow::Target) -> core::option::Option<core::cmp::Ordering>
 impl core::convert::From<bitcoin_units::pow::CompactTarget> for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::from(c: bitcoin_units::pow::CompactTarget) -> Self
+impl core::fmt::Binary for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Debug for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::LowerHex for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Octal for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::UpperHex for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
@@ -4542,11 +4546,15 @@ impl core::cmp::PartialEq for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::eq(&self, other: &bitcoin_units::pow::Work) -> bool
 impl core::cmp::PartialOrd for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::partial_cmp(&self, other: &bitcoin_units::pow::Work) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Binary for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Debug for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::LowerHex for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Octal for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::UpperHex for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
@@ -8265,11 +8273,15 @@ impl core::cmp::PartialOrd for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::partial_cmp(&self, other: &bitcoin_units::pow::Target) -> core::option::Option<core::cmp::Ordering>
 impl core::convert::From<bitcoin_units::pow::CompactTarget> for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::from(c: bitcoin_units::pow::CompactTarget) -> Self
+impl core::fmt::Binary for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Debug for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::LowerHex for bitcoin_units::pow::Target
+pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Octal for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::UpperHex for bitcoin_units::pow::Target
 pub fn bitcoin_units::pow::Target::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
@@ -8608,11 +8620,15 @@ impl core::cmp::PartialEq for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::eq(&self, other: &bitcoin_units::pow::Work) -> bool
 impl core::cmp::PartialOrd for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::partial_cmp(&self, other: &bitcoin_units::pow::Work) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Binary for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Debug for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::LowerHex for bitcoin_units::pow::Work
+pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Octal for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::UpperHex for bitcoin_units::pow::Work
 pub fn bitcoin_units::pow::Work::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result

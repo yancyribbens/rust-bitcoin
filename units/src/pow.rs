@@ -10,6 +10,7 @@ use arbitrary::{Arbitrary, Unstructured};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::internal_macros::impl_fmt_traits_for_u32_wrapper;
 use crate::parse_int::{self, PrefixedHexError, UnprefixedHexError};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
@@ -79,20 +80,6 @@ macro_rules! do_impl {
             }
         }
 
-        impl fmt::LowerHex for $ty {
-            #[inline]
-            fn fmt(&self, f: &mut fmt::Formatter) -> core::fmt::Result {
-                fmt::LowerHex::fmt(&self.0, f)
-            }
-        }
-
-        impl fmt::UpperHex for $ty {
-            #[inline]
-            fn fmt(&self, f: &mut fmt::Formatter) -> core::fmt::Result {
-                fmt::UpperHex::fmt(&self.0, f)
-            }
-        }
-
         impl core::str::FromStr for $ty {
             type Err = $err_ty;
 
@@ -117,6 +104,7 @@ impl Work {
 }
 
 do_impl!(Work, ParseWorkError);
+impl_fmt_traits_for_u32_wrapper!(Work);
 
 impl Add for Work {
     type Output = Self;
@@ -235,6 +223,7 @@ impl Target {
     pub fn to_work(self) -> Work { Work(self.0.inverse()) }
 }
 do_impl!(Target, ParseTargetError);
+impl_fmt_traits_for_u32_wrapper!(Target);
 
 /// Encoding of 256-bit target as 32-bit float.
 ///
@@ -756,6 +745,34 @@ mod tests {
         check_fmt_30, 0_u32, "{:.1}", "0";
         check_fmt_31, 0_u32, "{:4.1}", "   0";
         check_fmt_32, 0_u32, "{:04.1}", "0000";
+
+        check_fmt_33, 0_u32, "{:b}", "0";
+        check_fmt_34, 0_u32, "{:#b}", "0b0";
+        check_fmt_35, 42_u32, "{:b}", "101010";
+        check_fmt_36, 42_u32, "{:#b}", "0b101010";
+        check_fmt_37, 42_u32, "{:8b}", "  101010";
+        check_fmt_38, 42_u32, "{:08b}", "00101010";
+        check_fmt_39, 42_u32, "{:<8b}", "101010  ";
+        check_fmt_40, 42_u32, "{:>8b}", "  101010";
+        check_fmt_41, 42_u32, "{:^8b}", " 101010 ";
+        check_fmt_42, 42_u32, "{:#10b}", "  0b101010";
+        check_fmt_43, 42_u32, "{:#010b}", "0b00101010";
+        check_fmt_44, 42_u32, "{:.4b}", "101010";
+        check_fmt_45, 42_u32, "{:10.4b}", "    101010";
+
+        check_fmt_46, 0_u32, "{:o}", "0";
+        check_fmt_47, 0_u32, "{:#o}", "0o0";
+        check_fmt_48, 42_u32, "{:o}", "52";
+        check_fmt_49, 42_u32, "{:#o}", "0o52";
+        check_fmt_50, 42_u32, "{:4o}", "  52";
+        check_fmt_51, 42_u32, "{:04o}", "0052";
+        check_fmt_52, 42_u32, "{:<4o}", "52  ";
+        check_fmt_53, 42_u32, "{:>4o}", "  52";
+        check_fmt_54, 42_u32, "{:^4o}", " 52 ";
+        check_fmt_55, 42_u32, "{:#6o}", "  0o52";
+        check_fmt_56, 42_u32, "{:#06o}", "0o0052";
+        check_fmt_57, 42_u32, "{:.4o}", "52";
+        check_fmt_58, 42_u32, "{:6.4o}", "    52";
     }
 
     #[test]
