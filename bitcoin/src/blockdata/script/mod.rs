@@ -88,7 +88,8 @@ pub use primitives::script::{
 pub(crate) use self::borrowed::ScriptExtPriv;
 #[doc(no_inline)]
 pub use self::error::{
-    Error, PushBytesError, RedeemScriptSizeError, ScriptIntError, WitnessScriptSizeError,
+    Error, FromHexError, PushBytesError, RedeemScriptSizeError, ScriptIntError,
+    WitnessScriptSizeError,
 };
 pub(crate) use self::owned::ScriptBufExtPriv;
 
