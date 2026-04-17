@@ -20,9 +20,10 @@ use crate::network::Params;
 #[doc(inline)]
 pub use primitives::pow::{error, CompactTarget, CompactTargetEncoder, CompactTargetDecoder, Target, Work};
 #[doc(no_inline)]
-pub use self::error::CompactTargetDecoderError;
-#[doc(no_inline)]
 pub use primitives::pow::{ParseTargetError, ParseWorkError};
+
+#[doc(no_inline)]
+pub use self::error::CompactTargetDecoderError;
 
 /// Extension functionality for the [`Work`] type.
 // This can't be defined with the extension trait macro because it ignores the feature gate.

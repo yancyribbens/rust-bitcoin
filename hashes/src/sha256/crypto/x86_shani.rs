@@ -336,10 +336,8 @@ pub(super) unsafe fn sha256d_64_2way(output: &mut [[u8; 32]; 2], input: &[[u8; 6
     const FINAL: [u32; 8] = [0x80000000, 0, 0, 0, 0, 0, 0, 0x100];
 
     #[allow(non_snake_case)]
-    let MASK: __m128i = _mm_set_epi64x(
-        0x0c0d_0e0f_0809_0a0bu64 as i64,
-        0x0405_0607_0001_0203u64 as i64,
-    );
+    let MASK: __m128i =
+        _mm_set_epi64x(0x0c0d_0e0f_0809_0a0bu64 as i64, 0x0405_0607_0001_0203u64 as i64);
 
     // Preshuffled SHA256 initial hash values for x86 SHA-NI.
     let init0: __m128i = _mm_set_epi64x(0x6a09e667bb67ae85u64 as i64, 0x510e527f9b05688cu64 as i64);
@@ -1101,9 +1099,20 @@ pub(super) unsafe fn sha256d_64_2way(output: &mut [[u8; 32]; 2], input: &[[u8; 6
 
     // Store results (byte-swap to big-endian)
     // CAST SAFETY: storeu_si128 does not require alignment.
-    _mm_storeu_si128(output[0].as_mut_ptr().add(0).cast::<__m128i>(), _mm_shuffle_epi8(state0_a, MASK));
-    _mm_storeu_si128(output[0].as_mut_ptr().add(16).cast::<__m128i>(), _mm_shuffle_epi8(state1_a, MASK));
-    _mm_storeu_si128(output[1].as_mut_ptr().add(0).cast::<__m128i>(), _mm_shuffle_epi8(state0_b, MASK));
-    _mm_storeu_si128(output[1].as_mut_ptr().add(16).cast::<__m128i>(), _mm_shuffle_epi8(state1_b, MASK));
+    _mm_storeu_si128(
+        output[0].as_mut_ptr().add(0).cast::<__m128i>(),
+        _mm_shuffle_epi8(state0_a, MASK),
+    );
+    _mm_storeu_si128(
+        output[0].as_mut_ptr().add(16).cast::<__m128i>(),
+        _mm_shuffle_epi8(state1_a, MASK),
+    );
+    _mm_storeu_si128(
+        output[1].as_mut_ptr().add(0).cast::<__m128i>(),
+        _mm_shuffle_epi8(state0_b, MASK),
+    );
+    _mm_storeu_si128(
+        output[1].as_mut_ptr().add(16).cast::<__m128i>(),
+        _mm_shuffle_epi8(state1_b, MASK),
+    );
 }
-
