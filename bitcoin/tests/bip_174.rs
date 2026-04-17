@@ -119,7 +119,7 @@ fn build_extended_private_key() -> Xpriv {
     let xpriv = extended_private_key.parse::<Xpriv>().unwrap();
 
     let sk = WifKey::from_wif(seed).unwrap();
-    let seeded = Xpriv::new_master(NetworkKind::Test, &sk.private_key.to_bytes());
+    let seeded = Xpriv::new_master(NetworkKind::Test, &sk.private_key.to_secret_vec());
     assert_eq!(xpriv, seeded);
 
     xpriv
@@ -315,7 +315,7 @@ fn parse_and_verify_keys(
         let derived_priv =
             ext_priv.derive_xpriv(&path).expect("derivation path too long").to_private_key();
         assert_eq!(wif_priv.private_key, derived_priv);
-        let derived_pub = derived_priv.public_key();
+        let derived_pub = derived_priv.to_public_key();
         key_map.insert(derived_pub, derived_priv);
     }
     key_map
