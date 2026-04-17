@@ -141,7 +141,6 @@ impl From<Infallible> for CompactSizeDecoderError {
 
 impl core::fmt::Display for CompactSizeDecoderError {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        use internals::write_err;
         use CompactSizeDecoderErrorInner as E;
 
         match self.0 {
