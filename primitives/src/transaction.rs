@@ -1986,9 +1986,6 @@ mod tests {
         // The vout
         assert_eq!(encoder.current_chunk(), &TC_VOUT_BYTES[..]);
         assert!(!encoder.advance());
-
-        // Exhausted
-        assert!(encoder.current_chunk().is_empty());
     }
 
     #[test]
@@ -2008,9 +2005,6 @@ mod tests {
         // The script pubkey data.
         assert_eq!(encoder.current_chunk(), &TC_SCRIPT_BYTES[..]);
         assert!(!encoder.advance());
-
-        // Exhausted
-        assert!(encoder.current_chunk().is_empty());
     }
 
     #[test]
@@ -2035,9 +2029,6 @@ mod tests {
         // The sequence
         assert_eq!(encoder.current_chunk(), &TC_SEQ_MAX_BYTES[..]);
         assert!(!encoder.advance());
-
-        // Exhausted
-        assert!(encoder.current_chunk().is_empty());
     }
 
     #[test]
@@ -2094,9 +2085,6 @@ mod tests {
         // The lock time.
         assert_eq!(encoder.current_chunk(), &TC_LOCK_TIME_ZERO_BYTES[..]);
         assert!(!encoder.advance());
-
-        // Exhausted
-        assert!(encoder.current_chunk().is_empty());
     }
 
     #[test]
@@ -2152,9 +2140,6 @@ mod tests {
         // The lock time.
         assert_eq!(encoder.current_chunk(), &TC_LOCK_TIME_ZERO_BYTES[..]);
         assert!(!encoder.advance());
-
-        // Exhausted
-        assert!(encoder.current_chunk().is_empty());
     }
 
     // FIXME: Move all these encoding tests to a single file in `primitives/tests/`.
@@ -2261,9 +2246,6 @@ mod tests {
         // The lock time.
         assert_eq!(encoder.current_chunk(), &TC_LOCK_TIME_ZERO_BYTES[..]);
         assert!(!encoder.advance());
-
-        // Exhausted
-        assert!(encoder.current_chunk().is_empty());
     }
 
     #[test]

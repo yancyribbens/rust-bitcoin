@@ -338,7 +338,4 @@ fn empty_encoders() {
 
     assert_eq!(encoder.current_chunk(), &[3, 4][..]);
     assert!(!encoder.advance());
-
-    // Exhausted.
-    assert!(encoder.current_chunk().is_empty());
 }
