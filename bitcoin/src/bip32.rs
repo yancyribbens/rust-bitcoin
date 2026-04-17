@@ -1180,7 +1180,20 @@ impl<'a> Arbitrary<'a> for Xpub {
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for Xpriv {
     fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
-        Ok(Self::new_master(NetworkKind::arbitrary(u)?, u.arbitrary()?))
+        let depth = u.arbitrary()?;
+        let (parent_fingerprint, child_number) = match depth {
+            0 => (Fingerprint::default(), ChildNumber::ZERO_NORMAL),
+            _ => (u.arbitrary()?, u.arbitrary()?),
+        };
+
+        Ok(Self {
+            network: u.arbitrary()?,
+            depth,
+            parent_fingerprint,
+            child_number,
+            private_key: u.arbitrary()?,
+            chain_code: u.arbitrary()?,
+        })
     }
 }
 
