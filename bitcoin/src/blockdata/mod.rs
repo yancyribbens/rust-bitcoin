@@ -84,8 +84,9 @@ pub mod locktime {
         pub use units::locktime::relative::{error, LockTime, NumberOf512Seconds, NumberOfBlocks};
         #[doc(no_inline)]
         pub use units::locktime::relative::{
-            DisabledLockTimeError, InvalidHeightError, InvalidTimeError, IsSatisfiedByError,
-            IsSatisfiedByHeightError, IsSatisfiedByTimeError, TimeOverflowError,
+            DisabledLockTimeError, IncompatibleHeightError, IncompatibleTimeError,
+            InvalidHeightError, InvalidTimeError, IsSatisfiedByError, IsSatisfiedByHeightError,
+            IsSatisfiedByTimeError, TimeOverflowError,
         };
 
         #[deprecated(since = "TBD", note = "use `NumberOfBlocks` instead")]

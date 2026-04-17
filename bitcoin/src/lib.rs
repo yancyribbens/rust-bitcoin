@@ -241,9 +241,14 @@ pub mod amount {
     #[doc(inline)]
     pub use units::amount::{Amount, AmountDecoder, AmountEncoder, SignedAmount};
     #[doc(no_inline)]
-    pub use units::amount::{
-        AmountDecoderError, Denomination, Display, OutOfRangeError, ParseAmountError,
-        ParseDenominationError, ParseError,
+    pub use units::amount::{Denomination, Display};
+
+    #[doc(no_inline)]
+    pub use self::error::{
+        AmountDecoderError, BadPositionError, InputTooLargeError, InvalidCharacterError,
+        MissingDenominationError, MissingDigitsError, OutOfRangeError, ParseAmountError,
+        ParseDenominationError, ParseError, PossiblyConfusingDenominationError, TooPreciseError,
+        UnknownDenominationError,
     };
 
     /// Error types for bitcoin amounts.
