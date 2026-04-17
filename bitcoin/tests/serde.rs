@@ -55,7 +55,7 @@ fn serde_regression_absolute_lock_time_time() {
 
 #[test]
 fn serde_regression_relative_lock_time_height() {
-    let t = relative::LockTime::from(relative::Height::from(0xCAFE_u16));
+    let t = relative::LockTime::from(relative::NumberOfBlocks::from(0xCAFE_u16));
 
     let got = serialize(&t).unwrap();
     let want = include_bytes!("data/serde/relative_lock_time_blocks_bincode") as &[_];
@@ -64,7 +64,9 @@ fn serde_regression_relative_lock_time_height() {
 
 #[test]
 fn serde_regression_relative_lock_time_time() {
-    let t = relative::LockTime::from(relative::Time::from_512_second_intervals(0xFACE_u16));
+    let t = relative::LockTime::from(relative::NumberOf512Seconds::from_512_second_intervals(
+        0xFACE_u16,
+    ));
 
     let got = serialize(&t).unwrap();
     let want = include_bytes!("data/serde/relative_lock_time_seconds_bincode") as &[_];
