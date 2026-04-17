@@ -429,7 +429,7 @@ impl<'a> Arbitrary<'a> for CompactTarget {
     }
 }
 
-include!("../../include/u256.rs");
+include!("../include/u256.rs");
 
 impl U256 {
     /// Constructs a new `U256` from a prefixed hex string.
