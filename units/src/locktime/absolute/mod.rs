@@ -398,13 +398,6 @@ impl LockTime {
 parse_int::impl_parse_str_from_int_infallible!(LockTime, u32, from_consensus);
 
 #[cfg(feature = "encoding")]
-encoding::encoder_newtype_exact! {
-    /// The encoder for the [`LockTime`] type.
-    #[derive(Debug, Clone)]
-    pub struct LockTimeEncoder<'e>(encoding::ArrayEncoder<4>);
-}
-
-#[cfg(feature = "encoding")]
 impl encoding::Encodable for LockTime {
     type Encoder<'e> = LockTimeEncoder<'e>;
     #[inline]
@@ -413,6 +406,21 @@ impl encoding::Encodable for LockTime {
             self.to_consensus_u32().to_le_bytes(),
         ))
     }
+}
+
+#[cfg(feature = "encoding")]
+impl encoding::Decodable for LockTime {
+    type Decoder = LockTimeDecoder;
+
+    #[inline]
+    fn decoder() -> Self::Decoder { LockTimeDecoder(encoding::ArrayDecoder::<4>::new()) }
+}
+
+#[cfg(feature = "encoding")]
+encoding::encoder_newtype_exact! {
+    /// The encoder for the [`LockTime`] type.
+    #[derive(Debug, Clone)]
+    pub struct LockTimeEncoder<'e>(encoding::ArrayEncoder<4>);
 }
 
 #[cfg(feature = "encoding")]
@@ -429,13 +437,6 @@ crate::decoder_newtype! {
         let n = u32::from_le_bytes(value);
         Ok(LockTime::from_consensus(n))
     }
-}
-
-#[cfg(feature = "encoding")]
-impl encoding::Decodable for LockTime {
-    type Decoder = LockTimeDecoder;
-    #[inline]
-    fn decoder() -> Self::Decoder { LockTimeDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
 impl From<Height> for LockTime {

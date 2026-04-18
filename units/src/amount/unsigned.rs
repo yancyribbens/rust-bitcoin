@@ -614,21 +614,30 @@ impl TryFrom<SignedAmount> for Amount {
 }
 
 #[cfg(feature = "encoding")]
-encoding::encoder_newtype_exact! {
-    /// The encoder for the [`Amount`] type.
-    #[derive(Debug, Clone)]
-    pub struct AmountEncoder<'e>(encoding::ArrayEncoder<8>);
-}
-
-#[cfg(feature = "encoding")]
 impl encoding::Encodable for Amount {
     type Encoder<'e> = AmountEncoder<'e>;
+
     #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
         AmountEncoder::new(encoding::ArrayEncoder::without_length_prefix(
             self.to_sat().to_le_bytes(),
         ))
     }
+}
+
+#[cfg(feature = "encoding")]
+impl encoding::Decodable for Amount {
+    type Decoder = AmountDecoder;
+
+    #[inline]
+    fn decoder() -> Self::Decoder { AmountDecoder(encoding::ArrayDecoder::<8>::new()) }
+}
+
+#[cfg(feature = "encoding")]
+encoding::encoder_newtype_exact! {
+    /// The encoder for the [`Amount`] type.
+    #[derive(Debug, Clone)]
+    pub struct AmountEncoder<'e>(encoding::ArrayEncoder<8>);
 }
 
 #[cfg(feature = "encoding")]
@@ -649,13 +658,6 @@ crate::decoder_newtype! {
         let a = u64::from_le_bytes(value);
         Amount::from_sat(a).map_err(AmountDecoderError::out_of_range)
     }
-}
-
-#[cfg(feature = "encoding")]
-impl encoding::Decodable for Amount {
-    type Decoder = AmountDecoder;
-    #[inline]
-    fn decoder() -> Self::Decoder { AmountDecoder(encoding::ArrayDecoder::<8>::new()) }
 }
 
 #[cfg(feature = "arbitrary")]

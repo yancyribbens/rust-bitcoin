@@ -303,13 +303,6 @@ impl From<CompactTarget> for Target {
 }
 
 #[cfg(feature = "encoding")]
-encoding::encoder_newtype_exact! {
-    /// The encoder for the [`CompactTarget`] type.
-    #[derive(Debug, Clone)]
-    pub struct CompactTargetEncoder<'e>(encoding::ArrayEncoder<4>);
-}
-
-#[cfg(feature = "encoding")]
 impl encoding::Encodable for CompactTarget {
     type Encoder<'e> = CompactTargetEncoder<'e>;
     #[inline]
@@ -318,6 +311,21 @@ impl encoding::Encodable for CompactTarget {
             self.to_consensus().to_le_bytes(),
         ))
     }
+}
+
+#[cfg(feature = "encoding")]
+impl encoding::Decodable for CompactTarget {
+    type Decoder = CompactTargetDecoder;
+
+    #[inline]
+    fn decoder() -> Self::Decoder { CompactTargetDecoder(encoding::ArrayDecoder::<4>::new()) }
+}
+
+#[cfg(feature = "encoding")]
+encoding::encoder_newtype_exact! {
+    /// The encoder for the [`CompactTarget`] type.
+    #[derive(Debug, Clone)]
+    pub struct CompactTargetEncoder<'e>(encoding::ArrayEncoder<4>);
 }
 
 #[cfg(feature = "encoding")]
@@ -334,13 +342,6 @@ crate::decoder_newtype! {
         let n = u32::from_le_bytes(value);
         Ok(CompactTarget::from_consensus(n))
     }
-}
-
-#[cfg(feature = "encoding")]
-impl encoding::Decodable for CompactTarget {
-    type Decoder = CompactTargetDecoder;
-    #[inline]
-    fn decoder() -> Self::Decoder { CompactTargetDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
 
 /// Error types for proof-of-work related integer types.
