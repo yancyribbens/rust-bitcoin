@@ -50,7 +50,7 @@ impl TxMerkleNode {
     }
 }
 
-impl encoding::Encodable for TxMerkleNode {
+impl encoding::Encode for TxMerkleNode {
     type Encoder<'e> = TxMerkleNodeEncoder<'e>;
     #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -60,7 +60,7 @@ impl encoding::Encodable for TxMerkleNode {
     }
 }
 
-impl encoding::Decodable for TxMerkleNode {
+impl encoding::Decode for TxMerkleNode {
     type Decoder = TxMerkleNodeDecoder;
     #[inline]
     fn decoder() -> Self::Decoder { TxMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
@@ -114,7 +114,7 @@ mod tests {
     #[test]
     fn decoder_full_read_limit() {
         assert_eq!(TxMerkleNodeDecoder::default().read_limit(), 32);
-        assert_eq!(<TxMerkleNode as encoding::Decodable>::decoder().read_limit(), 32);
+        assert_eq!(<TxMerkleNode as encoding::Decode>::decoder().read_limit(), 32);
     }
 
     #[test]

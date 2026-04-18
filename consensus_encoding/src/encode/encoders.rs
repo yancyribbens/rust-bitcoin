@@ -2,7 +2,7 @@
 
 //! Collection of "standard encoders".
 //!
-//! These encoders should not be used directly. Instead, when implementing the [`super::Encodable`]
+//! These encoders should not be used directly. Instead, when implementing the [`super::Encode`]
 //! trait on a type, you should define a newtype around one or more of these encoders, and pass
 //! through the [`Encoder`] implementation to your newtype. This avoids leaking encoding
 //! implementation details to the users of your type.
@@ -12,7 +12,7 @@
 
 use core::fmt;
 
-use super::{Encodable, Encoder, ExactSizeEncoder};
+use super::{Encode, Encoder, ExactSizeEncoder};
 
 /// An encoder for a single byte slice.
 #[derive(Debug, Clone)]
@@ -88,14 +88,14 @@ impl<const N: usize> ExactSizeEncoder for ArrayRefEncoder<'_, N> {
 }
 
 /// An encoder for a list of encodable types.
-pub struct SliceEncoder<'e, T: Encodable> {
+pub struct SliceEncoder<'e, T: Encode> {
     /// The list of references to the objects we are encoding.
     sl: &'e [T],
     /// Encoder for the current object being encoded.
     cur_enc: Option<T::Encoder<'e>>,
 }
 
-impl<'e, T: Encodable> SliceEncoder<'e, T> {
+impl<'e, T: Encode> SliceEncoder<'e, T> {
     /// Constructs an encoder which encodes the slice _without_ adding the length prefix.
     ///
     /// To encode with a length prefix consider using [`Encoder2`].
@@ -109,7 +109,7 @@ impl<'e, T: Encodable> SliceEncoder<'e, T> {
     }
 }
 
-impl<'e, T: Encodable> fmt::Debug for SliceEncoder<'e, T>
+impl<'e, T: Encode> fmt::Debug for SliceEncoder<'e, T>
 where
     T::Encoder<'e>: fmt::Debug,
 {
@@ -123,14 +123,14 @@ where
 
 // Manual impl rather than #[derive(Clone)] because derive would constrain `where T: Clone`,
 // but `T` itself is never cloned, only the associated type `T::Encoder<'e>`.
-impl<'e, T: Encodable> Clone for SliceEncoder<'e, T>
+impl<'e, T: Encode> Clone for SliceEncoder<'e, T>
 where
     T::Encoder<'e>: Clone,
 {
     fn clone(&self) -> Self { Self { sl: self.sl, cur_enc: self.cur_enc.clone() } }
 }
 
-impl<T: Encodable> Encoder for SliceEncoder<'_, T> {
+impl<T: Encode> Encoder for SliceEncoder<'_, T> {
     fn current_chunk(&self) -> &[u8] {
         // `advance` sets `cur_enc` to `None` once the slice encoder is completely exhausted.
         self.cur_enc.as_ref().map(T::Encoder::current_chunk).unwrap_or_default()

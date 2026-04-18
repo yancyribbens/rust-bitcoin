@@ -526,7 +526,7 @@ mod tests {
     use std::error::Error;
 
     #[cfg(feature = "encoding")]
-    use encoding::{Decodable as _, Decoder as _};
+    use encoding::{Decode as _, Decoder as _};
 
     #[cfg(feature = "alloc")]
     use super::{ParseAmountError, ParseAmountErrorInner, ParseErrorInner};

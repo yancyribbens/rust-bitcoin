@@ -1,9 +1,9 @@
-use bitcoin_consensus_encoding::{ArrayEncoder, Encodable, Encoder2, Encoder3, EncoderByteIter};
+use bitcoin_consensus_encoding::{ArrayEncoder, Encode, Encoder2, Encoder3, EncoderByteIter};
 use hex::BytesToHexIter;
 
 struct TestArray<const N: usize>([u8; N]);
 
-impl<const N: usize> Encodable for TestArray<N> {
+impl<const N: usize> Encode for TestArray<N> {
     type Encoder<'e>
         = ArrayEncoder<N>
     where
@@ -14,7 +14,7 @@ impl<const N: usize> Encodable for TestArray<N> {
 
 struct TestCatArray<const N: usize, const M: usize>([u8; N], [u8; M]);
 
-impl<const N: usize, const M: usize> Encodable for TestCatArray<N, M> {
+impl<const N: usize, const M: usize> Encode for TestCatArray<N, M> {
     type Encoder<'e>
         = Encoder2<ArrayEncoder<N>, ArrayEncoder<M>>
     where
@@ -30,7 +30,7 @@ impl<const N: usize, const M: usize> Encodable for TestCatArray<N, M> {
 
 struct TestCatArray3<const N: usize, const M: usize, const L: usize>([u8; N], [u8; M], [u8; L]);
 
-impl<const N: usize, const M: usize, const L: usize> Encodable for TestCatArray3<N, M, L> {
+impl<const N: usize, const M: usize, const L: usize> Encode for TestCatArray3<N, M, L> {
     type Encoder<'e>
         = Encoder3<ArrayEncoder<N>, ArrayEncoder<M>, ArrayEncoder<L>>
     where

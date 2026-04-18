@@ -16,7 +16,7 @@ pub mod encoders;
 ///
 /// ```
 /// # #[cfg(feature = "alloc")] {
-/// use bitcoin_consensus_encoding::{encoder_newtype, encode_to_vec, Encodable, ArrayEncoder};
+/// use bitcoin_consensus_encoding::{encoder_newtype, encode_to_vec, Encode, ArrayEncoder};
 ///
 /// struct Foo([u8; 4]);
 ///
@@ -24,7 +24,7 @@ pub mod encoders;
 ///     pub struct FooEncoder<'e>(ArrayEncoder<4>);
 /// }
 ///
-/// impl Encodable for Foo {
+/// impl Encode for Foo {
 ///     type Encoder<'e> = FooEncoder<'e> where Self: 'e;
 ///
 ///     fn encoder(&self) -> Self::Encoder<'_> {
@@ -36,7 +36,7 @@ pub mod encoders;
 /// assert_eq!(encode_to_vec(&foo), vec![0xde, 0xad, 0xbe, 0xef]);
 /// # }
 /// ```
-pub trait Encodable {
+pub trait Encode {
     /// The encoder associated with this type. Conceptually, the encoder is like
     /// an iterator which yields byte slices.
     type Encoder<'e>: Encoder
@@ -282,7 +282,7 @@ pub trait ExactSizeEncoder: Encoder {
 #[cfg(feature = "alloc")]
 pub fn encode_to_vec<T>(object: &T) -> Vec<u8>
 where
-    T: Encodable + ?Sized,
+    T: Encode + ?Sized,
 {
     let mut encoder = object.encoder();
     drain_to_vec(&mut encoder)
@@ -318,7 +318,7 @@ where
 #[cfg(feature = "std")]
 pub fn encode_to_writer<T, W>(object: &T, writer: W) -> Result<(), std::io::Error>
 where
-    T: Encodable + ?Sized,
+    T: Encode + ?Sized,
     W: std::io::Write,
 {
     let mut encoder = object.encoder();

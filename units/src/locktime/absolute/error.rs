@@ -358,7 +358,7 @@ mod tests {
 
     #[cfg(feature = "alloc")]
     #[cfg(feature = "encoding")]
-    use encoding::{Decodable as _, Decoder as _};
+    use encoding::{Decode as _, Decoder as _};
 
     #[cfg(feature = "alloc")]
     use super::LockTimeUnit;

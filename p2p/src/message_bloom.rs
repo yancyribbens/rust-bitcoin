@@ -49,7 +49,7 @@ encoding::encoder_newtype_exact! {
     );
 }
 
-impl encoding::Encodable for FilterLoad {
+impl encoding::Encode for FilterLoad {
     type Encoder<'e> = FilterLoadEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -98,7 +98,7 @@ impl encoding::Decoder for FilterLoadDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for FilterLoad {
+impl encoding::Decode for FilterLoad {
     type Decoder = FilterLoadDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -130,7 +130,7 @@ encoding::encoder_newtype_exact! {
     pub struct BloomFlagsEncoder<'e>(ArrayEncoder<1>);
 }
 
-impl encoding::Encodable for BloomFlags {
+impl encoding::Encode for BloomFlags {
     type Encoder<'e> = BloomFlagsEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -181,7 +181,7 @@ impl encoding::Decoder for BloomFlagsDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for BloomFlags {
+impl encoding::Decode for BloomFlags {
     type Decoder = BloomFlagsDecoder;
 
     fn decoder() -> Self::Decoder { BloomFlagsDecoder(ArrayDecoder::new()) }
@@ -222,7 +222,7 @@ encoding::encoder_newtype_exact! {
     pub struct FilterAddEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
 
-impl encoding::Encodable for FilterAdd {
+impl encoding::Encode for FilterAdd {
     type Encoder<'e> = FilterAddEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -258,7 +258,7 @@ impl encoding::Decoder for FilterAddDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for FilterAdd {
+impl encoding::Decode for FilterAdd {
     type Decoder = FilterAddDecoder;
 
     fn decoder() -> Self::Decoder { FilterAddDecoder(FilterAddInnerDecoder::new()) }

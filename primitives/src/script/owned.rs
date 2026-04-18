@@ -211,7 +211,7 @@ impl<T> encoding::Decoder for ScriptBufDecoder<T> {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl<T> encoding::Decodable for ScriptBuf<T> {
+impl<T> encoding::Decode for ScriptBuf<T> {
     type Decoder = ScriptBufDecoder<T>;
     fn decoder() -> Self::Decoder { ScriptBufDecoder(ByteVecDecoder::new(), PhantomData) }
 }

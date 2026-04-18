@@ -614,7 +614,7 @@ impl TryFrom<SignedAmount> for Amount {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Encodable for Amount {
+impl encoding::Encode for Amount {
     type Encoder<'e> = AmountEncoder<'e>;
 
     #[inline]
@@ -626,7 +626,7 @@ impl encoding::Encodable for Amount {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Decodable for Amount {
+impl encoding::Decode for Amount {
     type Decoder = AmountDecoder;
 
     #[inline]

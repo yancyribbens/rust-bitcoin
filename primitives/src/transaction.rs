@@ -19,7 +19,7 @@ use arbitrary::{Arbitrary, Unstructured};
 use encoding::{ArrayEncoder, BytesEncoder, Encoder2};
 #[cfg(feature = "alloc")]
 use encoding::{
-    CompactSizeEncoder, Decoder2, Decoder3, Encodable as _, Encoder3, Encoder6, SliceEncoder,
+    CompactSizeEncoder, Decoder2, Decoder3, Encode as _, Encoder3, Encoder6, SliceEncoder,
     VecDecoder,
 };
 #[cfg(feature = "alloc")]
@@ -352,7 +352,7 @@ encoding::encoder_newtype! {
 }
 
 #[cfg(feature = "alloc")]
-impl encoding::Encodable for Transaction {
+impl encoding::Encode for Transaction {
     type Encoder<'e>
         = TransactionEncoder<'e>
     where
@@ -652,7 +652,7 @@ impl encoding::Decoder for TransactionDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl encoding::Decodable for Transaction {
+impl encoding::Decode for Transaction {
     type Decoder = TransactionDecoder;
     fn decoder() -> Self::Decoder { TransactionDecoder::new() }
 }
@@ -760,7 +760,7 @@ encoding::encoder_newtype_exact! {
 }
 
 #[cfg(feature = "alloc")]
-impl encoding::Encodable for TxIn {
+impl encoding::Encode for TxIn {
     type Encoder<'e>
         = Encoder3<OutPointEncoder<'e>, ScriptEncoder<'e>, SequenceEncoder<'e>>
     where
@@ -855,7 +855,7 @@ crate::decoder_newtype! {
 }
 
 #[cfg(feature = "alloc")]
-impl encoding::Decodable for TxIn {
+impl encoding::Decode for TxIn {
     type Decoder = TxInDecoder;
     fn decoder() -> Self::Decoder {
         TxInDecoder(Decoder3::new(
@@ -894,7 +894,7 @@ encoding::encoder_newtype_exact! {
 }
 
 #[cfg(feature = "alloc")]
-impl encoding::Encodable for TxOut {
+impl encoding::Encode for TxOut {
     type Encoder<'e>
         = Encoder2<AmountEncoder<'e>, ScriptEncoder<'e>>
     where
@@ -928,7 +928,7 @@ crate::decoder_newtype! {
 }
 
 #[cfg(feature = "alloc")]
-impl encoding::Decodable for TxOut {
+impl encoding::Decode for TxOut {
     type Decoder = TxOutDecoder;
     fn decoder() -> Self::Decoder {
         TxOutDecoder(Decoder2::new(AmountDecoder::new(), ScriptPubKeyBufDecoder::new()))
@@ -965,7 +965,7 @@ encoding::encoder_newtype_exact! {
     pub struct OutPointEncoder<'e>(Encoder2<BytesEncoder<'e>, ArrayEncoder<4>>);
 }
 
-impl encoding::Encodable for OutPoint {
+impl encoding::Encode for OutPoint {
     type Encoder<'e>
         = OutPointEncoder<'e>
     where
@@ -1047,7 +1047,7 @@ crate::decoder_newtype! {
     }
 }
 
-impl encoding::Decodable for OutPoint {
+impl encoding::Decode for OutPoint {
     type Decoder = OutPointDecoder;
     fn decoder() -> Self::Decoder { OutPointDecoder::default() }
 }
@@ -1248,7 +1248,7 @@ encoding::encoder_newtype_exact! {
     pub struct VersionEncoder<'e>(encoding::ArrayEncoder<4>);
 }
 
-impl encoding::Encodable for Version {
+impl encoding::Encode for Version {
     type Encoder<'e> = VersionEncoder<'e>;
     fn encoder(&self) -> Self::Encoder<'_> {
         VersionEncoder::new(encoding::ArrayEncoder::without_length_prefix(
@@ -1272,7 +1272,7 @@ crate::decoder_newtype! {
     }
 }
 
-impl encoding::Decodable for Version {
+impl encoding::Decode for Version {
     type Decoder = VersionDecoder;
     fn decoder() -> Self::Decoder { VersionDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
@@ -1622,7 +1622,7 @@ mod tests {
     #[cfg(feature = "std")]
     use std::error::Error as _;
 
-    use encoding::{Decodable as _, Decoder as _, Encoder as _};
+    use encoding::{Decode as _, Decoder as _, Encoder as _};
     #[cfg(feature = "hex")]
     use hex_unstable::hex;
 

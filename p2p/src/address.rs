@@ -171,7 +171,7 @@ encoding::encoder_newtype_exact! {
     >);
 }
 
-impl encoding::Encodable for Address {
+impl encoding::Encode for Address {
     type Encoder<'e>
         = AddressEncoder<'e>
     where
@@ -225,7 +225,7 @@ impl encoding::Decoder for AddressDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for Address {
+impl encoding::Decode for Address {
     type Decoder = AddressDecoder;
     fn decoder() -> Self::Decoder {
         AddressDecoder(encoding::Decoder3::new(
@@ -251,7 +251,7 @@ encoding::encoder_newtype_exact! {
     pub struct AddrV1MessageEncoder<'e>(Encoder2<ArrayEncoder<4>, AddressEncoder<'e>>);
 }
 
-impl encoding::Encodable for AddrV1Message {
+impl encoding::Encode for AddrV1Message {
     type Encoder<'e> = AddrV1MessageEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -288,7 +288,7 @@ impl encoding::Decoder for AddrV1MessageDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for AddrV1Message {
+impl encoding::Decode for AddrV1Message {
     type Decoder = AddrV1MessageDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -530,7 +530,7 @@ impl<'e> encoding::ExactSizeEncoder for AddrV2Encoder<'e> {
     }
 }
 
-impl encoding::Encodable for AddrV2 {
+impl encoding::Encode for AddrV2 {
     type Encoder<'e> = AddrV2Encoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> { AddrV2Encoder::new(self) }
@@ -632,7 +632,7 @@ impl encoding::Decoder for AddrV2Decoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for AddrV2 {
+impl encoding::Decode for AddrV2 {
     type Decoder = AddrV2Decoder;
 
     fn decoder() -> Self::Decoder {
@@ -805,7 +805,7 @@ encoding::encoder_newtype_exact! {
     pub struct AddrV2MessageEncoder<'e>(Encoder4<ArrayEncoder<4>, CompactSizeEncoder, AddrV2Encoder<'e>, ArrayEncoder<2>>);
 }
 
-impl encoding::Encodable for AddrV2Message {
+impl encoding::Encode for AddrV2Message {
     type Encoder<'e> = AddrV2MessageEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -847,7 +847,7 @@ impl encoding::Decoder for AddrV2MessageDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for AddrV2Message {
+impl encoding::Decode for AddrV2Message {
     type Decoder = AddrV2MessageDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -1291,7 +1291,7 @@ mod test {
     use alloc::{format, vec};
     use std::net::IpAddr;
 
-    use encoding::{Encodable as _, Encoder as _, ExactSizeEncoder as _};
+    use encoding::{Encode as _, Encoder as _, ExactSizeEncoder as _};
     use hex_unstable::hex;
 
     use super::*;

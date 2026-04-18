@@ -13,7 +13,7 @@ use bitcoin_primitives::{
     absolute, Amount, Block, BlockHash, BlockHeader, BlockTime, BlockVersion, CompactTarget,
     ScriptPubKeyBuf, ScriptSigBuf, Sequence, Witness,
 };
-use encoding::{Decodable as _, Decoder as _, Encodable as _, Encoder as _};
+use encoding::{Decode as _, Decoder as _, Encode as _, Encoder as _};
 use hex_unstable::hex;
 
 const TC_TXID_BYTES: [u8; 32] = [

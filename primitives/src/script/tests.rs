@@ -4,7 +4,7 @@ use alloc::string::ToString;
 use alloc::{format, vec};
 use core::ops::Bound;
 
-use encoding::{Decodable, Decoder as _};
+use encoding::{Decode, Decoder as _};
 use hashes::{hash160, sha256};
 
 use super::*;
@@ -609,7 +609,7 @@ fn decoder_error_display() {
 
     let bytes = vec![0x01_u8];
     let mut push = bytes.as_slice();
-    let mut decoder = <ScriptBuf as Decodable>::Decoder::default();
+    let mut decoder = <ScriptBuf as Decode>::Decoder::default();
     decoder.push_bytes(&mut push).unwrap();
 
     let err = decoder.end().unwrap_err();

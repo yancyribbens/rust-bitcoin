@@ -75,7 +75,7 @@ encoding::encoder_newtype_exact! {
     pub struct FilterHashEncoder<'e>(ArrayEncoder<32>);
 }
 
-impl encoding::Encodable for FilterHash {
+impl encoding::Encode for FilterHash {
     type Encoder<'e> = FilterHashEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -89,7 +89,7 @@ encoding::encoder_newtype_exact! {
     pub struct FilterHeaderEncoder<'e>(ArrayEncoder<32>);
 }
 
-impl encoding::Encodable for FilterHeader {
+impl encoding::Encode for FilterHeader {
     type Encoder<'e> = FilterHeaderEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -122,7 +122,7 @@ impl encoding::Decoder for FilterHashDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for FilterHash {
+impl encoding::Decode for FilterHash {
     type Decoder = FilterHashDecoder;
 
     fn decoder() -> Self::Decoder { FilterHashDecoder(ArrayDecoder::new()) }
@@ -151,7 +151,7 @@ impl encoding::Decoder for FilterHeaderDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for FilterHeader {
+impl encoding::Decode for FilterHeader {
     type Decoder = FilterHeaderDecoder;
 
     fn decoder() -> Self::Decoder { FilterHeaderDecoder(ArrayDecoder::new()) }
@@ -188,7 +188,7 @@ encoding::encoder_newtype_exact! {
     pub struct GetCFiltersEncoder<'e>(Encoder3<ArrayEncoder<1>, BlockHeightEncoder<'e>, BlockHashEncoder<'e>>);
 }
 
-impl encoding::Encodable for GetCFilters {
+impl encoding::Encode for GetCFilters {
     type Encoder<'e> = GetCFiltersEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -225,7 +225,7 @@ impl encoding::Decoder for GetCFiltersDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for GetCFilters {
+impl encoding::Decode for GetCFilters {
     type Decoder = GetCFiltersDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -262,7 +262,7 @@ encoding::encoder_newtype_exact! {
     );
 }
 
-impl encoding::Encodable for CFilter {
+impl encoding::Encode for CFilter {
     type Encoder<'e>
         = CFilterEncoder<'e>
     where
@@ -305,7 +305,7 @@ impl encoding::Decoder for CFilterDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for CFilter {
+impl encoding::Decode for CFilter {
     type Decoder = CFilterDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -336,7 +336,7 @@ encoding::encoder_newtype_exact! {
     pub struct GetCFHeadersEncoder<'e>(Encoder3<ArrayEncoder<1>, BlockHeightEncoder<'e>, BlockHashEncoder<'e>>);
 }
 
-impl encoding::Encodable for GetCFHeaders {
+impl encoding::Encode for GetCFHeaders {
     type Encoder<'e> = GetCFHeadersEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -373,7 +373,7 @@ impl encoding::Decoder for GetCFHeadersDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for GetCFHeaders {
+impl encoding::Decode for GetCFHeaders {
     type Decoder = GetCFHeadersDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -413,7 +413,7 @@ encoding::encoder_newtype! {
     );
 }
 
-impl encoding::Encodable for CFHeaders {
+impl encoding::Encode for CFHeaders {
     type Encoder<'e> = CFHeadersEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -461,7 +461,7 @@ impl encoding::Decoder for CFHeadersDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for CFHeaders {
+impl encoding::Decode for CFHeaders {
     type Decoder = CFHeadersDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -491,7 +491,7 @@ encoding::encoder_newtype_exact! {
     pub struct GetCFCheckptEncoder<'e>(Encoder2<ArrayEncoder<1>, BlockHashEncoder<'e>>);
 }
 
-impl encoding::Encodable for GetCFCheckpt {
+impl encoding::Encode for GetCFCheckpt {
     type Encoder<'e> = GetCFCheckptEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -527,7 +527,7 @@ impl encoding::Decoder for GetCFCheckptDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for GetCFCheckpt {
+impl encoding::Decode for GetCFCheckpt {
     type Decoder = GetCFCheckptDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -560,7 +560,7 @@ encoding::encoder_newtype! {
     );
 }
 
-impl encoding::Encodable for CFCheckpt {
+impl encoding::Encode for CFCheckpt {
     type Encoder<'e>
         = CFCheckptEncoder<'e>
     where
@@ -603,7 +603,7 @@ impl encoding::Decoder for CFCheckptDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for CFCheckpt {
+impl encoding::Decode for CFCheckpt {
     type Decoder = CFCheckptDecoder;
 
     fn decoder() -> Self::Decoder {

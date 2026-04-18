@@ -28,7 +28,7 @@ encoding::encoder_newtype_exact! {
     pub struct SendCmpctEncoder<'e>(Encoder2<ArrayEncoder<1>, ArrayEncoder<8>>);
 }
 
-impl encoding::Encodable for SendCmpct {
+impl encoding::Encode for SendCmpct {
     type Encoder<'e> = SendCmpctEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -65,7 +65,7 @@ impl encoding::Decoder for SendCmpctDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for SendCmpct {
+impl encoding::Decode for SendCmpct {
     type Decoder = SendCmpctDecoder;
 
     fn decoder() -> Self::Decoder {

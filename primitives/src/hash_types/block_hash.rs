@@ -30,7 +30,7 @@ type Inner = sha256d::Hash;
 
 include!("./generic.rs");
 
-impl encoding::Encodable for BlockHash {
+impl encoding::Encode for BlockHash {
     type Encoder<'e> = BlockHashEncoder<'e>;
     #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -40,7 +40,7 @@ impl encoding::Encodable for BlockHash {
     }
 }
 
-impl encoding::Decodable for BlockHash {
+impl encoding::Decode for BlockHash {
     type Decoder = BlockHashDecoder;
     #[inline]
     fn decoder() -> Self::Decoder { BlockHashDecoder(encoding::ArrayDecoder::<32>::new()) }
@@ -94,7 +94,7 @@ mod tests {
     #[test]
     fn decoder_full_read_limit() {
         assert_eq!(BlockHashDecoder::default().read_limit(), 32);
-        assert_eq!(<BlockHash as encoding::Decodable>::decoder().read_limit(), 32);
+        assert_eq!(<BlockHash as encoding::Decode>::decoder().read_limit(), 32);
     }
 
     #[test]
