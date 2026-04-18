@@ -51,7 +51,7 @@ pub const MAX_INV_SIZE: usize = 50_000;
 
 /// Maximum size, in bytes, of an encoded message
 /// This by necessity should be larger than `MAX_VEC_SIZE`
-pub const MAX_MSG_SIZE: usize = 5_000_000;
+pub const MAX_MSG_SIZE: u32 = 5_000_000;
 
 /// Serializer for command string
 #[derive(PartialEq, Eq, Clone, Debug)]
@@ -1268,7 +1268,7 @@ enum NetworkMessageDecoder {
 }
 
 impl NetworkMessageDecoder {
-    fn new(command: CommandString, payload_len: usize) -> Self {
+    fn new(command: CommandString, payload_len: u32) -> Self {
         use encoding::Decodable as _;
         match command.as_ref() {
             "version" => Self::Version(message_network::VersionMessage::decoder()),
@@ -1304,8 +1304,8 @@ impl NetworkMessageDecoder {
             "addrv2" => Self::AddrV2(AddrV2Payload::decoder()),
             _ => Self::Unknown {
                 command,
-                remaining: payload_len,
-                buffer: Vec::with_capacity(payload_len),
+                remaining: payload_len.try_into().unwrap(),
+                buffer: Vec::with_capacity(payload_len.try_into().unwrap()),
             },
         }
     }
@@ -1508,7 +1508,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                         })?;
 
                     let payload_len_bytes = length.to_le_bytes();
-                    let length = usize::try_from(length).unwrap();  // cast ok, 32 bits fits in 64
+                    //let length = usize::try_from(length).unwrap();  // cast ok, 32 bits fits in 64
                     if length > MAX_MSG_SIZE{
                         return Err(V1NetworkMessageDecoderError(
                             V1NetworkMessageDecoderErrorInner::PayloadTooLarge,
