@@ -18,8 +18,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # We only get 20 jobs at a time, we probably don't want to go
-        # over that limit with fuzzing because of the hour run time.
         fuzz_target: [
           bitcoin_arbitrary_block,
           bitcoin_arbitrary_psbt,
@@ -94,6 +92,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+      - run: cargo install --locked --version 0.12.0 cargo-fuzz
       - name: Display structure of downloaded files
         run: ls -R
       - run: find executed_* -type f -exec cat {} + | sort > executed
