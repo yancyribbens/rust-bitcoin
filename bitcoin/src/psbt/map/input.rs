@@ -10,7 +10,7 @@ use hashes::{hash160, ripemd160, sha256, sha256d};
 use crate::bip32::KeySource;
 use crate::crypto::key::{LegacyPublicKey, XOnlyPublicKey};
 use crate::crypto::{ecdsa, taproot};
-use crate::prelude::{btree_map, BTreeMap, Borrow, Box, ToOwned, Vec};
+use crate::prelude::{btree_map, BTreeMap, Borrow, Box, Vec};
 use crate::psbt::map::Map;
 use crate::psbt::serialize::Deserialize;
 use crate::psbt::{error, raw, Error};
@@ -165,16 +165,18 @@ impl FromStr for PsbtSighashType {
         // NB: some of Taproot sighash types are non-standard for pre-Taproot
         // inputs. We also do not support SIGHASH_RESERVED in verbatim form
         // ("0xFF" string should be used instead).
-        if let Ok(ty) = s.parse::<TapSighashType>() {
-            return Ok(ty.into());
-        }
+        let parse_res = match s.parse::<TapSighashType>() {
+            Ok(ty) => return Ok(ty.into()),
+            Err(e) => e,
+        };
 
         // We accept non-standard sighash values.
         if let Ok(inner) = u32::from_str_radix(s.trim_start_matches("0x"), 16) {
             return Ok(Self { inner });
         }
 
-        Err(SighashTypeParseError { unrecognized: s.to_owned() })
+        // TapSighashType returns the SighashTypeParseError with unconsumed as the `s` string
+        Err(parse_res)
     }
 }
 impl From<EcdsaSighashType> for PsbtSighashType {
