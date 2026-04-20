@@ -199,10 +199,7 @@ pub trait HashEngine: Clone {
 }
 
 /// Encodes an object into a hash engine.
-///
-/// Consumes and returns the hash engine to make it easier to call [`HashEngine::finalize`] directly
-/// on the result.
-pub fn encode_to_engine<T, H>(object: &T, mut engine: H) -> H
+pub fn encode_to_engine<T, H>(object: &T, engine: &mut H)
 where
     T: encoding::Encodable + ?Sized,
     H: HashEngine,
@@ -214,7 +211,6 @@ where
             break;
         }
     }
-    engine
 }
 
 /// Trait which applies to hashes of all types.
