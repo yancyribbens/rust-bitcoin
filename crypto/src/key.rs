@@ -718,9 +718,10 @@ impl LegacyPublicKey {
             (_, byte) => return Err(FromSliceError::InvalidKeyPrefix(byte)),
         }
 
+        let secp_key = secp256k1::PublicKey::from_slice(data).map_err(FromSliceError::Secp256k1)?;
         Ok(match compressed {
-            true => Self::from_secp(secp256k1::PublicKey::from_slice(data)?),
-            false => Self::from_secp_uncompressed(secp256k1::PublicKey::from_slice(data)?),
+            true => Self::from_secp(secp_key),
+            false => Self::from_secp_uncompressed(secp_key),
         })
     }
 
@@ -779,7 +780,7 @@ impl FromStr for LegacyPublicKey {
                     DecodeFixedLengthBytesError::InvalidLength(_) =>
                         unreachable!("length checked already"),
                 })?;
-                Ok(Self::from_slice(&bytes)?)
+                Self::from_slice(&bytes).map_err(ParsePublicKeyError::Encoding)
             }
             130 => {
                 let bytes = hex::decode_to_array::<65>(s).map_err(|e| match e {
@@ -788,7 +789,7 @@ impl FromStr for LegacyPublicKey {
                     DecodeFixedLengthBytesError::InvalidLength(_) =>
                         unreachable!("length checked already"),
                 })?;
-                Ok(Self::from_slice(&bytes)?)
+                Self::from_slice(&bytes).map_err(ParsePublicKeyError::Encoding)
             }
             len => Err(ParsePublicKeyError::InvalidHexLength(len)),
         }
@@ -930,7 +931,8 @@ impl FromStr for FullPublicKey {
     type Err = ParseFullPublicKeyError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_bytes(hex::decode_to_array::<33>(s)?).map_err(Into::into)
+        Self::from_bytes(hex::decode_to_array::<33>(s).map_err(ParseFullPublicKeyError::Hex)?)
+            .map_err(ParseFullPublicKeyError::Secp256k1)
     }
 }
 
@@ -1123,18 +1125,22 @@ impl WifKey {
     /// * [`FromWifError::InvalidAddressVersion`] if the network version byte is not main or testnet.
     /// * [`FromWifError::Secp256k1`] if the bytes are not representative of a valid private key.
     pub fn from_wif(wif: &str) -> Result<Self, FromWifError> {
-        let data = base58::decode_check(wif)?;
+        let data = base58::decode_check(wif).map_err(FromWifError::Base58)?;
 
         let (compressed, data) = if let Ok(data) = <&[u8; 33]>::try_from(&*data) {
             (false, data)
         } else if let Ok(data) = <&[u8; 34]>::try_from(&*data) {
             let (compressed_flag, data) = data.split_last::<33>();
             if *compressed_flag != 1 {
-                return Err(InvalidWifCompressionFlagError { invalid: *compressed_flag }.into());
+                return Err(FromWifError::InvalidWifCompressionFlag(
+                    InvalidWifCompressionFlagError { invalid: *compressed_flag },
+                ));
             }
             (true, data)
         } else {
-            return Err(InvalidBase58PayloadLengthError { length: data.len() }.into());
+            return Err(FromWifError::InvalidBase58PayloadLength(
+                InvalidBase58PayloadLengthError { length: data.len() },
+            ));
         };
 
         let (network, key) = data.split_first();
@@ -1142,11 +1148,14 @@ impl WifKey {
             128 => NetworkKind::Main,
             239 => NetworkKind::Test,
             invalid => {
-                return Err(InvalidAddressVersionError { invalid }.into());
+                return Err(FromWifError::InvalidAddressVersion(InvalidAddressVersionError {
+                    invalid,
+                }));
             }
         };
 
-        let sec_key = secp256k1::SecretKey::from_secret_bytes(*key)?;
+        let sec_key =
+            secp256k1::SecretKey::from_secret_bytes(*key).map_err(FromWifError::Secp256k1)?;
         let priv_key = match compressed {
             true => PrivateKey::from_secp(sec_key),
             false => PrivateKey::from_secp_uncompressed(sec_key),
@@ -1481,10 +1490,6 @@ pub mod error {
         }
     }
 
-    impl From<secp256k1::Error> for FromSliceError {
-        fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
-    }
-
     /// Error generated from WIF key format.
     #[derive(Debug, Clone, PartialEq, Eq)]
     #[non_exhaustive]
@@ -1531,26 +1536,6 @@ pub mod error {
                 Self::InvalidWifCompressionFlag(ref e) => Some(e),
             }
         }
-    }
-
-    impl From<base58::Error> for FromWifError {
-        fn from(e: base58::Error) -> Self { Self::Base58(e) }
-    }
-
-    impl From<secp256k1::Error> for FromWifError {
-        fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
-    }
-
-    impl From<InvalidBase58PayloadLengthError> for FromWifError {
-        fn from(e: InvalidBase58PayloadLengthError) -> Self { Self::InvalidBase58PayloadLength(e) }
-    }
-
-    impl From<InvalidAddressVersionError> for FromWifError {
-        fn from(e: InvalidAddressVersionError) -> Self { Self::InvalidAddressVersion(e) }
-    }
-
-    impl From<InvalidWifCompressionFlagError> for FromWifError {
-        fn from(e: InvalidWifCompressionFlagError) -> Self { Self::InvalidWifCompressionFlag(e) }
     }
 
     /// Error returned while constructing a [`Keypair`] from string.
@@ -1611,10 +1596,6 @@ pub mod error {
         }
     }
 
-    impl From<FromSliceError> for ParsePublicKeyError {
-        fn from(e: FromSliceError) -> Self { Self::Encoding(e) }
-    }
-
     /// Error returned when parsing a [`FullPublicKey`] from a string.
     ///
     /// [`FullPublicKey`]: super::FullPublicKey
@@ -1647,14 +1628,6 @@ pub mod error {
                 Self::Hex(e) => Some(e),
             }
         }
-    }
-
-    impl From<secp256k1::Error> for ParseFullPublicKeyError {
-        fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
-    }
-
-    impl From<hex::DecodeFixedLengthBytesError> for ParseFullPublicKeyError {
-        fn from(e: hex::DecodeFixedLengthBytesError) -> Self { Self::Hex(e) }
     }
 
     /// SegWit public keys must always be compressed.

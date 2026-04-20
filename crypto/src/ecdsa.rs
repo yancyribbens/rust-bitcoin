@@ -51,7 +51,8 @@ impl Signature {
     /// * [`DecodeError::Secp256k1`] if the slice cannot be decoded to an ECDSA signature.
     pub fn from_slice(sl: &[u8]) -> Result<Self, DecodeError> {
         let (sighash_type, sig) = sl.split_last().ok_or(DecodeError::EmptySignature)?;
-        let sighash_type = EcdsaSighashType::from_standard(u32::from(*sighash_type))?;
+        let sighash_type = EcdsaSighashType::from_standard(u32::from(*sighash_type))
+            .map_err(DecodeError::SighashType)?;
         let signature =
             secp256k1::ecdsa::Signature::from_der(sig).map_err(DecodeError::Secp256k1)?;
         Ok(Self { signature, sighash_type })
@@ -104,8 +105,8 @@ impl FromStr for Signature {
     type Err = ParseSignatureError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = hex::decode_to_vec(s)?;
-        Ok(Self::from_slice(&bytes)?)
+        let bytes = hex::decode_to_vec(s).map_err(ParseSignatureError::Hex)?;
+        Self::from_slice(&bytes).map_err(ParseSignatureError::Decode)
     }
 }
 
@@ -301,14 +302,6 @@ pub mod error {
         }
     }
 
-    impl From<secp256k1::Error> for DecodeError {
-        fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
-    }
-
-    impl From<NonStandardSighashTypeError> for DecodeError {
-        fn from(e: NonStandardSighashTypeError) -> Self { Self::SighashType(e) }
-    }
-
     /// Error encountered while parsing an ECDSA signature from a string.
     #[derive(Debug, Clone, PartialEq, Eq)]
     #[non_exhaustive]
@@ -340,14 +333,6 @@ pub mod error {
                 Self::Decode(ref e) => Some(e),
             }
         }
-    }
-
-    impl From<hex::DecodeVariableLengthBytesError> for ParseSignatureError {
-        fn from(e: hex::DecodeVariableLengthBytesError) -> Self { Self::Hex(e) }
-    }
-
-    impl From<DecodeError> for ParseSignatureError {
-        fn from(e: DecodeError) -> Self { Self::Decode(e) }
     }
 }
 
