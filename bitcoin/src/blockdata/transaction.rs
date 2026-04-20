@@ -1657,7 +1657,7 @@ mod tests {
         for s in sht_mistakes {
             assert_eq!(
                 s.parse::<EcdsaSighashType>().unwrap_err().to_string(),
-                format!("unrecognized SIGHASH string '{}'", s)
+                format!("failed to parse '{}' as SIGHASH string", s)
             );
         }
     }

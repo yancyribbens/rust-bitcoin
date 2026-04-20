@@ -8,7 +8,6 @@
 //! [BIP-0341]: <https://github.com/bitcoin/bips/blob/150ab6f5c3aca9da05fccc5b435e9667853407f4/bip-0341.mediawiki>
 //! [BIP-0143]: <https://github.com/bitcoin/bips/blob/99701f68a88ce33b2d0838eb84e115cef505b4c2/bip-0143.mediawiki>
 
-use alloc::borrow::ToOwned;
 use core::{fmt, str};
 
 #[cfg(feature = "arbitrary")]
@@ -71,7 +70,7 @@ impl str::FromStr for TapSighashType {
             "SIGHASH_ALL|SIGHASH_ANYONECANPAY" => Ok(Self::AllPlusAnyoneCanPay),
             "SIGHASH_NONE|SIGHASH_ANYONECANPAY" => Ok(Self::NonePlusAnyoneCanPay),
             "SIGHASH_SINGLE|SIGHASH_ANYONECANPAY" => Ok(Self::SinglePlusAnyoneCanPay),
-            _ => Err(SighashTypeParseError { unrecognized: s.to_owned() }),
+            _ => Err(SighashTypeParseError { unrecognized: s.into() }),
         }
     }
 }
@@ -146,7 +145,7 @@ impl str::FromStr for EcdsaSighashType {
             "SIGHASH_ALL|SIGHASH_ANYONECANPAY" => Ok(Self::AllPlusAnyoneCanPay),
             "SIGHASH_NONE|SIGHASH_ANYONECANPAY" => Ok(Self::NonePlusAnyoneCanPay),
             "SIGHASH_SINGLE|SIGHASH_ANYONECANPAY" => Ok(Self::SinglePlusAnyoneCanPay),
-            _ => Err(SighashTypeParseError { unrecognized: s.to_owned() }),
+            _ => Err(SighashTypeParseError { unrecognized: s.into() }),
         }
     }
 }
@@ -228,8 +227,9 @@ impl From<EcdsaSighashType> for TapSighashType {
 
 /// Error types for signature hashing.
 pub mod error {
-    use alloc::string::String;
     use core::fmt;
+
+    use internals::error::InputString;
 
     /// Integer is not a consensus valid sighash type.
     #[derive(Debug, Clone, PartialEq, Eq)]
@@ -269,12 +269,12 @@ pub mod error {
     #[non_exhaustive]
     pub struct SighashTypeParseError {
         /// The unrecognized string we attempted to parse.
-        pub unrecognized: String,
+        pub unrecognized: InputString,
     }
 
     impl fmt::Display for SighashTypeParseError {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f, "unrecognized SIGHASH string '{}'", self.unrecognized)
+            write!(f, "{}", self.unrecognized.display_cannot_parse("SIGHASH string"))
         }
     }
 
