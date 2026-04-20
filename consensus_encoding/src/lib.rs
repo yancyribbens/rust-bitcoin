@@ -96,7 +96,7 @@ pub use self::encode::{encode_to_vec, flush_to_vec};
 #[doc(inline)]
 pub use self::encode::{encode_to_writer, flush_to_writer};
 #[doc(inline)]
-pub use self::encode::{Encodable, EncodableByteIter, Encoder, ExactSizeEncoder};
+pub use self::encode::{Encodable, Encoder, EncoderByteIter, ExactSizeEncoder};
 #[cfg(feature = "alloc")]
 #[doc(no_inline)]
 pub use self::error::LengthPrefixExceedsMaxError;

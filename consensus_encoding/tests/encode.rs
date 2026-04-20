@@ -6,8 +6,8 @@
 use std::io::{Cursor, Write};
 
 use bitcoin_consensus_encoding::{
-    ArrayEncoder, ArrayRefEncoder, BytesEncoder, CompactSizeEncoder, Encodable, EncodableByteIter,
-    Encoder, Encoder2, Encoder3, Encoder4, Encoder6, ExactSizeEncoder, SliceEncoder,
+    ArrayEncoder, ArrayRefEncoder, BytesEncoder, CompactSizeEncoder, Encodable, Encoder, Encoder2,
+    Encoder3, Encoder4, Encoder6, EncoderByteIter, ExactSizeEncoder, SliceEncoder,
 };
 
 struct TestBytes<'a>(&'a [u8]);
@@ -617,7 +617,7 @@ fn encode_compact_size() {
 #[test]
 fn iter_encoder() {
     let test_array = TestArray([1u8, 2, 3, 4]);
-    let mut iter = EncodableByteIter::new(&test_array);
+    let mut iter = EncoderByteIter::new(test_array.encoder());
 
     assert_eq!(iter.len(), 4);
 

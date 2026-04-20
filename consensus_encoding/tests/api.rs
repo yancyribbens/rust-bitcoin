@@ -14,7 +14,7 @@ use core::fmt;
 use bitcoin_consensus_encoding::{
     self as encoding, encoder_newtype, ArrayDecoder, ArrayEncoder, ArrayRefEncoder, BytesEncoder,
     CompactSizeDecoder, CompactSizeDecoderError, CompactSizeEncoder, CompactSizeU64Decoder,
-    Decodable, Decoder, Decoder2, Decoder3, Decoder4, Decoder6, Encodable, EncodableByteIter,
+    Decodable, Decoder, Decoder2, Decoder3, Decoder4, Decoder6, Encodable, EncoderByteIter,
     SliceEncoder, UnexpectedEofError,
 };
 use encoding::error::{DecodeError, UnconsumedError};
@@ -43,7 +43,7 @@ struct Structs {
     j: Decoder3<D, D, D>,
     k: Decoder4<D, D, D, D>,
     l: Decoder6<D, D, D, D, D, D>,
-    m: EncodableByteIter<'static, Foo>,
+    m: EncoderByteIter<FooEncoder<'static>>,
     n: SliceEncoder<'static, Foo>,
     #[cfg(feature = "alloc")]
     o: VecDecoder<Foo>,
@@ -112,7 +112,7 @@ struct Clone {
     // j: Decoder3<D, D, D>,
     // k: Decoder4<D, D, D, D>,
     // l: Decoder6<D, D, D, D, D, D>,
-    m: EncodableByteIter<'static, Foo>,
+    m: EncoderByteIter<FooEncoder<'static>>,
     n: SliceEncoder<'static, Foo>,
     #[cfg(feature = "alloc")]
     o: VecDecoder<Foo>,
@@ -202,7 +202,7 @@ fn api_all_non_error_types_have_non_empty_debug() {
     let debug = format!("{:?}", Decoder6::new(d(), d(), d(), d(), d(), d()));
     assert!(!debug.is_empty());
 
-    let debug = format!("{:?}", EncodableByteIter::new(&Foo::dummy()));
+    let debug = format!("{:?}", EncoderByteIter::new(Foo::dummy().encoder()));
     assert!(!debug.is_empty());
     let debug = format!("{:?}", SliceEncoder::without_length_prefix(&[Foo::dummy()]));
     assert!(!debug.is_empty());
