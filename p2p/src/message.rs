@@ -1262,7 +1262,7 @@ enum NetworkMessageDecoder {
     /// Unknown message — must buffer since type is unknown at compile time.
     Unknown {
         command: CommandString,
-        remaining: usize,
+        remaining: u32,
         buffer: Vec<u8>,
     },
 }
@@ -1304,7 +1304,7 @@ impl NetworkMessageDecoder {
             "addrv2" => Self::AddrV2(AddrV2Payload::decoder()),
             _ => Self::Unknown {
                 command,
-                remaining: payload_len.try_into().unwrap(),
+                remaining: payload_len,
                 buffer: Vec::with_capacity(payload_len.try_into().unwrap()),
             },
         }
