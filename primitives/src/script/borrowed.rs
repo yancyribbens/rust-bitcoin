@@ -134,7 +134,7 @@ impl<T> Script<T> {
     pub fn to_hex_string_prefixed(&self) -> String {
         use hex_unstable::{BytesToHexIter, Case};
 
-        let iter = encoding::EncodableByteIter::new(self);
+        let iter = encoding::EncoderByteIter::new(self.encoder());
         BytesToHexIter::new(iter, Case::Lower).collect()
     }
 

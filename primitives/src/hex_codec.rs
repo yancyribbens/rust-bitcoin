@@ -12,7 +12,7 @@ use core::convert::Infallible;
 use core::fmt;
 use core::fmt::Write as _;
 
-use encoding::{Decodable, Decoder, Encodable, EncodableByteIter};
+use encoding::{Decodable, Decoder, Encodable, EncoderByteIter};
 use hex_unstable::{BytesToHexIter, Case};
 use internals::write_err;
 
@@ -24,9 +24,9 @@ pub(crate) struct HexPrimitive<'a, T>(pub(crate) &'a T);
 
 impl<'a, T: Encodable + Decodable> IntoIterator for &HexPrimitive<'a, T> {
     type Item = u8;
-    type IntoIter = EncodableByteIter<'a, T>;
+    type IntoIter = EncoderByteIter<T::Encoder<'a>>;
 
-    fn into_iter(self) -> Self::IntoIter { EncodableByteIter::new(self.0) }
+    fn into_iter(self) -> Self::IntoIter { EncoderByteIter::new(self.0.encoder()) }
 }
 
 impl<T: Decodable> HexPrimitive<'_, T> {
@@ -84,8 +84,8 @@ impl<T: Encodable> HexPrimitive<'_, T> {
         };
 
         // Count hex chars
-        let len = EncodableByteIter::new(self.0).count() * 2;
-        let iter = BytesToHexIter::new(EncodableByteIter::new(self.0), case);
+        let len = EncoderByteIter::new(self.0.encoder()).count() * 2;
+        let iter = BytesToHexIter::new(EncoderByteIter::new(self.0.encoder()), case);
 
         let extra_len = if f.alternate() { 2 } else { 0 };
         let total_len = len + extra_len;
