@@ -5,9 +5,11 @@
 //! This module provides keys used in Bitcoin that can be roundtrip
 //! (de)serialized.
 
-use alloc::borrow::Borrow;
+#[cfg(feature = "alloc")]
 use alloc::string::String;
+#[cfg(feature = "alloc")]
 use alloc::vec::Vec;
+use core::borrow::Borrow;
 use core::fmt;
 use core::str::FromStr;
 
@@ -15,8 +17,10 @@ use core::str::FromStr;
 use arbitrary::{Arbitrary, Unstructured};
 use hashes::hash160;
 use hex_unstable::DisplayHex;
+#[cfg(feature = "alloc")]
 use internals::array::ArrayExt;
 use internals::array_vec::ArrayVec;
+#[cfg(feature = "alloc")]
 use internals::impl_to_hex_from_lower_hex;
 use network::NetworkKind;
 #[cfg(feature = "rand")]
@@ -38,11 +42,13 @@ pub use serialized_legacy_public_key::SerializedLegacyPublicKey;
 
 #[doc(no_inline)]
 pub use self::error::{
-    FromSliceError, FromWifError, InvalidAddressVersionError, InvalidBase58PayloadLengthError,
-    InvalidWifCompressionFlagError, ParseFullPublicKeyError, ParseKeypairError,
-    ParsePublicKeyError, ParseXOnlyPublicKeyError, TweakXOnlyPublicKeyError,
-    UncompressedPublicKeyError,
+    FromSliceError, InvalidAddressVersionError, InvalidBase58PayloadLengthError,
+    ParseFullPublicKeyError, ParseKeypairError, ParsePublicKeyError, ParseXOnlyPublicKeyError,
+    TweakXOnlyPublicKeyError, UncompressedPublicKeyError,
 };
+#[cfg(feature = "alloc")]
+#[doc(no_inline)]
+pub use self::error::{FromWifError, InvalidWifCompressionFlagError};
 
 /// Encapsulation module to provide a clear barrier for construction/destruction of types.
 mod encapsulate {
@@ -414,6 +420,7 @@ impl fmt::LowerHex for XOnlyPublicKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::LowerHex::fmt(self.as_inner(), f) }
 }
 // Allocate for serialized size
+#[cfg(feature = "alloc")]
 impl_to_hex_from_lower_hex!(XOnlyPublicKey, |_| constants::SCHNORR_PUBLIC_KEY_SIZE * 2);
 
 impl fmt::Display for XOnlyPublicKey {
@@ -634,9 +641,8 @@ impl LegacyPublicKey {
     pub fn force_compressed(self) -> FullPublicKey { FullPublicKey::from_secp(self.to_inner()) }
 
     /// Serializes the public key to bytes.
-    pub fn to_vec(self) -> Vec<u8> {
-        self.to_bytes().to_vec()
-    }
+    #[cfg(feature = "alloc")]
+    pub fn to_vec(self) -> Vec<u8> { self.to_bytes().to_vec() }
 
     /// Serializes the public key to bytes.
     pub fn to_bytes(self) -> SerializedLegacyPublicKey {
@@ -978,9 +984,11 @@ impl PrivateKey {
 
     /// Serializes the private key to bytes.
     #[deprecated(since = "TBD", note = "use to_secret_vec instead")]
+    #[cfg(feature = "alloc")]
     pub fn to_bytes(&self) -> Vec<u8> { self.to_secret_vec() }
 
     /// Serializes the private key to bytes.
+    #[cfg(feature = "alloc")]
     pub fn to_secret_vec(&self) -> Vec<u8> { self.to_secret_bytes().to_vec() }
 
     /// Serializes the private key to bytes.
@@ -1066,6 +1074,7 @@ impl WifKey {
     ///
     /// Errors if `fmt` cannot be written to.
     #[rustfmt::skip]
+    #[cfg(feature = "alloc")]
     pub fn fmt_wif(&self, fmt: &mut dyn fmt::Write) -> fmt::Result {
         let mut ret = [0; 34];
         ret[0] = if self.network_kind.is_mainnet() { 128 } else { 239 };
@@ -1081,6 +1090,7 @@ impl WifKey {
     }
 
     /// Gets the WIF encoding of this private key.
+    #[cfg(feature = "alloc")]
     pub fn to_wif(&self) -> String {
         let mut buf = String::new();
         let _ = self.fmt_wif(&mut buf);
@@ -1099,6 +1109,7 @@ impl WifKey {
     ///   data string.
     /// * [`FromWifError::InvalidAddressVersion`] if the network version byte is not main or testnet.
     /// * [`FromWifError::Secp256k1`] if the bytes are not representative of a valid private key.
+    #[cfg(feature = "alloc")]
     pub fn from_wif(wif: &str) -> Result<Self, FromWifError> {
         let data = base58::decode_check(wif).map_err(FromWifError::Base58)?;
 
@@ -1141,12 +1152,14 @@ impl WifKey {
 
 // [`WifKey`] intentionally has a `FromStr` without a reciprocal `Display`.
 // Parsing from a WIF string should be convenient, printing secret data should not.
+#[cfg(feature = "alloc")]
 impl FromStr for WifKey {
     type Err = FromWifError;
     fn from_str(s: &str) -> Result<Self, FromWifError> { Self::from_wif(s) }
 }
 
 #[cfg(feature = "serde")]
+#[cfg(feature = "alloc")]
 impl serde::Serialize for WifKey {
     fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         s.serialize_str(&self.to_wif())
@@ -1154,6 +1167,7 @@ impl serde::Serialize for WifKey {
 }
 
 #[cfg(feature = "serde")]
+#[cfg(feature = "alloc")]
 impl<'de> serde::Deserialize<'de> for WifKey {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         struct WifVisitor;
@@ -1330,6 +1344,7 @@ impl fmt::LowerHex for TweakedPublicKey {
     }
 }
 // Allocate for serialized size
+#[cfg(feature = "alloc")]
 impl_to_hex_from_lower_hex!(TweakedPublicKey, |_| constants::SCHNORR_PUBLIC_KEY_SIZE * 2);
 
 impl fmt::Display for TweakedPublicKey {
@@ -1468,6 +1483,7 @@ pub mod error {
     /// Error generated from WIF key format.
     #[derive(Debug, Clone, PartialEq, Eq)]
     #[non_exhaustive]
+    #[cfg(feature = "alloc")]
     pub enum FromWifError {
         /// A base58 decoding error.
         Base58(base58::Error),
@@ -1481,10 +1497,12 @@ pub mod error {
         InvalidWifCompressionFlag(InvalidWifCompressionFlagError),
     }
 
+    #[cfg(feature = "alloc")]
     impl From<Infallible> for FromWifError {
         fn from(never: Infallible) -> Self { match never {} }
     }
 
+    #[cfg(feature = "alloc")]
     impl fmt::Display for FromWifError {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             match self {
@@ -1501,6 +1519,7 @@ pub mod error {
     }
 
     #[cfg(feature = "std")]
+    #[cfg(feature = "alloc")]
     impl std::error::Error for FromWifError {
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
             match self {
@@ -1673,22 +1692,26 @@ pub mod error {
 
     /// Invalid compression flag for a WIF key
     #[derive(Debug, Clone, PartialEq, Eq)]
+    #[cfg(feature = "alloc")]
     pub struct InvalidWifCompressionFlagError {
         /// The invalid compression flag.
         pub(crate) invalid: u8,
     }
 
+    #[cfg(feature = "alloc")]
     impl InvalidWifCompressionFlagError {
         /// Returns the invalid compression flag.
         pub fn invalid_compression_flag(&self) -> u8 { self.invalid }
     }
 
+    #[cfg(feature = "alloc")]
     impl fmt::Display for InvalidWifCompressionFlagError {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             write!(f, "invalid WIF compression flag. Expected a 0x01 byte at the end of the key but found: {}", self.invalid)
         }
     }
 
+    #[cfg(feature = "alloc")]
     #[cfg(feature = "std")]
     impl std::error::Error for InvalidWifCompressionFlagError {
         fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
@@ -1771,12 +1794,15 @@ impl<'a> Arbitrary<'a> for XOnlyPublicKey {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "alloc")]
     use alloc::string::ToString;
+    #[cfg(feature = "alloc")]
     use alloc::{format, vec};
 
     use super::*;
 
     #[test]
+    #[cfg(feature = "alloc")]
     fn pubkey_hash() {
         let pk = "032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af"
             .parse::<LegacyPublicKey>()
@@ -1788,6 +1814,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "alloc")]
     fn wpubkey_hash() {
         let pk = "032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af"
             .parse::<LegacyPublicKey>()
@@ -1802,6 +1829,7 @@ mod tests {
 
     #[test]
     #[cfg(feature = "serde")]
+    #[cfg(feature = "alloc")]
     fn skey_serde() {
         use serde_test::{assert_tokens, Configure, Token};
 
@@ -1866,6 +1894,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "alloc")]
     fn pubkey_sort() {
         struct Vector {
             input: Vec<LegacyPublicKey>,
@@ -2093,6 +2122,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "alloc")]
     fn keypair_from_str_roundtrip() {
         #[cfg(feature = "rand")]
         #[cfg(feature = "std")]
