@@ -1,4 +1,4 @@
-use bitcoin_consensus_encoding::{ArrayEncoder, Encodable, EncodableByteIter, Encoder2, Encoder3};
+use bitcoin_consensus_encoding::{ArrayEncoder, Encodable, Encoder2, Encoder3, EncoderByteIter};
 use hex::BytesToHexIter;
 
 struct TestArray<const N: usize>([u8; N]);
@@ -48,7 +48,7 @@ impl<const N: usize, const M: usize, const L: usize> Encodable for TestCatArray3
 #[test]
 fn hex_iter() {
     let data = TestArray([255u8, 240, 9, 135]);
-    let byte_iter = EncodableByteIter::new(&data);
+    let byte_iter = EncoderByteIter::new(data.encoder());
     let mut iter = BytesToHexIter::new(byte_iter, hex::Case::Upper);
 
     let expect_str = "FFF00987";
@@ -63,7 +63,7 @@ fn hex_iter() {
 #[test]
 fn hex_iter_cat_encoder() {
     let data = TestCatArray([222u8, 173], [190u8, 239]);
-    let byte_iter = EncodableByteIter::new(&data);
+    let byte_iter = EncoderByteIter::new(data.encoder());
     let mut iter = BytesToHexIter::new(byte_iter, hex::Case::Lower);
 
     let expect_str = "deadbeef";
@@ -80,19 +80,19 @@ fn hex_iter_cat_encoder() {
 #[test]
 fn nth() {
     let data = TestArray([255u8, 240, 9, 135]);
-    let mut byte_iter = EncodableByteIter::new(&data);
+    let mut byte_iter = EncoderByteIter::new(data.encoder());
     assert_eq!(byte_iter.nth(2).unwrap(), 9);
     assert_eq!(byte_iter.nth(0).unwrap(), 135);
     assert!(byte_iter.nth(42).is_none());
 
     let data = TestCatArray([222u8, 173], [190u8, 239]);
-    let mut byte_iter = EncodableByteIter::new(&data);
+    let mut byte_iter = EncoderByteIter::new(data.encoder());
     assert_eq!(byte_iter.nth(1).unwrap(), 173);
     assert_eq!(byte_iter.nth(1).unwrap(), 239);
     assert!(byte_iter.nth(42).is_none());
 
     let data = TestCatArray3([0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]);
-    let mut byte_iter = EncodableByteIter::new(&data);
+    let mut byte_iter = EncoderByteIter::new(data.encoder());
     assert_eq!(byte_iter.nth(5).unwrap(), 5);
     assert_eq!(byte_iter.peek_chunk(), [6, 7]);
 }
@@ -100,13 +100,13 @@ fn nth() {
 #[test]
 fn peek_chunk() {
     let data = TestArray([255u8, 240, 9, 135]);
-    let mut byte_iter = EncodableByteIter::new(&data);
+    let mut byte_iter = EncoderByteIter::new(data.encoder());
     assert_eq!(byte_iter.peek_chunk(), [255u8, 240, 9, 135]);
     assert_eq!(byte_iter.next().unwrap(), 255);
     assert_eq!(byte_iter.peek_chunk(), [240, 9, 135]);
 
     let data = TestCatArray([222u8, 173], [190u8, 239]);
-    let mut byte_iter = EncodableByteIter::new(&data);
+    let mut byte_iter = EncoderByteIter::new(data.encoder());
     assert_eq!(byte_iter.peek_chunk(), [222u8, 173]);
     assert_eq!(byte_iter.next().unwrap(), 222);
     assert_eq!(byte_iter.peek_chunk(), [173]);
@@ -114,7 +114,7 @@ fn peek_chunk() {
     assert_eq!(byte_iter.peek_chunk(), [190, 239]);
 
     let data = TestCatArray([], [21u8, 42]);
-    let mut byte_iter = EncodableByteIter::new(&data);
+    let mut byte_iter = EncoderByteIter::new(data.encoder());
     assert_eq!(byte_iter.peek_chunk(), [21, 42]);
     assert_eq!(byte_iter.next().unwrap(), 21);
     assert_eq!(byte_iter.peek_chunk(), [42]);
