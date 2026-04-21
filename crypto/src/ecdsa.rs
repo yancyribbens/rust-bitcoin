@@ -14,7 +14,6 @@ use core::{fmt, iter};
 use arbitrary::{Arbitrary, Unstructured};
 use hex_unstable::DisplayHex;
 use internals::impl_to_hex_from_lower_hex;
-use io::Write;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -81,17 +80,6 @@ impl Signature {
             .chain(iter::once(self.sighash_type as u8))
             .collect()
     }
-
-    /// Serializes an ECDSA signature (inner secp256k1 signature in DER format) to a `writer`.
-    ///
-    /// # Errors
-    ///
-    /// If the signature bytes cannot be written to the provided `writer`.
-    #[inline]
-    pub fn serialize_to_writer<W: Write + ?Sized>(&self, writer: &mut W) -> Result<(), io::Error> {
-        let sig = self.serialize();
-        sig.write_to(writer)
-    }
 }
 
 impl fmt::Display for Signature {
@@ -152,16 +140,6 @@ impl SerializedSignature {
     /// Returns an iterator over bytes of the signature.
     #[inline]
     pub fn iter(&self) -> core::slice::Iter<'_, u8> { self.into_iter() }
-
-    /// Writes this serialized signature to a `writer`.
-    ///
-    /// # Errors
-    ///
-    /// If the signature bytes cannot be written to the provided `writer`.
-    #[inline]
-    pub fn write_to<W: Write + ?Sized>(&self, writer: &mut W) -> Result<(), io::Error> {
-        writer.write_all(self)
-    }
 }
 
 impl fmt::Debug for SerializedSignature {
@@ -374,12 +352,15 @@ impl<'a> Arbitrary<'a> for Signature {
 #[cfg(test)]
 mod tests {
     use alloc::vec;
+    #[cfg(feature = "std")]
+    use std::io::Write;
 
     use super::*;
 
     const TEST_SIGNATURE_HEX: &str = "3046022100839c1fbc5304de944f697c9f4b1d01d1faeba32d751c0f7acb21ac8a0f436a72022100e89bd46bb3a5a62adc679f659b7ce876d83ee297c7a5587b2011c4fcc72eab45";
 
     #[test]
+    #[cfg(feature = "std")]
     fn write_serialized_signature() {
         let sig = Signature {
             signature: secp256k1::ecdsa::Signature::from_str(TEST_SIGNATURE_HEX).unwrap(),
@@ -387,7 +368,7 @@ mod tests {
         };
 
         let mut buf = vec![];
-        sig.serialize_to_writer(&mut buf).expect("write failed");
+        buf.write_all(&sig.serialize()).expect("write failed");
 
         assert_eq!(sig.to_vec(), buf);
     }
