@@ -170,7 +170,7 @@ impl<T> Deserialize for ScriptBuf<T> {
 impl Serialize for LegacyPublicKey {
     fn serialize(&self) -> Vec<u8> {
         let mut buf = Vec::new();
-        self.write_into(&mut buf).expect("vecs don't error");
+        buf.write_all(&self.to_bytes()).expect("vecs don't error");
         buf
     }
 }

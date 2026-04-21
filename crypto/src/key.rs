@@ -18,7 +18,6 @@ use hex_unstable::DisplayHex;
 use internals::array::ArrayExt;
 use internals::array_vec::ArrayVec;
 use internals::impl_to_hex_from_lower_hex;
-use io::{Read, Write};
 use network::NetworkKind;
 #[cfg(feature = "rand")]
 #[cfg(feature = "std")]
@@ -633,50 +632,9 @@ impl LegacyPublicKey {
     /// information on the [`LegacyPublicKey`].
     pub fn force_compressed(self) -> FullPublicKey { FullPublicKey::from_secp(self.to_inner()) }
 
-    /// Writes the public key into a writer.
-    ///
-    /// # Errors
-    ///
-    /// Errors if the bytes fail to write to the provided writer.
-    pub fn write_into<W: Write + ?Sized>(&self, writer: &mut W) -> Result<(), io::Error> {
-        self.with_serialized(|bytes| writer.write_all(bytes))
-    }
-
-    /// Reads the public key from a reader.
-    ///
-    /// This internally reads the first byte before reading the rest, so
-    /// use of a `BufReader` is recommended.
-    ///
-    /// # Errors
-    ///
-    /// Errors if the reader fails to read, or the read bytes are not a valid public key.
-    pub fn read_from<R: Read + ?Sized>(reader: &mut R) -> Result<Self, io::Error> {
-        let mut bytes = [0; 65];
-
-        reader.read_exact(&mut bytes[0..1])?;
-        let bytes = if bytes[0] < 4 { &mut bytes[..33] } else { &mut bytes[..65] };
-
-        reader.read_exact(&mut bytes[1..])?;
-        Self::from_slice(bytes).map_err(|e| {
-            // Need a static string for no-std io
-            #[cfg(feature = "std")]
-            let reason = e;
-            #[cfg(not(feature = "std"))]
-            let reason = match e {
-                FromSliceError::Secp256k1(_) => "secp256k1 error",
-                FromSliceError::InvalidKeyPrefix(_) => "invalid key prefix",
-                FromSliceError::InvalidLength(_) => "invalid length",
-            };
-            io::Error::new(io::ErrorKind::InvalidData, reason)
-        })
-    }
-
     /// Serializes the public key to bytes.
-    #[allow(clippy::missing_panics_doc)]
     pub fn to_vec(self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        self.write_into(&mut buf).expect("vecs don't error");
-        buf
+        self.to_bytes().to_vec()
     }
 
     /// Serializes the public key to bytes.
@@ -870,38 +828,6 @@ impl FullPublicKey {
     /// Returns bitcoin 160-bit hash of the public key for witness program.
     pub fn wpubkey_hash(&self) -> WPubkeyHash {
         WPubkeyHash::from_byte_array(hash160::Hash::hash(&self.to_bytes()).to_byte_array())
-    }
-
-    /// Writes the public key into a writer.
-    ///
-    /// # Errors
-    ///
-    /// Errors if the bytes fail to write to the provided writer.
-    pub fn write_into<W: io::Write + ?Sized>(&self, writer: &mut W) -> Result<(), io::Error> {
-        writer.write_all(&self.to_bytes())
-    }
-
-    /// Reads the public key from a reader.
-    ///
-    /// This internally reads the first byte before reading the rest, so
-    /// use of a `BufReader` is recommended.
-    ///
-    /// # Errors
-    ///
-    /// Errors if the reader fails to read, or the read bytes are not a valid public key.
-    pub fn read_from<R: io::Read + ?Sized>(reader: &mut R) -> Result<Self, io::Error> {
-        let mut bytes = [0; 33];
-
-        reader.read_exact(&mut bytes)?;
-        #[allow(unused_variables)] // e when std not enabled
-        Self::from_bytes(bytes).map_err(|e| {
-            // Need a static string for no-std io
-            #[cfg(feature = "std")]
-            let reason = e;
-            #[cfg(not(feature = "std"))]
-            let reason = "secp256k1 error";
-            io::Error::new(io::ErrorKind::InvalidData, reason)
-        })
     }
 
     /// Serializes the public key.
@@ -1915,55 +1841,6 @@ mod tests {
         assert_tokens(&pk.readable(), &[Token::BorrowedStr(PK_STR)]);
         assert_tokens(&pk_u.compact(), &[Token::BorrowedBytes(&PK_BYTES_U[..])]);
         assert_tokens(&pk_u.readable(), &[Token::BorrowedStr(PK_STR_U)]);
-    }
-
-    fn random_key(mut seed: u8) -> LegacyPublicKey {
-        loop {
-            let mut data = [0; 65];
-            for byte in &mut data[..] {
-                *byte = seed;
-                // totally a rng
-                seed = seed.wrapping_mul(41).wrapping_add(43);
-            }
-            if data[0] % 2 == 0 {
-                data[0] = 4;
-                if let Ok(key) = LegacyPublicKey::from_slice(&data[..]) {
-                    return key;
-                }
-            } else {
-                data[0] = 2 + (data[0] >> 7);
-                if let Ok(key) = LegacyPublicKey::from_slice(&data[..33]) {
-                    return key;
-                }
-            }
-        }
-    }
-
-    #[test]
-    fn pubkey_read_write() {
-        const N_KEYS: usize = 20;
-        let keys: Vec<_> = (0..N_KEYS).map(|i| random_key(i as u8)).collect();
-
-        let mut v = vec![];
-        for k in &keys {
-            k.write_into(&mut v).expect("writing into vec");
-        }
-
-        let mut reader = v.as_slice();
-        let mut dec_keys = vec![];
-        for _ in 0..N_KEYS {
-            dec_keys.push(LegacyPublicKey::read_from(&mut reader).expect("reading from vec"));
-        }
-        assert_eq!(keys, dec_keys);
-        assert!(LegacyPublicKey::read_from(&mut reader).is_err());
-
-        // sanity checks
-        let mut empty: &[u8] = &[];
-        assert!(LegacyPublicKey::read_from(&mut empty).is_err());
-        assert!(LegacyPublicKey::read_from(&mut &[0; 33][..]).is_err());
-        assert!(LegacyPublicKey::read_from(&mut &[2; 32][..]).is_err());
-        assert!(LegacyPublicKey::read_from(&mut &[0; 65][..]).is_err());
-        assert!(LegacyPublicKey::read_from(&mut &[4; 64][..]).is_err());
     }
 
     #[test]
