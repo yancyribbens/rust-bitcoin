@@ -24,49 +24,10 @@ pub use crypto::key::{
 };
 #[doc(inline)]
 pub use crypto::key::{
-    FullPublicKey, Keypair, LegacyPublicKey, PrivateKey, PubkeyHash, SerializedXOnlyPublicKey,
-    TweakedKeypair, TweakedPublicKey, UntweakedKeypair, UntweakedPublicKey, WPubkeyHash, WifKey,
-    XOnlyPublicKey,
+    FullPublicKey, Keypair, LegacyPublicKey, PrivateKey, PubkeyHash, SerializedLegacyPublicKey,
+    SerializedXOnlyPublicKey, TweakedKeypair, TweakedPublicKey, UntweakedKeypair,
+    UntweakedPublicKey, WPubkeyHash, WifKey, XOnlyPublicKey,
 };
-pub use serialized_legacy_public_key::SerializedLegacyPublicKey;
-
-mod serialized_legacy_public_key {
-    use internals::array_vec::ArrayVec;
-
-    /// A serialized form of `LegacyPublicKey`.
-    ///
-    /// This type contains the legacy public key in serialized as either compressed or
-    /// uncompressed. The type implements the standard conversion traits so it behaves a lot like
-    /// an array. In addition, the type implements `AsRef<PushBytes>`, so you can pass it into
-    /// script.
-    #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-    pub struct SerializedLegacyPublicKey(ArrayVec<u8, 65>);
-
-    impl SerializedLegacyPublicKey {
-        pub(crate) fn new_compressed(compressed: &[u8; 33]) -> Self {
-            Self(ArrayVec::from_slice(compressed))
-        }
-
-        pub(crate) fn new_uncompressed(uncompressed: &[u8; 65]) -> Self {
-            Self(ArrayVec::from_slice(uncompressed))
-        }
-    }
-
-    impl core::ops::Deref for SerializedLegacyPublicKey {
-        type Target = [u8];
-
-        #[inline]
-        fn deref(&self) -> &Self::Target { &self.0 }
-    }
-}
-
-impl AsRef<[u8]> for SerializedLegacyPublicKey {
-    fn as_ref(&self) -> &[u8] { self }
-}
-
-impl Borrow<[u8]> for SerializedLegacyPublicKey {
-    fn borrow(&self) -> &[u8] { self }
-}
 
 impl AsRef<PushBytes> for SerializedLegacyPublicKey {
     fn as_ref(&self) -> &PushBytes { self.borrow() }
@@ -113,15 +74,6 @@ define_extension_trait! {
         fn p2wpkh_script_code(&self) -> Result<WitnessScriptBuf, UncompressedPublicKeyError> {
             let key = FullPublicKey::try_from(*self)?;
             Ok(key.p2wpkh_script_code())
-        }
-
-        /// Serializes the public key to bytes.
-        fn to_bytes(self) -> SerializedLegacyPublicKey {
-            if self.compressed() {
-                SerializedLegacyPublicKey::new_compressed(&self.serialize_compressed())
-            } else {
-                SerializedLegacyPublicKey::new_uncompressed(&self.serialize_uncompressed())
-            }
         }
     }
 }
@@ -297,23 +249,5 @@ mod tests {
                 .parse::<LegacyPublicKey>()
                 .unwrap()
         );
-    }
-
-    #[test]
-    #[cfg(feature = "rand")]
-    #[cfg(feature = "std")]
-    fn serialized_legacy_public_key_roundtrip() {
-        let key = Keypair::generate().to_public_key();
-        assert!(key.compressed());
-        let serialized = &key.to_bytes();
-        assert_eq!(serialized.len(), 33);
-        let deser = LegacyPublicKey::from_slice(serialized).unwrap();
-        assert_eq!(deser, key);
-
-        let key = LegacyPublicKey::from_secp_uncompressed(key.to_inner());
-        let serialized = &key.to_bytes();
-        assert_eq!(serialized.len(), 65);
-        let deser = LegacyPublicKey::from_slice(serialized).unwrap();
-        assert_eq!(deser, key);
     }
 }
