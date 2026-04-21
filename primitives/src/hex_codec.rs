@@ -233,10 +233,11 @@ impl<T: Decodable> std::error::Error for ParsePrimitiveError<T> {
 #[cfg(test)]
 mod tests {
     #[cfg(feature = "alloc")]
-    use alloc::{format, string::ToString};
+    use alloc::{format, string::ToString, vec};
 
     #[cfg(feature = "alloc")]
     use super::*;
+    #[cfg(feature = "alloc")]
     use crate::block;
 
     #[test]
@@ -274,5 +275,48 @@ mod tests {
 
         assert_eq!((&hex).into_iter().next(), Some(0u8));
         assert!(!format!("{hex:?}").is_empty());
+    }
+
+    #[test]
+    #[cfg(feature = "alloc")]
+    fn hex_primitive_from_str_flushes_full_buffer() {
+        // 300 headers force multiple full 4096-byte decoder flushes plus a final remainder flush.
+        let bytes = vec![0u8; block::Header::SIZE * 300];
+        let encoded = hex_unstable::DisplayHex::as_hex(&bytes).to_string();
+
+        let parsed = HexPrimitive::<block::Header>::from_str(&encoded).unwrap();
+
+        assert_eq!(parsed.version.to_consensus(), 0);
+        assert_eq!(parsed.prev_blockhash, crate::hash_types::BlockHash::from_byte_array([0; 32]));
+    }
+
+    #[test]
+    #[cfg(feature = "alloc")]
+    fn hex_primitive_upper_hex_with_alternate_prefix() {
+        let header: block::Header =
+            encoding::decode_from_slice(&[0u8; block::Header::SIZE]).expect("valid header");
+
+        assert!(format!("{:#X}", HexPrimitive(&header)).starts_with("0X"));
+    }
+
+    #[test]
+    #[cfg(feature = "alloc")]
+    fn parse_primitive_error_clone() {
+        let odd: ParsePrimitiveError<block::Header> = HexPrimitive::from_str("0").unwrap_err();
+        let invalid: ParsePrimitiveError<block::Header> = HexPrimitive::from_str("zz").unwrap_err();
+        let decode: ParsePrimitiveError<block::Header> = HexPrimitive::from_str("00").unwrap_err();
+
+        assert_eq!(odd.clone(), odd);
+        assert_eq!(invalid.clone(), invalid);
+        assert_eq!(decode.clone(), decode);
+    }
+
+    #[test]
+    #[cfg(feature = "alloc")]
+    fn parse_primitive_error_partial_eq_false_for_different_variants() {
+        let odd: ParsePrimitiveError<block::Header> = HexPrimitive::from_str("0").unwrap_err();
+        let invalid: ParsePrimitiveError<block::Header> = HexPrimitive::from_str("zz").unwrap_err();
+
+        assert_ne!(odd, invalid);
     }
 }

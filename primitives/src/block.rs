@@ -1525,6 +1525,10 @@ mod tests {
 
         assert_eq!(format!("{}", block), want);
         assert_eq!(format!("{:x}", block), want);
+        assert_eq!(format!("0x{want}"), format!("{:#x}", block));
+        assert_eq!(format!("0X{}", want.to_ascii_uppercase()), format!("{:#X}", block));
+        assert_eq!(format!("{:>166}", format!("0x{want}")), format!("{:>#166x}", block));
+        assert_eq!(format!("{:.20}", want), format!("{:.20x}", block));
 
         // Note this is pointless because the hex does not have letters in it, only numbers.
         let want =

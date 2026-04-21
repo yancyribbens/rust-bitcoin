@@ -302,10 +302,12 @@ mod tests {
         let as_array: &[u8; 32] = tc.as_ref();
         let as_slice: &[u8] = tc.as_ref();
         let borrowed: &[u8; 32] = core::borrow::Borrow::<[u8; 32]>::borrow(&tc);
+        let borrowed_slice: &[u8] = core::borrow::Borrow::<[u8]>::borrow(&tc);
 
         assert_eq!(as_array, tc.as_byte_array());
         assert_eq!(borrowed, tc.as_byte_array());
         assert_eq!(as_slice, tc.as_byte_array());
+        assert_eq!(borrowed_slice, tc.as_byte_array());
     }
 
     byte_array_roundtrip_test!(txid_byte_array_roundtrip, Txid, 32, 0x12);

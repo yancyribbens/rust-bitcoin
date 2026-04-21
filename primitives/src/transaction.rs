@@ -1722,6 +1722,11 @@ mod tests {
         // All of these should yield a lowercase hex
         assert_eq!(encoded_tx, lower_hex_tx);
         assert_eq!(encoded_tx, format!("{}", tx_orig));
+        assert_eq!(format!("0x{encoded_tx}"), format!("{:#x}", tx_orig));
+        assert_eq!(format!("{:>132}", encoded_tx), format!("{:>132x}", tx_orig));
+        assert_eq!(format!("{:<132}", encoded_tx), format!("{:<132x}", tx_orig));
+        assert_eq!(format!("{:^132}", encoded_tx), format!("{:^132x}", tx_orig));
+        assert_eq!(format!("{:.20}", encoded_tx), format!("{:.20x}", tx_orig));
 
         // And this should yield uppercase hex
         let upper_encoded = encoded_tx
@@ -1729,6 +1734,7 @@ mod tests {
             .map(|chr| chr.to_ascii_uppercase())
             .collect::<alloc::string::String>();
         assert_eq!(upper_encoded, upper_hex_tx);
+        assert_eq!(format!("0X{upper_encoded}"), format!("{:#X}", tx_orig));
     }
 
     #[test]

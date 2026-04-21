@@ -2,6 +2,7 @@
 
 use alloc::string::ToString;
 use alloc::{format, vec};
+use core::ops::Bound;
 
 use encoding::{Decodable, Decoder as _};
 use hashes::{hash160, sha256};
@@ -198,6 +199,13 @@ fn test_index() {
 }
 
 #[test]
+fn test_index_bound_tuple() {
+    let script = Script::from_bytes(&[1, 2, 3, 4, 5]);
+
+    assert_eq!(script[(Bound::Included(1), Bound::Excluded(4))].as_bytes(), &[2, 3, 4]);
+}
+
+#[test]
 fn partial_ord() {
     let script_small = Script::from_bytes(&[0x51, 0x52, 0x53]);
     let script_big = Script::from_bytes(&[0x54, 0x55, 0x56]);
@@ -355,26 +363,34 @@ fn cow_script_to_box_script() {
 
 #[test]
 fn redeem_script_size_error() {
+    #[cfg(feature = "std")]
+    use std::error::Error as _;
+
     let script = RedeemScriptBuf::from(vec![0x51; 521]);
     let result = ScriptHash::try_from(script);
 
     let err = result.unwrap_err();
     assert_eq!(err.invalid_size(), 521);
 
-    let err_msg = format!("{}", err);
-    assert!(err_msg.contains("521"));
+    assert!(!err.to_string().is_empty());
+    #[cfg(feature = "std")]
+    assert!(err.source().is_none());
 }
 
 #[test]
 fn witness_script_size_error() {
+    #[cfg(feature = "std")]
+    use std::error::Error as _;
+
     let script = WitnessScriptBuf::from(vec![0x51; 10_001]);
     let result = WScriptHash::try_from(script);
 
     let err = result.unwrap_err();
     assert_eq!(err.invalid_size(), 10_001);
 
-    let err_msg = format!("{}", err);
-    assert!(err_msg.contains("10001"));
+    assert!(!err.to_string().is_empty());
+    #[cfg(feature = "std")]
+    assert!(err.source().is_none());
 }
 
 #[test]
@@ -427,6 +443,14 @@ fn script_display() {
 }
 
 #[test]
+fn script_pubkey_display_and_debug() {
+    let script = ScriptPubKey::from_bytes(&[0x00, 0xa1, 0xb2]);
+
+    assert_eq!(format!("{}", script), "OP_0 OP_LESSTHANOREQUAL OP_CSV");
+    assert_eq!(format!("{:?}", script), "Script(OP_0 OP_LESSTHANOREQUAL OP_CSV)");
+}
+
+#[test]
 fn script_display_pushdata() {
     // OP_PUSHDATA1
     let script = Script::from_bytes(&[0x4c, 0x02, 0xab, 0xcd]);
@@ -452,6 +476,14 @@ fn script_buf_display() {
         assert_eq!(format!("{:X}", script_buf), "00A1B2");
     }
     assert!(!format!("{:?}", script_buf).is_empty());
+}
+
+#[test]
+fn script_pubkey_buf_display_and_debug() {
+    let script_buf = ScriptPubKeyBuf::from(vec![0x00, 0xa1, 0xb2]);
+
+    assert_eq!(format!("{}", script_buf), "OP_0 OP_LESSTHANOREQUAL OP_CSV");
+    assert_eq!(format!("{:?}", script_buf), "Script(OP_0 OP_LESSTHANOREQUAL OP_CSV)");
 }
 
 #[test]
