@@ -94,7 +94,6 @@ dependencies = [
  "arbitrary",
  "base58ck",
  "bitcoin-internals",
- "bitcoin-io",
  "bitcoin-network-kind",
  "bitcoin_hashes",
  "hex-conservative 0.3.2",

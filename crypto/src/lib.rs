@@ -21,8 +21,6 @@ pub extern crate base58;
 
 pub extern crate network;
 
-pub extern crate io;
-
 pub extern crate secp256k1;
 
 #[cfg(feature = "alloc")]
