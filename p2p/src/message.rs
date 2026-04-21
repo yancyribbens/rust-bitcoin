@@ -55,7 +55,7 @@ pub const MAX_MSG_SIZE: usize = 5_000_000;
 
 /// Serializer for command string
 #[derive(PartialEq, Eq, Clone, Debug)]
-pub struct CommandString(Cow<'static, str>);
+pub struct CommandString([u8; 12]);
 
 impl CommandString {
     /// Converts `&'static str` to `CommandString`
@@ -72,11 +72,13 @@ impl CommandString {
     }
 
     fn try_from_static_cow(cow: Cow<'static, str>) -> Result<Self, CommandStringError> {
-        if cow.len() > 12 {
-            Err(CommandStringError { cow })
-        } else {
-            Ok(Self(cow))
-        }
+        let a = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+        Ok(Self(a))
+        //if cow.len() > 12 {
+            //Err(CommandStringError { cow })
+        //} else {
+            //Ok(Self(cow))
+        //}
     }
 }
 
@@ -112,13 +114,13 @@ impl core::str::FromStr for CommandString {
     }
 }
 
-impl fmt::Display for CommandString {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { f.write_str(self.0.as_ref()) }
-}
+//impl fmt::Display for CommandString {
+    //fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { f.write_str(self.0.as_ref()) }
+//}
 
-impl AsRef<str> for CommandString {
-    fn as_ref(&self) -> &str { self.0.as_ref() }
-}
+//impl AsRef<str> for CommandString {
+    //fn as_ref(&self) -> &str { self.0.as_ref() }
+//}
 
 //impl Encodable for CommandString {
     //#[inline]
