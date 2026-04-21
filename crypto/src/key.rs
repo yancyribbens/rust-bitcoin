@@ -5,6 +5,7 @@
 //! This module provides keys used in Bitcoin that can be roundtrip
 //! (de)serialized.
 
+use alloc::borrow::Borrow;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt;
@@ -34,6 +35,7 @@ pub use encapsulate::{
     FullPublicKey, Keypair, LegacyPublicKey, PrivateKey, SerializedXOnlyPublicKey, TweakedKeypair,
     TweakedPublicKey, XOnlyPublicKey,
 };
+pub use serialized_legacy_public_key::SerializedLegacyPublicKey;
 
 #[doc(no_inline)]
 pub use self::error::{
@@ -279,6 +281,43 @@ mod encapsulate {
         /// Returns a reference to the raw bytes.
         pub const fn as_byte_array(&self) -> &[u8; 32] { &self.0 }
     }
+}
+
+mod serialized_legacy_public_key {
+    use internals::array_vec::ArrayVec;
+
+    /// A serialized form of `LegacyPublicKey`.
+    ///
+    /// This type contains the legacy public key in serialized as either compressed or
+    /// uncompressed. The type implements the standard conversion traits so it behaves a lot like
+    /// an array.
+    #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+    pub struct SerializedLegacyPublicKey(ArrayVec<u8, 65>);
+
+    impl SerializedLegacyPublicKey {
+        pub(crate) fn new_compressed(compressed: &[u8; 33]) -> Self {
+            Self(ArrayVec::from_slice(compressed))
+        }
+
+        pub(crate) fn new_uncompressed(uncompressed: &[u8; 65]) -> Self {
+            Self(ArrayVec::from_slice(uncompressed))
+        }
+    }
+
+    impl core::ops::Deref for SerializedLegacyPublicKey {
+        type Target = [u8];
+
+        #[inline]
+        fn deref(&self) -> &Self::Target { &self.0 }
+    }
+}
+
+impl AsRef<[u8]> for SerializedLegacyPublicKey {
+    fn as_ref(&self) -> &[u8] { self }
+}
+
+impl Borrow<[u8]> for SerializedLegacyPublicKey {
+    fn borrow(&self) -> &[u8] { self }
 }
 
 impl XOnlyPublicKey {
@@ -638,6 +677,15 @@ impl LegacyPublicKey {
         let mut buf = Vec::new();
         self.write_into(&mut buf).expect("vecs don't error");
         buf
+    }
+
+    /// Serializes the public key to bytes.
+    pub fn to_bytes(self) -> SerializedLegacyPublicKey {
+        if self.compressed() {
+            SerializedLegacyPublicKey::new_compressed(&self.serialize_compressed())
+        } else {
+            SerializedLegacyPublicKey::new_uncompressed(&self.serialize_uncompressed())
+        }
     }
 
     /// Serializes the public key into a `SortKey`.
@@ -2234,5 +2282,23 @@ mod tests {
         let secp_key =
             secp256k1::SecretKey::from_secret_bytes(bitcoin_key.to_secret_bytes()).unwrap();
         assert_eq!(PrivateKey::from_secp(secp_key), bitcoin_key);
+    }
+
+    #[test]
+    #[cfg(feature = "rand")]
+    #[cfg(feature = "std")]
+    fn serialized_legacy_public_key_roundtrip() {
+        let key = Keypair::generate().to_public_key();
+        assert!(key.compressed());
+        let serialized = &key.to_bytes();
+        assert_eq!(serialized.len(), 33);
+        let deser = LegacyPublicKey::from_slice(serialized).unwrap();
+        assert_eq!(deser, key);
+
+        let key = LegacyPublicKey::from_secp_uncompressed(key.to_inner());
+        let serialized = &key.to_bytes();
+        assert_eq!(serialized.len(), 65);
+        let deser = LegacyPublicKey::from_slice(serialized).unwrap();
+        assert_eq!(deser, key);
     }
 }
