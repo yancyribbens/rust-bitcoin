@@ -54,6 +54,9 @@ exclude_re = [
     "primitives/.* <impl Decoder for WitnessDecoder>::push_bytes", # Replacing == with != causes an infinite loop
     "primitives/.* WitnessDecoder::resize_if_needed", # Replacing *= with += still resizes the buffer making the mutant untestable.
     "primitives/.* WitnessDecoder::reserve_batch", # Mutations cause an infinite loop
+    "primitives/.* <impl encoding::Encoder for WitnessesEncoder<'_>>::advance -> bool", # Replacing with `true` cause an infinite loop
+    "primitives/.* <impl encoding::Encoder for WitnessEncoder<'_>>::advance -> bool", # Replacing with `true` cause an infinite loop
+    "primitives/.* == with != in <impl encoding::Decoder for WitnessDecoder>::push_bytes", # Replacing == with != causes an infinite loop
     "primitives/.* replace \\+ with \\* in MerkleNode::calculate_root", # Replacing + with * causes an infinite loop
     "primitives/.* replace == with != in MerkleNode::calculate_root", # Replacing == with != isn't caught unless alloc is disabled.
     # TODO: remove after x86 SIMD support lands (https://github.com/rust-bitcoin/rust-bitcoin/issues/5540)
