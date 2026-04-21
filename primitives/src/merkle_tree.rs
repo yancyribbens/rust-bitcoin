@@ -131,7 +131,7 @@ fn calculate_root_batched(mut nodes: Vec<[u8; 32]>) -> Option<[u8; 32]> {
 
         // if odd count, duplicate last element
         if nodes.len() % 2 != 0 {
-            let last = *nodes.last().expect("nodes is not emoty");
+            let last = *nodes.last().expect("nodes is not empty");
             nodes.push(last);
         }
 
