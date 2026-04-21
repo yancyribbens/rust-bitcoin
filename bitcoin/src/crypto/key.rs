@@ -6,6 +6,7 @@
 //! (de)serialized.
 
 use core::borrow::Borrow;
+use core::ops::Deref;
 
 use crate::internal_macros::define_extension_trait;
 use crate::script::{self, PushBytes, WitnessScriptBuf};
@@ -32,8 +33,6 @@ pub use serialized_legacy_public_key::SerializedLegacyPublicKey;
 mod serialized_legacy_public_key {
     use internals::array_vec::ArrayVec;
 
-    use crate::script::PushBytes;
-
     /// A serialized form of `LegacyPublicKey`.
     ///
     /// This type contains the legacy public key in serialized as either compressed or
@@ -53,39 +52,28 @@ mod serialized_legacy_public_key {
         }
     }
 
-    // Keep the proof close to the type definition
-    impl core::borrow::Borrow<PushBytes> for SerializedLegacyPublicKey {
-        fn borrow(&self) -> &PushBytes {
-            <&PushBytes>::try_from(&*self.0).expect("65 <= u32::MAX")
-        }
-    }
-}
+    impl core::ops::Deref for SerializedLegacyPublicKey {
+        type Target = [u8];
 
-impl core::ops::Deref for SerializedLegacyPublicKey {
-    type Target = [u8];
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        <Self as Borrow<PushBytes>>::borrow(self).as_bytes()
-    }
-}
-
-impl AsRef<PushBytes> for SerializedLegacyPublicKey {
-    fn as_ref(&self) -> &PushBytes {
-        self.borrow()
+        #[inline]
+        fn deref(&self) -> &Self::Target { &self.0 }
     }
 }
 
 impl AsRef<[u8]> for SerializedLegacyPublicKey {
-    fn as_ref(&self) -> &[u8] {
-        self
-    }
+    fn as_ref(&self) -> &[u8] { self }
 }
 
 impl Borrow<[u8]> for SerializedLegacyPublicKey {
-    fn borrow(&self) -> &[u8] {
-        self
-    }
+    fn borrow(&self) -> &[u8] { self }
+}
+
+impl AsRef<PushBytes> for SerializedLegacyPublicKey {
+    fn as_ref(&self) -> &PushBytes { self.borrow() }
+}
+
+impl Borrow<PushBytes> for SerializedLegacyPublicKey {
+    fn borrow(&self) -> &PushBytes { <&PushBytes>::try_from(self.deref()).expect("65 <= u32::MAX") }
 }
 
 #[deprecated(since = "TBD", note = "use `LegacyPublicKey` instead")]
