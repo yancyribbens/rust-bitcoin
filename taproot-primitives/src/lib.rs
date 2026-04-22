@@ -66,9 +66,10 @@ hash_newtype! {
     /// This is used for computing tapscript script spend hash.
     pub struct TapLeafHash(sha256t::Hash<TapLeafTag>);
 }
-
+#[cfg(feature = "hex")]
 hashes::impl_hex_for_newtype!(TapLeafHash);
 #[cfg(feature = "serde")]
+#[cfg(feature = "hex")]
 hashes::impl_serde_for_newtype!(TapLeafHash);
 
 sha256t_tag! {
@@ -83,8 +84,10 @@ hash_newtype! {
     pub struct TapNodeHash(sha256t::Hash<TapBranchTag>);
 }
 
+#[cfg(feature = "hex")]
 hashes::impl_hex_for_newtype!(TapNodeHash);
 #[cfg(feature = "serde")]
+#[cfg(feature = "hex")]
 hashes::impl_serde_for_newtype!(TapNodeHash);
 
 sha256t_tag! {
@@ -98,8 +101,10 @@ hash_newtype! {
     pub struct TapTweakHash(sha256t::Hash<TapTweakTag>);
 }
 
+#[cfg(feature = "hex")]
 hashes::impl_hex_for_newtype!(TapTweakHash);
 #[cfg(feature = "serde")]
+#[cfg(feature = "hex")]
 hashes::impl_serde_for_newtype!(TapTweakHash);
 
 impl From<TapLeafHash> for TapNodeHash {
