@@ -13,6 +13,10 @@ mod arm_sha2;
 #[cfg(any(feature = "cpufeatures", feature = "std"))]
 mod x86_shani;
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[cfg(any(feature = "cpufeatures", feature = "std"))]
+mod sse41;
+
 use internals::slice::SliceExt;
 
 use super::{HashEngine, Midstate, BLOCK_SIZE};
