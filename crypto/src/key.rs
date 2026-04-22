@@ -288,8 +288,9 @@ mod serialized_legacy_public_key {
 
     /// A serialized form of `LegacyPublicKey`.
     ///
-    /// This type contains the legacy public key in serialized as either compressed or
-    /// uncompressed. The type implements the standard conversion traits so it behaves a lot like
+    /// This type contains the legacy public key serialized in either compressed or
+    /// uncompressed form, without allocating and guaranteeing a maximum size of 65 bytes.
+    /// The type implements the standard conversion traits so it behaves a lot like
     /// an array.
     #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
     pub struct SerializedLegacyPublicKey(ArrayVec<u8, 65>);
