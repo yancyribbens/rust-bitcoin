@@ -892,14 +892,15 @@ impl V1NetworkMessage {
     ///
     /// # Panics
     ///
-    /// Panics if message encoding fails or if the payload length exceeds `u32::MAX`.
+    /// Panics if the payload length exceeds `u32::MAX`.
     pub fn new(magic: Magic, payload: NetworkMessage) -> Self {
         let mut engine = sha256d::Hash::engine();
-        let payload_len = payload.consensus_encode(&mut engine).expect("engine doesn't error");
-        let payload_len = u32::try_from(payload_len).expect("network message use u32 as length");
-        let checksum = sha256d::Hash::from_engine(engine);
-        let checksum = checksum.to_byte_array();
-        let checksum = [checksum[0], checksum[1], checksum[2], checksum[3]];
+        hashes::encode_to_engine(&payload, &mut engine);
+        let bytes_hashed = engine.n_bytes_hashed();
+        let payload_len = u32::try_from(bytes_hashed).expect("network message use u32 as length");
+        let hash = sha256d::Hash::from_engine(engine);
+        let bytes = hash.to_byte_array();
+        let checksum = [bytes[0], bytes[1], bytes[2], bytes[3]];
         Self { magic, payload, payload_len, checksum }
     }
 
