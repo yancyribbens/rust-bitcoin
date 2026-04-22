@@ -13,6 +13,7 @@
 #![allow(clippy::manual_range_contains)] // More readable than clippy's format.
 #![allow(clippy::uninlined_format_args)] // Allow `format!("{}", x)` instead of enforcing `format!("{x}")`
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
 #[cfg(feature = "std")]
@@ -190,6 +191,7 @@ impl fmt::LowerHex for LeafVersion {
         fmt::LowerHex::fmt(&self.to_consensus(), f)
     }
 }
+#[cfg(feature = "alloc")]
 internals::impl_to_hex_from_lower_hex!(LeafVersion, |_| 2);
 
 impl fmt::UpperHex for LeafVersion {
@@ -281,6 +283,7 @@ impl fmt::LowerHex for FutureLeafVersion {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { fmt::LowerHex::fmt(&self.0, f) }
 }
+#[cfg(feature = "alloc")]
 internals::impl_to_hex_from_lower_hex!(FutureLeafVersion, |_| 2);
 
 impl fmt::UpperHex for FutureLeafVersion {
