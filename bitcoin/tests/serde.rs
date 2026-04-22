@@ -19,19 +19,15 @@
 
 #![cfg(feature = "serde")]
 
-use std::collections::BTreeMap;
-
 use bincode::serialize;
-use bitcoin::bip32::{ChildNumber, KeySource, Xpriv, Xpub};
-use bitcoin::hashes::{hash160, ripemd160, sha256, sha256d};
+use bitcoin::bip32::{ChildNumber, Xpriv, Xpub};
 use bitcoin::locktime::{absolute, relative};
-use bitcoin::psbt::{raw, Input, Output, Psbt, PsbtSighashType};
 use bitcoin::sighash::{EcdsaSighashType, TapSighashType};
 use bitcoin::taproot::{self, ControlBlock, LeafVersion, TapTree, TaprootBuilder};
 use bitcoin::witness::Witness;
 use bitcoin::{
-    ecdsa, hex, transaction, Address, Amount, LegacyPublicKey, NetworkKind, OutPoint,
-    ScriptPubKeyBuf, ScriptSigBuf, Sequence, TapScriptBuf, Transaction, TxIn, TxOut, Txid, WifKey,
+    ecdsa, hex, Address, LegacyPublicKey, NetworkKind, OutPoint, ScriptSigBuf, TapScriptBuf, Txid,
+    WifKey,
 };
 
 #[test]
@@ -190,121 +186,6 @@ fn serde_regression_public_key() {
     let got = serialize(&pk).unwrap();
     let want = include_bytes!("data/serde/public_key_bincode") as &[_];
     assert_eq!(got, want)
-}
-
-#[test]
-fn serde_regression_psbt() {
-    let tx = Transaction {
-        version: transaction::Version::ONE,
-        lock_time: absolute::LockTime::ZERO,
-        inputs: vec![TxIn {
-            previous_output: OutPoint {
-                txid: "e567952fb6cc33857f392efa3a46c995a28f69cca4bb1b37e0204dab1ec7a389"
-                    .parse::<Txid>()
-                    .unwrap(),
-                vout: 0,
-            },
-            script_sig: ScriptSigBuf::from_hex_no_length_prefix(
-                "160014be18d152a9b012039daf3da7de4f53349eecb985",
-            )
-            .unwrap(),
-            sequence: Sequence::from_consensus(4294967295),
-            witness: Witness::from_slice(&[hex::decode_to_vec(
-                "03d2e15674941bad4a996372cb87e1856d3652606d98562fe39c5e9e7e413f2105",
-            )
-            .unwrap()]),
-        }],
-        outputs: vec![TxOut {
-            amount: Amount::from_sat(190_303_501_938).unwrap(),
-            script_pubkey: ScriptPubKeyBuf::from_hex_no_length_prefix(
-                "a914339725ba21efd62ac753a9bcd067d6c7a6a39d0587",
-            )
-            .unwrap(),
-        }],
-    };
-    let unknown: BTreeMap<raw::Key, Vec<u8>> =
-        vec![(raw::Key { type_value: 9, key_data: vec![0, 1] }, vec![3, 4, 5])]
-            .into_iter()
-            .collect();
-    let key_source = ("deadbeef".parse().unwrap(), "0'/1".parse().unwrap());
-    let keypaths: BTreeMap<secp256k1::PublicKey, KeySource> = vec![(
-        "0339880dc92394b7355e3d0439fa283c31de7590812ea011c4245c0674a685e883".parse().unwrap(),
-        key_source.clone(),
-    )]
-    .into_iter()
-    .collect();
-
-    let proprietary: BTreeMap<raw::ProprietaryKey, Vec<u8>> = vec![(
-        raw::ProprietaryKey {
-            prefix: "prefx".as_bytes().to_vec(),
-            subtype: 42,
-            key: "test_key".as_bytes().to_vec(),
-        },
-        vec![5, 6, 7],
-    )]
-    .into_iter()
-    .collect();
-
-    let psbt = Psbt {
-        version: 0,
-        xpub: {
-            let s = include_str!("data/serde/extended_pub_key");
-            let xpub = s.trim().parse::<Xpub>().unwrap();
-            vec![(xpub, key_source)].into_iter().collect()
-        },
-        unsigned_tx: {
-            let mut unsigned = tx.clone();
-            unsigned.inputs[0].previous_output.txid = tx.compute_txid();
-            unsigned.inputs[0].script_sig = ScriptSigBuf::new();
-            unsigned.inputs[0].witness = Witness::default();
-            unsigned
-        },
-        proprietary: proprietary.clone(),
-        unknown: unknown.clone(),
-
-        inputs: vec![Input {
-            non_witness_utxo: Some(tx),
-            witness_utxo: Some(TxOut {
-                amount: Amount::from_sat(190_303_501_938).unwrap(),
-                script_pubkey: ScriptPubKeyBuf::from_hex_no_length_prefix("a914339725ba21efd62ac753a9bcd067d6c7a6a39d0587").unwrap(),
-            }),
-            sighash_type: Some(PsbtSighashType::from("SIGHASH_SINGLE|SIGHASH_ANYONECANPAY".parse::<EcdsaSighashType>().unwrap())),
-            redeem_script: Some(vec![0x51].into()),
-            witness_script: None,
-            partial_sigs: vec![(
-                "0339880dc92394b7355e3d0439fa283c31de7590812ea011c4245c0674a685e883".parse().unwrap(),
-                "304402204f67e2afb76142d44fae58a2495d33a3419daa26cd0db8d04f3452b63289ac0f022010762a9fb67e94cc5cad9026f6dc99ff7f070f4278d30fbc7d0c869dd38c7fe701".parse().unwrap(),
-            )].into_iter().collect(),
-            bip32_derivation: keypaths.clone().into_iter().collect(),
-            final_script_witness: Some(Witness::from_slice(&[vec![1, 3], vec![5]])),
-            ripemd160_preimages: vec![(ripemd160::Hash::hash(&[1, 2]), vec![1, 2])].into_iter().collect(),
-            sha256_preimages: vec![(sha256::Hash::hash(&[1, 2]), vec![1, 2])].into_iter().collect(),
-            hash160_preimages: vec![(hash160::Hash::hash(&[1, 2]), vec![1, 2])].into_iter().collect(),
-            hash256_preimages: vec![(sha256d::Hash::hash(&[1, 2]), vec![1, 2])].into_iter().collect(),
-            proprietary: proprietary.clone(),
-            unknown: unknown.clone(),
-            ..Default::default()
-        }],
-        outputs: vec![Output {
-            bip32_derivation: keypaths.into_iter().collect(),
-            proprietary,
-            unknown,
-            ..Default::default()
-        }],
-    };
-
-    // Sanity, check we can roundtrip BIP-0174 serialize.
-    let serialized = psbt.serialize();
-    Psbt::deserialize(&serialized).unwrap();
-
-    let got = serialize(&psbt).unwrap();
-
-    let want = include_bytes!("data/serde/psbt_bincode") as &[_];
-    assert_eq!(got, want);
-
-    let got = serde_json::to_string(&psbt).unwrap();
-    let want = include_str!("data/serde/psbt_base64.json");
-    assert_eq!(got, want);
 }
 
 #[test]
