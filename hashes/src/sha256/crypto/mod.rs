@@ -40,6 +40,13 @@ mod cpuid_sha256_x86 {
     cpufeatures::new!(inner, "sha", "sse2", "ssse3", "sse4.1");
     pub fn get() -> bool { inner::get() }
 }
+#[cfg(feature = "cpufeatures")]
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[allow(deprecated_in_future)]
+mod cpuid_sse41_x86 {
+    cpufeatures::new!(inner, "sse2", "ssse3", "sse4.1");
+    pub fn get() -> bool { inner::get() }
+}
 
 #[allow(non_snake_case)]
 const fn Ch(x: u32, y: u32, z: u32) -> u32 { z ^ (x & (y ^ z)) }
@@ -341,7 +348,6 @@ impl HashEngine {
         let count = inputs.len();
 
         // TODO: 8-way AVX2
-        // TODO: 4-way SSE4.1
 
         // 2-way x86 SHA-NI
         #[cfg(feature = "std")]
@@ -397,6 +403,36 @@ impl HashEngine {
                     let inp = <&[[u8; 64]; 2]>::try_from(&inputs[i..i + 2]).unwrap();
                     unsafe { arm_sha2::sha256d_64_2way(out, inp) };
                     i += 2;
+                }
+            }
+        }
+
+        // 4-way SSE4.1
+        #[cfg(feature = "std")]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if std::is_x86_feature_detected!("sse4.1")
+                && std::is_x86_feature_detected!("sse2")
+                && std::is_x86_feature_detected!("ssse3")
+            {
+                while count - i >= 4 {
+                    let out = <&mut [[u8; 32]; 4]>::try_from(&mut outputs[i..i + 4]).unwrap();
+                    let inp = <&[[u8; 64]; 4]>::try_from(&inputs[i..i + 4]).unwrap();
+                    unsafe { sse41::sha256d_64_4way(out, inp) };
+                    i += 4;
+                }
+            }
+        }
+
+        #[cfg(feature = "cpufeatures")]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if cpuid_sse41_x86::get() {
+                while count - i >= 4 {
+                    let out = <&mut [[u8; 32]; 4]>::try_from(&mut outputs[i..i + 4]).unwrap();
+                    let inp = <&[[u8; 64]; 4]>::try_from(&inputs[i..i + 4]).unwrap();
+                    unsafe { sse41::sha256d_64_4way(out, inp) };
+                    i += 4;
                 }
             }
         }
