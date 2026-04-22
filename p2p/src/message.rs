@@ -3244,7 +3244,7 @@ mod test {
         let mut encoder = cmd.encoder();
         assert_eq!(encoder.len(), expected_bytes.len());
 
-        let encoded = encoding::flush_to_vec(&mut encoder);
+        let encoded = encoding::drain_to_vec(&mut encoder);
         assert_eq!(encoded, expected_bytes);
     }
 }

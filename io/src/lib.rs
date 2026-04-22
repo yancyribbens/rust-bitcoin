@@ -464,17 +464,17 @@ where
     W: Write,
 {
     let mut encoder = object.encoder();
-    flush_to_writer(&mut encoder, writer)
+    drain_to_writer(&mut encoder, writer)
 }
 
-/// Flushes the output of an [`Encoder`] to an I/O writer.
+/// Drains the output of an [`Encoder`] to an I/O writer.
 ///
 /// See [`encode_to_writer`] for more information.
 ///
 /// # Errors
 ///
 /// Returns any I/O error encountered while writing to the writer.
-pub fn flush_to_writer<T, W>(encoder: &mut T, mut writer: W) -> Result<()>
+pub fn drain_to_writer<T, W>(encoder: &mut T, mut writer: W) -> Result<()>
 where
     T: Encoder + ?Sized,
     W: Write,
