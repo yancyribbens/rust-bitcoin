@@ -8,9 +8,8 @@
 use alloc::borrow::{Cow, ToOwned};
 use alloc::boxed::Box;
 use alloc::string::String;
-use alloc::vec;
 use alloc::vec::Vec;
-use core::{cmp, fmt, mem};
+use core::{fmt, mem};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
@@ -20,7 +19,7 @@ use encoding::{
     SliceEncoder, VecDecoder,
 };
 use hashes::{sha256d, HashEngine};
-use io::{self, BufRead, Read, Write};
+use io::{self, BufRead, Write};
 use primitives::block::{self, HeaderDecoder, HeaderEncoder};
 use primitives::transaction;
 use units::FeeRate;
@@ -2028,36 +2027,6 @@ impl encoding::Decodable for V2NetworkMessage {
             state: V2NetworkMessageDecoderState::ShortId(encoding::ArrayDecoder::new()),
         }
     }
-}
-
-struct ReadBytesFromFiniteReaderOpts {
-    len: usize,
-    chunk_size: usize,
-}
-
-/// Read `opts.len` bytes from reader, where `opts.len` could potentially be malicious.
-///
-/// This function relies on reader being bound in amount of data
-/// it returns for OOM protection. See [`Decodable::consensus_decode_from_finite_reader`].
-#[inline]
-fn read_bytes_from_finite_reader<D: Read + ?Sized>(
-    d: &mut D,
-    mut opts: ReadBytesFromFiniteReaderOpts,
-) -> Result<Vec<u8>, encode::Error> {
-    let mut ret = vec![];
-
-    assert_ne!(opts.chunk_size, 0);
-
-    while opts.len > 0 {
-        let chunk_start = ret.len();
-        let chunk_size = cmp::min(opts.len, opts.chunk_size);
-        let chunk_end = chunk_start + chunk_size;
-        ret.resize(chunk_end, 0u8);
-        d.read_slice(&mut ret[chunk_start..chunk_end])?;
-        opts.len -= chunk_size;
-    }
-
-    Ok(ret)
 }
 
 /// Does a double-SHA256 on `data` and returns the first 4 bytes.
