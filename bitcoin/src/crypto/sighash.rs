@@ -224,7 +224,7 @@ impl<'s> ScriptPath<'s> {
 
         enc.write_all(&[self.leaf_version.to_consensus()])
             .expect("writing to hash engine should never fail");
-        enc = hashes::encode_to_engine(self.script, enc);
+        hashes::encode_to_engine(self.script, &mut enc);
 
         let inner = sha256t::Hash::<TapLeafTag>::from_engine(enc);
         TapLeafHash::from_byte_array(inner.to_byte_array())
@@ -412,7 +412,7 @@ impl<R: Borrow<Transaction>> SighashCache<R> {
                     outputs_length: self.tx.borrow().outputs.len(),
                 }))
                 .map_err(SigningDataError::Sighash)?;
-            enc = hashes::encode_to_engine(txout, enc);
+            hashes::encode_to_engine(txout, &mut enc);
             let hash = sha256::Hash::from_engine(enc);
             writer.write_all(&hash.to_byte_array())?;
         }
@@ -552,8 +552,7 @@ impl<R: Borrow<Transaction>> SighashCache<R> {
             && input_index < self.tx.borrow().outputs.len()
         {
             let mut single_enc = LegacySighash::engine();
-            single_enc =
-                hashes::encode_to_engine(&self.tx.borrow().outputs[input_index], single_enc);
+            hashes::encode_to_engine(&self.tx.borrow().outputs[input_index], &mut single_enc);
             let hash = LegacySighash::from_engine(single_enc);
             writer.write_all(hash.as_byte_array())?;
         } else {
@@ -790,8 +789,8 @@ impl<R: Borrow<Transaction>> SighashCache<R> {
             let mut enc_prevouts = sha256::Hash::engine();
             let mut enc_sequences = sha256::Hash::engine();
             for txin in tx.inputs.iter() {
-                enc_prevouts = hashes::encode_to_engine(&txin.previous_output, enc_prevouts);
-                enc_sequences = hashes::encode_to_engine(&txin.sequence, enc_sequences);
+                hashes::encode_to_engine(&txin.previous_output, &mut enc_prevouts);
+                hashes::encode_to_engine(&txin.sequence, &mut enc_sequences);
             }
             CommonCache {
                 prevouts: sha256::Hash::from_engine(enc_prevouts),
@@ -825,10 +824,10 @@ impl<R: Borrow<Transaction>> SighashCache<R> {
             let mut enc_amounts = sha256::Hash::engine();
             let mut enc_script_pubkeys = sha256::Hash::engine();
             for prevout in prevouts {
-                enc_amounts = hashes::encode_to_engine(&prevout.borrow().amount, enc_amounts);
-                enc_script_pubkeys = hashes::encode_to_engine(
+                hashes::encode_to_engine(&prevout.borrow().amount, &mut enc_amounts);
+                hashes::encode_to_engine(
                     &(*prevout.borrow().script_pubkey),
-                    enc_script_pubkeys,
+                    &mut enc_script_pubkeys,
                 );
             }
             TaprootCache {

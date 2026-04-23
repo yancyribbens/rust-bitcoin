@@ -175,7 +175,7 @@ impl Block<Unchecked> {
     ) -> Option<(WitnessMerkleNode, WitnessCommitment)> {
         compute_witness_root(&self.transactions).map(|witness_root| {
             let mut encoder = sha256d::Hash::engine();
-            encoder = hashes::encode_to_engine(&witness_root, encoder);
+            hashes::encode_to_engine(&witness_root, &mut encoder);
             encoder.input(witness_reserved_value);
             let witness_commitment = WitnessCommitment::from_byte_array(
                 sha256d::Hash::from_engine(encoder).to_byte_array(),
@@ -475,8 +475,9 @@ impl Header {
     /// Returns the block hash.
     // This is the same as `Encodable` but done manually because `Encodable` isn't in `primitives`.
     pub fn block_hash(&self) -> BlockHash {
-        let bare_hash = hashes::encode_to_engine(self, sha256d::Hash::engine()).finalize();
-        BlockHash::from_byte_array(bare_hash.to_byte_array())
+        let mut engine = sha256d::Hash::engine();
+        hashes::encode_to_engine(self, &mut engine);
+        BlockHash::from_byte_array(engine.finalize().to_byte_array())
     }
 }
 
