@@ -2743,7 +2743,6 @@ mod test {
     use alloc::vec;
     use std::net::Ipv4Addr;
 
-    use bitcoin::consensus::encode::{deserialize, deserialize_partial, serialize};
     use hex_unstable::hex;
     use primitives::transaction::{Transaction, Txid};
     use primitives::{Block, BlockHash};
@@ -2767,14 +2766,14 @@ mod test {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn full_round_ser_der_raw_network_message() {
-        let version_msg: VersionMessage = deserialize(&hex!("721101000100000000000000e6e0845300000000010000000000000000000000000000000000ffff0000000000000100000000000000fd87d87eeb4364f22cf54dca59412db7208d47d920cffce83ee8102f5361746f7368693a302e392e39392f2c9f040001")).unwrap();
-        let tx: Transaction = deserialize(&hex!("0100000001a15d57094aa7a21a28cb20b59aab8fc7d1149a3bdbcddba9c622e4f5f6a99ece010000006c493046022100f93bb0e7d8db7bd46e40132d1f8242026e045f03a0efe71bbb8e3f475e970d790221009337cd7f1f929f00cc6ff01f03729b069a7c21b59b1736ddfee5db5946c5da8c0121033b9b137ee87d5a812d6f506efdd37f0affa7ffc310711c06c7f3e097c9447c52ffffffff0100e1f505000000001976a9140389035a9225b3839e2bbf32d826a1e222031fd888ac00000000")).unwrap();
-        let block: Block = deserialize(&hex!("00608e2e094d41aecfbcbf8fe70cb60be57516b07db1bafee4c4de5dad760000000000004aec16eab3be95abe9c54e01cf850c14b8c5cad1bc6b2e73e811db5d5998ada404503e66fcff031b4ebd99d701010000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff3402983a000404503e6604f1f617271083bc3d6600000000000000000007bb1b0a636b706f6f6c0d506f72746c616e642e484f444cffffffff0200f2052a010000001976a9142ce72b25fe97b52638c199acfaa5e3891ddfed5b88ac0000000000000000266a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf90120000000000000000000000000000000000000000000000000000000000000000000000000")).unwrap();
-        let header: block::Header = deserialize(&hex!("010000004ddccd549d28f385ab457e98d1b11ce80bfea2c5ab93015ade4973e400000000bf4473e53794beae34e64fccc471dace6ae544180816f89591894e0f417a914cd74d6e49ffff001d323b3a7b")).unwrap();
+        let version_msg: VersionMessage = encoding::decode_from_slice(&hex!("721101000100000000000000e6e0845300000000010000000000000000000000000000000000ffff0000000000000100000000000000fd87d87eeb4364f22cf54dca59412db7208d47d920cffce83ee8102f5361746f7368693a302e392e39392f2c9f040001")).unwrap();
+        let tx: Transaction = encoding::decode_from_slice(&hex!("0100000001a15d57094aa7a21a28cb20b59aab8fc7d1149a3bdbcddba9c622e4f5f6a99ece010000006c493046022100f93bb0e7d8db7bd46e40132d1f8242026e045f03a0efe71bbb8e3f475e970d790221009337cd7f1f929f00cc6ff01f03729b069a7c21b59b1736ddfee5db5946c5da8c0121033b9b137ee87d5a812d6f506efdd37f0affa7ffc310711c06c7f3e097c9447c52ffffffff0100e1f505000000001976a9140389035a9225b3839e2bbf32d826a1e222031fd888ac00000000")).unwrap();
+        let block: Block = encoding::decode_from_slice(&hex!("00608e2e094d41aecfbcbf8fe70cb60be57516b07db1bafee4c4de5dad760000000000004aec16eab3be95abe9c54e01cf850c14b8c5cad1bc6b2e73e811db5d5998ada404503e66fcff031b4ebd99d701010000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff3402983a000404503e6604f1f617271083bc3d6600000000000000000007bb1b0a636b706f6f6c0d506f72746c616e642e484f444cffffffff0200f2052a010000001976a9142ce72b25fe97b52638c199acfaa5e3891ddfed5b88ac0000000000000000266a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf90120000000000000000000000000000000000000000000000000000000000000000000000000")).unwrap();
+        let header: block::Header = encoding::decode_from_slice(&hex!("010000004ddccd549d28f385ab457e98d1b11ce80bfea2c5ab93015ade4973e400000000bf4473e53794beae34e64fccc471dace6ae544180816f89591894e0f417a914cd74d6e49ffff001d323b3a7b")).unwrap();
         let script = &hex!("1976a91431a420903c05a0a7de2de40c9f02ebedbacdc17288ac");
-        let merkle_block: MerkleBlock = deserialize(&hex!("0100000079cda856b143d9db2c1caff01d1aecc8630d30625d10e8b4b8b0000000000000b50cc069d6a3e33e3ff84a5c41d9d3febe7c770fdcc96b2c3ff60abe184f196367291b4d4c86041b8fa45d630100000001b50cc069d6a3e33e3ff84a5c41d9d3febe7c770fdcc96b2c3ff60abe184f19630101")).unwrap();
-        let cmptblock = deserialize(&hex!("00000030d923ad36ff2d955abab07f8a0a6e813bc6e066b973e780c5e36674cad5d1cd1f6e265f2a17a0d35cbe701fe9d06e2c6324cfe135f6233e8b767bfa3fb4479b71115dc562ffff7f2006000000000000000000000000010002000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0302ee00ffffffff0100f9029500000000015100000000")).unwrap();
-        let blocktxn = deserialize(&hex!("2e93c0cff39ff605020072d96bc3a8d20b8447e294d08092351c8583e08d9b5a01020000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff0402dc0000ffffffff0200f90295000000001976a9142b4569203694fc997e13f2c0a1383b9e16c77a0d88ac0000000000000000266a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf90120000000000000000000000000000000000000000000000000000000000000000000000000")).unwrap();
+        let merkle_block: MerkleBlock = encoding::decode_from_slice(&hex!("0100000079cda856b143d9db2c1caff01d1aecc8630d30625d10e8b4b8b0000000000000b50cc069d6a3e33e3ff84a5c41d9d3febe7c770fdcc96b2c3ff60abe184f196367291b4d4c86041b8fa45d630100000001b50cc069d6a3e33e3ff84a5c41d9d3febe7c770fdcc96b2c3ff60abe184f19630101")).unwrap();
+        let cmptblock = encoding::decode_from_slice(&hex!("00000030d923ad36ff2d955abab07f8a0a6e813bc6e066b973e780c5e36674cad5d1cd1f6e265f2a17a0d35cbe701fe9d06e2c6324cfe135f6233e8b767bfa3fb4479b71115dc562ffff7f2006000000000000000000000000010002000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0302ee00ffffffff0100f9029500000000015100000000")).unwrap();
+        let blocktxn = encoding::decode_from_slice(&hex!("2e93c0cff39ff605020072d96bc3a8d20b8447e294d08092351c8583e08d9b5a01020000000001010000000000000000000000000000000000000000000000000000000000000000ffffffff0402dc0000ffffffff0200f90295000000001976a9142b4569203694fc997e13f2c0a1383b9e16c77a0d88ac0000000000000000266a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf90120000000000000000000000000000000000000000000000000000000000000000000000000")).unwrap();
 
         let msgs = [
             NetworkMessage::Version(version_msg),
@@ -2890,20 +2889,15 @@ mod test {
         ];
 
         for msg in &msgs {
-            // V1 messages via legacy encoding traits.
             let raw_msg = V1NetworkMessage::new(Magic::from_bytes([57, 0, 0, 0]), msg.clone());
-            assert_eq!(deserialize::<V1NetworkMessage>(&serialize(&raw_msg)).unwrap(), raw_msg);
-
             // V1 messages via encoding traits.
             let encoded = encoding::encode_to_vec(&raw_msg);
             let decoded = encoding::decode_from_slice::<V1NetworkMessage>(&encoded).unwrap();
             assert_eq!(decoded, raw_msg);
 
-            // V2 messages. legacy encoding
+            // V2 messages via encoding traits
             let v2_msg = V2NetworkMessage::new(msg.clone());
-            assert_eq!(deserialize::<V2NetworkMessage>(&serialize(&v2_msg)).unwrap(), v2_msg);
 
-            // V2 messages via new consensus-encoding
             let v2_encoded = encoding::encode_to_vec(&v2_msg);
             let v2_decoded = encoding::decode_from_slice::<V2NetworkMessage>(&v2_encoded).unwrap();
             assert_eq!(v2_decoded, v2_msg);
@@ -2921,30 +2915,30 @@ mod test {
 
         // Test serializing.
         let cs = CommandString("Andrew".into());
-        assert_eq!(serialize(&cs), [0x41u8, 0x6e, 0x64, 0x72, 0x65, 0x77, 0, 0, 0, 0, 0, 0]);
+        assert_eq!(encoding::encode_to_vec(&cs), [0x41u8, 0x6e, 0x64, 0x72, 0x65, 0x77, 0, 0, 0, 0, 0, 0]);
 
         // Test deserializing
         let cs: Result<CommandString, _> =
-            deserialize(&[0x41u8, 0x6e, 0x64, 0x72, 0x65, 0x77, 0, 0, 0, 0, 0, 0]);
+            encoding::decode_from_slice(&[0x41u8, 0x6e, 0x64, 0x72, 0x65, 0x77, 0, 0, 0, 0, 0, 0]);
         assert!(cs.is_ok());
         assert_eq!(cs.as_ref().unwrap().to_string(), "Andrew".to_owned());
         assert_eq!(cs.unwrap(), CommandString::try_from_static("Andrew").unwrap());
 
         // Test that embedded null bytes are preserved while trailing nulls are trimmed
         let cs: Result<CommandString, _> =
-            deserialize(&[0, 0x41u8, 0x6e, 0x64, 0, 0x72, 0x65, 0x77, 0, 0, 0, 0]);
+            encoding::decode_from_slice(&[0, 0x41u8, 0x6e, 0x64, 0, 0x72, 0x65, 0x77, 0, 0, 0, 0]);
         assert!(cs.is_ok());
         assert_eq!(cs.as_ref().unwrap().to_string(), "\0And\0rew".to_owned());
         assert_eq!(cs.unwrap(), CommandString::try_from_static("\0And\0rew").unwrap());
 
         // Invalid CommandString, must be ASCII
-        assert!(deserialize::<CommandString>(&[
+        assert!(encoding::decode_from_slice::<CommandString>(&[
             0, 0x41u8, 0x6e, 0xa4, 0, 0x72, 0x65, 0x77, 0, 0, 0, 0
         ])
         .is_err());
 
         // Invalid CommandString, must be 12 bytes
-        assert!(deserialize::<CommandString>(&[
+        assert!(encoding::decode_from_slice::<CommandString>(&[
             0x41u8, 0x6e, 0x64, 0x72, 0x65, 0x77, 0, 0, 0, 0, 0
         ])
         .is_err());
@@ -2953,7 +2947,7 @@ mod test {
     #[test]
     #[rustfmt::skip]
     fn serialize_verack() {
-        assert_eq!(serialize(&V1NetworkMessage::new(Magic::BITCOIN, NetworkMessage::Verack)),
+        assert_eq!(encoding::encode_to_vec(&V1NetworkMessage::new(Magic::BITCOIN, NetworkMessage::Verack)),
                        [0xf9, 0xbe, 0xb4, 0xd9, 0x76, 0x65, 0x72, 0x61,
                         0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x5d, 0xf6, 0xe0, 0xe2]);
@@ -2962,7 +2956,7 @@ mod test {
     #[test]
     fn serialize_v2_verack() {
         assert_eq!(
-            serialize(&V2NetworkMessage::new(NetworkMessage::Verack)),
+            encoding::encode_to_vec(&V2NetworkMessage::new(NetworkMessage::Verack)),
             [
                 0x00, // Full command encoding flag.
                 0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -2996,7 +2990,7 @@ mod test {
     #[test]
     #[rustfmt::skip]
     fn serialize_mempool() {
-        assert_eq!(serialize(&V1NetworkMessage::new(Magic::BITCOIN, NetworkMessage::MemPool)),
+        assert_eq!(encoding::encode_to_vec(&V1NetworkMessage::new(Magic::BITCOIN, NetworkMessage::MemPool)),
                        [0xf9, 0xbe, 0xb4, 0xd9, 0x6d, 0x65, 0x6d, 0x70,
                         0x6f, 0x6f, 0x6c, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x5d, 0xf6, 0xe0, 0xe2]);
@@ -3005,7 +2999,7 @@ mod test {
     #[test]
     fn serialize_v2_mempool() {
         assert_eq!(
-            serialize(&V2NetworkMessage::new(NetworkMessage::MemPool)),
+            encoding::encode_to_vec(&V2NetworkMessage::new(NetworkMessage::MemPool)),
             [
                 0x0F, // MemPool command short ID
             ]
@@ -3015,7 +3009,7 @@ mod test {
     #[test]
     #[rustfmt::skip]
     fn serialize_getaddr() {
-        assert_eq!(serialize(&V1NetworkMessage::new(Magic::BITCOIN, NetworkMessage::GetAddr)),
+        assert_eq!(encoding::encode_to_vec(&V1NetworkMessage::new(Magic::BITCOIN, NetworkMessage::GetAddr)),
                        [0xf9, 0xbe, 0xb4, 0xd9, 0x67, 0x65, 0x74, 0x61,
                         0x64, 0x64, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x5d, 0xf6, 0xe0, 0xe2]);
@@ -3024,7 +3018,7 @@ mod test {
     #[test]
     fn serialize_v2_getaddr() {
         assert_eq!(
-            serialize(&V2NetworkMessage::new(NetworkMessage::GetAddr)),
+            encoding::encode_to_vec(&V2NetworkMessage::new(NetworkMessage::GetAddr)),
             [
                 0x00, // Full command encoding flag.
                 0x67, 0x65, 0x74, 0x61, 0x64, 0x64, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -3035,7 +3029,7 @@ mod test {
     #[test]
     fn deserialize_getaddr() {
         #[rustfmt::skip]
-        let msg = deserialize(&[
+        let msg = encoding::decode_from_slice(&[
             0xf9, 0xbe, 0xb4, 0xd9, 0x67, 0x65, 0x74, 0x61,
             0x64, 0x64, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x5d, 0xf6, 0xe0, 0xe2
@@ -3049,7 +3043,7 @@ mod test {
 
     #[test]
     fn deserialize_v2_getaddr() {
-        let msg = deserialize(&[
+        let msg = encoding::decode_from_slice(&[
             0x00, // Full command encoding flag
             0x67, 0x65, 0x74, 0x61, 0x64, 0x64, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,
         ]);
@@ -3063,7 +3057,7 @@ mod test {
     #[test]
     fn deserialize_version() {
         #[rustfmt::skip]
-        let msg = deserialize::<V1NetworkMessage>(&[
+        let msg = encoding::decode_from_slice::<V1NetworkMessage>(&[
             0xf9, 0xbe, 0xb4, 0xd9, 0x76, 0x65, 0x72, 0x73,
             0x69, 0x6f, 0x6e, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x66, 0x00, 0x00, 0x00, 0xbe, 0x61, 0xb8, 0x27,
@@ -3107,7 +3101,7 @@ mod test {
     #[test]
     fn deserialize_v2_version() {
         #[rustfmt::skip]
-        let msg = deserialize::<V2NetworkMessage>(&[
+        let msg = encoding::decode_from_slice::<V2NetworkMessage>(&[
             0x00, // Full command encoding flag
             0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x00, 0x00, 0x00, 0x00, 0x00, // "version" command
             0x7f, 0x11, 0x01, 0x00, // version: 70015
@@ -3145,7 +3139,7 @@ mod test {
     #[test]
     fn deserialize_partial_message() {
         #[rustfmt::skip]
-        let data = [
+        let data: [u8; 128] = [
             0xf9, 0xbe, 0xb4, 0xd9, 0x76, 0x65, 0x72, 0x73,
             0x69, 0x6f, 0x6e, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x66, 0x00, 0x00, 0x00, 0xbe, 0x61, 0xb8, 0x27,
@@ -3163,11 +3157,11 @@ mod test {
             0x69, 0x3a, 0x30, 0x2e, 0x31, 0x37, 0x2e, 0x31,
             0x2f, 0x93, 0x8c, 0x08, 0x00, 0x01, 0x00, 0x00
         ];
-        let msg = deserialize_partial::<V1NetworkMessage>(&data);
+        let msg = encoding::decode_from_slice_unbounded::<V1NetworkMessage>(&mut data.as_ref());
         assert!(msg.is_ok());
 
-        let (msg, consumed) = msg.unwrap();
-        assert_eq!(consumed, data.to_vec().len() - 2);
+        let msg = msg.unwrap();
+        assert_eq!(encoding::encode_to_vec(&msg).len(), data.to_vec().len() - 2);
         assert_eq!(msg.magic, Magic::BITCOIN);
         if let NetworkMessage::Version(version_msg) = msg.payload {
             assert_eq!(version_msg.version, ProtocolVersion::INVALID_CB_NO_BAN_VERSION);
@@ -3189,27 +3183,14 @@ mod test {
     }
 
     #[test]
-    fn serialize_checkeddata() {
-        let cd = CheckedData::new(vec![1u8, 2, 3, 4, 5]);
-        assert_eq!(serialize(&cd), [5, 0, 0, 0, 162, 107, 175, 90, 1, 2, 3, 4, 5]);
-    }
-
-    #[test]
-    fn deserialize_checkeddata() {
-        let cd: Result<CheckedData, _> =
-            deserialize(&[5u8, 0, 0, 0, 162, 107, 175, 90, 1, 2, 3, 4, 5]);
-        assert_eq!(cd.ok(), Some(CheckedData::new(vec![1u8, 2, 3, 4, 5])));
-    }
-
-    #[test]
     fn headers_message() {
-        let block_900_000 = deserialize::<block::Header>(
+        let block_900_000 = encoding::decode_from_slice::<block::Header>(
             &hex!("00a0ab20247d4d9f582f9750344cdf62c46d81d046be960340960100000000000000000070f96945530651135839d8adc3f40e595118ec74c7ad81a3d17bb022e554fb0c937f4268743702177ad05f92")
         ).unwrap();
-        let block_900_001 = deserialize::<block::Header>(
+        let block_900_001 = encoding::decode_from_slice::<block::Header>(
             &hex!("00e000208a96960d6d1ca4ee4a283fd83da309b8d5d2bfed380501000000000000000000371c9ffd63d75fb36c57d58eb842d23c0e7ec049daf16d94cc38805c346e9d52e880426874370217973dc83b")
         ).unwrap();
-        let block_900_002 = deserialize::<block::Header>(
+        let block_900_002 = encoding::decode_from_slice::<block::Header>(
             &hex!("0400ff3ffc834fac4e1eb2ae41f1f9776e0f8e24a6090603ffa8010000000000000000002efba7e7280aa60f0a650f29e30332d52e11af57bc58cc6e71f343851f016c676182426874370217e3615653")
         ).unwrap();
         let header_900_000 = NetworkHeader { header: block_900_000, length: 0 };
@@ -3230,7 +3211,7 @@ mod test {
         let _ = decoder.push_bytes(&mut data.as_slice());
         let decoded = decoder.end().unwrap();
 
-        let enc = serialize(&decoded);
+        let enc = encoding::encode_to_vec(&decoded);
         assert_eq!(data.as_slice(), enc.as_slice());
     }
 
