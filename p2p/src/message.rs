@@ -997,18 +997,6 @@ impl encoding::Encodable for NetworkMessage {
     fn encoder(&self) -> Self::Encoder<'_> { NetworkMessageEncoder::new(self) }
 }
 
-impl Encodable for V1NetworkMessage {
-    fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
-        let mut len = 0;
-        len += self.magic.consensus_encode(w)?;
-        len += self.command().consensus_encode(w)?;
-        len += self.payload_len.consensus_encode(w)?;
-        len += self.checksum.consensus_encode(w)?;
-        len += self.payload().consensus_encode(w)?;
-        Ok(len)
-    }
-}
-
 /// Encoder for [`NetworkMessage`]
 #[derive(Debug, Clone)]
 pub enum NetworkMessageEncoder<'e> {
@@ -1851,113 +1839,6 @@ impl encoding::Decodable for HeadersMessage {
     type Decoder = HeadersMessageDecoder;
 
     fn decoder() -> Self::Decoder { HeadersMessageDecoder(VecDecoder::new()) }
-}
-
-impl Decodable for V1NetworkMessage {
-    fn consensus_decode_from_finite_reader<R: BufRead + ?Sized>(
-        r: &mut R,
-    ) -> Result<Self, encode::Error> {
-        let magic = Decodable::consensus_decode_from_finite_reader(r)?;
-        let cmd = CommandString::consensus_decode_from_finite_reader(r)?;
-        let checked_data = CheckedData::consensus_decode_from_finite_reader(r)?;
-        let checksum = checked_data.checksum();
-        let raw_payload = checked_data.into_data();
-        let payload_len = raw_payload.len() as u32;
-
-        let mut mem_d = raw_payload.as_slice();
-        let payload = match &cmd.0[..] {
-            "version" =>
-                NetworkMessage::Version(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "verack" => NetworkMessage::Verack,
-            "addr" =>
-                NetworkMessage::Addr(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "inv" =>
-                NetworkMessage::Inv(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "getdata" =>
-                NetworkMessage::GetData(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "notfound" => NetworkMessage::NotFound(Decodable::consensus_decode_from_finite_reader(
-                &mut mem_d,
-            )?),
-            "getblocks" => NetworkMessage::GetBlocks(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "getheaders" => NetworkMessage::GetHeaders(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "mempool" => NetworkMessage::MemPool,
-            "block" =>
-                NetworkMessage::Block(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "headers" => NetworkMessage::Headers(
-                HeadersMessage::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "sendheaders" => NetworkMessage::SendHeaders,
-            "getaddr" => NetworkMessage::GetAddr,
-            "ping" => NetworkMessage::Ping(Ping(Decodable::consensus_decode_from_finite_reader(
-                &mut mem_d,
-            )?)),
-            "pong" => NetworkMessage::Pong(Pong(Decodable::consensus_decode_from_finite_reader(
-                &mut mem_d,
-            )?)),
-            "merkleblock" => NetworkMessage::MerkleBlock(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "filterload" => NetworkMessage::FilterLoad(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "filteradd" => NetworkMessage::FilterAdd(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "filterclear" => NetworkMessage::FilterClear,
-            "tx" => NetworkMessage::Tx(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "getcfilters" => NetworkMessage::GetCFilters(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "cfilter" =>
-                NetworkMessage::CFilter(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "getcfheaders" => NetworkMessage::GetCFHeaders(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "cfheaders" => NetworkMessage::CFHeaders(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "getcfcheckpt" => NetworkMessage::GetCFCheckpt(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "cfcheckpt" => NetworkMessage::CFCheckpt(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "reject" =>
-                NetworkMessage::Reject(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "alert" =>
-                NetworkMessage::Alert(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "feefilter" => NetworkMessage::FeeFilter(
-                FeeFilter::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "sendcmpct" => NetworkMessage::SendCmpct(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "cmpctblock" => NetworkMessage::CmpctBlock(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "getblocktxn" => NetworkMessage::GetBlockTxn(
-                Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
-            ),
-            "blocktxn" => NetworkMessage::BlockTxn(Decodable::consensus_decode_from_finite_reader(
-                &mut mem_d,
-            )?),
-            "wtxidrelay" => NetworkMessage::WtxidRelay,
-            "addrv2" =>
-                NetworkMessage::AddrV2(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "sendaddrv2" => NetworkMessage::SendAddrV2,
-            _ => NetworkMessage::Unknown { command: cmd, payload: raw_payload },
-        };
-        Ok(Self { magic, payload, payload_len, checksum })
-    }
-
-    #[inline]
-    fn consensus_decode<R: BufRead + ?Sized>(r: &mut R) -> Result<Self, encode::Error> {
-        Self::consensus_decode_from_finite_reader(&mut r.take(MAX_MSG_SIZE.to_u64()))
-    }
 }
 
 impl Decodable for V2NetworkMessage {
