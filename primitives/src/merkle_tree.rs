@@ -131,7 +131,7 @@ fn calculate_root_batched(mut nodes: Vec<[u8; 32]>) -> Option<[u8; 32]> {
 
         // if odd count, duplicate last element
         if nodes.len() % 2 != 0 {
-            let last = *nodes.last().expect("nodes is not emoty");
+            let last = *nodes.last().expect("nodes is not empty");
             nodes.push(last);
         }
 
@@ -196,6 +196,9 @@ impl MerkleNode for WitnessMerkleNode {
 
 #[cfg(test)]
 mod tests {
+    use hashes::HashEngine;
+
+    use super::MerkleNode;
     use crate::hash_types::*;
 
     // Helper to make a Txid, TxMerkleNode pair with a single number byte array
@@ -387,5 +390,79 @@ mod tests {
         let leaf = Wtxid::from_byte_array([2; 32]);
         let root = WitnessMerkleNode::calculate_root([leaf, leaf].into_iter());
         assert!(root.is_none(), "Duplicate witness leaves should return None");
+    }
+
+    // The tests below exercise the default trait `MerkleNode::calculate_root`
+    // implementation. On std+x86_64/aarch64, both `TxMerkleNode` and
+    // `WitnessMerkleNode` override `calculate_root` with the batched version,
+    // this is a test-only impl that uses the default `calculate_root` to kill
+    // mutants
+    #[derive(Clone, Copy, Eq, PartialEq)]
+    struct TestLeaf([u8; 32]);
+
+    impl AsRef<[u8]> for TestLeaf {
+        fn as_ref(&self) -> &[u8] { &self.0 }
+    }
+
+    impl crate::transaction::TxIdentifier for TestLeaf {}
+
+    #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+    struct TestNode([u8; 32]);
+
+    impl super::MerkleNode for TestNode {
+        type Leaf = TestLeaf;
+
+        fn from_leaf(leaf: Self::Leaf) -> Self { Self(leaf.0) }
+
+        fn combine(&self, other: &Self) -> Self {
+            let mut engine = hashes::sha256d::Hash::engine();
+            engine.input(&self.0);
+            engine.input(&other.0);
+            Self(hashes::sha256d::Hash::from_engine(engine).to_byte_array())
+        }
+    }
+
+    // Asserts the default (stack-based) `TestNode::calculate_root` produces
+    // the same result as the optimized `TxMerkleNode::calculate_root`.
+    #[track_caller]
+    fn assert_roots_match(leaf_bytes: &[u8]) {
+        let test_root = TestNode::calculate_root(leaf_bytes.iter().map(|&b| TestLeaf([b; 32])));
+        let tx_root = TxMerkleNode::calculate_root(
+            leaf_bytes.iter().map(|&b| Txid::from_byte_array([b; 32])),
+        );
+        assert_eq!(test_root.map(|n| n.0), tx_root.map(TxMerkleNode::to_byte_array));
+    }
+
+    #[test]
+    fn calculate_root_empty() { assert_roots_match(&[]); }
+
+    #[test]
+    fn calculate_root_single_leaf() { assert_roots_match(&[1]); }
+
+    #[test]
+    fn calculate_root_two_leaves() { assert_roots_match(&[1, 2]); }
+
+    #[test]
+    fn calculate_root_duplicate_leaves() { assert_roots_match(&[3, 3]); }
+
+    #[test]
+    fn calculate_root_four_leaves() { assert_roots_match(&[1, 2, 3, 4]); }
+
+    #[test]
+    fn calculate_root_three_leaves_unbalanced() { assert_roots_match(&[1, 2, 3]); }
+
+    #[test]
+    fn calculate_root_five_leaves_unbalanced() { assert_roots_match(&[1, 2, 3, 4, 5]); }
+
+    #[test]
+    fn calculate_root_seven_leaves_unbalanced() { assert_roots_match(&[1, 2, 3, 4, 5, 6, 7]); }
+
+    #[test]
+    fn calculate_root_correct_root_value() {
+        assert_roots_match(&[10, 20]);
+        // Verify ordering matters: combine(a, b) != combine(b, a).
+        let (_, node1) = make_leaf_node(10);
+        let (_, node2) = make_leaf_node(20);
+        assert_ne!(node1.combine(&node2), node2.combine(&node1));
     }
 }
