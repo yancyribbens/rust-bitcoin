@@ -18,6 +18,15 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
+#[cfg(feature = "arbitrary")]
+pub extern crate arbitrary;
+
+pub extern crate hashes;
+pub extern crate secp256k1;
+
+#[cfg(feature = "serde")]
+pub extern crate serde;
+
 #[rustfmt::skip] // Keep pub re-exports separate
 #[doc(no_inline)]
 pub use self::error::InvalidTaprootLeafVersionError;
