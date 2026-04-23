@@ -20,7 +20,6 @@ use encoding::{
     SliceEncoder, VecDecoder,
 };
 use hashes::{sha256d, HashEngine};
-use internals::ToU64 as _;
 use io::{self, BufRead, Read, Write};
 use primitives::block::{self, HeaderDecoder, HeaderEncoder};
 use primitives::transaction;
@@ -1675,24 +1674,6 @@ fn v2_command_byte(payload: &NetworkMessage) -> (u8, Option<CommandString>) {
     }
 }
 
-impl Encodable for V2NetworkMessage {
-    fn consensus_encode<W: Write + ?Sized>(&self, writer: &mut W) -> Result<usize, io::Error> {
-        // A subset of message types are optimized to only use one byte to encode the command.
-        // Non-optimized message types use the zero-byte flag and the following twelve bytes to encode the command.
-        let (command_byte, full_command) = v2_command_byte(&self.payload);
-
-        let mut len = command_byte.consensus_encode(writer)?;
-        if let Some(cmd) = full_command {
-            len += cmd.consensus_encode(writer)?;
-        }
-
-        // Encode the payload.
-        len += self.payload.consensus_encode(writer)?;
-
-        Ok(len)
-    }
-}
-
 /// Network encoded [`Header`](primitives::block::Header) with associated byte for the length of
 /// transactions that follow, which is currently always zero.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1839,78 +1820,6 @@ impl encoding::Decodable for HeadersMessage {
     type Decoder = HeadersMessageDecoder;
 
     fn decoder() -> Self::Decoder { HeadersMessageDecoder(VecDecoder::new()) }
-}
-
-impl Decodable for V2NetworkMessage {
-    fn consensus_decode_from_finite_reader<R: BufRead + ?Sized>(
-        r: &mut R,
-    ) -> Result<Self, encode::Error> {
-        let short_id: u8 = Decodable::consensus_decode_from_finite_reader(r)?;
-        let payload = match short_id {
-            0u8 => {
-                // Full command encoding.
-                let cmd = CommandString::consensus_decode_from_finite_reader(r)?;
-                match &cmd.0[..] {
-                    "version" =>
-                        NetworkMessage::Version(Decodable::consensus_decode_from_finite_reader(r)?),
-                    "verack" => NetworkMessage::Verack,
-                    "sendheaders" => NetworkMessage::SendHeaders,
-                    "getaddr" => NetworkMessage::GetAddr,
-                    "wtxidrelay" => NetworkMessage::WtxidRelay,
-                    "sendaddrv2" => NetworkMessage::SendAddrV2,
-                    "alert" =>
-                        NetworkMessage::Alert(Decodable::consensus_decode_from_finite_reader(r)?),
-                    "reject" =>
-                        NetworkMessage::Reject(Decodable::consensus_decode_from_finite_reader(r)?),
-                    _ => NetworkMessage::Unknown {
-                        command: cmd,
-                        payload: Vec::consensus_decode_from_finite_reader(r)?,
-                    },
-                }
-            }
-            1u8 => NetworkMessage::Addr(Decodable::consensus_decode_from_finite_reader(r)?),
-            2u8 => NetworkMessage::Block(Decodable::consensus_decode_from_finite_reader(r)?),
-            3u8 => NetworkMessage::BlockTxn(Decodable::consensus_decode_from_finite_reader(r)?),
-            4u8 => NetworkMessage::CmpctBlock(Decodable::consensus_decode_from_finite_reader(r)?),
-            5u8 => NetworkMessage::FeeFilter(FeeFilter::consensus_decode_from_finite_reader(r)?),
-            6u8 => NetworkMessage::FilterAdd(Decodable::consensus_decode_from_finite_reader(r)?),
-            7u8 => NetworkMessage::FilterClear,
-            8u8 => NetworkMessage::FilterLoad(Decodable::consensus_decode_from_finite_reader(r)?),
-            9u8 => NetworkMessage::GetBlocks(Decodable::consensus_decode_from_finite_reader(r)?),
-            10u8 => NetworkMessage::GetBlockTxn(Decodable::consensus_decode_from_finite_reader(r)?),
-            11u8 => NetworkMessage::GetData(Decodable::consensus_decode_from_finite_reader(r)?),
-            12u8 => NetworkMessage::GetHeaders(Decodable::consensus_decode_from_finite_reader(r)?),
-            13u8 =>
-                NetworkMessage::Headers(HeadersMessage::consensus_decode_from_finite_reader(r)?),
-            14u8 => NetworkMessage::Inv(Decodable::consensus_decode_from_finite_reader(r)?),
-            15u8 => NetworkMessage::MemPool,
-            16u8 => NetworkMessage::MerkleBlock(Decodable::consensus_decode_from_finite_reader(r)?),
-            17u8 => NetworkMessage::NotFound(Decodable::consensus_decode_from_finite_reader(r)?),
-            18u8 => NetworkMessage::Ping(Ping(Decodable::consensus_decode_from_finite_reader(r)?)),
-            19u8 => NetworkMessage::Pong(Pong(Decodable::consensus_decode_from_finite_reader(r)?)),
-            20u8 => NetworkMessage::SendCmpct(Decodable::consensus_decode_from_finite_reader(r)?),
-            21u8 => NetworkMessage::Tx(Decodable::consensus_decode_from_finite_reader(r)?),
-            22u8 => NetworkMessage::GetCFilters(Decodable::consensus_decode_from_finite_reader(r)?),
-            23u8 => NetworkMessage::CFilter(Decodable::consensus_decode_from_finite_reader(r)?),
-            24u8 =>
-                NetworkMessage::GetCFHeaders(Decodable::consensus_decode_from_finite_reader(r)?),
-            25u8 => NetworkMessage::CFHeaders(Decodable::consensus_decode_from_finite_reader(r)?),
-            26u8 =>
-                NetworkMessage::GetCFCheckpt(Decodable::consensus_decode_from_finite_reader(r)?),
-            27u8 => NetworkMessage::CFCheckpt(Decodable::consensus_decode_from_finite_reader(r)?),
-            28u8 => NetworkMessage::AddrV2(Decodable::consensus_decode_from_finite_reader(r)?),
-            _ =>
-                return Err(encode::Error::Parse(encode::ParseError::ParseFailed(
-                    "Unknown short ID",
-                ))),
-        };
-        Ok(Self { payload })
-    }
-
-    #[inline]
-    fn consensus_decode<R: BufRead + ?Sized>(r: &mut R) -> Result<Self, encode::Error> {
-        Self::consensus_decode_from_finite_reader(&mut r.take(MAX_MSG_SIZE.to_u64()))
-    }
 }
 
 // State machine for decoding a [`V2NetworkMessage`].
