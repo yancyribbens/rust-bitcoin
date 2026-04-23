@@ -2030,66 +2030,6 @@ impl encoding::Decodable for V2NetworkMessage {
     }
 }
 
-/// Data and a 4-byte checksum.
-#[derive(PartialEq, Eq, Clone, Debug)]
-pub struct CheckedData {
-    data: Vec<u8>,
-    checksum: [u8; 4],
-}
-
-impl CheckedData {
-    /// Constructs a new `CheckedData` computing the checksum of given data.
-    pub fn new(data: Vec<u8>) -> Self {
-        let hash = sha256d::hash(data.as_slice()).to_byte_array();
-        let checksum = [hash[0], hash[1], hash[2], hash[3]];
-        Self { data, checksum }
-    }
-
-    /// Returns a reference to the raw data without the checksum.
-    pub fn data(&self) -> &[u8] { &self.data }
-
-    /// Returns the raw data without the checksum.
-    pub fn into_data(self) -> Vec<u8> { self.data }
-
-    /// Returns the checksum of the data.
-    pub fn checksum(&self) -> [u8; 4] { self.checksum }
-}
-
-impl Encodable for CheckedData {
-    #[inline]
-    fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
-        u32::try_from(self.data.len())
-            .expect("network message use u32 as length")
-            .consensus_encode(w)?;
-        self.checksum().consensus_encode(w)?;
-        Ok(8 + w.emit_slice(&self.data)?)
-    }
-}
-
-impl Decodable for CheckedData {
-    #[inline]
-    fn consensus_decode_from_finite_reader<R: BufRead + ?Sized>(
-        r: &mut R,
-    ) -> Result<Self, encode::Error> {
-        let len = u32::consensus_decode_from_finite_reader(r)? as usize;
-
-        let checksum = <[u8; 4]>::consensus_decode_from_finite_reader(r)?;
-        let opts = ReadBytesFromFiniteReaderOpts { len, chunk_size: encode::MAX_VEC_SIZE };
-        let data = read_bytes_from_finite_reader(r, opts)?;
-        let hash = sha256d::hash(data.as_slice()).to_byte_array();
-        let expected_checksum = [hash[0], hash[1], hash[2], hash[3]];
-        if expected_checksum == checksum {
-            Ok(Self { data, checksum })
-        } else {
-            Err(encode::ParseError::InvalidChecksum {
-                expected: expected_checksum,
-                actual: checksum,
-            }
-            .into())
-        }
-    }
-}
-
 struct ReadBytesFromFiniteReaderOpts {
     len: usize,
     chunk_size: usize,
