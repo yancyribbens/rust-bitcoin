@@ -26,8 +26,6 @@ pub const BITCOIN_SIGNED_MSG_PREFIX: &[u8] = b"\x18Bitcoin Signed Message:\n";
 
 #[cfg(feature = "secp-recovery")]
 mod message_signing {
-    use core::fmt;
-
     use hashes::sha256d;
     use secp256k1::ecdsa::{RecoverableSignature, RecoveryId};
 
@@ -121,6 +119,8 @@ mod message_signing {
 
     #[cfg(feature = "base64")]
     mod base64_impls {
+        use core::fmt;
+
         use base64::prelude::{Engine as _, BASE64_STANDARD};
 
         use super::*;
