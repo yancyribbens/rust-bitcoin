@@ -17,6 +17,10 @@ mod x86_shani;
 #[cfg(any(feature = "cpufeatures", feature = "std"))]
 mod sse41;
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[cfg(any(feature = "cpufeatures", feature = "std"))]
+mod avx2;
+
 use internals::slice::SliceExt;
 
 use super::{HashEngine, Midstate, BLOCK_SIZE};
