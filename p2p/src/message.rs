@@ -943,51 +943,6 @@ impl V2NetworkMessage {
     pub fn command(&self) -> CommandString { self.payload.command() }
 }
 
-impl Encodable for NetworkMessage {
-    fn consensus_encode<W: Write + ?Sized>(&self, writer: &mut W) -> Result<usize, io::Error> {
-        match self {
-            Self::Version(ref dat) => dat.consensus_encode(writer),
-            Self::Addr(ref dat) => dat.consensus_encode(writer),
-            Self::Inv(ref dat) => dat.consensus_encode(writer),
-            Self::GetData(ref dat) => dat.consensus_encode(writer),
-            Self::NotFound(ref dat) => dat.consensus_encode(writer),
-            Self::GetBlocks(ref dat) => dat.consensus_encode(writer),
-            Self::GetHeaders(ref dat) => dat.consensus_encode(writer),
-            Self::Tx(ref dat) => dat.consensus_encode(writer),
-            Self::Block(ref dat) => dat.consensus_encode(writer),
-            Self::Headers(ref dat) => dat.consensus_encode(writer),
-            Self::Ping(ref dat) => dat.0.consensus_encode(writer),
-            Self::Pong(ref dat) => dat.0.consensus_encode(writer),
-            Self::MerkleBlock(ref dat) => dat.consensus_encode(writer),
-            Self::FilterLoad(ref dat) => dat.consensus_encode(writer),
-            Self::FilterAdd(ref dat) => dat.consensus_encode(writer),
-            Self::GetCFilters(ref dat) => dat.consensus_encode(writer),
-            Self::CFilter(ref dat) => dat.consensus_encode(writer),
-            Self::GetCFHeaders(ref dat) => dat.consensus_encode(writer),
-            Self::CFHeaders(ref dat) => dat.consensus_encode(writer),
-            Self::GetCFCheckpt(ref dat) => dat.consensus_encode(writer),
-            Self::CFCheckpt(ref dat) => dat.consensus_encode(writer),
-            Self::SendCmpct(ref dat) => dat.consensus_encode(writer),
-            Self::CmpctBlock(ref dat) => dat.consensus_encode(writer),
-            Self::GetBlockTxn(ref dat) => dat.consensus_encode(writer),
-            Self::BlockTxn(ref dat) => dat.consensus_encode(writer),
-            Self::Alert(ref dat) => dat.consensus_encode(writer),
-            Self::Reject(ref dat) => dat.consensus_encode(writer),
-            Self::FeeFilter(ref dat) => dat.consensus_encode(writer),
-            Self::AddrV2(ref dat) => dat.consensus_encode(writer),
-            Self::Verack
-            | Self::SendHeaders
-            | Self::MemPool
-            | Self::GetAddr
-            | Self::WtxidRelay
-            | Self::FilterClear
-            | Self::SendAddrV2 => Ok(0),
-            // Don't use consensus_encode so as not to add a length suffix.
-            Self::Unknown { payload: ref data, .. } => writer.write(data),
-        }
-    }
-}
-
 impl encoding::Encodable for NetworkMessage {
     type Encoder<'e> = NetworkMessageEncoder<'e>;
 
