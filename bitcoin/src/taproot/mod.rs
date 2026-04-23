@@ -18,6 +18,8 @@ use internals::array::ArrayExt;
 #[allow(unused)] // MSRV polyfill
 use internals::slice::SliceExt;
 use io::Write;
+#[cfg(feature = "serde")]
+use serde::Deserialize;
 
 use crate::consensus::Encodable;
 use crate::crypto::key::{
@@ -48,8 +50,6 @@ pub use self::error::{
     InvalidMerkleBranchSizeError, InvalidMerkleTreeDepthError, InvalidTaprootLeafVersionError,
     SigFromSliceError, TaprootBuilderError, TaprootError,
 };
-#[cfg(feature = "arbitrary")]
-use crate::psbt::serialize::Deserialize;
 #[doc(inline)]
 pub use crate::XOnlyPublicKey;
 
@@ -1470,7 +1470,8 @@ impl<'a> Arbitrary<'a> for TapLeaf {
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for TapTree {
     fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
-        Ok(Self::deserialize(u.arbitrary()?).map_err(|_| arbitrary::Error::IncorrectFormat)?)
+        let node_info = NodeInfo::arbitrary(u)?;
+        Ok(Self(node_info))
     }
 }
 
