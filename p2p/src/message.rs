@@ -13,7 +13,7 @@ use core::{fmt, mem};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-use bitcoin::consensus::encode::{self, Decodable, Encodable, ReadExt, WriteExt};
+use bitcoin::consensus::encode::{self, Decodable, Encodable, ReadExt};
 use encoding::{
     self, ArrayDecoder, ArrayEncoder, BytesEncoder, CompactSizeEncoder, Decoder2, Encoder2,
     SliceEncoder, VecDecoder,
@@ -26,7 +26,7 @@ use units::FeeRate;
 
 use self::error::V1NetworkMessageDecoderErrorInner;
 use crate::address::{AddrV1Message, AddrV2Message};
-use crate::consensus::{impl_consensus_encoding, impl_vec_wrapper};
+//use crate::consensus::{impl_consensus_encoding, impl_vec_wrapper};
 use crate::merkle_tree::MerkleBlock;
 use crate::{
     bip152, message_blockdata, message_bloom, message_compact_blocks, message_filter,
@@ -320,7 +320,7 @@ impl encoding::Decodable for V1MessageHeader {
     }
 }
 
-impl_consensus_encoding!(V1MessageHeader, magic, command, length, checksum);
+//impl_consensus_encoding!(V1MessageHeader, magic, command, length, checksum);
 
 /// A Network message using the v2 p2p protocol defined in BIP-0324.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -486,9 +486,9 @@ impl encoding::Decodable for AddrV2Payload {
     fn decoder() -> Self::Decoder { AddrV2PayloadDecoder(VecDecoder::new()) }
 }
 
-impl_vec_wrapper!(InventoryPayload, message_blockdata::Inventory);
-impl_vec_wrapper!(AddrPayload, AddrV1Message);
-impl_vec_wrapper!(AddrV2Payload, AddrV2Message);
+//impl_vec_wrapper!(InventoryPayload, message_blockdata::Inventory);
+//impl_vec_wrapper!(AddrPayload, AddrV1Message);
+//impl_vec_wrapper!(AddrV2Payload, AddrV2Message);
 
 /// The `feefilter` message, wrapper around [`FeeRate`] for P2P wire format encoding.
 ///
@@ -1726,7 +1726,7 @@ impl HeadersMessage {
     }
 }
 
-impl_vec_wrapper!(HeadersMessage, NetworkHeader);
+//impl_vec_wrapper!(HeadersMessage, NetworkHeader);
 
 encoding::encoder_newtype! {
     /// The encoder type for a [`HeadersMessage`].
