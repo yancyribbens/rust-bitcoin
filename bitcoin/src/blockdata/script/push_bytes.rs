@@ -6,6 +6,7 @@ use core::fmt;
 use core::ops::{Deref, DerefMut};
 
 use crate::crypto::{ecdsa, taproot};
+use crate::internal_macros::impl_asref_push_bytes;
 use crate::prelude::{Borrow, BorrowMut};
 use crate::script;
 
@@ -434,6 +435,14 @@ impl AsRef<PushBytes> for taproot::SerializedSignature {
         <&PushBytes>::try_from(<Self as AsRef<[u8]>>::as_ref(self))
             .expect("max length 65 bytes is valid")
     }
+}
+
+impl_asref_push_bytes! {
+    hashes::ripemd160::Hash,
+    hashes::hash160::Hash,
+    hashes::sha1::Hash,
+    hashes::sha256::Hash,
+    hashes::sha256d::Hash,
 }
 
 /// Possible errors that can arise from [`PushBytes::read_scriptint`].
