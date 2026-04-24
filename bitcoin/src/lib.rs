@@ -102,13 +102,17 @@ pub mod ext {
     pub use crate::{
         block::{BlockCheckedExt as _, HeaderExt as _},
         key::{FullPublicKeyExt as _, LegacyPublicKeyExt as _},
-        pow::CompactTargetExt as _,
+        network::NetworkExt as _,
+        pow::{CompactTargetExt as _, TargetExt as _, WorkExt as _},
         script::{ScriptExt as _, ScriptBufExt as _, TapScriptExt as _, ScriptPubKeyExt as _, ScriptPubKeyBufExt as _, WitnessScriptExt as _, ScriptSigExt as _},
+        taproot::{TapLeafHashExt as _, TapNodeHashExt as _},
         transaction::{TxidExt as _, WtxidExt as _, OutPointExt as _, TxInExt as _, TxOutExt as _, TransactionExt as _},
         witness::WitnessExt as _,
     };
     #[cfg(feature = "bitcoinconsensus")]
     pub use crate::consensus_validation::{ScriptPubKeyExt as _, TransactionExt as _};
+    #[cfg(feature = "secp-recovery")]
+    pub use crate::key::PrivateKeyExt as _;
 }
 pub mod address;
 pub mod bip158;
