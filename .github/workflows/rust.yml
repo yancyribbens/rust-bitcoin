@@ -236,6 +236,8 @@ jobs:
         run: |
           contrib/generate-primitives-re-export-test.sh && (cd ./primitives && cargo test --all-features)
           contrib/generate-bitcoin-re-export-test.sh && (cd ./bitcoin && cargo test --all-features)
+      - name: "Check error type re-exports"
+        run: contrib/check-error-reexports.sh
 
   DiffMutants:
     name: Check cargo mutants in diff - stable toolchain
