@@ -17,6 +17,10 @@ mod x86_shani;
 #[cfg(any(feature = "cpufeatures", feature = "std"))]
 mod sse41;
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[cfg(any(feature = "cpufeatures", feature = "std"))]
+mod avx2;
+
 use internals::slice::SliceExt;
 
 use super::{HashEngine, Midstate, BLOCK_SIZE};
@@ -45,6 +49,13 @@ mod cpuid_sha256_x86 {
 #[allow(deprecated_in_future)]
 mod cpuid_sse41_x86 {
     cpufeatures::new!(inner, "sse2", "ssse3", "sse4.1");
+    pub fn get() -> bool { inner::get() }
+}
+#[cfg(feature = "cpufeatures")]
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[allow(deprecated_in_future)]
+mod cpuid_avx2_x86 {
+    cpufeatures::new!(inner, "avx", "avx2");
     pub fn get() -> bool { inner::get() }
 }
 
@@ -347,8 +358,6 @@ impl HashEngine {
         let mut i = 0;
         let count = inputs.len();
 
-        // TODO: 8-way AVX2
-
         // 2-way x86 SHA-NI
         #[cfg(feature = "std")]
         #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
@@ -403,6 +412,33 @@ impl HashEngine {
                     let inp = <&[[u8; 64]; 2]>::try_from(&inputs[i..i + 2]).unwrap();
                     unsafe { arm_sha2::sha256d_64_2way(out, inp) };
                     i += 2;
+                }
+            }
+        }
+
+        // 8-way AVX2
+        #[cfg(feature = "std")]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if std::is_x86_feature_detected!("avx") && std::is_x86_feature_detected!("avx2") {
+                while count - i >= 8 {
+                    let out = <&mut [[u8; 32]; 8]>::try_from(&mut outputs[i..i + 8]).unwrap();
+                    let inp = <&[[u8; 64]; 8]>::try_from(&inputs[i..i + 8]).unwrap();
+                    unsafe { avx2::sha256d_64_8way(out, inp) };
+                    i += 8;
+                }
+            }
+        }
+
+        #[cfg(feature = "cpufeatures")]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if cpuid_avx2_x86::get() {
+                while count - i >= 8 {
+                    let out = <&mut [[u8; 32]; 8]>::try_from(&mut outputs[i..i + 8]).unwrap();
+                    let inp = <&[[u8; 64]; 8]>::try_from(&inputs[i..i + 8]).unwrap();
+                    unsafe { avx2::sha256d_64_8way(out, inp) };
+                    i += 8;
                 }
             }
         }
