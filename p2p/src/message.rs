@@ -19,7 +19,7 @@ use encoding::{
     self, ArrayDecoder, ArrayEncoder, BytesEncoder, CompactSizeEncoder, Decoder2, Encoder2,
     SliceEncoder, VecDecoder,
 };
-use hashes::sha256d;
+use hashes::{sha256d, HashEngine};
 use internals::ToU64 as _;
 use io::{self, BufRead, Read, Write};
 use primitives::block::{self, HeaderDecoder, HeaderEncoder};
@@ -1548,6 +1548,15 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                 ..
             } => {
                 let payload = payload_decoder.end()?;
+                let expected_checksum = sha2_checksum(&payload);
+                if checksum != expected_checksum {
+                    return Err(V1NetworkMessageDecoderError(
+                        V1NetworkMessageDecoderErrorInner::InvalidChecksum {
+                            expected: expected_checksum,
+                            actual: checksum,
+                        },
+                    ));
+                }
 
                 Ok(V1NetworkMessage {
                     magic: Magic::from_bytes(magic_bytes),
@@ -2240,7 +2249,8 @@ pub struct CheckedData {
 impl CheckedData {
     /// Constructs a new `CheckedData` computing the checksum of given data.
     pub fn new(data: Vec<u8>) -> Self {
-        let checksum = sha2_checksum(&data);
+        let hash = sha256d::hash(data.as_slice()).to_byte_array();
+        let checksum = [hash[0], hash[1], hash[2], hash[3]];
         Self { data, checksum }
     }
 
@@ -2275,7 +2285,8 @@ impl Decodable for CheckedData {
         let checksum = <[u8; 4]>::consensus_decode_from_finite_reader(r)?;
         let opts = ReadBytesFromFiniteReaderOpts { len, chunk_size: encode::MAX_VEC_SIZE };
         let data = read_bytes_from_finite_reader(r, opts)?;
-        let expected_checksum = sha2_checksum(&data);
+        let hash = sha256d::hash(data.as_slice()).to_byte_array();
+        let expected_checksum = [hash[0], hash[1], hash[2], hash[3]];
         if expected_checksum == checksum {
             Ok(Self { data, checksum })
         } else {
@@ -2319,9 +2330,11 @@ fn read_bytes_from_finite_reader<D: Read + ?Sized>(
 }
 
 /// Does a double-SHA256 on `data` and returns the first 4 bytes.
-fn sha2_checksum(data: &[u8]) -> [u8; 4] {
-    let checksum = sha256d::hash(data);
-    let checksum = checksum.to_byte_array();
+fn sha2_checksum(data: &impl encoding::Encodable) -> [u8; 4] {
+    let mut engine = sha256d::HashEngine::new();
+    hashes::encode_to_engine(data, &mut engine);
+    let hash = engine.finalize();
+    let checksum = hash.to_byte_array();
     [checksum[0], checksum[1], checksum[2], checksum[3]]
 }
 
@@ -2525,6 +2538,8 @@ pub mod error {
         PayloadTooLarge,
         /// Error decoding the message payload.
         Payload,
+        /// Message checksum did not match the one reported in the message header.
+        InvalidChecksum { expected: [u8; 4], actual: [u8; 4] },
     }
 
     impl fmt::Display for V1NetworkMessageDecoderError {
@@ -2539,6 +2554,11 @@ pub mod error {
                 V1NetworkMessageDecoderErrorInner::Payload => {
                     write!(f, "error decoding message payload")
                 }
+                V1NetworkMessageDecoderErrorInner::InvalidChecksum { expected: ref e, actual: ref a } => write!(
+                    f,
+                    "invalid checksum: expected {:02x}{:02x}{:02x}{:02x}, actual {:02x}{:02x}{:02x}{:02x}",
+                    e[0], e[1], e[2], e[3], a[0], a[1], a[2], a[3],
+                ),
             }
         }
     }
@@ -2550,6 +2570,8 @@ pub mod error {
                 V1NetworkMessageDecoderErrorInner::Header => None,
                 V1NetworkMessageDecoderErrorInner::PayloadTooLarge => None,
                 V1NetworkMessageDecoderErrorInner::Payload => None,
+                V1NetworkMessageDecoderErrorInner::InvalidChecksum { expected: _, actual: _ } =>
+                    None,
             }
         }
     }
