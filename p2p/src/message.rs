@@ -1548,7 +1548,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                 ..
             } => {
                 let payload = payload_decoder.end()?;
-                let expected_checksum = sha2_checksum(&payload);
+                let (_, expected_checksum) = sha2_checksum(&payload);
                 if checksum != expected_checksum {
                     return Err(V1NetworkMessageDecoderError(
                         V1NetworkMessageDecoderErrorInner::InvalidChecksum {
@@ -2330,12 +2330,15 @@ fn read_bytes_from_finite_reader<D: Read + ?Sized>(
 }
 
 /// Does a double-SHA256 on `data` and returns the first 4 bytes.
-fn sha2_checksum(data: &impl encoding::Encodable) -> [u8; 4] {
+fn sha2_checksum(data: &impl encoding::Encodable) -> (u64, [u8; 4]) {
     let mut engine = sha256d::HashEngine::new();
     hashes::encode_to_engine(data, &mut engine);
+    let bytes_hashed = engine.n_bytes_hashed();
     let hash = engine.finalize();
     let checksum = hash.to_byte_array();
-    [checksum[0], checksum[1], checksum[2], checksum[3]]
+    let leading_bytes = [checksum[0], checksum[1], checksum[2], checksum[3]];
+
+    (bytes_hashed, leading_bytes)
 }
 
 /// Error types for network messages.
