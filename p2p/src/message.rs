@@ -892,14 +892,10 @@ impl V1NetworkMessage {
     ///
     /// # Panics
     ///
-    /// Panics if message encoding fails or if the payload length exceeds `u32::MAX`.
+    /// Panics if the payload length exceeds `u32::MAX`.
     pub fn new(magic: Magic, payload: NetworkMessage) -> Self {
-        let mut engine = sha256d::Hash::engine();
-        let payload_len = payload.consensus_encode(&mut engine).expect("engine doesn't error");
-        let payload_len = u32::try_from(payload_len).expect("network message use u32 as length");
-        let checksum = sha256d::Hash::from_engine(engine);
-        let checksum = checksum.to_byte_array();
-        let checksum = [checksum[0], checksum[1], checksum[2], checksum[3]];
+        let (bytes_hashed, checksum) = sha2_checksum(&payload);
+        let payload_len = u32::try_from(bytes_hashed).expect("network message use u32 as length");
         Self { magic, payload, payload_len, checksum }
     }
 
@@ -1548,7 +1544,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                 ..
             } => {
                 let payload = payload_decoder.end()?;
-                let expected_checksum = sha2_checksum(&payload);
+                let (_, expected_checksum) = sha2_checksum(&payload);
                 if checksum != expected_checksum {
                     return Err(V1NetworkMessageDecoderError(
                         V1NetworkMessageDecoderErrorInner::InvalidChecksum {
@@ -2330,12 +2326,15 @@ fn read_bytes_from_finite_reader<D: Read + ?Sized>(
 }
 
 /// Does a double-SHA256 on `data` and returns the first 4 bytes.
-fn sha2_checksum(data: &impl encoding::Encodable) -> [u8; 4] {
+fn sha2_checksum(data: &impl encoding::Encodable) -> (u64, [u8; 4]) {
     let mut engine = sha256d::HashEngine::new();
     hashes::encode_to_engine(data, &mut engine);
+    let bytes_hashed = engine.n_bytes_hashed();
     let hash = engine.finalize();
     let checksum = hash.to_byte_array();
-    [checksum[0], checksum[1], checksum[2], checksum[3]]
+    let leading_bytes = [checksum[0], checksum[1], checksum[2], checksum[3]];
+
+    (bytes_hashed, leading_bytes)
 }
 
 /// Error types for network messages.
