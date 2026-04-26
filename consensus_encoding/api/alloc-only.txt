@@ -1915,5 +1915,5 @@ impl<const N: usize> bitcoin_consensus_encoding::ExactSizeEncoder for bitcoin_co
 pub fn bitcoin_consensus_encoding::ArrayRefEncoder<'_, N>::len(&self) -> usize
 pub fn bitcoin_consensus_encoding::decode_from_slice<T: bitcoin_consensus_encoding::Decodable>(bytes: &[u8]) -> core::result::Result<T, bitcoin_consensus_encoding::error::DecodeError<<<T as bitcoin_consensus_encoding::Decodable>::Decoder as bitcoin_consensus_encoding::Decoder>::Error>>
 pub fn bitcoin_consensus_encoding::decode_from_slice_unbounded<T>(bytes: &mut &[u8]) -> core::result::Result<T, <<T as bitcoin_consensus_encoding::Decodable>::Decoder as bitcoin_consensus_encoding::Decoder>::Error> where T: bitcoin_consensus_encoding::Decodable
+pub fn bitcoin_consensus_encoding::drain_to_vec<T>(encoder: &mut T) -> alloc::vec::Vec<u8> where T: bitcoin_consensus_encoding::Encoder + ?core::marker::Sized
 pub fn bitcoin_consensus_encoding::encode_to_vec<T>(object: &T) -> alloc::vec::Vec<u8> where T: bitcoin_consensus_encoding::Encodable + ?core::marker::Sized
-pub fn bitcoin_consensus_encoding::flush_to_vec<T>(encoder: &mut T) -> alloc::vec::Vec<u8> where T: bitcoin_consensus_encoding::Encoder + ?core::marker::Sized

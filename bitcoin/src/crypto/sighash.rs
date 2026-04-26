@@ -392,7 +392,7 @@ impl<R: Borrow<Transaction>> SighashCache<R> {
                 encoding::CompactSizeEncoder::new(annex.0.len()),
                 encoding::BytesEncoder::without_length_prefix(annex.0),
             );
-            io::flush_to_writer(&mut encoder, &mut enc)?;
+            io::drain_to_writer(&mut encoder, &mut enc)?;
             let hash = sha256::Hash::from_engine(enc);
             writer.write_all(&hash.to_byte_array())?;
         }
@@ -704,7 +704,7 @@ impl<R: Borrow<Transaction>> SighashCache<R> {
                         encoding::CompactSizeEncoder::new(self_.outputs.len()),
                         encoding::SliceEncoder::without_length_prefix(&self_.outputs),
                     );
-                    io::flush_to_writer(&mut encoder, &mut writer)?;
+                    io::drain_to_writer(&mut encoder, &mut writer)?;
                 }
                 EcdsaSighashType::Single => {
                     // sign all outputs up to and including this one, but erase

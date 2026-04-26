@@ -44,9 +44,9 @@
 //! And on the encoding side we provide:
 //!
 //! * [`encode_to_writer`]: Encode to a stdlib writer.
-//! * [`flush_to_writer`]: Flush an encoder to a stdlib writer.
+//! * [`drain_to_writer`]: Drain an encoder to a stdlib writer.
 //! * [`encode_to_vec`]: Encode to the heap.
-//! * [`flush_to_vec`]: Flush an encoder to the heap.
+//! * [`drain_to_vec`]: Drain an encoder to the heap.
 //!
 //! # Feature Flags
 //!
@@ -91,10 +91,10 @@ pub use self::encode::encoders::{
 };
 #[cfg(feature = "alloc")]
 #[doc(inline)]
-pub use self::encode::{encode_to_vec, flush_to_vec};
+pub use self::encode::{encode_to_vec, drain_to_vec};
 #[cfg(feature = "std")]
 #[doc(inline)]
-pub use self::encode::{encode_to_writer, flush_to_writer};
+pub use self::encode::{encode_to_writer, drain_to_writer};
 #[doc(inline)]
 pub use self::encode::{Encodable, Encoder, EncoderByteIter, ExactSizeEncoder};
 #[cfg(feature = "alloc")]
