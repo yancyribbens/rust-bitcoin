@@ -50,13 +50,6 @@ doc = false
 bench = false
 
 [[bin]]
-name = "bitcoin_arbitrary_psbt"
-path = "fuzz_targets/bitcoin/arbitrary_psbt.rs"
-test = false
-doc = false
-bench = false
-
-[[bin]]
 name = "bitcoin_arbitrary_script"
 path = "fuzz_targets/bitcoin/arbitrary_script.rs"
 test = false
@@ -94,13 +87,6 @@ bench = false
 [[bin]]
 name = "bitcoin_deserialize_prefilled_transaction"
 path = "fuzz_targets/bitcoin/deserialize_prefilled_transaction.rs"
-test = false
-doc = false
-bench = false
-
-[[bin]]
-name = "bitcoin_deserialize_psbt"
-path = "fuzz_targets/bitcoin/deserialize_psbt.rs"
 test = false
 doc = false
 bench = false

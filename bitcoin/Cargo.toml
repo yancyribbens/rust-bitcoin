@@ -61,14 +61,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 name = "bip32"
 
 [[example]]
-name = "ecdsa-psbt"
-required-features = ["std", "bitcoinconsensus"]
-
-[[example]]
-name = "ecdsa-psbt-simple"
-required-features = ["rand", "std"]
-
-[[example]]
 name = "create-p2wpkh-address"
 required-features = ["rand", "std"]
 
@@ -78,14 +70,6 @@ required-features = ["rand", "std"]
 
 [[example]]
 name = "sign-tx-taproot"
-required-features = ["rand", "std"]
-
-[[example]]
-name = "taproot-psbt"
-required-features = ["rand", "std", "bitcoinconsensus"]
-
-[[example]]
-name = "taproot-psbt-simple"
 required-features = ["rand", "std"]
 
 [[example]]
@@ -114,10 +98,8 @@ use_self = "warn"
 examples = [
     "bip32",
     "bip32:-",
-    "ecdsa-psbt:std bitcoinconsensus",
     "sign-tx-segwit-v0:rand std",
     "sign-tx-taproot:rand std",
-    "taproot-psbt:bitcoinconsensus rand std",
     "sighash:std",
     "serde:std serde",
 ]
