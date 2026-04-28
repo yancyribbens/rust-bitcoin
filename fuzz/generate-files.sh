@@ -23,6 +23,7 @@ cargo-fuzz = true
 
 [dependencies]
 bitcoin = { path = "../bitcoin", features = [ "serde", "arbitrary" ] }
+old_bitcoin = { version = "0.32.8", package = "bitcoin" }
 bitcoin_consensus_encoding = { path = "../consensus_encoding", package = "bitcoin-consensus-encoding" }
 p2p = { path = "../p2p", package = "bitcoin-p2p-messages", features = ["arbitrary"] }
 
@@ -42,6 +43,15 @@ use_self = "warn"
 [package.metadata.rbmt.lint]
 allowed_duplicates = [
     "hex-conservative",
+    "bitcoin_hashes",
+    "bitcoin-io",
+    "hex-conservative",
+    "base58ck",
+    "bitcoin",
+    "bitcoin-internals",
+    "bitcoin-units",
+    "secp256k1",
+    "secp256k1-sys",
 ]
 EOF
 
