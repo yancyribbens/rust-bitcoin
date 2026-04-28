@@ -11,7 +11,7 @@ use bitcoin_units::block::BlockHeightDecoder;
 use bitcoin_units::sequence::SequenceDecoder;
 use bitcoin_units::time::BlockTimeDecoder;
 use bitcoin_units::{Amount, BlockHeight, BlockTime, Sequence};
-use encoding::{encode_to_vec, Decodable as _, Decoder as _};
+use encoding::{encode_to_vec, Decode as _, Decoder as _};
 
 /// Tests round-trip encoding/decoding for a list of values.
 ///

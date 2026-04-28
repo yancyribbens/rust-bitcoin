@@ -398,7 +398,7 @@ impl LockTime {
 parse_int::impl_parse_str_from_int_infallible!(LockTime, u32, from_consensus);
 
 #[cfg(feature = "encoding")]
-impl encoding::Encodable for LockTime {
+impl encoding::Encode for LockTime {
     type Encoder<'e> = LockTimeEncoder<'e>;
     #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -409,7 +409,7 @@ impl encoding::Encodable for LockTime {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Decodable for LockTime {
+impl encoding::Decode for LockTime {
     type Decoder = LockTimeDecoder;
 
     #[inline]

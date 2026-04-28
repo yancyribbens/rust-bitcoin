@@ -303,7 +303,7 @@ impl From<CompactTarget> for Target {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Encodable for CompactTarget {
+impl encoding::Encode for CompactTarget {
     type Encoder<'e> = CompactTargetEncoder<'e>;
     #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -314,7 +314,7 @@ impl encoding::Encodable for CompactTarget {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Decodable for CompactTarget {
+impl encoding::Decode for CompactTarget {
     type Decoder = CompactTargetDecoder;
 
     #[inline]
@@ -1513,7 +1513,7 @@ mod tests {
     fn compact_target_decoder_read_limit() {
         // read_limit is one u32 = 4 bytes for empty decoder
         assert_eq!(CompactTargetDecoder::default().read_limit(), 4);
-        assert_eq!(<CompactTarget as encoding::Decodable>::decoder().read_limit(), 4);
+        assert_eq!(<CompactTarget as encoding::Decode>::decoder().read_limit(), 4);
     }
 
     #[test]

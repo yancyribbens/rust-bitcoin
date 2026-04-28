@@ -135,7 +135,7 @@ encoding::encoder_newtype! {
     pub struct MerkleBlockEncoder<'e>(Encoder2<HeaderEncoder<'e>, PartialMerkleTreeEncoder<'e>>);
 }
 
-impl encoding::Encodable for MerkleBlock {
+impl encoding::Encode for MerkleBlock {
     type Encoder<'e> = MerkleBlockEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -168,7 +168,7 @@ impl encoding::Decoder for MerkleBlockDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for MerkleBlock {
+impl encoding::Decode for MerkleBlock {
     type Decoder = MerkleBlockDecoder;
     fn decoder() -> Self::Decoder {
         MerkleBlockDecoder(Decoder2::new(block::Header::decoder(), PartialMerkleTree::decoder()))
@@ -508,7 +508,7 @@ encoding::encoder_newtype! {
     );
 }
 
-impl encoding::Encodable for PartialMerkleTree {
+impl encoding::Encode for PartialMerkleTree {
     type Encoder<'e> = PartialMerkleTreeEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -560,7 +560,7 @@ impl encoding::Decoder for PartialMerkleTreeDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for PartialMerkleTree {
+impl encoding::Decode for PartialMerkleTree {
     type Decoder = PartialMerkleTreeDecoder;
 
     fn decoder() -> Self::Decoder {

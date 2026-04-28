@@ -205,7 +205,7 @@ impl TryFrom<BlockHeight> for absolute::Height {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Encodable for BlockHeight {
+impl encoding::Encode for BlockHeight {
     type Encoder<'e> = BlockHeightEncoder<'e>;
     #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -216,7 +216,7 @@ impl encoding::Encodable for BlockHeight {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Decodable for BlockHeight {
+impl encoding::Decode for BlockHeight {
     type Decoder = BlockHeightDecoder;
 
     #[inline]
@@ -695,7 +695,7 @@ mod tests {
     use std::error::Error;
 
     #[cfg(feature = "encoding")]
-    use encoding::{Decodable as _, Decoder as _, UnexpectedEofError};
+    use encoding::{Decode as _, Decoder as _, UnexpectedEofError};
 
     use super::*;
     use crate::relative::{NumberOf512Seconds, TimeOverflowError};

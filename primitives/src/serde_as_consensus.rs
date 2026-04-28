@@ -8,7 +8,7 @@
 //!
 //! Use with `#[serde(with = "bitcoin_primitives::serde_as_consensus")]`.
 //!
-//! This module works with any type `T` that implements both [`Encodable`] and [`Decodable`].
+//! This module works with any type `T` that implements both [`Encode`] and [`Decode`].
 //! In human-readable formats (like JSON), the value is serialized as a hex string.
 //! In non-human-readable formats (like bincode), raw bytes are used.
 //!
@@ -36,7 +36,7 @@
 use core::fmt;
 use core::marker::PhantomData;
 
-use encoding::{Decodable, Encodable};
+use encoding::{Decode, Encode};
 use serde::{de, Deserializer, Serializer};
 
 use crate::hex_codec::HexPrimitive;
@@ -45,11 +45,11 @@ use crate::hex_codec::HexPrimitive;
 ///
 /// # Type Parameters
 ///
-/// * `T` - The type to serialize, must implement [`Encodable`] and [`Decodable`]
+/// * `T` - The type to serialize, must implement [`Encode`] and [`Decode`]
 /// * `S` - The serializer type
 pub fn serialize<T, S>(value: &T, s: S) -> Result<S::Ok, S::Error>
 where
-    T: Encodable + Decodable,
+    T: Encode + Decode,
     S: Serializer,
 {
     if s.is_human_readable() {
@@ -66,11 +66,11 @@ where
 ///
 /// # Type Parameters
 ///
-/// * `T` - The type to deserialize, must implement [`Encodable`] and [`Decodable`]
+/// * `T` - The type to deserialize, must implement [`Encode`] and [`Decode`]
 /// * `D` - The deserializer type
 pub fn deserialize<'d, T, D>(d: D) -> Result<T, D::Error>
 where
-    T: Encodable + Decodable,
+    T: Encode + Decode,
     D: Deserializer<'d>,
 {
     if d.is_human_readable() {
@@ -86,7 +86,7 @@ where
 
         impl<'de, T> serde::de::Visitor<'de> for BytesVisitor<T>
         where
-            T: Encodable + Decodable,
+            T: Encode + Decode,
         {
             type Value = T;
 
@@ -121,25 +121,25 @@ pub mod opt {
     //! **WARNING:**
     //!
     //! This module is specifically for using `serde` to be able to serialize any object that is
-    //! `Encodable`/`Decodable` if said object is in an `Option`.
+    //! `Encode`/`Decode` if said object is in an `Option`.
     //!
     //! Use with `#[serde(with = "bitcoin_primitives::serde_as_consensus::opt")]`.
 
     use core::fmt;
     use core::marker::PhantomData;
 
-    use encoding::{Decodable, Encodable};
+    use encoding::{Decode, Encode};
     use serde::{de, Deserializer, Serializer};
 
     #[allow(clippy::ref_option)] // API forced by serde.
     pub fn serialize<T, S>(t: &Option<T>, s: S) -> Result<S::Ok, S::Error>
     where
-        T: Encodable + Decodable,
+        T: Encode + Decode,
         S: Serializer,
     {
         struct AsConsensus<'a, T>(&'a T);
 
-        impl<T: Encodable + Decodable> serde::Serialize for AsConsensus<'_, T> {
+        impl<T: Encode + Decode> serde::Serialize for AsConsensus<'_, T> {
             fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
                 super::serialize(self.0, s)
             }
@@ -153,19 +153,19 @@ pub mod opt {
 
     pub fn deserialize<'d, T, D>(d: D) -> Result<Option<T>, D::Error>
     where
-        T: Encodable + Decodable,
+        T: Encode + Decode,
         D: Deserializer<'d>,
     {
         struct OptVisitor<X>(PhantomData<X>);
 
         impl<'de, X> de::Visitor<'de> for OptVisitor<X>
         where
-            X: Encodable + Decodable,
+            X: Encode + Decode,
         {
             type Value = Option<X>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                write!(formatter, "an Option<T> where T: encoding::Decodable")
+                write!(formatter, "an Option<T> where T: encoding::Decode")
             }
 
             fn visit_none<E>(self) -> Result<Self::Value, E>
@@ -193,7 +193,7 @@ pub mod vec {
     //!
     //! This is not a consensus encoded vector (i.e, with length prefix). This module is
     //! specifically for using `serde` to be able to serialize any object that is
-    //! `Encodable`/`Decodable` if said object is in a `Vec`.
+    //! `Encode`/`Decode` if said object is in a `Vec`.
     //!
     //! Use with `#[serde(with = "bitcoin_primitives::serde_as_consensus::vec")]`.
 
@@ -201,19 +201,19 @@ pub mod vec {
     use core::fmt;
     use core::marker::PhantomData;
 
-    use encoding::{Decodable, Encodable};
+    use encoding::{Decode, Encode};
     use serde::{de, Deserializer, Serializer};
 
     pub fn serialize<T, S>(v: &[T], s: S) -> Result<S::Ok, S::Error>
     where
-        T: Encodable + Decodable,
+        T: Encode + Decode,
         S: Serializer,
     {
         use serde::ser::SerializeSeq;
 
         struct AsConsensus<'a, T>(&'a T);
 
-        impl<T: Encodable + Decodable> serde::Serialize for AsConsensus<'_, T> {
+        impl<T: Encode + Decode> serde::Serialize for AsConsensus<'_, T> {
             fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
                 super::serialize(self.0, s)
             }
@@ -228,14 +228,14 @@ pub mod vec {
 
     pub fn deserialize<'d, T, D>(d: D) -> Result<Vec<T>, D::Error>
     where
-        T: Encodable + Decodable,
+        T: Encode + Decode,
         D: Deserializer<'d>,
     {
         struct VecVisitor<X>(PhantomData<X>);
 
         impl<'de, X> de::Visitor<'de> for VecVisitor<X>
         where
-            X: Encodable + Decodable,
+            X: Encode + Decode,
         {
             type Value = Vec<X>;
 
@@ -251,7 +251,7 @@ pub mod vec {
 
                 impl<'de, X> de::Deserialize<'de> for Wrap<X>
                 where
-                    X: Encodable + Decodable,
+                    X: Encode + Decode,
                 {
                     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
                         super::deserialize::<X, D>(d).map(Wrap)

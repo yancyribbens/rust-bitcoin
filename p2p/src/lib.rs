@@ -135,7 +135,7 @@ encoding::encoder_newtype_exact! {
     pub struct ProtocolVersionEncoder<'e>(encoding::ArrayEncoder<4>);
 }
 
-impl encoding::Encodable for ProtocolVersion {
+impl encoding::Encode for ProtocolVersion {
     type Encoder<'e> = ProtocolVersionEncoder<'e>;
     fn encoder(&self) -> Self::Encoder<'_> {
         ProtocolVersionEncoder::new(encoding::ArrayEncoder::without_length_prefix(
@@ -176,7 +176,7 @@ impl encoding::Decoder for ProtocolVersionDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for ProtocolVersion {
+impl encoding::Decode for ProtocolVersion {
     type Decoder = ProtocolVersionDecoder;
     fn decoder() -> Self::Decoder { ProtocolVersionDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
@@ -344,7 +344,7 @@ encoding::encoder_newtype_exact! {
     pub struct ServiceFlagsEncoder<'e>(encoding::ArrayEncoder<8>);
 }
 
-impl encoding::Encodable for ServiceFlags {
+impl encoding::Encode for ServiceFlags {
     type Encoder<'e> = ServiceFlagsEncoder<'e>;
     fn encoder(&self) -> Self::Encoder<'_> {
         ServiceFlagsEncoder::new(encoding::ArrayEncoder::without_length_prefix(
@@ -385,7 +385,7 @@ impl encoding::Decoder for ServiceFlagsDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for ServiceFlags {
+impl encoding::Decode for ServiceFlags {
     type Decoder = ServiceFlagsDecoder;
     fn decoder() -> Self::Decoder { ServiceFlagsDecoder(encoding::ArrayDecoder::<8>::new()) }
 }
@@ -498,7 +498,7 @@ encoding::encoder_newtype_exact! {
     pub struct MagicEncoder<'e>(ArrayEncoder<4>);
 }
 
-impl encoding::Encodable for Magic {
+impl encoding::Encode for Magic {
     type Encoder<'e> = MagicEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -531,7 +531,7 @@ impl encoding::Decoder for MagicDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for Magic {
+impl encoding::Decode for Magic {
     type Decoder = MagicDecoder;
 
     fn decoder() -> Self::Decoder { MagicDecoder(ArrayDecoder::new()) }

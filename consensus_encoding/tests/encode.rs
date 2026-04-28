@@ -6,13 +6,13 @@
 use std::io::{Cursor, Write};
 
 use bitcoin_consensus_encoding::{
-    ArrayEncoder, ArrayRefEncoder, BytesEncoder, CompactSizeEncoder, Encodable, Encoder, Encoder2,
+    ArrayEncoder, ArrayRefEncoder, BytesEncoder, CompactSizeEncoder, Encode, Encoder, Encoder2,
     Encoder3, Encoder4, Encoder6, EncoderByteIter, ExactSizeEncoder, SliceEncoder,
 };
 
 struct TestBytes<'a>(&'a [u8]);
 
-impl Encodable for TestBytes<'_> {
+impl Encode for TestBytes<'_> {
     type Encoder<'e>
         = BytesEncoder<'e>
     where
@@ -23,7 +23,7 @@ impl Encodable for TestBytes<'_> {
 
 struct TestArray<const N: usize>([u8; N]);
 
-impl<const N: usize> Encodable for TestArray<N> {
+impl<const N: usize> Encode for TestArray<N> {
     type Encoder<'e>
         = ArrayEncoder<N>
     where
@@ -32,12 +32,12 @@ impl<const N: usize> Encodable for TestArray<N> {
     fn encoder(&self) -> Self::Encoder<'_> { ArrayEncoder::without_length_prefix(self.0) }
 }
 
-// Simple test type that implements Encodable.
+// Simple test type that implements Encode.
 #[cfg(feature = "alloc")]
 struct TestData(u32);
 
 #[cfg(feature = "alloc")]
-impl Encodable for TestData {
+impl Encode for TestData {
     type Encoder<'e>
         = ArrayEncoder<4>
     where
@@ -53,7 +53,7 @@ impl Encodable for TestData {
 struct EmptyData;
 
 #[cfg(feature = "alloc")]
-impl Encodable for EmptyData {
+impl Encode for EmptyData {
     type Encoder<'e>
         = ArrayEncoder<0>
     where
@@ -150,7 +150,7 @@ fn encode_slice_encoder_mixed_empty_and_data() {
     // Test SliceEncoder behavior with mixed empty and non-empty elements.
     struct TestBytesVec(Vec<u8>);
 
-    impl Encodable for TestBytesVec {
+    impl Encode for TestBytesVec {
         type Encoder<'e>
             = BytesEncoder<'e>
         where

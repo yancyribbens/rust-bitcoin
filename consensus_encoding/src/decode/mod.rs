@@ -16,7 +16,7 @@ use crate::{DecodeError, UnconsumedError};
 /// # Examples
 ///
 /// ```
-/// use bitcoin_consensus_encoding::{decode_from_slice, Decodable, Decoder, ArrayDecoder, UnexpectedEofError};
+/// use bitcoin_consensus_encoding::{decode_from_slice, Decode, Decoder, ArrayDecoder, UnexpectedEofError};
 ///
 /// struct Foo([u8; 4]);
 ///
@@ -33,7 +33,7 @@ use crate::{DecodeError, UnconsumedError};
 ///     fn read_limit(&self) -> usize { self.0.read_limit() }
 /// }
 ///
-/// impl Decodable for Foo {
+/// impl Decode for Foo {
 ///     type Decoder = FooDecoder;
 ///     fn decoder() -> Self::Decoder { FooDecoder(ArrayDecoder::new()) }
 /// }
@@ -41,7 +41,7 @@ use crate::{DecodeError, UnconsumedError};
 /// let foo: Foo = decode_from_slice(&[0xde, 0xad, 0xbe, 0xef]).unwrap();
 /// assert_eq!(foo.0, [0xde, 0xad, 0xbe, 0xef]);
 /// ```
-pub trait Decodable {
+pub trait Decode {
     /// Associated decoder for the type.
     type Decoder: Decoder<Output = Self>;
 
@@ -107,7 +107,7 @@ pub trait Decoder: Sized {
 /// Returns an error if the decoder encounters an error while parsing the data, including
 /// insufficient data. This function also errors if the provided slice is not completely consumed
 /// during decode.
-pub fn decode_from_slice<T: Decodable>(
+pub fn decode_from_slice<T: Decode>(
     bytes: &[u8],
 ) -> Result<T, DecodeError<<T::Decoder as Decoder>::Error>> {
     let mut remaining = bytes;
@@ -134,7 +134,7 @@ pub fn decode_from_slice_unbounded<T>(
     bytes: &mut &[u8],
 ) -> Result<T, <T::Decoder as Decoder>::Error>
 where
-    T: Decodable,
+    T: Decode,
 {
     let mut decoder = T::decoder();
 
@@ -162,7 +162,7 @@ where
 #[cfg(feature = "std")]
 pub fn decode_from_read<T, R>(mut reader: R) -> Result<T, ReadError<<T::Decoder as Decoder>::Error>>
 where
-    T: Decodable,
+    T: Decode,
     R: std::io::BufRead,
 {
     let mut decoder = T::decoder();
@@ -213,7 +213,7 @@ pub fn decode_from_read_unbuffered<T, R>(
     reader: R,
 ) -> Result<T, ReadError<<T::Decoder as Decoder>::Error>>
 where
-    T: Decodable,
+    T: Decode,
     R: std::io::Read,
 {
     decode_from_read_unbuffered_with::<T, R, 4096>(reader)
@@ -240,7 +240,7 @@ pub fn decode_from_read_unbuffered_with<T, R, const BUFFER_SIZE: usize>(
     mut reader: R,
 ) -> Result<T, ReadError<<T::Decoder as Decoder>::Error>>
 where
-    T: Decodable,
+    T: Decode,
     R: std::io::Read,
 {
     let mut decoder = T::decoder();

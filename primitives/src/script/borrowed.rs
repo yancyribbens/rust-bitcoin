@@ -10,7 +10,7 @@ use core::ops::{
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
-use encoding::{BytesEncoder, CompactSizeEncoder, Encodable, Encoder2};
+use encoding::{BytesEncoder, CompactSizeEncoder, Encode, Encoder2};
 
 use super::ScriptBuf;
 use crate::prelude::{Box, ToOwned, Vec};
@@ -189,7 +189,7 @@ encoding::encoder_newtype_exact! {
     pub struct ScriptEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
 
-impl<T> Encodable for Script<T> {
+impl<T> Encode for Script<T> {
     type Encoder<'e>
         = ScriptEncoder<'e>
     where

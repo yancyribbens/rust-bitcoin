@@ -201,7 +201,7 @@ pub trait HashEngine: Clone {
 /// Encodes an object into a hash engine.
 pub fn encode_to_engine<T, H>(object: &T, engine: &mut H)
 where
-    T: encoding::Encodable + ?Sized,
+    T: encoding::Encode + ?Sized,
     H: HashEngine,
 {
     let mut encoder = object.encoder();

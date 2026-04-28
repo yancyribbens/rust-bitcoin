@@ -58,7 +58,7 @@ encoding::encoder_newtype! {
     pub struct PrefilledTransactionEncoder<'e>(Encoder2<CompactSizeEncoder, TransactionEncoder<'e>>);
 }
 
-impl encoding::Encodable for PrefilledTransaction {
+impl encoding::Encode for PrefilledTransaction {
     type Encoder<'e>
         = PrefilledTransactionEncoder<'e>
     where
@@ -107,7 +107,7 @@ impl encoding::Decoder for PrefilledTransactionDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for PrefilledTransaction {
+impl encoding::Decode for PrefilledTransaction {
     type Decoder = PrefilledTransactionDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -234,7 +234,7 @@ encoding::encoder_newtype_exact! {
     pub struct ShortIdEncoder<'e>(ArrayEncoder<6>);
 }
 
-impl encoding::Encodable for ShortId {
+impl encoding::Encode for ShortId {
     type Encoder<'e> = ShortIdEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -267,7 +267,7 @@ impl encoding::Decoder for ShortIdDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for ShortId {
+impl encoding::Decode for ShortId {
     type Decoder = ShortIdDecoder;
 
     fn decoder() -> Self::Decoder { ShortIdDecoder(ShortIdInnerDecoder::new()) }
@@ -307,7 +307,7 @@ encoding::encoder_newtype! {
     );
 }
 
-impl encoding::Encodable for HeaderAndShortIds {
+impl encoding::Encode for HeaderAndShortIds {
     type Encoder<'e>
         = HeaderAndShortIdsEncoder<'e>
     where
@@ -371,7 +371,7 @@ impl encoding::Decoder for HeaderAndShortIdsDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for HeaderAndShortIds {
+impl encoding::Decode for HeaderAndShortIds {
     type Decoder = HeaderAndShortIdsDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -498,7 +498,7 @@ impl HeaderAndShortIds {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Offset(usize);
 
-impl encoding::Encodable for Offset {
+impl encoding::Encode for Offset {
     type Encoder<'e> = CompactSizeEncoder;
 
     fn encoder(&self) -> Self::Encoder<'_> { CompactSizeEncoder::new(self.0) }
@@ -523,7 +523,7 @@ impl encoding::Decoder for OffsetDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for Offset {
+impl encoding::Decode for Offset {
     type Decoder = OffsetDecoder;
 
     fn decoder() -> Self::Decoder { OffsetDecoder(CompactSizeDecoder::new()) }
@@ -600,7 +600,7 @@ encoding::encoder_newtype! {
     );
 }
 
-impl encoding::Encodable for BlockTransactionsRequest {
+impl encoding::Encode for BlockTransactionsRequest {
     type Encoder<'e> = BlockTransactionsRequestEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -639,7 +639,7 @@ impl encoding::Decoder for BlockTransactionsRequestDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for BlockTransactionsRequest {
+impl encoding::Decode for BlockTransactionsRequest {
     type Decoder = BlockTransactionsRequestDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -712,7 +712,7 @@ encoding::encoder_newtype! {
     );
 }
 
-impl encoding::Encodable for BlockTransactions {
+impl encoding::Encode for BlockTransactions {
     type Encoder<'e>
         = BlockTransactionsEncoder<'e>
     where
@@ -754,7 +754,7 @@ impl encoding::Decoder for BlockTransactionsDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for BlockTransactions {
+impl encoding::Decode for BlockTransactions {
     type Decoder = BlockTransactionsDecoder;
 
     fn decoder() -> Self::Decoder {

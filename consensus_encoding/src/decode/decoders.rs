@@ -7,7 +7,7 @@ use alloc::vec::Vec;
 use core::{fmt, mem};
 
 #[cfg(feature = "alloc")]
-use super::Decodable;
+use super::Decode;
 use super::Decoder;
 #[cfg(feature = "alloc")]
 use crate::compact_size::CompactSizeDecoder;
@@ -147,15 +147,15 @@ impl Decoder for ByteVecDecoder {
 ///
 /// The decoding is expected to start with expected number of items in the vector.
 #[cfg(feature = "alloc")]
-pub struct VecDecoder<T: Decodable> {
+pub struct VecDecoder<T: Decode> {
     prefix_decoder: Option<CompactSizeDecoder>,
     length: usize,
     buffer: Vec<T>,
-    decoder: Option<<T as Decodable>::Decoder>,
+    decoder: Option<<T as Decode>::Decoder>,
 }
 
 #[cfg(feature = "alloc")]
-impl<T: Decodable> fmt::Debug for VecDecoder<T>
+impl<T: Decode> fmt::Debug for VecDecoder<T>
 where
     T::Decoder: fmt::Debug,
 {
@@ -171,7 +171,7 @@ where
 }
 
 #[cfg(feature = "alloc")]
-impl<T: Decodable> Clone for VecDecoder<T>
+impl<T: Decode> Clone for VecDecoder<T>
 where
     T: Clone,
     T::Decoder: Clone,
@@ -187,7 +187,7 @@ where
 }
 
 #[cfg(feature = "alloc")]
-impl<T: Decodable> VecDecoder<T> {
+impl<T: Decode> VecDecoder<T> {
     /// Constructs a new typed vector decoder with the default limit of 4,000,000 elements.
     pub const fn new() -> Self { Self::new_with_limit(MAX_VEC_SIZE) }
 
@@ -225,14 +225,14 @@ impl<T: Decodable> VecDecoder<T> {
 }
 
 #[cfg(feature = "alloc")]
-impl<T: Decodable> Default for VecDecoder<T> {
+impl<T: Decode> Default for VecDecoder<T> {
     fn default() -> Self { Self::new() }
 }
 
 #[cfg(feature = "alloc")]
-impl<T: Decodable> Decoder for VecDecoder<T> {
+impl<T: Decode> Decoder for VecDecoder<T> {
     type Output = Vec<T>;
-    type Error = VecDecoderError<<<T as Decodable>::Decoder as Decoder>::Error>;
+    type Error = VecDecoderError<<<T as Decode>::Decoder as Decoder>::Error>;
 
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
         use VecDecoderError as E;
@@ -914,7 +914,7 @@ mod tests {
     }
 
     #[cfg(feature = "alloc")]
-    impl Decodable for Inner {
+    impl Decode for Inner {
         type Decoder = InnerDecoder;
         fn decoder() -> Self::Decoder { InnerDecoder(ArrayDecoder::<4>::new()) }
     }
@@ -946,7 +946,7 @@ mod tests {
     }
 
     #[cfg(feature = "alloc")]
-    impl Decodable for Test {
+    impl Decode for Test {
         type Decoder = TestDecoder;
         fn decoder() -> Self::Decoder { TestDecoder(VecDecoder::new()) }
     }

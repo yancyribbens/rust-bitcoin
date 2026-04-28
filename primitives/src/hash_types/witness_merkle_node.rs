@@ -50,7 +50,7 @@ impl WitnessMerkleNode {
     }
 }
 
-impl encoding::Encodable for WitnessMerkleNode {
+impl encoding::Encode for WitnessMerkleNode {
     type Encoder<'e> = WitnessMerkleNodeEncoder<'e>;
     #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -60,7 +60,7 @@ impl encoding::Encodable for WitnessMerkleNode {
     }
 }
 
-impl encoding::Decodable for WitnessMerkleNode {
+impl encoding::Decode for WitnessMerkleNode {
     type Decoder = WitnessMerkleNodeDecoder;
     #[inline]
     fn decoder() -> Self::Decoder { WitnessMerkleNodeDecoder(encoding::ArrayDecoder::<32>::new()) }
@@ -124,7 +124,7 @@ mod tests {
         assert_eq!(WitnessMerkleNodeDecoder::new().read_limit(), 32);
         // These two are the same decoder but we want 100% coverage.
         assert_eq!(WitnessMerkleNodeDecoder::default().read_limit(), 32);
-        assert_eq!(<WitnessMerkleNode as encoding::Decodable>::decoder().read_limit(), 32);
+        assert_eq!(<WitnessMerkleNode as encoding::Decode>::decoder().read_limit(), 32);
     }
 
     #[test]

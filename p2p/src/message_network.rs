@@ -114,7 +114,7 @@ encoding::encoder_newtype_exact! {
     );
 }
 
-impl encoding::Encodable for VersionMessage {
+impl encoding::Encode for VersionMessage {
     type Encoder<'e>
         = VersionMessageEncoder<'e>
     where
@@ -140,7 +140,7 @@ impl encoding::Encodable for VersionMessage {
     }
 }
 
-impl encoding::Decodable for VersionMessage {
+impl encoding::Decode for VersionMessage {
     type Decoder = VersionMessageDecoder;
 
     #[inline]
@@ -245,7 +245,7 @@ encoding::encoder_newtype_exact! {
     pub struct UserAgentEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
 
-impl encoding::Encodable for UserAgent {
+impl encoding::Encode for UserAgent {
     type Encoder<'e> = UserAgentEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -283,7 +283,7 @@ impl encoding::Decoder for UserAgentDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for UserAgent {
+impl encoding::Decode for UserAgent {
     type Decoder = UserAgentDecoder;
 
     fn decoder() -> Self::Decoder { UserAgentDecoder(UserAgentInnerDecoder::new()) }
@@ -461,7 +461,7 @@ encoding::encoder_newtype_exact! {
     pub struct RejectReasonEncoder<'e>(ArrayEncoder<1>);
 }
 
-impl encoding::Encodable for RejectReason {
+impl encoding::Encode for RejectReason {
     type Encoder<'e> = RejectReasonEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -503,7 +503,7 @@ impl encoding::Decoder for RejectReasonDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for RejectReason {
+impl encoding::Decode for RejectReason {
     type Decoder = RejectReasonDecoder;
 
     fn decoder() -> Self::Decoder { RejectReasonDecoder(ArrayDecoder::new()) }
@@ -558,7 +558,7 @@ encoding::encoder_newtype_exact! {
     );
 }
 
-impl encoding::Encodable for Reject {
+impl encoding::Encode for Reject {
     type Encoder<'e> = RejectEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -610,7 +610,7 @@ impl encoding::Decoder for RejectDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for Reject {
+impl encoding::Decode for Reject {
     type Decoder = RejectDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -654,7 +654,7 @@ encoding::encoder_newtype_exact! {
     pub struct AlertEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 }
 
-impl encoding::Encodable for Alert {
+impl encoding::Encode for Alert {
     type Encoder<'e> = AlertEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -689,7 +689,7 @@ impl encoding::Decoder for AlertDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for Alert {
+impl encoding::Decode for Alert {
     type Decoder = AlertDecoder;
 
     fn decoder() -> Self::Decoder { AlertDecoder(AlertInnerDecoder::new()) }

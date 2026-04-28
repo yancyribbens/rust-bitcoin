@@ -17,13 +17,13 @@
 //!
 //! # Encoding
 //!
-//! Types implement [`Encodable`] to produce an [`Encoder`], which yields encoded bytes in chunks
+//! Types implement [`Encode`] to produce an [`Encoder`], which yields encoded bytes in chunks
 //! via [`Encoder::current_chunk`] and [`Encoder::advance`]. The caller drives the process by
 //! pulling chunks until `advance` returns `false`.
 //!
 //! # Decoding
 //!
-//! Types implement [`Decodable`] to produce a [`Decoder`], which consumes bytes via
+//! Types implement [`Decode`] to produce a [`Decoder`], which consumes bytes via
 //! [`Decoder::push_bytes`] until it signals completion by returning `Ok(false)`. The caller then
 //! calls [`Decoder::end`] to obtain the decoded value.
 //!
@@ -83,7 +83,7 @@ pub use self::decode::{
     decode_from_read, decode_from_read_unbuffered, decode_from_read_unbuffered_with,
 };
 #[doc(inline)]
-pub use self::decode::{decode_from_slice, decode_from_slice_unbounded, Decodable, Decoder};
+pub use self::decode::{decode_from_slice, decode_from_slice_unbounded, Decode, Decoder};
 #[doc(inline)]
 pub use self::encode::encoders::{
     ArrayEncoder, ArrayRefEncoder, BytesEncoder, Encoder2, Encoder3, Encoder4, Encoder6,
@@ -96,7 +96,7 @@ pub use self::encode::{encode_to_vec, drain_to_vec};
 #[doc(inline)]
 pub use self::encode::{encode_to_writer, drain_to_writer};
 #[doc(inline)]
-pub use self::encode::{Encodable, Encoder, EncoderByteIter, ExactSizeEncoder};
+pub use self::encode::{Encode, Encoder, EncoderByteIter, ExactSizeEncoder};
 #[cfg(feature = "alloc")]
 #[doc(no_inline)]
 pub use self::error::LengthPrefixExceedsMaxError;

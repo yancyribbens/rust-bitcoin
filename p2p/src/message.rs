@@ -147,7 +147,7 @@ impl Decodable for CommandString {
     }
 }
 
-impl encoding::Encodable for CommandString {
+impl encoding::Encode for CommandString {
     type Encoder<'e> = CommandStringEncoder;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -159,7 +159,7 @@ impl encoding::Encodable for CommandString {
     }
 }
 
-impl encoding::Decodable for CommandString {
+impl encoding::Decode for CommandString {
     type Decoder = CommandStringDecoder;
 
     fn decoder() -> Self::Decoder { CommandStringDecoder { inner: encoding::ArrayDecoder::new() } }
@@ -243,7 +243,7 @@ pub struct V1MessageHeader {
     pub checksum: [u8; 4],
 }
 
-impl encoding::Encodable for V1MessageHeader {
+impl encoding::Encode for V1MessageHeader {
     type Encoder<'e>
         = V1MessageHeaderEncoder<'e>
     where
@@ -310,7 +310,7 @@ impl encoding::Decoder for V1MessageHeaderDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for V1MessageHeader {
+impl encoding::Decode for V1MessageHeader {
     type Decoder = V1MessageHeaderDecoder;
     fn decoder() -> Self::Decoder {
         V1MessageHeaderDecoder(encoding::Decoder4::new(
@@ -340,7 +340,7 @@ encoding::encoder_newtype! {
     pub struct InventoryPayloadEncoder<'e>(Encoder2<CompactSizeEncoder, SliceEncoder<'e, message_blockdata::Inventory>>);
 }
 
-impl encoding::Encodable for InventoryPayload {
+impl encoding::Encode for InventoryPayload {
     type Encoder<'e>
         = Encoder2<CompactSizeEncoder, SliceEncoder<'e, message_blockdata::Inventory>>
     where
@@ -378,7 +378,7 @@ impl encoding::Decoder for InventoryPayloadDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for InventoryPayload {
+impl encoding::Decode for InventoryPayload {
     type Decoder = InventoryPayloadDecoder;
     fn decoder() -> Self::Decoder {
         InventoryPayloadDecoder(VecDecoder::<message_blockdata::Inventory>::new())
@@ -395,7 +395,7 @@ encoding::encoder_newtype! {
     pub struct AddrPayloadEncoder<'e>(Encoder2<CompactSizeEncoder, SliceEncoder<'e, AddrV1Message>>);
 }
 
-impl encoding::Encodable for AddrPayload {
+impl encoding::Encode for AddrPayload {
     type Encoder<'e> = AddrPayloadEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -430,7 +430,7 @@ impl encoding::Decoder for AddrPayloadDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for AddrPayload {
+impl encoding::Decode for AddrPayload {
     type Decoder = AddrPayloadDecoder;
     fn decoder() -> Self::Decoder { AddrPayloadDecoder(VecDecoder::new()) }
 }
@@ -445,7 +445,7 @@ encoding::encoder_newtype! {
     pub struct AddrV2PayloadEncoder<'e>(Encoder2<CompactSizeEncoder, SliceEncoder<'e, AddrV2Message>>);
 }
 
-impl encoding::Encodable for AddrV2Payload {
+impl encoding::Encode for AddrV2Payload {
     type Encoder<'e>
         = Encoder2<CompactSizeEncoder, SliceEncoder<'e, AddrV2Message>>
     where
@@ -483,7 +483,7 @@ impl encoding::Decoder for AddrV2PayloadDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for AddrV2Payload {
+impl encoding::Decode for AddrV2Payload {
     type Decoder = AddrV2PayloadDecoder;
     fn decoder() -> Self::Decoder { AddrV2PayloadDecoder(VecDecoder::new()) }
 }
@@ -520,7 +520,7 @@ impl From<FeeFilter> for FeeRate {
 impl bitcoin::consensus::encode::Encodable for FeeFilter {
     fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
         use encoding::Encoder;
-        let mut encoder = encoding::Encodable::encoder(self);
+        let mut encoder = encoding::Encode::encoder(self);
         loop {
             w.write_all(encoder.current_chunk())?;
             if !encoder.advance() {
@@ -537,7 +537,7 @@ impl bitcoin::consensus::encode::Decodable for FeeFilter {
     ) -> Result<Self, bitcoin::consensus::encode::Error> {
         use encoding::Decoder;
 
-        let mut decoder = <Self as encoding::Decodable>::decoder();
+        let mut decoder = <Self as encoding::Decode>::decoder();
         let mut buffer = [0u8; 8];
 
         r.read_exact(&mut buffer)?;
@@ -565,7 +565,7 @@ encoding::encoder_newtype_exact! {
     pub struct FeeFilterEncoder<'e>(encoding::ArrayEncoder<8>);
 }
 
-impl encoding::Encodable for FeeFilter {
+impl encoding::Encode for FeeFilter {
     type Encoder<'e> = FeeFilterEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -610,7 +610,7 @@ impl encoding::Decoder for FeeFilterDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for FeeFilter {
+impl encoding::Decode for FeeFilter {
     type Decoder = FeeFilterDecoder;
 
     fn decoder() -> Self::Decoder { FeeFilterDecoder::new() }
@@ -644,7 +644,7 @@ encoding::encoder_newtype_exact! {
     pub struct PingEncoder<'e>(encoding::ArrayEncoder<8>);
 }
 
-impl encoding::Encodable for Ping {
+impl encoding::Encode for Ping {
     type Encoder<'e>
         = PingEncoder<'e>
     where
@@ -678,7 +678,7 @@ impl encoding::Decoder for PingDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for Ping {
+impl encoding::Decode for Ping {
     type Decoder = PingDecoder;
     fn decoder() -> Self::Decoder { PingDecoder(encoding::ArrayDecoder::<8>::new()) }
 }
@@ -701,7 +701,7 @@ encoding::encoder_newtype_exact! {
     pub struct PongEncoder<'e>(encoding::ArrayEncoder<8>);
 }
 
-impl encoding::Encodable for Pong {
+impl encoding::Encode for Pong {
     type Encoder<'e>
         = PongEncoder<'e>
     where
@@ -735,7 +735,7 @@ impl encoding::Decoder for PongDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for Pong {
+impl encoding::Decode for Pong {
     type Decoder = PongDecoder;
     fn decoder() -> Self::Decoder { PongDecoder(encoding::ArrayDecoder::<8>::new()) }
 }
@@ -985,7 +985,7 @@ impl Encodable for NetworkMessage {
     }
 }
 
-impl encoding::Encodable for NetworkMessage {
+impl encoding::Encode for NetworkMessage {
     type Encoder<'e> = NetworkMessageEncoder<'e>;
 
     #[inline]
@@ -1008,63 +1008,63 @@ impl Encodable for V1NetworkMessage {
 #[derive(Debug, Clone)]
 pub enum NetworkMessageEncoder<'e> {
     /// Encodes [`NetworkMessage::Version`]
-    Version(<message_network::VersionMessage as encoding::Encodable>::Encoder<'e>),
+    Version(<message_network::VersionMessage as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::Addr`]
-    Addr(<AddrPayload as encoding::Encodable>::Encoder<'e>),
+    Addr(<AddrPayload as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::Inv`]
-    Inv(<InventoryPayload as encoding::Encodable>::Encoder<'e>),
+    Inv(<InventoryPayload as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::GetData`]
-    GetData(<InventoryPayload as encoding::Encodable>::Encoder<'e>),
+    GetData(<InventoryPayload as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::NotFound`]
-    NotFound(<InventoryPayload as encoding::Encodable>::Encoder<'e>),
+    NotFound(<InventoryPayload as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::GetBlocks`]
-    GetBlocks(<message_blockdata::GetBlocksMessage as encoding::Encodable>::Encoder<'e>),
+    GetBlocks(<message_blockdata::GetBlocksMessage as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::GetHeaders`]
-    GetHeaders(<message_blockdata::GetHeadersMessage as encoding::Encodable>::Encoder<'e>),
+    GetHeaders(<message_blockdata::GetHeadersMessage as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::Tx`]
-    Tx(<transaction::Transaction as encoding::Encodable>::Encoder<'e>),
+    Tx(<transaction::Transaction as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::Block`]
-    Block(<block::Block as encoding::Encodable>::Encoder<'e>),
+    Block(<block::Block as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::Headers`]
-    Headers(<HeadersMessage as encoding::Encodable>::Encoder<'e>),
+    Headers(<HeadersMessage as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::Ping`]
-    Ping(<Ping as encoding::Encodable>::Encoder<'e>),
+    Ping(<Ping as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::Pong`]
-    Pong(<Pong as encoding::Encodable>::Encoder<'e>),
+    Pong(<Pong as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::MerkleBlock`]
-    MerkleBlock(<MerkleBlock as encoding::Encodable>::Encoder<'e>),
+    MerkleBlock(<MerkleBlock as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::FilterLoad`]
-    FilterLoad(<message_bloom::FilterLoad as encoding::Encodable>::Encoder<'e>),
+    FilterLoad(<message_bloom::FilterLoad as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::FilterAdd`]
-    FilterAdd(<message_bloom::FilterAdd as encoding::Encodable>::Encoder<'e>),
+    FilterAdd(<message_bloom::FilterAdd as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::GetCFilters`]
-    GetCFilters(<message_filter::GetCFilters as encoding::Encodable>::Encoder<'e>),
+    GetCFilters(<message_filter::GetCFilters as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::CFilter`]
-    CFilter(<message_filter::CFilter as encoding::Encodable>::Encoder<'e>),
+    CFilter(<message_filter::CFilter as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::GetCFHeaders`]
-    GetCFHeaders(<message_filter::GetCFHeaders as encoding::Encodable>::Encoder<'e>),
+    GetCFHeaders(<message_filter::GetCFHeaders as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::CFHeaders`]
-    CFHeaders(<message_filter::CFHeaders as encoding::Encodable>::Encoder<'e>),
+    CFHeaders(<message_filter::CFHeaders as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::GetCFCheckpt`]
-    GetCFCheckpt(<message_filter::GetCFCheckpt as encoding::Encodable>::Encoder<'e>),
+    GetCFCheckpt(<message_filter::GetCFCheckpt as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::CFCheckpt`]
-    CFCheckpt(<message_filter::CFCheckpt as encoding::Encodable>::Encoder<'e>),
+    CFCheckpt(<message_filter::CFCheckpt as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::SendCmpct`]
-    SendCmpct(<message_compact_blocks::SendCmpct as encoding::Encodable>::Encoder<'e>),
+    SendCmpct(<message_compact_blocks::SendCmpct as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::CmpctBlock`]
-    CmpctBlock(<bip152::HeaderAndShortIds as encoding::Encodable>::Encoder<'e>),
+    CmpctBlock(<bip152::HeaderAndShortIds as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::GetBlockTxn`]
-    GetBlockTxn(<bip152::BlockTransactionsRequest as encoding::Encodable>::Encoder<'e>),
+    GetBlockTxn(<bip152::BlockTransactionsRequest as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::BlockTxn`]
-    BlockTxn(<bip152::BlockTransactions as encoding::Encodable>::Encoder<'e>),
+    BlockTxn(<bip152::BlockTransactions as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::Alert`]
-    Alert(<message_network::Alert as encoding::Encodable>::Encoder<'e>),
+    Alert(<message_network::Alert as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::Reject`]
-    Reject(<message_network::Reject as encoding::Encodable>::Encoder<'e>),
+    Reject(<message_network::Reject as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::FeeFilter`]
-    FeeFilter(<FeeFilter as encoding::Encodable>::Encoder<'e>),
+    FeeFilter(<FeeFilter as encoding::Encode>::Encoder<'e>),
     /// Encodes [`NetworkMessage::AddrV2`]
-    AddrV2(<AddrV2Payload as encoding::Encodable>::Encoder<'e>),
+    AddrV2(<AddrV2Payload as encoding::Encode>::Encoder<'e>),
     /// Encodes zero-payload messages: verack, mempool, sendheaders, getaddr, wtxidrelay,
     /// filterclear, sendaddrv2.
     Empty,
@@ -1074,7 +1074,7 @@ pub enum NetworkMessageEncoder<'e> {
 
 impl<'e> NetworkMessageEncoder<'e> {
     fn new(msg: &'e NetworkMessage) -> Self {
-        use encoding::Encodable as _;
+        use encoding::Encode as _;
         match msg {
             NetworkMessage::Version(dat) => Self::Version(dat.encoder()),
             NetworkMessage::Addr(dat) => Self::Addr(dat.encoder()),
@@ -1205,7 +1205,7 @@ encoding::encoder_newtype! {
     );
 }
 
-impl encoding::Encodable for V1NetworkMessage {
+impl encoding::Encode for V1NetworkMessage {
     type Encoder<'e> = V1NetworkMessageEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -1230,12 +1230,12 @@ enum NetworkMessageDecoder {
     NotFound(InventoryPayloadDecoder),
     GetBlocks(message_blockdata::GetBlocksMessageDecoder),
     GetHeaders(message_blockdata::GetHeadersMessageDecoder),
-    Tx(<transaction::Transaction as encoding::Decodable>::Decoder),
-    Block(<block::Block as encoding::Decodable>::Decoder),
+    Tx(<transaction::Transaction as encoding::Decode>::Decoder),
+    Block(<block::Block as encoding::Decode>::Decoder),
     Headers(HeadersMessageDecoder),
     Ping(PingDecoder),
     Pong(PongDecoder),
-    MerkleBlock(<MerkleBlock as encoding::Decodable>::Decoder),
+    MerkleBlock(<MerkleBlock as encoding::Decode>::Decoder),
     FilterLoad(message_bloom::FilterLoadDecoder),
     FilterAdd(message_bloom::FilterAddDecoder),
     GetCFilters(message_filter::GetCFiltersDecoder),
@@ -1245,9 +1245,9 @@ enum NetworkMessageDecoder {
     GetCFCheckpt(message_filter::GetCFCheckptDecoder),
     CFCheckpt(message_filter::CFCheckptDecoder),
     SendCmpct(message_compact_blocks::SendCmpctDecoder),
-    CmpctBlock(<bip152::HeaderAndShortIds as encoding::Decodable>::Decoder),
-    GetBlockTxn(<bip152::BlockTransactionsRequest as encoding::Decodable>::Decoder),
-    BlockTxn(<bip152::BlockTransactions as encoding::Decodable>::Decoder),
+    CmpctBlock(<bip152::HeaderAndShortIds as encoding::Decode>::Decoder),
+    GetBlockTxn(<bip152::BlockTransactionsRequest as encoding::Decode>::Decoder),
+    BlockTxn(<bip152::BlockTransactions as encoding::Decode>::Decoder),
     Alert(message_network::AlertDecoder),
     Reject(message_network::RejectDecoder),
     FeeFilter(FeeFilterDecoder),
@@ -1265,7 +1265,7 @@ enum NetworkMessageDecoder {
 
 impl NetworkMessageDecoder {
     fn new(command: CommandString, payload_len: usize) -> Self {
-        use encoding::Decodable as _;
+        use encoding::Decode as _;
         match command.as_ref() {
             "version" => Self::Version(message_network::VersionMessage::decoder()),
             "verack" | "sendheaders" | "mempool" | "getaddr" | "wtxidrelay" | "filterclear"
@@ -1572,7 +1572,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
     }
 }
 
-impl encoding::Decodable for V1NetworkMessage {
+impl encoding::Decode for V1NetworkMessage {
     type Decoder = V1NetworkMessageDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -1619,7 +1619,7 @@ impl encoding::Encoder for V2NetworkMessageEncoder<'_> {
     }
 }
 
-impl encoding::Encodable for V2NetworkMessage {
+impl encoding::Encode for V2NetworkMessage {
     type Encoder<'e> = V2NetworkMessageEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -1721,7 +1721,7 @@ encoding::encoder_newtype_exact! {
     pub struct NetworkHeaderEncoder<'e>(Encoder2<HeaderEncoder<'e>, ArrayEncoder<1>>);
 }
 
-impl encoding::Encodable for NetworkHeader {
+impl encoding::Encode for NetworkHeader {
     type Encoder<'e> = NetworkHeaderEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -1757,7 +1757,7 @@ impl encoding::Decoder for NetworkHeaderDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for NetworkHeader {
+impl encoding::Decode for NetworkHeader {
     type Decoder = NetworkHeaderDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -1806,7 +1806,7 @@ encoding::encoder_newtype! {
     pub struct HeadersMessageEncoder<'e>(Encoder2<CompactSizeEncoder, SliceEncoder<'e, NetworkHeader>>);
 }
 
-impl encoding::Encodable for HeadersMessage {
+impl encoding::Encode for HeadersMessage {
     type Encoder<'e> = HeadersMessageEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -1842,7 +1842,7 @@ impl encoding::Decoder for HeadersMessageDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for HeadersMessage {
+impl encoding::Decode for HeadersMessage {
     type Decoder = HeadersMessageDecoder;
 
     fn decoder() -> Self::Decoder { HeadersMessageDecoder(VecDecoder::new()) }
@@ -2058,7 +2058,7 @@ impl V2NetworkMessageDecoder {
     fn payload_decoder_from_short_id(
         short_id: u8,
     ) -> Result<NetworkMessageDecoder, V2NetworkMessageDecoderError> {
-        use encoding::Decodable as _;
+        use encoding::Decode as _;
 
         let err = V2NetworkMessageDecoderError::Payload(V1NetworkMessageDecoderError(
             V1NetworkMessageDecoderErrorInner::Payload,
@@ -2110,7 +2110,7 @@ impl V2NetworkMessageDecoder {
 
     /// Creates a payload decoder from a command string (for short ID == 0).
     fn payload_decoder_from_command(command: CommandString) -> NetworkMessageDecoder {
-        use encoding::Decodable as _;
+        use encoding::Decode as _;
 
         match command.as_ref() {
             "version" => NetworkMessageDecoder::Version(message_network::VersionMessage::decoder()),
@@ -2225,7 +2225,7 @@ impl encoding::Decoder for V2NetworkMessageDecoder {
     }
 }
 
-impl encoding::Decodable for V2NetworkMessage {
+impl encoding::Decode for V2NetworkMessage {
     type Decoder = V2NetworkMessageDecoder;
 
     fn decoder() -> Self::Decoder {
@@ -2326,7 +2326,7 @@ fn read_bytes_from_finite_reader<D: Read + ?Sized>(
 }
 
 /// Does a double-SHA256 on `data` and returns the first 4 bytes.
-fn sha2_checksum(data: &impl encoding::Encodable) -> (u64, [u8; 4]) {
+fn sha2_checksum(data: &impl encoding::Encode) -> (u64, [u8; 4]) {
     let mut engine = sha256d::HashEngine::new();
     hashes::encode_to_engine(data, &mut engine);
     let bytes_hashed = engine.n_bytes_hashed();
@@ -3238,7 +3238,7 @@ mod test {
 
     #[test]
     fn command_string_encoder() {
-        use encoding::{Encodable as _, ExactSizeEncoder as _};
+        use encoding::{Encode as _, ExactSizeEncoder as _};
 
         let cmd = CommandString::try_from_static("version").unwrap();
         let expected_bytes: [u8; 12] = [b'v', b'e', b'r', b's', b'i', b'o', b'n', 0, 0, 0, 0, 0];

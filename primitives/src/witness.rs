@@ -279,7 +279,7 @@ fn decode_cursor(bytes: &[u8], start_of_indices: usize, index: usize) -> Option<
 #[derive(Debug, Clone)]
 pub struct WitnessEncoder<'e>(Encoder2<CompactSizeEncoder, BytesEncoder<'e>>);
 
-impl encoding::Encodable for Witness {
+impl encoding::Encode for Witness {
     type Encoder<'e>
         = WitnessEncoder<'e>
     where
@@ -524,7 +524,7 @@ impl encoding::Decoder for WitnessDecoder {
     }
 }
 
-impl encoding::Decodable for Witness {
+impl encoding::Decode for Witness {
     type Decoder = WitnessDecoder;
     fn decoder() -> Self::Decoder { WitnessDecoder::default() }
 }
@@ -1008,9 +1008,9 @@ mod test {
     use std::error::Error as _;
 
     #[cfg(feature = "alloc")]
-    use encoding::Decodable as _;
+    use encoding::Decode as _;
     #[cfg(feature = "alloc")]
-    use encoding::Encodable as _;
+    use encoding::Encode as _;
     use encoding::Encoder as _;
 
     use super::*;

@@ -14,7 +14,7 @@ use core::fmt;
 use bitcoin_consensus_encoding::{
     self as encoding, encoder_newtype, ArrayDecoder, ArrayEncoder, ArrayRefEncoder, BytesEncoder,
     CompactSizeDecoder, CompactSizeDecoderError, CompactSizeEncoder, CompactSizeU64Decoder,
-    Decodable, Decoder, Decoder2, Decoder3, Decoder4, Decoder6, Encodable, EncoderByteIter,
+    Decode, Decoder, Decoder2, Decoder3, Decoder4, Decoder6, Encode, EncoderByteIter,
     SliceEncoder, UnexpectedEofError,
 };
 use encoding::error::{DecodeError, UnconsumedError};
@@ -65,7 +65,7 @@ encoder_newtype! {
     pub struct FooEncoder<'e>(ArrayEncoder<4>);
 }
 
-impl Encodable for Foo {
+impl Encode for Foo {
     type Encoder<'e>
         = FooEncoder<'e>
     where
@@ -89,7 +89,7 @@ impl Decoder for FooDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl Decodable for Foo {
+impl Decode for Foo {
     type Decoder = FooDecoder;
     fn decoder() -> Self::Decoder { FooDecoder(ArrayDecoder::new()) }
 }
@@ -235,7 +235,7 @@ fn dyn_compatible() {
         b: Box<dyn encoding::ExactSizeEncoder>,
     }
     // The following traits are not dyn compatible:
-    // - `Encodable`: has a GAT (`type Encoder<'e>`)
-    // - `Decodable`: has an associated type (`type Decoder`)
+    // - `Encode`: has a GAT (`type Encoder<'e>`)
+    // - `Decode`: has an associated type (`type Decoder`)
     // - `Decoder`: has a `Sized` bound
 }

@@ -5,7 +5,7 @@
 #[cfg(feature = "alloc")]
 use bitcoin_consensus_encoding::{
     decode_from_slice, encode_to_vec, CompactSizeDecoderError, CompactSizeEncoder,
-    CompactSizeU64Decoder, Decodable, Encodable,
+    CompactSizeU64Decoder, Decode, Encode,
 };
 use bitcoin_consensus_encoding::{CompactSizeDecoder, Decoder};
 
@@ -14,7 +14,7 @@ use bitcoin_consensus_encoding::{CompactSizeDecoder, Decoder};
 struct CompactSizeUsize(usize);
 
 #[cfg(feature = "alloc")]
-impl Encodable for CompactSizeUsize {
+impl Encode for CompactSizeUsize {
     type Encoder<'e>
         = CompactSizeEncoder
     where
@@ -41,7 +41,7 @@ impl Decoder for CompactSizeUsizeDecoderWrapper {
 }
 
 #[cfg(feature = "alloc")]
-impl Decodable for CompactSizeUsize {
+impl Decode for CompactSizeUsize {
     type Decoder = CompactSizeUsizeDecoderWrapper;
     fn decoder() -> Self::Decoder { CompactSizeUsizeDecoderWrapper(CompactSizeDecoder::new()) }
 }
@@ -51,7 +51,7 @@ impl Decodable for CompactSizeUsize {
 struct CompactSizeU64(u64);
 
 #[cfg(feature = "alloc")]
-impl Encodable for CompactSizeU64 {
+impl Encode for CompactSizeU64 {
     type Encoder<'e>
         = CompactSizeEncoder
     where
@@ -78,7 +78,7 @@ impl Decoder for CompactSizeU64DecoderWrapper {
 }
 
 #[cfg(feature = "alloc")]
-impl Decodable for CompactSizeU64 {
+impl Decode for CompactSizeU64 {
     type Decoder = CompactSizeU64DecoderWrapper;
     fn decoder() -> Self::Decoder { CompactSizeU64DecoderWrapper(CompactSizeU64Decoder::new()) }
 }

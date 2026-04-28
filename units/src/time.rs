@@ -118,7 +118,7 @@ impl<'de> Deserialize<'de> for BlockTime {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Encodable for BlockTime {
+impl encoding::Encode for BlockTime {
     type Encoder<'e> = BlockTimeEncoder<'e>;
     #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -129,7 +129,7 @@ impl encoding::Encodable for BlockTime {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Decodable for BlockTime {
+impl encoding::Decode for BlockTime {
     type Decoder = BlockTimeDecoder;
 
     #[inline]

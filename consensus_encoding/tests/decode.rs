@@ -8,7 +8,7 @@ use std::io::{Cursor, Read};
 #[cfg(feature = "std")]
 use bitcoin_consensus_encoding::{decode_from_read, decode_from_read_unbuffered, ReadError};
 use bitcoin_consensus_encoding::{
-    decode_from_slice, decode_from_slice_unbounded, ArrayDecoder, CompactSizeDecoder, Decodable,
+    decode_from_slice, decode_from_slice_unbounded, ArrayDecoder, CompactSizeDecoder, Decode,
     DecodeError, Decoder, Decoder2, UnexpectedEofError,
 };
 #[cfg(feature = "alloc")]
@@ -231,7 +231,7 @@ fn decode_byte_vec_decoder_does_not_overconsume_on_second_chunk() {
 #[derive(Debug, PartialEq)]
 struct TestArray([u8; 4]);
 
-impl Decodable for TestArray {
+impl Decode for TestArray {
     type Decoder = TestArrayDecoder;
     fn decoder() -> Self::Decoder { TestArrayDecoder { inner: ArrayDecoder::new() } }
 }
@@ -414,7 +414,7 @@ impl Decoder for InnerDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl Decodable for Inner {
+impl Decode for Inner {
     type Decoder = InnerDecoder;
     fn decoder() -> Self::Decoder { InnerDecoder(ArrayDecoder::<4>::new()) }
 }
@@ -445,7 +445,7 @@ impl Decoder for TestDecoder {
 }
 
 #[cfg(feature = "alloc")]
-impl Decodable for Test {
+impl Decode for Test {
     type Decoder = TestDecoder;
     fn decoder() -> Self::Decoder { TestDecoder(VecDecoder::new()) }
 }

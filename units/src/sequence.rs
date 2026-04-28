@@ -259,7 +259,7 @@ impl fmt::Debug for Sequence {
 parse_int::impl_parse_str_from_int_infallible!(Sequence, u32, from_consensus);
 
 #[cfg(feature = "encoding")]
-impl encoding::Encodable for Sequence {
+impl encoding::Encode for Sequence {
     type Encoder<'e> = SequenceEncoder<'e>;
     #[inline]
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -270,7 +270,7 @@ impl encoding::Encodable for Sequence {
 }
 
 #[cfg(feature = "encoding")]
-impl encoding::Decodable for Sequence {
+impl encoding::Decode for Sequence {
     type Decoder = SequenceDecoder;
 
     #[inline]
@@ -392,7 +392,7 @@ mod tests {
     #[cfg(feature = "encoding")]
     use encoding::UnexpectedEofError;
     #[cfg(feature = "encoding")]
-    use encoding::{Decodable as _, Decoder as _};
+    use encoding::{Decode as _, Decoder as _};
 
     use super::*;
 

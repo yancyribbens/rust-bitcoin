@@ -45,7 +45,7 @@ use core::cmp;
 #[cfg(feature = "std")]
 use std::vec::Vec;
 
-use encoding::{Decodable, Decoder, Encoder};
+use encoding::{Decode, Decoder, Encoder};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(no_inline)]
@@ -460,7 +460,7 @@ pub fn from_std_mut<T>(std_io: &mut T) -> &mut FromStd<T> { FromStd::new_mut(std
 /// If an I/O error occurs while writing to the underlying writer.
 pub fn encode_to_writer<T, W>(object: &T, writer: W) -> Result<()>
 where
-    T: encoding::Encodable + ?Sized,
+    T: encoding::Encode + ?Sized,
     W: Write,
 {
     let mut encoder = object.encoder();
@@ -504,7 +504,7 @@ pub fn decode_from_read<T, R>(
     mut reader: R,
 ) -> core::result::Result<T, ReadError<<T::Decoder as Decoder>::Error>>
 where
-    T: Decodable,
+    T: Decode,
     R: BufRead,
 {
     let mut decoder = T::decoder();
@@ -555,7 +555,7 @@ pub fn decode_from_read_unbuffered<T, R>(
     reader: R,
 ) -> core::result::Result<T, ReadError<<T::Decoder as Decoder>::Error>>
 where
-    T: Decodable,
+    T: Decode,
     R: Read,
 {
     decode_from_read_unbuffered_with::<T, R, 4096>(reader)
@@ -582,7 +582,7 @@ pub fn decode_from_read_unbuffered_with<T, R, const BUFFER_SIZE: usize>(
     mut reader: R,
 ) -> core::result::Result<T, ReadError<<T::Decoder as Decoder>::Error>>
 where
-    T: Decodable,
+    T: Decode,
     R: Read,
 {
     let mut decoder = T::decoder();
@@ -777,10 +777,10 @@ mod tests {
         assert_eq!(cursor.position(), 15);
     }
 
-    // Simple test type that implements Encodable.
+    // Simple test type that implements Encode.
     struct TestData(u32);
 
-    impl encoding::Encodable for TestData {
+    impl encoding::Encode for TestData {
         type Encoder<'e>
             = ArrayEncoder<4>
         where
@@ -804,7 +804,7 @@ mod tests {
     #[derive(Debug, PartialEq)]
     struct TestArray([u8; 4]);
 
-    impl Decodable for TestArray {
+    impl Decode for TestArray {
         type Decoder = TestArrayDecoder;
         fn decoder() -> Self::Decoder { TestArrayDecoder { inner: ArrayDecoder::new() } }
     }

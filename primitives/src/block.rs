@@ -286,7 +286,7 @@ mod sealed {
 #[cfg(feature = "hex")]
 impl core::str::FromStr for Block<Unchecked>
 where
-    Self: encoding::Decodable,
+    Self: encoding::Decode,
 {
     type Err = ParseBlockError;
 
@@ -299,7 +299,7 @@ where
 #[cfg(feature = "hex")]
 impl<V: Validation> fmt::Display for Block<V>
 where
-    Self: encoding::Encodable,
+    Self: encoding::Encode,
 {
     #[allow(clippy::use_self)]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -333,7 +333,7 @@ encoding::encoder_newtype! {
 }
 
 #[cfg(feature = "alloc")]
-impl<V> encoding::Encodable for Block<V>
+impl<V> encoding::Encode for Block<V>
 where
     V: Validation,
 {
@@ -374,7 +374,7 @@ crate::decoder_newtype! {
 }
 
 #[cfg(feature = "alloc")]
-impl encoding::Decodable for Block<Unchecked> {
+impl encoding::Decode for Block<Unchecked> {
     type Decoder = BlockDecoder;
     fn decoder() -> Self::Decoder {
         BlockDecoder(Decoder2::new(Header::decoder(), VecDecoder::<Transaction>::new()))
@@ -540,7 +540,7 @@ encoding::encoder_newtype_exact! {
     );
 }
 
-impl encoding::Encodable for Header {
+impl encoding::Encode for Header {
     type Encoder<'e> = HeaderEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -607,7 +607,7 @@ impl HeaderDecoder {
     }
 }
 
-impl encoding::Decodable for Header {
+impl encoding::Decode for Header {
     type Decoder = HeaderDecoder;
     fn decoder() -> Self::Decoder {
         HeaderDecoder(Decoder6::new(
@@ -734,7 +734,7 @@ encoding::encoder_newtype_exact! {
     pub struct VersionEncoder<'e>(encoding::ArrayEncoder<4>);
 }
 
-impl encoding::Encodable for Version {
+impl encoding::Encode for Version {
     type Encoder<'e> = VersionEncoder<'e>;
     fn encoder(&self) -> Self::Encoder<'_> {
         VersionEncoder::new(encoding::ArrayEncoder::without_length_prefix(
@@ -758,7 +758,7 @@ crate::decoder_newtype! {
     }
 }
 
-impl encoding::Decodable for Version {
+impl encoding::Decode for Version {
     type Decoder = VersionDecoder;
     fn decoder() -> Self::Decoder { VersionDecoder(encoding::ArrayDecoder::<4>::new()) }
 }
@@ -1024,8 +1024,8 @@ mod tests {
     use core::str::FromStr as _;
 
     #[cfg(feature = "alloc")]
-    use encoding::Decodable as _;
-    use encoding::{Decoder as _, Encodable as _, Encoder as _};
+    use encoding::Decode as _;
+    use encoding::{Decoder as _, Encode as _, Encoder as _};
     #[cfg(feature = "alloc")]
     #[cfg(feature = "hex")]
     #[cfg(feature = "serde")]

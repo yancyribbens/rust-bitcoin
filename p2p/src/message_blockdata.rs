@@ -118,7 +118,7 @@ encoding::encoder_newtype_exact! {
     pub struct InventoryEncoder<'e>(Encoder2<ArrayEncoder<4>, ArrayEncoder<32>>);
 }
 
-impl encoding::Encodable for Inventory {
+impl encoding::Encode for Inventory {
     type Encoder<'e> = InventoryEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -174,7 +174,7 @@ impl encoding::Decoder for InventoryDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for Inventory {
+impl encoding::Decode for Inventory {
     type Decoder = InventoryDecoder;
     fn decoder() -> Self::Decoder {
         InventoryDecoder(Decoder2::new(ArrayDecoder::<4>::new(), ArrayDecoder::<32>::new()))
@@ -255,7 +255,7 @@ encoding::encoder_newtype! {
     pub struct BlockLocatorEncoder<'e>(BlockLocatorInnerEncoder<'e>);
 }
 
-impl encoding::Encodable for BlockLocator {
+impl encoding::Encode for BlockLocator {
     type Encoder<'e> = BlockLocatorEncoder<'e>;
 
     fn encoder(&self) -> Self::Encoder<'_> {
@@ -299,7 +299,7 @@ impl encoding::Decoder for BlockLocatorDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for BlockLocator {
+impl encoding::Decode for BlockLocator {
     type Decoder = BlockLocatorDecoder;
     fn decoder() -> Self::Decoder { BlockLocatorDecoder::new() }
 }
@@ -343,7 +343,7 @@ encoding::encoder_newtype! {
     pub struct GetHeadersEncoder<'e>(GetBlocksOrHeadersInnerEncoder<'e>);
 }
 
-impl encoding::Encodable for GetHeadersMessage {
+impl encoding::Encode for GetHeadersMessage {
     type Encoder<'e>
         = GetHeadersEncoder<'e>
     where
@@ -358,7 +358,7 @@ impl encoding::Encodable for GetHeadersMessage {
     }
 }
 
-impl encoding::Encodable for GetBlocksMessage {
+impl encoding::Encode for GetBlocksMessage {
     type Encoder<'e>
         = GetBlocksEncoder<'e>
     where
@@ -424,7 +424,7 @@ impl encoding::Decoder for GetBlocksMessageDecoder {
     fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
-impl encoding::Decodable for GetBlocksMessage {
+impl encoding::Decode for GetBlocksMessage {
     type Decoder = GetBlocksMessageDecoder;
     fn decoder() -> Self::Decoder {
         GetBlocksMessageDecoder(Decoder3::new(
@@ -435,7 +435,7 @@ impl encoding::Decodable for GetBlocksMessage {
     }
 }
 
-impl encoding::Decodable for GetHeadersMessage {
+impl encoding::Decode for GetHeadersMessage {
     type Decoder = GetHeadersMessageDecoder;
     fn decoder() -> Self::Decoder {
         GetHeadersMessageDecoder(Decoder3::new(
