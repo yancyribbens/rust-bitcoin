@@ -115,19 +115,21 @@ pub struct CommandString([u8; 12]);
     //fn as_ref(&self) -> &str { self.0.as_ref() }
 //}
 
-//impl encoding::Encodable for CommandString {
-    //type Encoder<'e> = CommandStringEncoder;
+impl encoding::Encodable for CommandString {
+    type Encoder<'e> = CommandStringEncoder;
 
-    //fn encoder(&self) -> Self::Encoder<'_> {
-        //let enc = encoding::ArrayEncoder::without_length_prefix(self.0);
-        //CommandStringEncoder::new(enc)
-    //}
-//}
+    fn encoder(&self) -> Self::Encoder<'_> {
+        let enc = encoding::ArrayEncoder::without_length_prefix(self.0);
+        CommandStringEncoder::new(enc)
+    }
+}
 
 impl encoding::Decodable for CommandString {
     type Decoder = CommandStringDecoder;
 
-    fn decoder() -> Self::Decoder { CommandStringDecoder(encoding::ArrayDecoder::<12>::new()) }
+    fn decoder() -> Self::Decoder {
+        CommandStringDecoder(encoding::ArrayDecoder::<12>::new()) 
+    }
 }
 
 /// Encoder for the [`CommandString`] type
@@ -170,15 +172,6 @@ impl encoding::Decoder for CommandStringDecoder {
 
     fn end(self) -> Result<Self::Output, Self::Error> {
         let cmd = self.0.end().unwrap();
-        //let rawbytes = self.inner.end().map_err(CommandStringDecoderError::UnexpectedEof)?;
-        // Trim null padding from the end.
-        //let trimmed =
-            //rawbytes.iter().rposition(|&b| b != 0).map_or(&rawbytes[..0], |i| &rawbytes[..=i]);
-
-        //if !trimmed.is_ascii() {
-            //return Err(CommandStringDecoderError::NotAscii);
-        //}
-
         Ok(CommandString(cmd))
     }
 
@@ -200,7 +193,7 @@ pub struct V1MessageHeader {
     /// The network magic, a unique 4 byte sequence.
     pub magic: Magic,
     /// The "command" used to describe the payload.
-    pub command: [u8; 4],
+    pub command: CommandString,
     /// The length of the payload.
     pub length: u32,
     /// A checksum to the aforementioned data.
@@ -217,7 +210,7 @@ impl encoding::Encodable for V1MessageHeader {
     fn encoder(&self) -> Self::Encoder<'_> {
         let enc = encoding::Encoder4::new(
             self.magic.encoder(),
-            encoding::ArrayEncoder::without_length_prefix(self.checksum),
+            self.command.encoder(),
             encoding::ArrayEncoder::without_length_prefix(self.length.to_le_bytes()),
             encoding::ArrayEncoder::without_length_prefix(self.checksum),
         );
@@ -232,7 +225,7 @@ encoding::encoder_newtype_exact! {
     pub struct V1MessageHeaderEncoder<'e>(
         encoding::Encoder4<
             crate::MagicEncoder<'e>,
-            encoding::ArrayEncoder<4>,
+            CommandStringEncoder,
             encoding::ArrayEncoder<4>,
             encoding::ArrayEncoder<4>
     >);
@@ -240,7 +233,7 @@ encoding::encoder_newtype_exact! {
 
 type V1MessageHeaderInnerDecoder = encoding::Decoder4<
     encoding::ArrayDecoder<4>,
-    encoding::ArrayDecoder<4>,
+    CommandStringDecoder,
     encoding::ArrayDecoder<4>,
     encoding::ArrayDecoder<4>,
 >;
@@ -279,7 +272,7 @@ impl encoding::Decodable for V1MessageHeader {
     fn decoder() -> Self::Decoder {
         V1MessageHeaderDecoder(encoding::Decoder4::new(
             encoding::ArrayDecoder::<4>::new(),
-            encoding::ArrayDecoder::<4>::new(),
+            CommandString::decoder(),
             encoding::ArrayDecoder::<4>::new(),
             encoding::ArrayDecoder::<4>::new(),
         ))
@@ -1060,7 +1053,7 @@ encoding::encoder_newtype! {
         encoding::Encoder2<
             encoding::Encoder4<
                 encoding::ArrayEncoder<4>,
-                encoding::ArrayEncoder<4>,
+                CommandStringEncoder,
                 encoding::ArrayEncoder<4>,
                 encoding::ArrayEncoder<4>,
             >,
@@ -1076,7 +1069,7 @@ impl encoding::Encodable for V1NetworkMessage {
         V1NetworkMessageEncoder::new(encoding::Encoder2::new(
             encoding::Encoder4::new(
                 encoding::ArrayEncoder::without_length_prefix(self.magic.to_bytes()),
-                encoding::ArrayEncoder::without_length_prefix(self.checksum),
+                self.command().encoder(),
                 encoding::ArrayEncoder::without_length_prefix(self.payload_len.to_le_bytes()),
                 encoding::ArrayEncoder::without_length_prefix(self.checksum),
             ),
@@ -1315,7 +1308,7 @@ enum DecoderState {
     ReadingHeader {
         header_decoder: encoding::Decoder4<
             encoding::ArrayDecoder<4>,
-            encoding::ArrayDecoder<4>,
+            CommandStringDecoder,
             encoding::ArrayDecoder<4>,
             encoding::ArrayDecoder<4>,
         >,
@@ -1356,7 +1349,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                         DecoderState::ReadingHeader {
                             header_decoder: encoding::Decoder4::new(
                                 encoding::ArrayDecoder::new(),
-                                encoding::ArrayDecoder::new(),
+                                CommandStringDecoder::new(),
                                 encoding::ArrayDecoder::new(),
                                 encoding::ArrayDecoder::new(),
                             ),
@@ -1447,8 +1440,7 @@ impl encoding::Decodable for V1NetworkMessage {
             state: DecoderState::ReadingHeader {
                 header_decoder: encoding::Decoder4::new(
                     encoding::ArrayDecoder::new(),
-                    encoding::ArrayDecoder::new(),
-                    //CommandStringDecoder(ArrayDecoder<12>),
+                    CommandStringDecoder::decoder(),
                     encoding::ArrayDecoder::new(),
                     encoding::ArrayDecoder::new(),
                 ),
