@@ -69,7 +69,7 @@ fn main() {
     let signature = ecdsa::Signature { signature: sk.raw_ecdsa_sign(sighash), sighash_type };
 
     // Update the witness stack.
-    let pk = sk.to_public_key().force_compressed();
+    let pk = sk.to_public_key();
     *sighasher.witness_mut(input_index).unwrap() = Witness::p2wpkh(signature, pk);
 
     // Get the signed transaction.
@@ -85,7 +85,7 @@ fn main() {
 fn senders_keys() -> (PrivateKey, WPubkeyHash) {
     let sk = PrivateKey::generate();
     let pk = sk.to_public_key();
-    let wpkh = pk.wpubkey_hash().expect("key is compressed");
+    let wpkh = pk.wpubkey_hash();
 
     (sk, wpkh)
 }

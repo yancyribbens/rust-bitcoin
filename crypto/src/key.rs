@@ -352,11 +352,15 @@ impl XOnlyPublicKey {
 
     /// Converts this x-only public key to a full public key.
     ///
+    /// The [`FullPublicKey`] is constructed using the parity in this x-only public key.
+    #[inline]
+    pub fn to_public_key(self) -> FullPublicKey { self.as_inner().public_key(self.parity()).into() }
+
+    /// Converts this x-only public key to a legacy public key.
+    ///
     /// The [`LegacyPublicKey`] is constructed using the parity in this x-only public key.
     #[inline]
-    pub fn to_public_key(self) -> LegacyPublicKey {
-        self.as_inner().public_key(self.parity()).into()
-    }
+    pub fn to_legacy_public_key(self) -> LegacyPublicKey { self.to_public_key().into() }
 
     /// Verifies that a tweak produced by [`XOnlyPublicKey::add_tweak`] was computed correctly.
     ///
@@ -481,11 +485,17 @@ impl Keypair {
         self.as_inner().to_secret_bytes()
     }
 
+    /// Returns the [`FullPublicKey`] for this [`Keypair`].
+    ///
+    /// This is equivalent to using [`FullPublicKey::from_keypair`].
+    #[inline]
+    pub fn to_public_key(&self) -> FullPublicKey { FullPublicKey::from_keypair(self) }
+
     /// Returns the [`LegacyPublicKey`] for this [`Keypair`].
     ///
     /// This is equivalent to using [`LegacyPublicKey::from_keypair`].
     #[inline]
-    pub fn to_public_key(&self) -> LegacyPublicKey { LegacyPublicKey::from_keypair(self) }
+    pub fn to_legacy_public_key(&self) -> LegacyPublicKey { LegacyPublicKey::from_keypair(self) }
 
     /// Returns the [`XOnlyPublicKey`] for this [`Keypair`].
     ///
@@ -733,7 +743,7 @@ impl LegacyPublicKey {
     }
 
     /// Computes the public key as supposed to be used with this secret.
-    pub fn from_private_key(sk: &PrivateKey) -> Self { sk.to_public_key() }
+    pub fn from_private_key(sk: &PrivateKey) -> Self { sk.to_legacy_public_key() }
 
     /// Extracts the public key from a Keypair
     pub fn from_keypair(pair: &Keypair) -> Self { FullPublicKey::from_keypair(pair).into() }
@@ -863,13 +873,7 @@ impl FullPublicKey {
     }
 
     /// Computes the public key as supposed to be used with this secret.
-    ///
-    /// # Errors
-    ///
-    /// Errors if the private key is not compressed.
-    pub fn from_private_key(sk: &PrivateKey) -> Result<Self, UncompressedPublicKeyError> {
-        sk.to_public_key().try_into()
-    }
+    pub fn from_private_key(sk: &PrivateKey) -> Self { sk.to_public_key() }
 
     /// Extracts the public key from a Keypair
     pub fn from_keypair(pair: &Keypair) -> Self {
@@ -962,7 +966,20 @@ impl PrivateKey {
     }
 
     /// Constructs a new public key from this private key.
-    pub fn to_public_key(&self) -> LegacyPublicKey {
+    ///
+    /// The returned key is always in compressed form. Use [`to_legacy_public_key`] to get a key
+    /// that respects the `compressed` field of this private key.
+    ///
+    /// [`to_legacy_public_key`]: PrivateKey::to_legacy_public_key
+    pub fn to_public_key(&self) -> FullPublicKey {
+        FullPublicKey::from_secp(secp256k1::PublicKey::from_secret_key(self.as_inner()))
+    }
+
+    /// Constructs a new legacy public key from this private key.
+    ///
+    /// The `compressed` field of this private key determines whether the returned key is in
+    /// compressed or uncompressed form.
+    pub fn to_legacy_public_key(&self) -> LegacyPublicKey {
         match self.compressed() {
             true =>
                 LegacyPublicKey::from_secp(secp256k1::PublicKey::from_secret_key(self.as_inner())),
@@ -973,8 +990,8 @@ impl PrivateKey {
     }
 
     /// Constructs a new public key from this private key.
-    #[deprecated(since = "TBD", note = "use `to_public_key` instead")]
-    pub fn public_key(&self) -> LegacyPublicKey { self.to_public_key() }
+    #[deprecated(since = "TBD", note = "use `to_legacy_public_key` instead")]
+    pub fn public_key(&self) -> LegacyPublicKey { self.to_legacy_public_key() }
 
     /// Serializes the private key to bytes.
     #[deprecated(since = "TBD", note = "use to_secret_vec instead")]
@@ -2127,7 +2144,7 @@ mod tests {
     #[cfg(feature = "rand")]
     #[cfg(feature = "std")]
     fn public_key_secp_roundtrip() {
-        let bitcoin_key = Keypair::generate().to_public_key();
+        let bitcoin_key = Keypair::generate().to_legacy_public_key();
         let secp_key =
             secp256k1::PublicKey::from_byte_array_compressed(bitcoin_key.serialize_compressed())
                 .unwrap();
@@ -2166,7 +2183,7 @@ mod tests {
     #[cfg(feature = "rand")]
     #[cfg(feature = "std")]
     fn serialized_legacy_public_key_roundtrip() {
-        let key = Keypair::generate().to_public_key();
+        let key = Keypair::generate().to_legacy_public_key();
         assert!(key.compressed());
         let serialized = &key.to_bytes();
         assert_eq!(serialized.len(), 33);
