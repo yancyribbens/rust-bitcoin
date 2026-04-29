@@ -5,11 +5,8 @@
 //! This module defines the `NetworkMessage` and `V1NetworkMessage` types that
 //! are used for (de)serializing Bitcoin objects for transmission on the network.
 
-use alloc::borrow::{Cow, ToOwned};
-use alloc::boxed::Box;
-use alloc::string::String;
 use alloc::vec::Vec;
-use core::{fmt, mem};
+use core::{mem};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
@@ -48,90 +45,9 @@ pub const MAX_INV_SIZE: usize = 50_000;
 /// This by necessity should be larger than `MAX_VEC_SIZE`
 pub const MAX_MSG_SIZE: usize = 5_000_000;
 
-/// Serializer for command string
+/// Contains the message command.
 #[derive(PartialEq, Eq, Clone, Debug)]
-pub struct CommandString(Cow<'static, str>);
-
-impl CommandString {
-    /// Converts `&'static str` to `CommandString`
-    ///
-    /// This is more efficient for string literals than non-static conversions because it avoids
-    /// allocation.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if, and only if, the string is
-    /// larger than 12 characters in length.
-    pub fn try_from_static(s: &'static str) -> Result<Self, CommandStringError> {
-        Self::try_from_static_cow(s.into())
-    }
-
-    fn try_from_static_cow(cow: Cow<'static, str>) -> Result<Self, CommandStringError> {
-        if cow.len() > 12 {
-            Err(CommandStringError { cow })
-        } else {
-            Ok(Self(cow))
-        }
-    }
-}
-
-impl TryFrom<String> for CommandString {
-    type Error = CommandStringError;
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        Self::try_from_static_cow(value.into())
-    }
-}
-
-impl TryFrom<Box<str>> for CommandString {
-    type Error = CommandStringError;
-
-    fn try_from(value: Box<str>) -> Result<Self, Self::Error> {
-        Self::try_from_static_cow(String::from(value).into())
-    }
-}
-
-impl<'a> TryFrom<&'a str> for CommandString {
-    type Error = CommandStringError;
-
-    fn try_from(value: &'a str) -> Result<Self, Self::Error> {
-        Self::try_from_static_cow(value.to_owned().into())
-    }
-}
-
-impl core::str::FromStr for CommandString {
-    type Err = CommandStringError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::try_from_static_cow(s.to_owned().into())
-    }
-}
-
-impl fmt::Display for CommandString {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { f.write_str(self.0.as_ref()) }
-}
-
-impl AsRef<str> for CommandString {
-    fn as_ref(&self) -> &str { self.0.as_ref() }
-}
-
-impl encoding::Encode for CommandString {
-    type Encoder<'e> = CommandStringEncoder;
-
-    fn encoder(&self) -> Self::Encoder<'_> {
-        let mut rawbytes = [0u8; 12];
-        let strbytes = self.0.as_bytes();
-        debug_assert!(strbytes.len() <= 12);
-        rawbytes[..strbytes.len()].copy_from_slice(strbytes);
-        CommandStringEncoder::without_length_prefix(rawbytes)
-    }
-}
-
-impl encoding::Decode for CommandString {
-    type Decoder = CommandStringDecoder;
-
-    fn decoder() -> Self::Decoder { CommandStringDecoder { inner: encoding::ArrayDecoder::new() } }
-}
+pub struct CommandString([u8; 12]); 
 
 /// Encoder for the [`CommandString`] type
 // We can't use the [`encoder_newtype!`] macro due to the lifetime conflicting
@@ -140,9 +56,9 @@ impl encoding::Decode for CommandString {
 pub struct CommandStringEncoder(encoding::ArrayEncoder<12>);
 
 impl CommandStringEncoder {
-    /// Constructs an encoder which encodes the command string with no length prefix.
-    pub const fn without_length_prefix(arr: [u8; 12]) -> Self {
-        Self(encoding::ArrayEncoder::without_length_prefix(arr))
+    /// Constructs a new instance of the newtype encoder.
+    pub(crate) const fn new(encoder: ArrayEncoder<12>) -> Self {
+        CommandStringEncoder(encoder)
     }
 }
 
@@ -159,34 +75,44 @@ impl encoding::ExactSizeEncoder for CommandStringEncoder {
     fn len(&self) -> usize { self.0.len() }
 }
 
-/// Decoder for [`CommandString`].
-#[derive(Debug, Clone)]
-pub struct CommandStringDecoder {
-    inner: encoding::ArrayDecoder<12>,
+impl encoding::Encode for CommandString {
+    type Encoder<'e> = CommandStringEncoder where Self: 'e;
+
+    fn encoder(&self) -> Self::Encoder<'_> {
+        CommandStringEncoder::new(ArrayEncoder::without_length_prefix(self.0))
+    }
 }
+
+/// Decoder for the [`CommandString`] type
+#[derive(Debug, Clone)]
+pub struct CommandStringDecoder(ArrayDecoder<12>);
 
 impl encoding::Decoder for CommandStringDecoder {
     type Output = CommandString;
     type Error = CommandStringDecoderError;
 
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        self.inner.push_bytes(bytes).map_err(CommandStringDecoderError::UnexpectedEof)
+        self.0.push_bytes(bytes).map_err(CommandStringDecoderError::UnexpectedEof)
     }
 
     fn end(self) -> Result<Self::Output, Self::Error> {
-        let rawbytes = self.inner.end().map_err(CommandStringDecoderError::UnexpectedEof)?;
-        // Trim null padding from the end.
-        let trimmed =
-            rawbytes.iter().rposition(|&b| b != 0).map_or(&rawbytes[..0], |i| &rawbytes[..=i]);
-
-        if !trimmed.is_ascii() {
-            return Err(CommandStringDecoderError::NotAscii);
-        }
-
-        Ok(CommandString(Cow::Owned(unsafe { String::from_utf8_unchecked(trimmed.to_vec()) })))
+        let cmd = self.0.end().map_err(CommandStringDecoderError::UnexpectedEof)?;
+        Ok(CommandString(cmd))
     }
 
-    fn read_limit(&self) -> usize { self.inner.read_limit() }
+    fn read_limit(&self) -> usize {
+        self.0.read_limit()
+    }
+}
+
+impl CommandStringDecoder {
+    /// Constructs a new [`CommandString`] decoder.
+    pub fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
+}
+
+impl encoding::Decode for CommandString {
+    type Decoder = CommandStringDecoder;
+    fn decoder() -> Self::Decoder { CommandStringDecoder(ArrayDecoder::new()) }
 }
 
 /// A Network message using the v1 p2p protocol.
@@ -223,10 +149,10 @@ impl V1MessageHeader {
     /// # Panics
     ///
     /// Panics if the payload length exceeds `u32::MAX`.
-    pub fn new<T: encoding::Encode>(magic: Magic, message: &T, command: &'static str) -> Self {
+    pub fn new<T: encoding::Encode>(magic: Magic, message: &T, command: &[u8; 12]) -> Self {
         let (bytes_hashed, checksum) = sha2_checksum(message);
         let payload_len = u32::try_from(bytes_hashed).expect("network message use u32 as length");
-        let command = CommandString::try_from_static(command).unwrap();
+        let command = CommandString(*command);
 
         Self { magic, command, length: payload_len, checksum }
     }
@@ -821,10 +747,7 @@ impl NetworkMessage {
     ///
     /// Panics if the command string is invalid (should never happen for valid message types).
     pub fn command(&self) -> CommandString {
-        match *self {
-            Self::Unknown { command: ref c, .. } => c.clone(),
-            _ => CommandString::try_from_static(self.cmd()).expect("cmd returns valid commands"),
-        }
+        todo!("verify this is needed still")
     }
 }
 
@@ -1138,7 +1061,7 @@ enum NetworkMessageDecoder {
     AddrV2(AddrV2PayloadDecoder),
     /// Zero-payload messages: verack, mempool, sendheaders, getaddr, wtxidrelay,
     /// filterclear, sendaddrv2.
-    Empty(CommandString),
+    Empty(CommandStringDecoder),
     /// Unknown message — must buffer since type is unknown at compile time.
     Unknown {
         command: CommandString,
@@ -1150,43 +1073,48 @@ enum NetworkMessageDecoder {
 impl NetworkMessageDecoder {
     fn new(command: CommandString, payload_len: usize) -> Self {
         use encoding::Decode as _;
-        match command.as_ref() {
-            "version" => Self::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "mempool" | "getaddr" | "wtxidrelay" | "filterclear"
-            | "sendaddrv2" => Self::Empty(command),
-            "addr" => Self::Addr(AddrPayload::decoder()),
-            "inv" => Self::Inv(InventoryPayload::decoder()),
-            "getdata" => Self::GetData(InventoryPayload::decoder()),
-            "notfound" => Self::NotFound(InventoryPayload::decoder()),
-            "getblocks" => Self::GetBlocks(message_blockdata::GetBlocksMessage::decoder()),
-            "getheaders" => Self::GetHeaders(message_blockdata::GetHeadersMessage::decoder()),
-            "tx" => Self::Tx(transaction::Transaction::decoder()),
-            "block" => Self::Block(block::Block::decoder()),
-            "headers" => Self::Headers(HeadersMessage::decoder()),
-            "ping" => Self::Ping(Ping::decoder()),
-            "pong" => Self::Pong(Pong::decoder()),
-            "merkleblock" => Self::MerkleBlock(MerkleBlock::decoder()),
-            "filterload" => Self::FilterLoad(message_bloom::FilterLoad::decoder()),
-            "filteradd" => Self::FilterAdd(message_bloom::FilterAdd::decoder()),
-            "getcfilters" => Self::GetCFilters(message_filter::GetCFilters::decoder()),
-            "cfilter" => Self::CFilter(message_filter::CFilter::decoder()),
-            "getcfheaders" => Self::GetCFHeaders(message_filter::GetCFHeaders::decoder()),
-            "cfheaders" => Self::CFHeaders(message_filter::CFHeaders::decoder()),
-            "getcfcheckpt" => Self::GetCFCheckpt(message_filter::GetCFCheckpt::decoder()),
-            "cfcheckpt" => Self::CFCheckpt(message_filter::CFCheckpt::decoder()),
-            "sendcmpct" => Self::SendCmpct(message_compact_blocks::SendCmpct::decoder()),
-            "cmpctblock" => Self::CmpctBlock(bip152::HeaderAndShortIds::decoder()),
-            "getblocktxn" => Self::GetBlockTxn(bip152::BlockTransactionsRequest::decoder()),
-            "blocktxn" => Self::BlockTxn(bip152::BlockTransactions::decoder()),
-            "alert" => Self::Alert(message_network::Alert::decoder()),
-            "reject" => Self::Reject(message_network::Reject::decoder()),
-            "feefilter" => Self::FeeFilter(FeeFilter::decoder()),
-            "addrv2" => Self::AddrV2(AddrV2Payload::decoder()),
+        match command {
+            CommandString(val) if val == "version".as_bytes() => Self::Version(message_network::VersionMessage::decoder()),
+            CommandString(val) if val == "verack".as_bytes() => Self::Empty(CommandStringDecoder::new()), 
+            CommandString(val) if val == "sendheaders".as_bytes() => Self::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "mempool".as_bytes() => Self::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "getaddr".as_bytes() => Self::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "wtxidrelay".as_bytes() => Self::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "filterclear".as_bytes() => Self::Empty(CommandStringDecoder::new()), 
+            CommandString(val) if val == "sendaddrv2".as_bytes() => Self::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "addr".as_bytes() => Self::Addr(AddrPayload::decoder()),
+            CommandString(val) if val == "inv".as_bytes() => Self::Inv(InventoryPayload::decoder()),
+            CommandString(val) if val == "getdata".as_bytes() => Self::GetData(InventoryPayload::decoder()),
+            CommandString(val) if val == "notfound".as_bytes() => Self::NotFound(InventoryPayload::decoder()),
+            CommandString(val) if val == "getblocks".as_bytes() => Self::GetBlocks(message_blockdata::GetBlocksMessage::decoder()),
+            CommandString(val) if val == "getheaders".as_bytes() => Self::GetHeaders(message_blockdata::GetHeadersMessage::decoder()),
+            CommandString(val) if val == "tx".as_bytes() => Self::Tx(transaction::Transaction::decoder()),
+            CommandString(val) if val == "block".as_bytes() => Self::Block(block::Block::decoder()),
+            CommandString(val) if val == "headers".as_bytes() => Self::Headers(HeadersMessage::decoder()),
+            CommandString(val) if val == "ping".as_bytes() => Self::Ping(Ping::decoder()),
+            CommandString(val) if val == "pong".as_bytes() => Self::Pong(Pong::decoder()),
+            CommandString(val) if val == "merkleblock".as_bytes() => Self::MerkleBlock(MerkleBlock::decoder()),
+            CommandString(val) if val == "filterload".as_bytes() => Self::FilterLoad(message_bloom::FilterLoad::decoder()),
+            CommandString(val) if val == "filteradd".as_bytes() => Self::FilterAdd(message_bloom::FilterAdd::decoder()),
+            CommandString(val) if val == "getcfilters".as_bytes() => Self::GetCFilters(message_filter::GetCFilters::decoder()),
+            CommandString(val) if val == "cfilter".as_bytes() => Self::CFilter(message_filter::CFilter::decoder()),
+            CommandString(val) if val == "getcfheaders".as_bytes() => Self::GetCFHeaders(message_filter::GetCFHeaders::decoder()),
+            CommandString(val) if val == "cfheaders".as_bytes() => Self::CFHeaders(message_filter::CFHeaders::decoder()),
+            CommandString(val) if val == "getcfcheckpt".as_bytes() => Self::GetCFCheckpt(message_filter::GetCFCheckpt::decoder()),
+            CommandString(val) if val == "cfcheckpt".as_bytes() => Self::CFCheckpt(message_filter::CFCheckpt::decoder()),
+            CommandString(val) if val == "sendcmpct".as_bytes() => Self::SendCmpct(message_compact_blocks::SendCmpct::decoder()),
+            CommandString(val) if val == "cmpctblock".as_bytes() => Self::CmpctBlock(bip152::HeaderAndShortIds::decoder()),
+            CommandString(val) if val == "getblocktxn".as_bytes() => Self::GetBlockTxn(bip152::BlockTransactionsRequest::decoder()),
+            CommandString(val) if val == "blocktxn".as_bytes() => Self::BlockTxn(bip152::BlockTransactions::decoder()),
+            CommandString(val) if val == "alert".as_bytes() => Self::Alert(message_network::Alert::decoder()),
+            CommandString(val) if val == "reject".as_bytes() => Self::Reject(message_network::Reject::decoder()),
+            CommandString(val) if val == "feefilter".as_bytes() => Self::FeeFilter(FeeFilter::decoder()),
+            CommandString(val) if val == "addrv2".as_bytes() => Self::AddrV2(AddrV2Payload::decoder()),
             _ => Self::Unknown {
                 command,
                 remaining: payload_len,
                 buffer: Vec::with_capacity(payload_len),
-            },
+            }
         }
     }
 }
@@ -1272,22 +1200,8 @@ impl encoding::Decoder for NetworkMessageDecoder {
             Self::Reject(d) => Ok(NetworkMessage::Reject(d.end().map_err(|_| err)?)),
             Self::FeeFilter(d) => Ok(NetworkMessage::FeeFilter(d.end().map_err(|_| err)?)),
             Self::AddrV2(d) => Ok(NetworkMessage::AddrV2(d.end().map_err(|_| err)?)),
-            Self::Empty(cmd) => match cmd.as_ref() {
-                "verack" => Ok(NetworkMessage::Verack),
-                "mempool" => Ok(NetworkMessage::MemPool),
-                "sendheaders" => Ok(NetworkMessage::SendHeaders),
-                "getaddr" => Ok(NetworkMessage::GetAddr),
-                "wtxidrelay" => Ok(NetworkMessage::WtxidRelay),
-                "filterclear" => Ok(NetworkMessage::FilterClear),
-                "sendaddrv2" => Ok(NetworkMessage::SendAddrV2),
-                _ => Err(err),
-            },
-            Self::Unknown { command, buffer, remaining } => {
-                if remaining != 0 {
-                    return Err(err);
-                }
-                Ok(NetworkMessage::Unknown { command, payload: buffer })
-            }
+            Self::Empty(_cmd) => todo!("todo"),
+            Self::Unknown { command: _, buffer: _, remaining: _} => Err(err)
         }
     }
 
@@ -1374,7 +1288,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                         DecoderState::ReadingHeader {
                             header_decoder: encoding::Decoder4::new(
                                 encoding::ArrayDecoder::new(),
-                                CommandStringDecoder { inner: encoding::ArrayDecoder::new() },
+                                CommandStringDecoder::new(),
                                 encoding::ArrayDecoder::new(),
                                 encoding::ArrayDecoder::new(),
                             ),
@@ -1464,7 +1378,7 @@ impl encoding::Decode for V1NetworkMessage {
             state: DecoderState::ReadingHeader {
                 header_decoder: encoding::Decoder4::new(
                     encoding::ArrayDecoder::new(),
-                    CommandStringDecoder { inner: encoding::ArrayDecoder::new() },
+                    CommandStringDecoder::new(),
                     encoding::ArrayDecoder::new(),
                     encoding::ArrayDecoder::new(),
                 ),
@@ -1731,7 +1645,7 @@ impl V2NetworkMessageDecoder {
     ) -> Result<NetworkMessageDecoder, V2NetworkMessageDecoderError> {
         use encoding::Decode as _;
 
-        let err = V2NetworkMessageDecoderError::Payload(V1NetworkMessageDecoderError(
+        let _err = V2NetworkMessageDecoderError::Payload(V1NetworkMessageDecoderError(
             V1NetworkMessageDecoderErrorInner::Payload,
         ));
         // Use a large payload_len for the Unknown variant buffer; actual messages use typed decoders.
@@ -1743,7 +1657,7 @@ impl V2NetworkMessageDecoder {
             5u8 => Ok(NetworkMessageDecoder::FeeFilter(FeeFilter::decoder())),
             6u8 => Ok(NetworkMessageDecoder::FilterAdd(message_bloom::FilterAdd::decoder())),
             7u8 => Ok(NetworkMessageDecoder::Empty(
-                CommandString::try_from_static("filterclear").map_err(|_| err)?,
+                CommandStringDecoder::new() // TODO filterclear
             )),
             8u8 => Ok(NetworkMessageDecoder::FilterLoad(message_bloom::FilterLoad::decoder())),
             9u8 =>
@@ -1756,9 +1670,7 @@ impl V2NetworkMessageDecoder {
             )),
             13u8 => Ok(NetworkMessageDecoder::Headers(HeadersMessage::decoder())),
             14u8 => Ok(NetworkMessageDecoder::Inv(InventoryPayload::decoder())),
-            15u8 => Ok(NetworkMessageDecoder::Empty(
-                CommandString::try_from_static("mempool").map_err(|_| err)?,
-            )),
+            15u8 => Ok(NetworkMessageDecoder::Empty(CommandString::decoder())), //TODO mompool
             16u8 => Ok(NetworkMessageDecoder::MerkleBlock(MerkleBlock::decoder())),
             17u8 => Ok(NetworkMessageDecoder::NotFound(InventoryPayload::decoder())),
             18u8 => Ok(NetworkMessageDecoder::Ping(Ping::decoder())),
@@ -1782,13 +1694,15 @@ impl V2NetworkMessageDecoder {
     /// Creates a payload decoder from a command string (for short ID == 0).
     fn payload_decoder_from_command(command: CommandString) -> NetworkMessageDecoder {
         use encoding::Decode as _;
-
-        match command.as_ref() {
-            "version" => NetworkMessageDecoder::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "getaddr" | "wtxidrelay" | "sendaddrv2" =>
-                NetworkMessageDecoder::Empty(command),
-            "alert" => NetworkMessageDecoder::Alert(message_network::Alert::decoder()),
-            "reject" => NetworkMessageDecoder::Reject(message_network::Reject::decoder()),
+        match command {
+            CommandString(val) if val == "version".as_bytes() => NetworkMessageDecoder::Version(message_network::VersionMessage::decoder()),
+            CommandString(val) if val == "verack".as_bytes() => NetworkMessageDecoder::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "sendheaders".as_bytes() => NetworkMessageDecoder::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "getaddr".as_bytes() => NetworkMessageDecoder::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "wtxidrelay".as_bytes() => NetworkMessageDecoder::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "sendaddrv2".as_bytes() => NetworkMessageDecoder::Empty(CommandStringDecoder::new()),
+            CommandString(val) if val == "alert".as_bytes() => NetworkMessageDecoder::Alert(message_network::Alert::decoder()),
+            CommandString(val) if val == "reject".as_bytes() => NetworkMessageDecoder::Reject(message_network::Reject::decoder()),
             _ => NetworkMessageDecoder::Unknown {
                 command,
                 remaining: 0, // no payload length, buffer all bytes until end().
@@ -1822,7 +1736,7 @@ impl encoding::Decoder for V2NetworkMessageDecoder {
                             if id == 0 {
                                 // Non-optimized: need to read 12-byte command string next.
                                 self.state = V2NetworkMessageDecoderState::CommandString(
-                                    CommandStringDecoder { inner: encoding::ArrayDecoder::new() },
+                                    CommandStringDecoder::new(),
                                 );
                             } else {
                                 // Optimized short ID (1-28): skip command, go straight to payload.
@@ -2271,7 +2185,20 @@ impl<'a> Arbitrary<'a> for InventoryPayload {
 #[cfg(feature = "arbitrary")]
 impl<'a> Arbitrary<'a> for CommandString {
     fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
-        Ok(Self(u.arbitrary::<String>()?.into()))
+        let byte_1 = u8::arbitrary(u)?;
+        let byte_2 = u8::arbitrary(u)?;
+        let byte_3 = u8::arbitrary(u)?;
+        let byte_4 = u8::arbitrary(u)?;
+        let byte_5 = u8::arbitrary(u)?;
+        let byte_6 = u8::arbitrary(u)?;
+        let byte_7 = u8::arbitrary(u)?;
+        let byte_8 = u8::arbitrary(u)?;
+        let byte_9 = u8::arbitrary(u)?;
+        let byte_10 = u8::arbitrary(u)?;
+        let byte_11 = u8::arbitrary(u)?;
+        let byte_12 = u8::arbitrary(u)?;
+
+        Ok(CommandString([byte_1, byte_2, byte_3, byte_4, byte_5, byte_6, byte_7, byte_8, byte_9, byte_10, byte_11, byte_12]))
     }
 }
 
