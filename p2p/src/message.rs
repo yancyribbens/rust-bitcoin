@@ -48,6 +48,48 @@ pub const MAX_INV_SIZE: usize = 50_000;
 /// This by necessity should be larger than `MAX_VEC_SIZE`
 pub const MAX_MSG_SIZE: usize = 5_000_000;
 
+pub struct CmdString([u8; 12]); 
+
+encoding::encoder_newtype! {
+    pub struct CmdStringEncoder<'e>(ArrayEncoder<12>);
+}
+
+impl encoding::Encodable for CmdString {
+    type Encoder<'e> = CmdStringEncoder<'e> where Self: 'e;
+
+    fn encoder(&self) -> Self::Encoder<'_> {
+        CmdStringEncoder::new(ArrayEncoder::without_length_prefix(self.0))
+    }
+}
+
+pub struct CmdStringDecoder(ArrayDecoder<12>);
+
+impl encoding::Decoder for CmdStringDecoder {
+    type Output = CmdString;
+    type Error = CmdStringDecoderError;
+
+    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
+        self.0.push_bytes(bytes).map_err(CmdStringDecoderError)
+    }
+
+    fn end(self) -> Result<Self::Output, Self::Error> {
+        let cmd = self.0.end().map_err(CmdStringDecoderError)?;
+        Ok(CmdString(cmd))
+    }
+
+    fn read_limit(&self) -> usize {
+        self.0.read_limit()
+    }
+}
+
+impl encoding::Decodable for CmdString {
+    type Decoder = CmdStringDecoder;
+    fn decoder() -> Self::Decoder { CmdStringDecoder(ArrayDecoder::new()) }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CmdStringDecoderError(<encoding::ArrayDecoder<12> as encoding::Decoder>::Error);
+
 /// Serializer for command string
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct CommandString(Cow<'static, str>);
