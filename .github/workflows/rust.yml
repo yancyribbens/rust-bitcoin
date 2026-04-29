@@ -240,7 +240,7 @@ jobs:
         run: contrib/check-error-reexports.sh
 
   Encodable-coverage:
-    name: Check Encodable fuzz coverage - stable toolchain
+    name: Check Encode fuzz coverage - stable toolchain
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -251,7 +251,7 @@ jobs:
           persist-credentials: false
       - name: "Select toolchain"
         uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6 # stable
-      - name: "Check Encodable coverage"
+      - name: "Check Encode coverage"
         run: ./contrib/check-encodable-coverage.sh
 
   DiffMutants:
