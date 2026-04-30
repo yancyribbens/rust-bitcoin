@@ -1173,10 +1173,10 @@ enum NetworkMessageDecoder {
     AddrV2(AddrV2PayloadDecoder),
     /// Zero-payload messages: verack, mempool, sendheaders, getaddr, wtxidrelay,
     /// filterclear, sendaddrv2.
-    Empty(CommandString),
+    Empty(CmdStringDecoder),
     /// Unknown message — must buffer since type is unknown at compile time.
     Unknown {
-        command: CommandString,
+        command: CmdString,
         remaining: usize,
         buffer: Vec<u8>,
     },
@@ -1308,22 +1308,8 @@ impl encoding::Decoder for NetworkMessageDecoder {
             Self::Reject(d) => Ok(NetworkMessage::Reject(d.end().map_err(|_| err)?)),
             Self::FeeFilter(d) => Ok(NetworkMessage::FeeFilter(d.end().map_err(|_| err)?)),
             Self::AddrV2(d) => Ok(NetworkMessage::AddrV2(d.end().map_err(|_| err)?)),
-            Self::Empty(cmd) => match cmd.as_ref() {
-                "verack" => Ok(NetworkMessage::Verack),
-                "mempool" => Ok(NetworkMessage::MemPool),
-                "sendheaders" => Ok(NetworkMessage::SendHeaders),
-                "getaddr" => Ok(NetworkMessage::GetAddr),
-                "wtxidrelay" => Ok(NetworkMessage::WtxidRelay),
-                "filterclear" => Ok(NetworkMessage::FilterClear),
-                "sendaddrv2" => Ok(NetworkMessage::SendAddrV2),
-                _ => Err(err),
-            },
-            Self::Unknown { command, buffer, remaining } => {
-                if remaining != 0 {
-                    return Err(err);
-                }
-                Ok(NetworkMessage::Unknown { command, payload: buffer })
-            }
+            Self::Empty(cmd) => Err(err),
+            Self::Unknown { command, buffer, remaining } => Err(err)
         }
     }
 
@@ -1778,9 +1764,7 @@ impl V2NetworkMessageDecoder {
             4u8 => Ok(NetworkMessageDecoder::CmpctBlock(bip152::HeaderAndShortIds::decoder())),
             5u8 => Ok(NetworkMessageDecoder::FeeFilter(FeeFilter::decoder())),
             6u8 => Ok(NetworkMessageDecoder::FilterAdd(message_bloom::FilterAdd::decoder())),
-            7u8 => Ok(NetworkMessageDecoder::Empty(
-                CommandString::try_from_static("filterclear").map_err(|_| err)?,
-            )),
+            7u8 => Ok(NetworkMessageDecoder::Empty(CmdString::decoder())),
             8u8 => Ok(NetworkMessageDecoder::FilterLoad(message_bloom::FilterLoad::decoder())),
             9u8 =>
                 Ok(NetworkMessageDecoder::GetBlocks(message_blockdata::GetBlocksMessage::decoder())),
@@ -1792,9 +1776,7 @@ impl V2NetworkMessageDecoder {
             )),
             13u8 => Ok(NetworkMessageDecoder::Headers(HeadersMessage::decoder())),
             14u8 => Ok(NetworkMessageDecoder::Inv(InventoryPayload::decoder())),
-            15u8 => Ok(NetworkMessageDecoder::Empty(
-                CommandString::try_from_static("mempool").map_err(|_| err)?,
-            )),
+            15u8 => Ok(NetworkMessageDecoder::Empty(CmdString::decoder())),
             16u8 => Ok(NetworkMessageDecoder::MerkleBlock(MerkleBlock::decoder())),
             17u8 => Ok(NetworkMessageDecoder::NotFound(InventoryPayload::decoder())),
             18u8 => Ok(NetworkMessageDecoder::Ping(Ping::decoder())),
@@ -1818,19 +1800,7 @@ impl V2NetworkMessageDecoder {
     /// Creates a payload decoder from a command string (for short ID == 0).
     fn payload_decoder_from_command(command: CommandString) -> NetworkMessageDecoder {
         use encoding::Decodable as _;
-
-        match command.as_ref() {
-            "version" => NetworkMessageDecoder::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "getaddr" | "wtxidrelay" | "sendaddrv2" =>
-                NetworkMessageDecoder::Empty(command),
-            "alert" => NetworkMessageDecoder::Alert(message_network::Alert::decoder()),
-            "reject" => NetworkMessageDecoder::Reject(message_network::Reject::decoder()),
-            _ => NetworkMessageDecoder::Unknown {
-                command,
-                remaining: 0, // no payload length, buffer all bytes until end().
-                buffer: Vec::new(),
-            },
-        }
+        NetworkMessageDecoder::Reject(message_network::Reject::decoder())
     }
 }
 
