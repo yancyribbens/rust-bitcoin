@@ -86,6 +86,11 @@ impl encoding::Decoder for CmdStringDecoder {
     }
 }
 
+impl CmdStringDecoder {
+    /// Constructs a new [`CommandString`] decoder.
+    pub fn new() -> Self { Self(encoding::ArrayDecoder::new()) }
+}
+
 impl encoding::Decodable for CmdString {
     type Decoder = CmdStringDecoder;
     fn decoder() -> Self::Decoder { CmdStringDecoder(ArrayDecoder::new()) }
@@ -1364,7 +1369,7 @@ enum DecoderState {
     ReadingHeader {
         header_decoder: encoding::Decoder4<
             encoding::ArrayDecoder<4>,
-            CommandStringDecoder,
+            CmdStringDecoder,
             encoding::ArrayDecoder<4>,
             encoding::ArrayDecoder<4>,
         >,
@@ -1405,7 +1410,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                         DecoderState::ReadingHeader {
                             header_decoder: encoding::Decoder4::new(
                                 encoding::ArrayDecoder::new(),
-                                CommandStringDecoder { inner: encoding::ArrayDecoder::new() },
+                                CmdStringDecoder::new(),
                                 encoding::ArrayDecoder::new(),
                                 encoding::ArrayDecoder::new(),
                             ),
@@ -1428,6 +1433,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                         ));
                     }
 
+                    let command = CommandString::try_from_static("").unwrap();
                     let payload_decoder = NetworkMessageDecoder::new(command, payload_len);
                     self.state = DecoderState::ReadingPayload {
                         magic_bytes,
@@ -1495,7 +1501,7 @@ impl encoding::Decodable for V1NetworkMessage {
             state: DecoderState::ReadingHeader {
                 header_decoder: encoding::Decoder4::new(
                     encoding::ArrayDecoder::new(),
-                    CommandStringDecoder { inner: encoding::ArrayDecoder::new() },
+                    CmdStringDecoder::new(),
                     encoding::ArrayDecoder::new(),
                     encoding::ArrayDecoder::new(),
                 ),
