@@ -1180,44 +1180,45 @@ enum NetworkMessageDecoder {
 impl NetworkMessageDecoder {
     fn new(command: CommandString, payload_len: usize) -> Self {
         use encoding::Decodable as _;
-        match command.as_ref() {
-            "version" => Self::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "mempool" | "getaddr" | "wtxidrelay" | "filterclear"
-            | "sendaddrv2" => Self::Empty(command),
-            "addr" => Self::Addr(AddrPayload::decoder()),
-            "inv" => Self::Inv(InventoryPayload::decoder()),
-            "getdata" => Self::GetData(InventoryPayload::decoder()),
-            "notfound" => Self::NotFound(InventoryPayload::decoder()),
-            "getblocks" => Self::GetBlocks(message_blockdata::GetBlocksMessage::decoder()),
-            "getheaders" => Self::GetHeaders(message_blockdata::GetHeadersMessage::decoder()),
-            "tx" => Self::Tx(transaction::Transaction::decoder()),
-            "block" => Self::Block(block::Block::decoder()),
-            "headers" => Self::Headers(HeadersMessage::decoder()),
-            "ping" => Self::Ping(Ping::decoder()),
-            "pong" => Self::Pong(Pong::decoder()),
-            "merkleblock" => Self::MerkleBlock(MerkleBlock::decoder()),
-            "filterload" => Self::FilterLoad(message_bloom::FilterLoad::decoder()),
-            "filteradd" => Self::FilterAdd(message_bloom::FilterAdd::decoder()),
-            "getcfilters" => Self::GetCFilters(message_filter::GetCFilters::decoder()),
-            "cfilter" => Self::CFilter(message_filter::CFilter::decoder()),
-            "getcfheaders" => Self::GetCFHeaders(message_filter::GetCFHeaders::decoder()),
-            "cfheaders" => Self::CFHeaders(message_filter::CFHeaders::decoder()),
-            "getcfcheckpt" => Self::GetCFCheckpt(message_filter::GetCFCheckpt::decoder()),
-            "cfcheckpt" => Self::CFCheckpt(message_filter::CFCheckpt::decoder()),
-            "sendcmpct" => Self::SendCmpct(message_compact_blocks::SendCmpct::decoder()),
-            "cmpctblock" => Self::CmpctBlock(bip152::HeaderAndShortIds::decoder()),
-            "getblocktxn" => Self::GetBlockTxn(bip152::BlockTransactionsRequest::decoder()),
-            "blocktxn" => Self::BlockTxn(bip152::BlockTransactions::decoder()),
-            "alert" => Self::Alert(message_network::Alert::decoder()),
-            "reject" => Self::Reject(message_network::Reject::decoder()),
-            "feefilter" => Self::FeeFilter(FeeFilter::decoder()),
-            "addrv2" => Self::AddrV2(AddrV2Payload::decoder()),
-            _ => Self::Unknown {
-                command,
-                remaining: payload_len,
-                buffer: Vec::with_capacity(payload_len),
-            },
-        }
+        //match command.as_ref() {
+            //"version" => Self::Version(message_network::VersionMessage::decoder()),
+            //"verack" | "sendheaders" | "mempool" | "getaddr" | "wtxidrelay" | "filterclear"
+            //| "sendaddrv2" => Self::Empty(command),
+            //"addr" => Self::Addr(AddrPayload::decoder()),
+            //"inv" => Self::Inv(InventoryPayload::decoder()),
+            //"getdata" => Self::GetData(InventoryPayload::decoder()),
+            //"notfound" => Self::NotFound(InventoryPayload::decoder()),
+            //"getblocks" => Self::GetBlocks(message_blockdata::GetBlocksMessage::decoder()),
+            //"getheaders" => Self::GetHeaders(message_blockdata::GetHeadersMessage::decoder()),
+            //"tx" => Self::Tx(transaction::Transaction::decoder()),
+            //"block" => Self::Block(block::Block::decoder()),
+            //"headers" => Self::Headers(HeadersMessage::decoder()),
+            //"ping" => Self::Ping(Ping::decoder()),
+            //"pong" => Self::Pong(Pong::decoder()),
+            //"merkleblock" => Self::MerkleBlock(MerkleBlock::decoder()),
+            //"filterload" => Self::FilterLoad(message_bloom::FilterLoad::decoder()),
+            //"filteradd" => Self::FilterAdd(message_bloom::FilterAdd::decoder()),
+            //"getcfilters" => Self::GetCFilters(message_filter::GetCFilters::decoder()),
+            //"cfilter" => Self::CFilter(message_filter::CFilter::decoder()),
+            //"getcfheaders" => Self::GetCFHeaders(message_filter::GetCFHeaders::decoder()),
+            //"cfheaders" => Self::CFHeaders(message_filter::CFHeaders::decoder()),
+            //"getcfcheckpt" => Self::GetCFCheckpt(message_filter::GetCFCheckpt::decoder()),
+            //"cfcheckpt" => Self::CFCheckpt(message_filter::CFCheckpt::decoder()),
+            //"sendcmpct" => Self::SendCmpct(message_compact_blocks::SendCmpct::decoder()),
+            //"cmpctblock" => Self::CmpctBlock(bip152::HeaderAndShortIds::decoder()),
+            //"getblocktxn" => Self::GetBlockTxn(bip152::BlockTransactionsRequest::decoder()),
+            //"blocktxn" => Self::BlockTxn(bip152::BlockTransactions::decoder()),
+            //"alert" => Self::Alert(message_network::Alert::decoder()),
+            //"reject" => Self::Reject(message_network::Reject::decoder()),
+            //"feefilter" => Self::FeeFilter(FeeFilter::decoder()),
+            //"addrv2" => Self::AddrV2(AddrV2Payload::decoder()),
+            //_ => Self::Unknown {
+                //command,
+                //remaining: payload_len,
+                //buffer: Vec::with_capacity(payload_len),
+            //},
+        //}
+        Self::AddrV2(AddrV2Payload::decoder())
     }
 }
 
