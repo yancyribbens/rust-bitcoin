@@ -786,7 +786,7 @@ pub enum NetworkMessage {
     /// Any other message.
     Unknown {
         /// The command of this message.
-        command: CommandString,
+        command: CmdString,
         /// The payload of this message.
         payload: Vec<u8>,
     },
@@ -845,11 +845,8 @@ impl NetworkMessage {
     /// # Panics
     ///
     /// Panics if the command string is invalid (should never happen for valid message types).
-    pub fn command(&self) -> CommandString {
-        match *self {
-            Self::Unknown { command: ref c, .. } => c.clone(),
-            _ => CommandString::try_from_static(self.cmd()).expect("cmd returns valid commands"),
-        }
+    pub fn command(&self) -> CmdString {
+        panic!("todo")
     }
 }
 
@@ -1171,53 +1168,54 @@ enum NetworkMessageDecoder {
     Empty(CommandString),
     /// Unknown message — must buffer since type is unknown at compile time.
     Unknown {
-        command: CommandString,
+        command: CmdString,
         remaining: usize,
         buffer: Vec<u8>,
     },
 }
 
 impl NetworkMessageDecoder {
-    fn new(command: CommandString, payload_len: usize) -> Self {
+    fn new(command: CmdString, payload_len: usize) -> Self {
         use encoding::Decodable as _;
-        match command.as_ref() {
-            "version" => Self::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "mempool" | "getaddr" | "wtxidrelay" | "filterclear"
-            | "sendaddrv2" => Self::Empty(command),
-            "addr" => Self::Addr(AddrPayload::decoder()),
-            "inv" => Self::Inv(InventoryPayload::decoder()),
-            "getdata" => Self::GetData(InventoryPayload::decoder()),
-            "notfound" => Self::NotFound(InventoryPayload::decoder()),
-            "getblocks" => Self::GetBlocks(message_blockdata::GetBlocksMessage::decoder()),
-            "getheaders" => Self::GetHeaders(message_blockdata::GetHeadersMessage::decoder()),
-            "tx" => Self::Tx(transaction::Transaction::decoder()),
-            "block" => Self::Block(block::Block::decoder()),
-            "headers" => Self::Headers(HeadersMessage::decoder()),
-            "ping" => Self::Ping(Ping::decoder()),
-            "pong" => Self::Pong(Pong::decoder()),
-            "merkleblock" => Self::MerkleBlock(MerkleBlock::decoder()),
-            "filterload" => Self::FilterLoad(message_bloom::FilterLoad::decoder()),
-            "filteradd" => Self::FilterAdd(message_bloom::FilterAdd::decoder()),
-            "getcfilters" => Self::GetCFilters(message_filter::GetCFilters::decoder()),
-            "cfilter" => Self::CFilter(message_filter::CFilter::decoder()),
-            "getcfheaders" => Self::GetCFHeaders(message_filter::GetCFHeaders::decoder()),
-            "cfheaders" => Self::CFHeaders(message_filter::CFHeaders::decoder()),
-            "getcfcheckpt" => Self::GetCFCheckpt(message_filter::GetCFCheckpt::decoder()),
-            "cfcheckpt" => Self::CFCheckpt(message_filter::CFCheckpt::decoder()),
-            "sendcmpct" => Self::SendCmpct(message_compact_blocks::SendCmpct::decoder()),
-            "cmpctblock" => Self::CmpctBlock(bip152::HeaderAndShortIds::decoder()),
-            "getblocktxn" => Self::GetBlockTxn(bip152::BlockTransactionsRequest::decoder()),
-            "blocktxn" => Self::BlockTxn(bip152::BlockTransactions::decoder()),
-            "alert" => Self::Alert(message_network::Alert::decoder()),
-            "reject" => Self::Reject(message_network::Reject::decoder()),
-            "feefilter" => Self::FeeFilter(FeeFilter::decoder()),
-            "addrv2" => Self::AddrV2(AddrV2Payload::decoder()),
-            _ => Self::Unknown {
-                command,
-                remaining: payload_len,
-                buffer: Vec::with_capacity(payload_len),
-            },
-        }
+        //match command.as_ref() {
+            //"version" => Self::Version(message_network::VersionMessage::decoder()),
+            //"verack" | "sendheaders" | "mempool" | "getaddr" | "wtxidrelay" | "filterclear"
+            //| "sendaddrv2" => Self::Empty(command),
+            //"addr" => Self::Addr(AddrPayload::decoder()),
+            //"inv" => Self::Inv(InventoryPayload::decoder()),
+            //"getdata" => Self::GetData(InventoryPayload::decoder()),
+            //"notfound" => Self::NotFound(InventoryPayload::decoder()),
+            //"getblocks" => Self::GetBlocks(message_blockdata::GetBlocksMessage::decoder()),
+            //"getheaders" => Self::GetHeaders(message_blockdata::GetHeadersMessage::decoder()),
+            //"tx" => Self::Tx(transaction::Transaction::decoder()),
+            //"block" => Self::Block(block::Block::decoder()),
+            //"headers" => Self::Headers(HeadersMessage::decoder()),
+            //"ping" => Self::Ping(Ping::decoder()),
+            //"pong" => Self::Pong(Pong::decoder()),
+            //"merkleblock" => Self::MerkleBlock(MerkleBlock::decoder()),
+            //"filterload" => Self::FilterLoad(message_bloom::FilterLoad::decoder()),
+            //"filteradd" => Self::FilterAdd(message_bloom::FilterAdd::decoder()),
+            //"getcfilters" => Self::GetCFilters(message_filter::GetCFilters::decoder()),
+            //"cfilter" => Self::CFilter(message_filter::CFilter::decoder()),
+            //"getcfheaders" => Self::GetCFHeaders(message_filter::GetCFHeaders::decoder()),
+            //"cfheaders" => Self::CFHeaders(message_filter::CFHeaders::decoder()),
+            //"getcfcheckpt" => Self::GetCFCheckpt(message_filter::GetCFCheckpt::decoder()),
+            //"cfcheckpt" => Self::CFCheckpt(message_filter::CFCheckpt::decoder()),
+            //"sendcmpct" => Self::SendCmpct(message_compact_blocks::SendCmpct::decoder()),
+            //"cmpctblock" => Self::CmpctBlock(bip152::HeaderAndShortIds::decoder()),
+            //"getblocktxn" => Self::GetBlockTxn(bip152::BlockTransactionsRequest::decoder()),
+            //"blocktxn" => Self::BlockTxn(bip152::BlockTransactions::decoder()),
+            //"alert" => Self::Alert(message_network::Alert::decoder()),
+            //"reject" => Self::Reject(message_network::Reject::decoder()),
+            //"feefilter" => Self::FeeFilter(FeeFilter::decoder()),
+            //"addrv2" => Self::AddrV2(AddrV2Payload::decoder()),
+            //_ => Self::Unknown {
+                //command,
+                //remaining: payload_len,
+                //buffer: Vec::with_capacity(payload_len),
+            //},
+        //}
+        Self::Ping(Ping::decoder())
     }
 }
 
@@ -1313,9 +1311,9 @@ impl encoding::Decoder for NetworkMessageDecoder {
                 _ => Err(err),
             },
             Self::Unknown { command, buffer, remaining } => {
-                if remaining != 0 {
-                    return Err(err);
-                }
+                //if remaining != 0 {
+                    //return Err(err);
+                //}
                 Ok(NetworkMessage::Unknown { command, payload: buffer })
             }
         }
@@ -1363,7 +1361,7 @@ enum DecoderState {
     ReadingHeader {
         header_decoder: encoding::Decoder4<
             encoding::ArrayDecoder<4>,
-            CommandStringDecoder,
+            CmdStringDecoder,
             encoding::ArrayDecoder<4>,
             encoding::ArrayDecoder<4>,
         >,
@@ -1404,7 +1402,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                         DecoderState::ReadingHeader {
                             header_decoder: encoding::Decoder4::new(
                                 encoding::ArrayDecoder::new(),
-                                CommandStringDecoder { inner: encoding::ArrayDecoder::new() },
+                                CmdString::new(),
                                 encoding::ArrayDecoder::new(),
                                 encoding::ArrayDecoder::new(),
                             ),
@@ -1494,7 +1492,7 @@ impl encoding::Decodable for V1NetworkMessage {
             state: DecoderState::ReadingHeader {
                 header_decoder: encoding::Decoder4::new(
                     encoding::ArrayDecoder::new(),
-                    CommandStringDecoder { inner: encoding::ArrayDecoder::new() },
+                    CmdStringDecoder::new(),
                     encoding::ArrayDecoder::new(),
                     encoding::ArrayDecoder::new(),
                 ),
@@ -1737,7 +1735,7 @@ enum V2NetworkMessageDecoderState {
     ShortId(encoding::ArrayDecoder<1>),
     // Decoding the command string with the short-id byte stored, and payload
     // decoder waiting.
-    CommandString(CommandStringDecoder),
+    CommandString(CmdStringDecoder),
     // Decoding the payload, with the short-id and command string.
     Payload(NetworkMessageDecoder),
     // Decoder has failed and cannot be used again.
@@ -1810,21 +1808,22 @@ impl V2NetworkMessageDecoder {
     }
 
     /// Creates a payload decoder from a command string (for short ID == 0).
-    fn payload_decoder_from_command(command: CommandString) -> NetworkMessageDecoder {
+    fn payload_decoder_from_command(command: CmdString) -> NetworkMessageDecoder {
         use encoding::Decodable as _;
 
-        match command.as_ref() {
-            "version" => NetworkMessageDecoder::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "getaddr" | "wtxidrelay" | "sendaddrv2" =>
-                NetworkMessageDecoder::Empty(command),
-            "alert" => NetworkMessageDecoder::Alert(message_network::Alert::decoder()),
-            "reject" => NetworkMessageDecoder::Reject(message_network::Reject::decoder()),
-            _ => NetworkMessageDecoder::Unknown {
-                command,
-                remaining: 0, // no payload length, buffer all bytes until end().
-                buffer: Vec::new(),
-            },
-        }
+        //match command.as_ref() {
+            //"version" => NetworkMessageDecoder::Version(message_network::VersionMessage::decoder()),
+            //"verack" | "sendheaders" | "getaddr" | "wtxidrelay" | "sendaddrv2" =>
+                //NetworkMessageDecoder::Empty(command),
+            //"alert" => NetworkMessageDecoder::Alert(message_network::Alert::decoder()),
+            //"reject" => NetworkMessageDecoder::Reject(message_network::Reject::decoder()),
+            //_ => NetworkMessageDecoder::Unknown {
+                //command,
+                //remaining: 0, // no payload length, buffer all bytes until end().
+                //buffer: Vec::new(),
+            //},
+        //}
+        NetworkMessageDecoder::Empty(command)
     }
 }
 
