@@ -48,9 +48,12 @@ pub const MAX_INV_SIZE: usize = 50_000;
 /// This by necessity should be larger than `MAX_VEC_SIZE`
 pub const MAX_MSG_SIZE: usize = 5_000_000;
 
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub struct CmdString([u8; 12]); 
 
-encoding::encoder_newtype! {
+encoding::encoder_newtype_exact! {
+    /// todo
+    #[derive(Debug, Clone)]
     pub struct CmdStringEncoder<'e>(ArrayEncoder<12>);
 }
 
@@ -62,6 +65,7 @@ impl encoding::Encodable for CmdString {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct CmdStringDecoder(ArrayDecoder<12>);
 
 impl encoding::Decoder for CmdStringDecoder {
@@ -246,7 +250,7 @@ pub struct V1MessageHeader {
     /// The network magic, a unique 4 byte sequence.
     pub magic: Magic,
     /// The "command" used to describe the payload.
-    pub command: CommandString,
+    pub command: CmdString,
     /// The length of the payload.
     pub length: u32,
     /// A checksum to the aforementioned data.
@@ -278,7 +282,7 @@ encoding::encoder_newtype_exact! {
     pub struct V1MessageHeaderEncoder<'e>(
         encoding::Encoder4<
             crate::MagicEncoder<'e>,
-            CommandStringEncoder,
+            CmdStringEncoder<'e>,
             encoding::ArrayEncoder<4>,
             encoding::ArrayEncoder<4>
     >);
@@ -286,7 +290,7 @@ encoding::encoder_newtype_exact! {
 
 type V1MessageHeaderInnerDecoder = encoding::Decoder4<
     encoding::ArrayDecoder<4>,
-    CommandStringDecoder,
+    CmdStringDecoder,
     encoding::ArrayDecoder<4>,
     encoding::ArrayDecoder<4>,
 >;
@@ -325,7 +329,7 @@ impl encoding::Decodable for V1MessageHeader {
     fn decoder() -> Self::Decoder {
         V1MessageHeaderDecoder(encoding::Decoder4::new(
             encoding::ArrayDecoder::<4>::new(),
-            CommandString::decoder(),
+            CmdString::decoder(),
             encoding::ArrayDecoder::<4>::new(),
             encoding::ArrayDecoder::<4>::new(),
         ))
