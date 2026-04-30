@@ -314,3 +314,85 @@ impl<'a> Arbitrary<'a> for TapSighashType {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[cfg(feature = "alloc")]
+    use alloc::{format, string::ToString};
+
+    #[cfg(feature = "alloc")]
+    use super::*;
+
+    #[test]
+    #[cfg(feature = "alloc")]
+    fn tapsighashtype_fromstr_display() {
+        let sighashtypes = [
+            ("SIGHASH_DEFAULT", TapSighashType::Default),
+            ("SIGHASH_ALL", TapSighashType::All),
+            ("SIGHASH_NONE", TapSighashType::None),
+            ("SIGHASH_SINGLE", TapSighashType::Single),
+            ("SIGHASH_ALL|SIGHASH_ANYONECANPAY", TapSighashType::AllPlusAnyoneCanPay),
+            ("SIGHASH_NONE|SIGHASH_ANYONECANPAY", TapSighashType::NonePlusAnyoneCanPay),
+            ("SIGHASH_SINGLE|SIGHASH_ANYONECANPAY", TapSighashType::SinglePlusAnyoneCanPay),
+        ];
+        for (s, sht) in sighashtypes {
+            assert_eq!(sht.to_string(), s);
+            assert_eq!(s.parse::<TapSighashType>().unwrap(), sht);
+        }
+        let sht_mistakes = [
+            "SIGHASH_ALL | SIGHASH_ANYONECANPAY",
+            "SIGHASH_NONE |SIGHASH_ANYONECANPAY",
+            "SIGHASH_SINGLE| SIGHASH_ANYONECANPAY",
+            "SIGHASH_ALL SIGHASH_ANYONECANPAY",
+            "SIGHASH_NONE |",
+            "SIGHASH_SIGNLE",
+            "DEFAULT",
+            "ALL",
+            "sighash_none",
+            "Sighash_none",
+            "SigHash_None",
+            "SigHash_NONE",
+        ];
+        for s in sht_mistakes {
+            assert_eq!(
+                s.parse::<TapSighashType>().unwrap_err().to_string(),
+                format!("failed to parse '{}' as SIGHASH string", s)
+            );
+        }
+    }
+
+    #[test]
+    #[cfg(feature = "alloc")]
+    fn ecdsasighashtype_fromstr_display() {
+        let sighashtypes = [
+            ("SIGHASH_ALL", EcdsaSighashType::All),
+            ("SIGHASH_NONE", EcdsaSighashType::None),
+            ("SIGHASH_SINGLE", EcdsaSighashType::Single),
+            ("SIGHASH_ALL|SIGHASH_ANYONECANPAY", EcdsaSighashType::AllPlusAnyoneCanPay),
+            ("SIGHASH_NONE|SIGHASH_ANYONECANPAY", EcdsaSighashType::NonePlusAnyoneCanPay),
+            ("SIGHASH_SINGLE|SIGHASH_ANYONECANPAY", EcdsaSighashType::SinglePlusAnyoneCanPay),
+        ];
+        for (s, sht) in sighashtypes {
+            assert_eq!(sht.to_string(), s);
+            assert_eq!(s.parse::<EcdsaSighashType>().unwrap(), sht);
+        }
+        let sht_mistakes = [
+            "SIGHASH_ALL | SIGHASH_ANYONECANPAY",
+            "SIGHASH_NONE |SIGHASH_ANYONECANPAY",
+            "SIGHASH_SINGLE| SIGHASH_ANYONECANPAY",
+            "SIGHASH_ALL SIGHASH_ANYONECANPAY",
+            "SIGHASH_NONE |",
+            "SIGHASH_SIGNLE",
+            "sighash_none",
+            "Sighash_none",
+            "SigHash_None",
+            "SigHash_NONE",
+        ];
+        for s in sht_mistakes {
+            assert_eq!(
+                s.parse::<EcdsaSighashType>().unwrap_err().to_string(),
+                format!("failed to parse '{}' as SIGHASH string", s)
+            );
+        }
+    }
+}
