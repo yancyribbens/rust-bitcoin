@@ -1183,7 +1183,7 @@ enum NetworkMessageDecoder {
 }
 
 impl NetworkMessageDecoder {
-    fn new(command: CommandString, payload_len: usize) -> Self {
+    fn new(command: CmdString, payload_len: usize) -> Self {
         use encoding::Decodable as _;
         //match command.as_ref() {
             //"version" => Self::Version(message_network::VersionMessage::decoder()),
@@ -1433,7 +1433,6 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                         ));
                     }
 
-                    let command = CommandString::try_from_static("").unwrap();
                     let payload_decoder = NetworkMessageDecoder::new(command, payload_len);
                     self.state = DecoderState::ReadingPayload {
                         magic_bytes,
