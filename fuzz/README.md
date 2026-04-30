@@ -12,6 +12,13 @@ run
 
 in this directory.
 
+By default, `fuzz.sh` runs each target for 100 seconds. Pass
+`-max_total_time` to run for longer or shorter:
+
+```bash
+./fuzz.sh -max_total_time=300
+```
+
 ## Fuzzing with weak cryptography
 
 You may wish to replace the hashing and signing code with broken crypto,
