@@ -161,8 +161,9 @@ fn p2pk_pubkey_bytes_different_op_code_returns_none() {
 
 #[test]
 fn p2pk_pubkey_bytes_incorrect_key_size_returns_none() {
-    // 63 byte key
-    let malformed_key = b"21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1";
+    // 63 byte key (neither 33 nor 65 bytes, so the resulting script is not a valid P2PK).
+    const MALFORMED_KEY: &str = "21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1ad21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ff";
+    let malformed_key = hex!(MALFORMED_KEY);
     let invalid_p2pk_script =
         ScriptPubKey::builder().push_slice(malformed_key).push_opcode(OP_CHECKSIG).into_script();
     assert!(invalid_p2pk_script.p2pk_pubkey_bytes().is_none());
@@ -170,7 +171,10 @@ fn p2pk_pubkey_bytes_incorrect_key_size_returns_none() {
 
 #[test]
 fn p2pk_pubkey_bytes_invalid_key_returns_some() {
-    let malformed_key = b"21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1ux";
+    // 65 byte slice; resulting script has the size of an uncompressed P2PK, so the bytes are
+    // returned even though the leading byte (0xff) is not a valid uncompressed-pubkey prefix.
+    const MALFORMED_KEY: &str = "ff032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1ad21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1ad";
+    let malformed_key = hex!(MALFORMED_KEY);
     let invalid_key_script =
         ScriptPubKey::builder().push_slice(malformed_key).push_opcode(OP_CHECKSIG).into_script();
     assert!(invalid_key_script.p2pk_pubkey_bytes().is_some());
@@ -224,7 +228,9 @@ fn p2pk_public_key_different_op_code_returns_none() {
 
 #[test]
 fn p2pk_public_key_incorrect_size_returns_none() {
-    let malformed_key = b"21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1";
+    // 63 byte key (neither 33 nor 65 bytes, so the resulting script is not a valid P2PK).
+    const MALFORMED_KEY: &str = "21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1ad21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ff";
+    let malformed_key = hex!(MALFORMED_KEY);
     let malformed_key_script =
         ScriptPubKey::builder().push_slice(malformed_key).push_opcode(OP_CHECKSIG).into_script();
     assert!(malformed_key_script.p2pk_public_key().is_none());
@@ -232,7 +238,10 @@ fn p2pk_public_key_incorrect_size_returns_none() {
 
 #[test]
 fn p2pk_public_key_invalid_key_returns_none() {
-    let malformed_key = b"21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1ux";
+    // 65 byte slice with an invalid uncompressed-pubkey prefix (0xff); the script is the right
+    // size but the bytes don't parse as a valid public key.
+    const MALFORMED_KEY: &str = "ff032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1ad21032e58afe51f9ed8ad3cc7897f634d881fdbe49816429ded8156bebd2ffd1ad";
+    let malformed_key = hex!(MALFORMED_KEY);
     let invalid_key_script =
         ScriptPubKey::builder().push_slice(malformed_key).push_opcode(OP_CHECKSIG).into_script();
     assert!(invalid_key_script.p2pk_public_key().is_none());
