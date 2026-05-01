@@ -51,14 +51,34 @@ pub const MAX_MSG_SIZE: usize = 5_000_000;
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct CmdString([u8; 12]); 
 
-encoding::encoder_newtype_exact! {
-    /// todo
-    #[derive(Debug, Clone)]
-    pub struct CmdStringEncoder<'e>(ArrayEncoder<12>);
+/// Encoder for the [`CommandString`] type
+// We can't use the [`encoder_newtype!`] macro due to the lifetime conflicting
+// when constructing the encoder in `V1NetworkMessage`.
+#[derive(Debug, Clone)]
+pub struct CmdStringEncoder(encoding::ArrayEncoder<12>);
+
+impl CmdStringEncoder {
+    /// Constructs a new instance of the newtype encoder.
+    pub(crate) const fn new(encoder: ArrayEncoder<12>) -> Self {
+        CmdStringEncoder(encoder)
+    }
+}
+
+impl encoding::Encoder for CmdStringEncoder {
+    #[inline]
+    fn current_chunk(&self) -> &[u8] { self.0.current_chunk() }
+
+    #[inline]
+    fn advance(&mut self) -> bool { self.0.advance() }
+}
+
+impl encoding::ExactSizeEncoder for CmdStringEncoder {
+    #[inline]
+    fn len(&self) -> usize { self.0.len() }
 }
 
 impl encoding::Encodable for CmdString {
-    type Encoder<'e> = CmdStringEncoder<'e> where Self: 'e;
+    type Encoder<'e> = CmdStringEncoder where Self: 'e;
 
     fn encoder(&self) -> Self::Encoder<'_> {
         CmdStringEncoder::new(ArrayEncoder::without_length_prefix(self.0))
@@ -287,7 +307,7 @@ encoding::encoder_newtype_exact! {
     pub struct V1MessageHeaderEncoder<'e>(
         encoding::Encoder4<
             crate::MagicEncoder<'e>,
-            CmdStringEncoder<'e>,
+            CmdStringEncoder,
             encoding::ArrayEncoder<4>,
             encoding::ArrayEncoder<4>
     >);
@@ -791,7 +811,7 @@ pub enum NetworkMessage {
     /// Any other message.
     Unknown {
         /// The command of this message.
-        command: CommandString,
+        command: CmdString,
         /// The payload of this message.
         payload: Vec<u8>,
     },
@@ -850,11 +870,13 @@ impl NetworkMessage {
     /// # Panics
     ///
     /// Panics if the command string is invalid (should never happen for valid message types).
-    pub fn command(&self) -> CommandString {
-        match *self {
-            Self::Unknown { command: ref c, .. } => c.clone(),
-            _ => CommandString::try_from_static(self.cmd()).expect("cmd returns valid commands"),
-        }
+    pub fn command(&self) -> CmdString {
+        // this is called from call site L896 of impl V1NetworkMessage
+        panic!("todo")
+        //match *self {
+            //Self::Unknown { command: ref c, .. } => c.clone(),
+            //_ => CommandString::try_from_static(self.cmd()).expect("cmd returns valid commands"),
+        //}
     }
 }
 
@@ -892,7 +914,7 @@ impl V1NetworkMessage {
     pub fn cmd(&self) -> &'static str { self.payload.cmd() }
 
     /// Returns the `CommandString` for the message command.
-    pub fn command(&self) -> CommandString { self.payload.command() }
+    pub fn command(&self) -> CmdString { self.payload.command() }
 }
 
 impl V2NetworkMessage {
@@ -913,7 +935,7 @@ impl V2NetworkMessage {
     pub fn cmd(&self) -> &'static str { self.payload.cmd() }
 
     /// Returns the `CommandString` for the message command.
-    pub fn command(&self) -> CommandString { self.payload.command() }
+    pub fn command(&self) -> CmdString { self.payload.command() }
 }
 
 impl encoding::Encodable for NetworkMessage {
@@ -1115,7 +1137,7 @@ encoding::encoder_newtype! {
         encoding::Encoder2<
             encoding::Encoder4<
                 encoding::ArrayEncoder<4>,
-                CommandStringEncoder,
+                CmdStringEncoder,
                 encoding::ArrayEncoder<4>,
                 encoding::ArrayEncoder<4>,
             >,
@@ -1584,7 +1606,7 @@ fn v2_command_byte(payload: &NetworkMessage) -> (u8, Option<CommandString>) {
         | NetworkMessage::SendAddrV2
         | NetworkMessage::Alert(_)
         | NetworkMessage::Reject(_)
-        | NetworkMessage::Unknown { .. } => (0u8, Some(payload.command())),
+        | NetworkMessage::Unknown { .. } => (0u8, None),
     }
 }
 
