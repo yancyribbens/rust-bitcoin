@@ -243,6 +243,27 @@ pub struct V1MessageHeader {
     pub checksum: [u8; 4],
 }
 
+impl V1MessageHeader {
+    /// Constructs a new [`V1MessageHeader`] with computed 4 byte checksum.
+    ///
+    /// # Parameters
+    ///
+    /// * `magic` - the network magic bytes.
+    /// * `message` - the message described by header.
+    /// * `command` - the character string which defines the transmitted command.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the payload length exceeds `u32::MAX`.
+    pub fn new<T: encoding::Encode>(magic: Magic, message: &T, command: &'static str) -> Self {
+        let (bytes_hashed, checksum) = sha2_checksum(message);
+        let payload_len = u32::try_from(bytes_hashed).expect("network message use u32 as length");
+        let command = CommandString::try_from_static(command).unwrap();
+
+        Self { magic, command, length: payload_len, checksum }
+    }
+}
+
 impl encoding::Encode for V1MessageHeader {
     type Encoder<'e>
         = V1MessageHeaderEncoder<'e>
@@ -2783,6 +2804,22 @@ mod test {
     use crate::{ProtocolVersion, ServiceFlags};
 
     fn hash(array: [u8; 32]) -> sha256d::Hash { sha256d::Hash::from_byte_array(array) }
+
+    #[test]
+    fn v1_message_header() {
+        let magic = Magic::BITCOIN;
+        let payload = Pong(314);
+
+        let header = V1MessageHeader::new(magic, &payload, "pong");
+
+        let target_header = V1MessageHeader {
+            magic: Magic::BITCOIN,
+            command: CommandString::try_from_static("pong").unwrap(),
+            length: 8,
+            checksum: [198, 34, 189, 120],
+        };
+        assert_eq!(header, target_header);
+    }
 
     #[test]
     #[allow(clippy::too_many_lines)]
