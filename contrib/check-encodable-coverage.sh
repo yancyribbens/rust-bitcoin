@@ -7,7 +7,7 @@ set -euo pipefail
 
 REPO_DIR=$(git rev-parse --show-toplevel)
 FUZZ_FILE="$REPO_DIR/fuzz/fuzz_targets/bitcoin/compare_consensus_encoding.rs"
-TRAIT_IMPL_JS="$REPO_DIR/target/doc/trait.impl/bitcoin_consensus_encoding/encode/trait.Encodable.js"
+TRAIT_IMPL_JS="$REPO_DIR/target/doc/trait.impl/bitcoin_consensus_encoding/encode/trait.Encode.js"
 
 # Known exclusions (types that don't exist in old_bitcoin 0.32 or are generic).
 # Add types here that have new Encodable but no old_bitcoin equivalent.
@@ -29,18 +29,18 @@ main() {
     missing=$(find_missing_types "$new_types" "$fuzz_types")
 
     if [ -n "$missing" ]; then
-        echo "The following types implement encoding::Encodable but are not in the fuzz test:" >&2
+        echo "The following types implement encoding::Encode but are not in the fuzz test:" >&2
         for type in $missing; do
             echo "  - $type" >&2
         done
         err "Either add them to compare_consensus_encoding.rs or add to EXCLUSIONS in this script"
     fi
 
-    echo "All encoding::Encodable types are covered (or excluded)"
+    echo "All encoding::Encode types are covered (or excluded)"
 }
 
 generate_docs() {
-    echo "Generating docs to discover Encodable implementors..."
+    echo "Generating docs to discover Encode implementors..."
     cargo doc --workspace --no-deps --quiet
 }
 
@@ -56,7 +56,7 @@ extract_new_types() {
     tr '>' '\n' < "$TRAIT_IMPL_JS" \
         | grep -oE '^[A-Z][a-zA-Z0-9_]+<' \
         | sed 's/<$//' \
-        | grep -v '^Encodable$' \
+        | grep -v '^Encode$' \
         | sort -u
 }
 
