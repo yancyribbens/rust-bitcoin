@@ -117,8 +117,6 @@ pub mod siphash24;
 use core::fmt::{self, Write as _};
 use core::{convert, hash};
 
-use encoding::Encoder;
-
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
 pub use self::{
@@ -205,6 +203,15 @@ where
     H: HashEngine,
 {
     let mut encoder = object.encoder();
+    drain_to_engine(&mut encoder, engine);
+}
+
+/// Drain the output of an [`encoding::Encoder`] into a hash engine.
+pub fn drain_to_engine<T, H>(encoder: &mut T, engine: &mut H)
+where
+    T: encoding::Encoder + ?Sized,
+    H: HashEngine,
+{
     loop {
         engine.input(encoder.current_chunk());
         if !encoder.advance() {
