@@ -1,3 +1,9 @@
+# 0.2.0 - 2026-04-27
+
+- Re-export types and extern crates [#5858](https://github.com/rust-bitcoin/rust-bitcoin/pull/5858)
+- Remove error conversion `From` impls [#6041](https://github.com/rust-bitcoin/rust-bitcoin/pull/6041)
+- Remove `bitcoin-io` dependency [#6049](https://github.com/rust-bitcoin/rust-bitcoin/pull/6049)
+
 # 0.1.0 - Initial migration
 
 - Migrate all code from `rust-bitcoin::crypto::ecdsa` to this crate.
