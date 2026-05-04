@@ -1106,7 +1106,7 @@ impl encoding::Encode for V1NetworkMessage {
 }
 
 #[derive(Debug, Clone)]
-enum NetworkMessageDecoder {
+enum NetworkMessageDecoderInner {
     Version(message_network::VersionMessageDecoder),
     Addr(AddrPayloadDecoder),
     Inv(InventoryPayloadDecoder),
@@ -1147,7 +1147,7 @@ enum NetworkMessageDecoder {
     },
 }
 
-impl NetworkMessageDecoder {
+impl NetworkMessageDecoderInner {
     fn new(command: CommandString, payload_len: usize) -> Self {
         use encoding::Decode as _;
         match command.as_ref() {
@@ -1191,7 +1191,7 @@ impl NetworkMessageDecoder {
     }
 }
 
-impl encoding::Decoder for NetworkMessageDecoder {
+impl encoding::Decoder for NetworkMessageDecoderInner {
     type Output = NetworkMessage;
     type Error = V1NetworkMessageDecoderError;
 
@@ -1323,6 +1323,63 @@ impl encoding::Decoder for NetworkMessageDecoder {
             Self::AddrV2(d) => d.read_limit(),
             Self::Empty(_) => 0,
             Self::Unknown { remaining, .. } => *remaining,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+struct NetworkMessageDecoder {
+    inner: NetworkMessageDecoderInner,
+    payload_len: Option<usize>,
+    bytes_consumed: usize,
+}
+
+impl NetworkMessageDecoder {
+    fn new(command: CommandString, payload_len: usize) -> Self {
+        Self {
+            inner: NetworkMessageDecoderInner::new(command, payload_len),
+            payload_len: Some(payload_len),
+            bytes_consumed: 0,
+        }
+    }
+
+    fn from_inner(inner: NetworkMessageDecoderInner) -> Self {
+        Self { inner, payload_len: None, bytes_consumed: 0 }
+    }
+}
+
+impl encoding::Decoder for NetworkMessageDecoder {
+    type Output = NetworkMessage;
+    type Error = V1NetworkMessageDecoderError;
+
+    #[inline]
+    fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
+        let before = bytes.len();
+        let result = self.inner.push_bytes(bytes)?;
+        self.bytes_consumed += before - bytes.len();
+        Ok(result)
+    }
+
+    fn end(self) -> Result<Self::Output, Self::Error> {
+        if let Some(expected) = self.payload_len {
+            if self.bytes_consumed != expected {
+                return Err(V1NetworkMessageDecoderError(
+                    V1NetworkMessageDecoderErrorInner::PayloadLengthMismatch {
+                        expected,
+                        actual: self.bytes_consumed,
+                    },
+                ));
+            }
+        }
+        self.inner.end()
+    }
+
+    #[inline]
+    fn read_limit(&self) -> usize {
+        match self.payload_len {
+            Some(expected) =>
+                self.inner.read_limit().min(expected.saturating_sub(self.bytes_consumed)),
+            None => self.inner.read_limit(),
         }
     }
 }
@@ -1730,71 +1787,61 @@ impl V2NetworkMessageDecoder {
         short_id: u8,
     ) -> Result<NetworkMessageDecoder, V2NetworkMessageDecoderError> {
         use encoding::Decode as _;
+        use NetworkMessageDecoderInner as E;
 
         let err = V2NetworkMessageDecoderError::Payload(V1NetworkMessageDecoderError(
             V1NetworkMessageDecoderErrorInner::Payload,
         ));
-        // Use a large payload_len for the Unknown variant buffer; actual messages use typed decoders.
-        match short_id {
-            1u8 => Ok(NetworkMessageDecoder::Addr(AddrPayload::decoder())),
-            2u8 => Ok(NetworkMessageDecoder::Block(block::Block::decoder())),
-            3u8 => Ok(NetworkMessageDecoder::BlockTxn(bip152::BlockTransactions::decoder())),
-            4u8 => Ok(NetworkMessageDecoder::CmpctBlock(bip152::HeaderAndShortIds::decoder())),
-            5u8 => Ok(NetworkMessageDecoder::FeeFilter(FeeFilter::decoder())),
-            6u8 => Ok(NetworkMessageDecoder::FilterAdd(message_bloom::FilterAdd::decoder())),
-            7u8 => Ok(NetworkMessageDecoder::Empty(
-                CommandString::try_from_static("filterclear").map_err(|_| err)?,
-            )),
-            8u8 => Ok(NetworkMessageDecoder::FilterLoad(message_bloom::FilterLoad::decoder())),
-            9u8 =>
-                Ok(NetworkMessageDecoder::GetBlocks(message_blockdata::GetBlocksMessage::decoder())),
-            10u8 =>
-                Ok(NetworkMessageDecoder::GetBlockTxn(bip152::BlockTransactionsRequest::decoder())),
-            11u8 => Ok(NetworkMessageDecoder::GetData(InventoryPayload::decoder())),
-            12u8 => Ok(NetworkMessageDecoder::GetHeaders(
-                message_blockdata::GetHeadersMessage::decoder(),
-            )),
-            13u8 => Ok(NetworkMessageDecoder::Headers(HeadersMessage::decoder())),
-            14u8 => Ok(NetworkMessageDecoder::Inv(InventoryPayload::decoder())),
-            15u8 => Ok(NetworkMessageDecoder::Empty(
-                CommandString::try_from_static("mempool").map_err(|_| err)?,
-            )),
-            16u8 => Ok(NetworkMessageDecoder::MerkleBlock(MerkleBlock::decoder())),
-            17u8 => Ok(NetworkMessageDecoder::NotFound(InventoryPayload::decoder())),
-            18u8 => Ok(NetworkMessageDecoder::Ping(Ping::decoder())),
-            19u8 => Ok(NetworkMessageDecoder::Pong(Pong::decoder())),
-            20u8 =>
-                Ok(NetworkMessageDecoder::SendCmpct(message_compact_blocks::SendCmpct::decoder())),
-            21u8 => Ok(NetworkMessageDecoder::Tx(transaction::Transaction::decoder())),
-            22u8 => Ok(NetworkMessageDecoder::GetCFilters(message_filter::GetCFilters::decoder())),
-            23u8 => Ok(NetworkMessageDecoder::CFilter(message_filter::CFilter::decoder())),
-            24u8 =>
-                Ok(NetworkMessageDecoder::GetCFHeaders(message_filter::GetCFHeaders::decoder())),
-            25u8 => Ok(NetworkMessageDecoder::CFHeaders(message_filter::CFHeaders::decoder())),
-            26u8 =>
-                Ok(NetworkMessageDecoder::GetCFCheckpt(message_filter::GetCFCheckpt::decoder())),
-            27u8 => Ok(NetworkMessageDecoder::CFCheckpt(message_filter::CFCheckpt::decoder())),
-            28u8 => Ok(NetworkMessageDecoder::AddrV2(AddrV2Payload::decoder())),
+        (match short_id {
+            1u8 => Ok(E::Addr(AddrPayload::decoder())),
+            2u8 => Ok(E::Block(block::Block::decoder())),
+            3u8 => Ok(E::BlockTxn(bip152::BlockTransactions::decoder())),
+            4u8 => Ok(E::CmpctBlock(bip152::HeaderAndShortIds::decoder())),
+            5u8 => Ok(E::FeeFilter(FeeFilter::decoder())),
+            6u8 => Ok(E::FilterAdd(message_bloom::FilterAdd::decoder())),
+            7u8 => Ok(E::Empty(CommandString::try_from_static("filterclear").map_err(|_| err)?)),
+            8u8 => Ok(E::FilterLoad(message_bloom::FilterLoad::decoder())),
+            9u8 => Ok(E::GetBlocks(message_blockdata::GetBlocksMessage::decoder())),
+            10u8 => Ok(E::GetBlockTxn(bip152::BlockTransactionsRequest::decoder())),
+            11u8 => Ok(E::GetData(InventoryPayload::decoder())),
+            12u8 => Ok(E::GetHeaders(message_blockdata::GetHeadersMessage::decoder())),
+            13u8 => Ok(E::Headers(HeadersMessage::decoder())),
+            14u8 => Ok(E::Inv(InventoryPayload::decoder())),
+            15u8 => Ok(E::Empty(CommandString::try_from_static("mempool").map_err(|_| err)?)),
+            16u8 => Ok(E::MerkleBlock(MerkleBlock::decoder())),
+            17u8 => Ok(E::NotFound(InventoryPayload::decoder())),
+            18u8 => Ok(E::Ping(Ping::decoder())),
+            19u8 => Ok(E::Pong(Pong::decoder())),
+            20u8 => Ok(E::SendCmpct(message_compact_blocks::SendCmpct::decoder())),
+            21u8 => Ok(E::Tx(transaction::Transaction::decoder())),
+            22u8 => Ok(E::GetCFilters(message_filter::GetCFilters::decoder())),
+            23u8 => Ok(E::CFilter(message_filter::CFilter::decoder())),
+            24u8 => Ok(E::GetCFHeaders(message_filter::GetCFHeaders::decoder())),
+            25u8 => Ok(E::CFHeaders(message_filter::CFHeaders::decoder())),
+            26u8 => Ok(E::GetCFCheckpt(message_filter::GetCFCheckpt::decoder())),
+            27u8 => Ok(E::CFCheckpt(message_filter::CFCheckpt::decoder())),
+            28u8 => Ok(E::AddrV2(AddrV2Payload::decoder())),
             id => Err(V2NetworkMessageDecoderError::UnknownShortId(id)),
-        }
+        })
+        .map(NetworkMessageDecoder::from_inner)
     }
 
     /// Creates a payload decoder from a command string (for short ID == 0).
     fn payload_decoder_from_command(command: CommandString) -> NetworkMessageDecoder {
         use encoding::Decode as _;
+        use NetworkMessageDecoderInner as E;
 
-        match command.as_ref() {
-            "version" => NetworkMessageDecoder::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "getaddr" | "wtxidrelay" | "sendaddrv2" =>
-                NetworkMessageDecoder::Empty(command),
-            "alert" => NetworkMessageDecoder::Alert(message_network::Alert::decoder()),
-            "reject" => NetworkMessageDecoder::Reject(message_network::Reject::decoder()),
-            _ => NetworkMessageDecoder::Unknown {
+        NetworkMessageDecoder::from_inner(match command.as_ref() {
+            "version" => E::Version(message_network::VersionMessage::decoder()),
+            "verack" | "sendheaders" | "getaddr" | "wtxidrelay" | "sendaddrv2" => E::Empty(command),
+            "alert" => E::Alert(message_network::Alert::decoder()),
+            "reject" => E::Reject(message_network::Reject::decoder()),
+            _ => E::Unknown {
                 command,
                 remaining: 0, // no payload length, buffer all bytes until end().
                 buffer: Vec::new(),
             },
-        }
+        })
     }
 }
 
@@ -2120,6 +2167,8 @@ pub mod error {
         Payload,
         /// Message checksum did not match the one reported in the message header.
         InvalidChecksum { expected: [u8; 4], actual: [u8; 4] },
+        /// Bytes decoded by the payload decoder do not match the declared payload length.
+        PayloadLengthMismatch { expected: usize, actual: usize },
     }
 
     impl fmt::Display for V1NetworkMessageDecoderError {
@@ -2139,6 +2188,8 @@ pub mod error {
                     "invalid checksum: expected {:02x}{:02x}{:02x}{:02x}, actual {:02x}{:02x}{:02x}{:02x}",
                     e[0], e[1], e[2], e[3], a[0], a[1], a[2], a[3],
                 ),
+                V1NetworkMessageDecoderErrorInner::PayloadLengthMismatch { expected, actual } =>
+                    write!(f, "payload length mismatch: expected {expected} bytes, decoded {actual}"),
             }
         }
     }
@@ -2152,6 +2203,7 @@ pub mod error {
                 V1NetworkMessageDecoderErrorInner::Payload => None,
                 V1NetworkMessageDecoderErrorInner::InvalidChecksum { expected: _, actual: _ } =>
                     None,
+                V1NetworkMessageDecoderErrorInner::PayloadLengthMismatch { .. } => None,
             }
         }
     }
