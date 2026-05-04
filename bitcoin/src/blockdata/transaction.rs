@@ -1308,7 +1308,6 @@ mod tests {
     use crate::consensus::encode::{deserialize, serialize};
     use crate::constants::WITNESS_SCALE_FACTOR;
     use crate::script::ScriptSigBuf;
-    use crate::sighash::EcdsaSighashType;
     use crate::{hex, parse_int};
 
     const SOME_TX: &str = "0100000001a15d57094aa7a21a28cb20b59aab8fc7d1149a3bdbcddba9c622e4f5f6a99ece010000006c493046022100f93bb0e7d8db7bd46e40132d1f8242026e045f03a0efe71bbb8e3f475e970d790221009337cd7f1f929f00cc6ff01f03729b069a7c21b59b1736ddfee5db5946c5da8c0121033b9b137ee87d5a812d6f506efdd37f0affa7ffc310711c06c7f3e097c9447c52ffffffff0100e1f505000000001976a9140389035a9225b3839e2bbf32d826a1e222031fd888ac00000000";
@@ -1626,40 +1625,6 @@ mod tests {
             format!("{:x}", tx.compute_txid()),
             "971ed48a62c143bbd9c87f4bafa2ef213cfa106c6e140f111931d0be307468dd"
         );
-    }
-
-    #[test]
-    fn sighashtype_fromstr_display() {
-        let sighashtypes = [
-            ("SIGHASH_ALL", EcdsaSighashType::All),
-            ("SIGHASH_NONE", EcdsaSighashType::None),
-            ("SIGHASH_SINGLE", EcdsaSighashType::Single),
-            ("SIGHASH_ALL|SIGHASH_ANYONECANPAY", EcdsaSighashType::AllPlusAnyoneCanPay),
-            ("SIGHASH_NONE|SIGHASH_ANYONECANPAY", EcdsaSighashType::NonePlusAnyoneCanPay),
-            ("SIGHASH_SINGLE|SIGHASH_ANYONECANPAY", EcdsaSighashType::SinglePlusAnyoneCanPay),
-        ];
-        for (s, sht) in sighashtypes {
-            assert_eq!(sht.to_string(), s);
-            assert_eq!(s.parse::<EcdsaSighashType>().unwrap(), sht);
-        }
-        let sht_mistakes = [
-            "SIGHASH_ALL | SIGHASH_ANYONECANPAY",
-            "SIGHASH_NONE |SIGHASH_ANYONECANPAY",
-            "SIGHASH_SINGLE| SIGHASH_ANYONECANPAY",
-            "SIGHASH_ALL SIGHASH_ANYONECANPAY",
-            "SIGHASH_NONE |",
-            "SIGHASH_SIGNLE",
-            "sighash_none",
-            "Sighash_none",
-            "SigHash_None",
-            "SigHash_NONE",
-        ];
-        for s in sht_mistakes {
-            assert_eq!(
-                s.parse::<EcdsaSighashType>().unwrap_err().to_string(),
-                format!("unrecognized SIGHASH string '{}'", s)
-            );
-        }
     }
 
     #[test]

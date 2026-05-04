@@ -1293,7 +1293,6 @@ where
 mod tests {
     #[cfg(feature = "serde")]
     use alloc::string::String;
-    use alloc::string::ToString;
     use alloc::vec::Vec;
 
     use hashes::HashEngine;
@@ -1800,43 +1799,6 @@ mod tests {
 
             let tweaked_priv_key = tweaked_keypair.to_private_key();
             assert_eq!(PrivateKey::from_secp(expected.tweaked_privkey), tweaked_priv_key);
-        }
-    }
-
-    #[test]
-    fn sighashtype_fromstr_display() {
-        let sighashtypes = [
-            ("SIGHASH_DEFAULT", TapSighashType::Default),
-            ("SIGHASH_ALL", TapSighashType::All),
-            ("SIGHASH_NONE", TapSighashType::None),
-            ("SIGHASH_SINGLE", TapSighashType::Single),
-            ("SIGHASH_ALL|SIGHASH_ANYONECANPAY", TapSighashType::AllPlusAnyoneCanPay),
-            ("SIGHASH_NONE|SIGHASH_ANYONECANPAY", TapSighashType::NonePlusAnyoneCanPay),
-            ("SIGHASH_SINGLE|SIGHASH_ANYONECANPAY", TapSighashType::SinglePlusAnyoneCanPay),
-        ];
-        for (s, sht) in sighashtypes {
-            assert_eq!(sht.to_string(), s);
-            assert_eq!(s.parse::<TapSighashType>().unwrap(), sht);
-        }
-        let sht_mistakes = [
-            "SIGHASH_ALL | SIGHASH_ANYONECANPAY",
-            "SIGHASH_NONE |SIGHASH_ANYONECANPAY",
-            "SIGHASH_SINGLE| SIGHASH_ANYONECANPAY",
-            "SIGHASH_ALL SIGHASH_ANYONECANPAY",
-            "SIGHASH_NONE |",
-            "SIGHASH_SIGNLE",
-            "DEFAULT",
-            "ALL",
-            "sighash_none",
-            "Sighash_none",
-            "SigHash_None",
-            "SigHash_NONE",
-        ];
-        for s in sht_mistakes {
-            assert_eq!(
-                s.parse::<TapSighashType>().unwrap_err().to_string(),
-                format!("unrecognized SIGHASH string '{}'", s)
-            );
         }
     }
 

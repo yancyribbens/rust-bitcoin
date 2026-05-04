@@ -4,19 +4,25 @@
 //!
 //! This module provides ECDSA signatures used by Bitcoin that can be roundtrip (de)serialized.
 
+#[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use core::borrow::Borrow;
+use core::fmt;
+#[cfg(feature = "alloc")]
+use core::iter;
 use core::ops::Deref;
+#[cfg(feature = "alloc")]
 use core::str::FromStr;
-use core::{fmt, iter};
 
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
 use hex_unstable::DisplayHex;
+#[cfg(feature = "alloc")]
 use internals::impl_to_hex_from_lower_hex;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "alloc")]
 use crate::hex;
 use crate::sighash::EcdsaSighashType;
 
@@ -72,6 +78,7 @@ impl Signature {
     ///
     /// Note: this performs an extra heap allocation, you might prefer the
     /// [`serialize`](Self::serialize) method instead.
+    #[cfg(feature = "alloc")]
     pub fn to_vec(self) -> Vec<u8> {
         self.signature
             .serialize_der()
@@ -89,6 +96,7 @@ impl fmt::Display for Signature {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl FromStr for Signature {
     type Err = ParseSignatureError;
 
@@ -158,6 +166,7 @@ impl fmt::LowerHex for SerializedSignature {
         fmt::LowerHex::fmt(&(**self).as_hex(), f)
     }
 }
+#[cfg(feature = "alloc")]
 impl_to_hex_from_lower_hex!(SerializedSignature, |signature: &SerializedSignature| signature.len
     * 2);
 
@@ -351,11 +360,14 @@ impl<'a> Arbitrary<'a> for Signature {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "alloc")]
     use super::*;
 
+    #[cfg(feature = "alloc")]
     const TEST_SIGNATURE_HEX: &str = "3046022100839c1fbc5304de944f697c9f4b1d01d1faeba32d751c0f7acb21ac8a0f436a72022100e89bd46bb3a5a62adc679f659b7ce876d83ee297c7a5587b2011c4fcc72eab45";
 
     #[test]
+    #[cfg(feature = "alloc")]
     fn iterate_serialized_signature() {
         let sig = Signature {
             signature: secp256k1::ecdsa::Signature::from_str(TEST_SIGNATURE_HEX).unwrap(),
