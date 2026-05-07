@@ -9,12 +9,15 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream};
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::{env, process};
 
-use bitcoin_p2p_messages::message::{NetworkMessage, Pong, V1NetworkMessage};
-use bitcoin_p2p_messages::message_network::{ClientSoftwareVersion, UserAgent, UserAgentVersion};
-use bitcoin_p2p_messages::{
+use bitcoin_p2p_min::message::{Empty, Ping, Pong};
+use bitcoin_p2p_min::message_compact_blocks::SendCmpct;
+use bitcoin_p2p_min::message_network::{ClientSoftwareVersion, UserAgent, UserAgentVersion};
+use bitcoin_p2p_min::{
     self, address, message, message_network, Magic, NetworkExt, ProtocolVersion, ServiceFlags,
 };
 use network::Network;
+
+use crate::message::V1MessageHeader;
 
 const SOFTWARE_VERSION: ClientSoftwareVersion =
     ClientSoftwareVersion::SemVer { major: 0, minor: 1, revision: 0 };
@@ -41,34 +44,49 @@ fn main() {
     });
 
     let remote_socket: SocketAddr = SocketAddr::new(IpAddr::V4(ip), port);
-    let version_message = build_version_message(remote_socket);
-    let version_message = message::V1NetworkMessage::new(magic, version_message);
+    let version_message_body = build_version_message(remote_socket);
+    let version_message_header = V1MessageHeader::new(magic, &version_message_body, "version");
 
     if let Ok(mut stream) = TcpStream::connect(remote_socket) {
-        encoding::encode_to_writer(&version_message, &mut stream).unwrap();
+        encoding::encode_to_writer(&version_message_header, &mut stream).unwrap();
+        encoding::encode_to_writer(&version_message_body, &mut stream).unwrap();
 
         let read_stream = stream.try_clone().unwrap();
         let mut stream_reader = BufReader::new(read_stream);
         loop {
-            let msg =
-                encoding::decode_from_read::<V1NetworkMessage, _>(&mut stream_reader).unwrap();
-
-            match msg.payload() {
-                message::NetworkMessage::Ping(ping) => {
-                    println!("got ping {:?}", ping);
-                    let pong = Pong::from_ping(ping);
-                    println!("send pong {:?}", pong);
-                    let net_msg = V1NetworkMessage::new(magic, NetworkMessage::Pong(pong));
-                    encoding::encode_to_writer(&net_msg, &mut stream).unwrap();
+            let V1MessageHeader { command, .. } =
+                encoding::decode_from_read::<V1MessageHeader, _>(&mut stream_reader).unwrap();
+            match command.as_ref() {
+                "ping" => {
+                    // receive ping and respond with pong.
+                    let ping = encoding::decode_from_read::<Ping, _>(&mut stream_reader).unwrap();
+                    println!("{:?}", ping);
+                    let pong = Pong::from_ping(&ping);
+                    println!("{:?}", pong);
+                    let msg_header = V1MessageHeader::new(magic, &pong, "pong");
+                    let _ = encoding::encode_to_writer(&msg_header, &stream);
+                    let _ = encoding::encode_to_writer(&pong, &stream);
                 }
-                message::NetworkMessage::SendCmpct(_) => {}
-                message::NetworkMessage::Verack => {}
-                message::NetworkMessage::Version(_v) => {
-                    let verack = V1NetworkMessage::new(magic, NetworkMessage::Verack);
+                "sendcmpct" => {
+                    let _ = encoding::decode_from_read::<SendCmpct, _>(&mut stream_reader).unwrap();
+                }
+                "verack" => {}
+                "version" => {
+                    // receive version and respond with verack.
+                    let _ = encoding::decode_from_read::<message_network::VersionMessage, _>(
+                        &mut stream_reader,
+                    )
+                    .unwrap();
+
+                    let empty = Empty;
+                    let verack = V1MessageHeader::new(magic, &empty, "verack");
                     encoding::encode_to_writer(&verack, &mut stream).unwrap();
                 }
-                message::NetworkMessage::FeeFilter(_f) => {}
-                _ => unimplemented!("{:?}", msg.payload()),
+                "feefilter" => {
+                    let _ = encoding::decode_from_read::<message::FeeFilter, _>(&mut stream_reader)
+                        .unwrap();
+                }
+                _ => unimplemented!("{:?}", command.as_ref()),
             }
         }
     } else {
@@ -76,7 +94,7 @@ fn main() {
     }
 }
 
-fn build_version_message(address: SocketAddr) -> message::NetworkMessage {
+fn build_version_message(address: SocketAddr) -> message_network::VersionMessage {
     // Building version message, see https://en.bitcoin.it/wiki/Protocol_documentation#version
     let my_address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
 
@@ -106,7 +124,7 @@ fn build_version_message(address: SocketAddr) -> message::NetworkMessage {
     let user_agent = UserAgent::new(SOFTWARE_NAME, &USER_AGENT_VERSION);
 
     // Construct the message
-    message::NetworkMessage::Version(message_network::VersionMessage::new(
+    message_network::VersionMessage::new(
         protocol_version,
         services,
         timestamp as i64,
@@ -115,5 +133,5 @@ fn build_version_message(address: SocketAddr) -> message::NetworkMessage {
         nonce,
         user_agent,
         start_height,
-    ))
+    )
 }

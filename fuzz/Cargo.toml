@@ -15,7 +15,7 @@ cargo-fuzz = true
 bitcoin = { path = "../bitcoin", version = "0.33.0-beta", features = [ "serde", "arbitrary" ] }
 old_bitcoin = { version = "0.32.9", package = "bitcoin" }
 bitcoin_consensus_encoding = { path = "../consensus_encoding", package = "bitcoin-consensus-encoding" }
-p2p = { path = "../p2p", package = "bitcoin-p2p-messages", features = ["arbitrary"] }
+p2p = { path = "../p2p", package = "bitcoin-p2p-min", features = ["arbitrary"] }
 
 arbitrary = { version = "1.4.1" }
 libfuzzer-sys = { version = "0.4.0" }

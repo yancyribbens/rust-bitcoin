@@ -49,8 +49,8 @@ impl MerkleBlock {
     /// # Examples
     ///
     /// ```rust
-    /// use bitcoin_p2p_messages::hex;
-    /// use bitcoin_p2p_messages::merkle_tree::MerkleBlock;
+    /// use bitcoin_p2p_min::hex;
+    /// use bitcoin_p2p_min::merkle_tree::MerkleBlock;
     /// use primitives::{Block, Txid};
     ///
     /// // Block 80000
@@ -236,7 +236,7 @@ impl PartialMerkleTree {
     /// # Examples
     ///
     /// ```rust
-    /// use bitcoin_p2p_messages::merkle_tree::PartialMerkleTree;
+    /// use bitcoin_p2p_min::merkle_tree::PartialMerkleTree;
     /// use primitives::Txid;
     ///
     /// // Block 80000
