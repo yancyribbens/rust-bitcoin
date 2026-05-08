@@ -24,6 +24,25 @@ const SOFTWARE_VERSION: ClientSoftwareVersion =
 const USER_AGENT_VERSION: UserAgentVersion = UserAgentVersion::new(SOFTWARE_VERSION);
 const SOFTWARE_NAME: &str = "ping-pong";
 
+fn pad<'a>(value: &'a str) -> [u8; 12] {
+    if value.len() > 12 {
+        panic!("len greater than 12");
+    }
+
+    let bytes  = value.as_bytes();
+    let cmd = &mut [0; 12];
+
+    for i in 0..11 {
+        if let Some(x) = bytes.get(i) {
+            cmd[i] = *x as u8;
+        } else {
+            cmd[i] = 0;
+        }
+    }
+    
+    *cmd
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 3 {
@@ -56,8 +75,9 @@ fn main() {
         loop {
             let V1MessageHeader { command, .. } =
                 encoding::decode_from_read::<V1MessageHeader, _>(&mut stream_reader).unwrap();
-            match command.as_ref() {
-                "ping" => {
+            //let cmd: &[u8; 12] = &command.0;
+            match command.0 {
+                val if val == pad("ping") => {
                     // receive ping and respond with pong.
                     let ping = encoding::decode_from_read::<Ping, _>(&mut stream_reader).unwrap();
                     println!("{:?}", ping);
@@ -67,11 +87,11 @@ fn main() {
                     let _ = encoding::encode_to_writer(&msg_header, &stream);
                     let _ = encoding::encode_to_writer(&pong, &stream);
                 }
-                "sendcmpct" => {
+                val if val == pad("sendcmpct") => {
                     let _ = encoding::decode_from_read::<SendCmpct, _>(&mut stream_reader).unwrap();
                 }
-                "verack" => {}
-                "version" => {
+                val if val == pad("verack") => {}
+                val if val == pad("version") => {
                     // receive version and respond with verack.
                     let _ = encoding::decode_from_read::<message_network::VersionMessage, _>(
                         &mut stream_reader,
@@ -82,11 +102,11 @@ fn main() {
                     let verack = V1MessageHeader::new(magic, &empty, "verack");
                     encoding::encode_to_writer(&verack, &mut stream).unwrap();
                 }
-                "feefilter" => {
+                val if val == pad("feefilter") => {
                     let _ = encoding::decode_from_read::<message::FeeFilter, _>(&mut stream_reader)
                         .unwrap();
                 }
-                _ => unimplemented!("{:?}", command.as_ref()),
+                _ => unimplemented!("{:?}", command),
             }
         }
     } else {

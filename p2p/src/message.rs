@@ -43,82 +43,76 @@ pub const MAX_MSG_SIZE: usize = 5_000_000;
 
 /// Serializer for command string
 #[derive(PartialEq, Eq, Clone, Debug)]
-pub struct CommandString(Cow<'static, str>);
+pub struct CommandString(pub [u8; 12]);
 
-impl CommandString {
-    /// Converts `&'static str` to `CommandString`
-    ///
-    /// This is more efficient for string literals than non-static conversions because it avoids
-    /// allocation.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if, and only if, the string is
-    /// larger than 12 characters in length.
-    pub fn try_from_static(s: &'static str) -> Result<Self, CommandStringError> {
-        Self::try_from_static_cow(s.into())
-    }
+//impl TryFrom<String> for CommandString {
+    //type Error = CommandStringError;
 
-    fn try_from_static_cow(cow: Cow<'static, str>) -> Result<Self, CommandStringError> {
-        if cow.len() > 12 {
-            Err(CommandStringError { cow })
-        } else {
-            Ok(Self(cow))
-        }
-    }
-}
+    //fn try_from(value: String) -> Result<Self, Self::Error> {
+        //Self::try_from_static_cow(value.into())
+    //}
+//}
 
-impl TryFrom<String> for CommandString {
-    type Error = CommandStringError;
+//impl TryFrom<Box<str>> for CommandString {
+    //type Error = CommandStringError;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        Self::try_from_static_cow(value.into())
-    }
-}
-
-impl TryFrom<Box<str>> for CommandString {
-    type Error = CommandStringError;
-
-    fn try_from(value: Box<str>) -> Result<Self, Self::Error> {
-        Self::try_from_static_cow(String::from(value).into())
-    }
-}
+    //fn try_from(value: Box<str>) -> Result<Self, Self::Error> {
+        //Self::try_from_static_cow(String::from(value).into())
+    //}
+//}
 
 impl<'a> TryFrom<&'a str> for CommandString {
     type Error = CommandStringError;
 
     fn try_from(value: &'a str) -> Result<Self, Self::Error> {
-        Self::try_from_static_cow(value.to_owned().into())
+        if value.len() > 12 {
+            panic!("len greater than 12");
+        }
+
+        let bytes  = value.as_bytes();
+        let cmd = &mut [0; 12];
+
+        for i in 0..11 {
+            if let Some(x) = bytes.get(i) {
+                cmd[i] = *x as u8;
+            } else {
+                cmd[i] = 0;
+            }
+        }
+        
+        Ok(Self(*cmd))
     }
 }
 
-impl core::str::FromStr for CommandString {
-    type Err = CommandStringError;
+//impl<'a> TryFrom<CommandString> for &'a str {
+    //type Error = CommandStringError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::try_from_static_cow(s.to_owned().into())
-    }
-}
+    //fn try_from(value: CommandString) -> Result<Self, Self::Error> {
+        //let cmd: &[u8; 12] = &value.0;
+        //let value = str::from_utf8(cmd).expect("Invalid UTF-8");
+        //Ok(value)
+    //}
+//}
 
-impl fmt::Display for CommandString {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { f.write_str(self.0.as_ref()) }
-}
+//impl core::str::FromStr for CommandString {
+    //type Err = CommandStringError;
 
-impl AsRef<str> for CommandString {
-    fn as_ref(&self) -> &str { self.0.as_ref() }
-}
+    //fn from_str(s: &str) -> Result<Self, Self::Err> {
+        //Self::try_from_static_cow(s.to_owned().into())
+    //}
+//}
 
 impl encoding::Encode for CommandString {
-    type Encoder<'e> = CommandStringEncoder;
+    type Encoder<'e> = CommandStringEncoder where Self: 'e;
 
     fn encoder(&self) -> Self::Encoder<'_> {
-        let mut rawbytes = [0u8; 12];
-        let strbytes = self.0.as_bytes();
-        debug_assert!(strbytes.len() <= 12);
-        rawbytes[..strbytes.len()].copy_from_slice(strbytes);
-        CommandStringEncoder::without_length_prefix(rawbytes)
+        CommandStringEncoder::new(ArrayEncoder::without_length_prefix(self.0))
     }
 }
+
+/// Decoder for the [`CommandString`] type
+#[derive(Debug, Default, Clone)]
+pub struct CommandStringDecoder(ArrayDecoder<12>);
 
 impl encoding::Decode for CommandString {
     type Decoder = CommandStringDecoder;
@@ -131,9 +125,8 @@ impl encoding::Decode for CommandString {
 pub struct CommandStringEncoder(encoding::ArrayEncoder<12>);
 
 impl CommandStringEncoder {
-    /// Constructs an encoder which encodes the command string with no length prefix.
-    pub const fn without_length_prefix(arr: [u8; 12]) -> Self {
-        Self(encoding::ArrayEncoder::without_length_prefix(arr))
+    pub(crate) const fn new(encoder: ArrayEncoder<12>) -> Self {
+        CommandStringEncoder(encoder)
     }
 }
 
@@ -150,34 +143,20 @@ impl encoding::ExactSizeEncoder for CommandStringEncoder {
     fn len(&self) -> usize { self.0.len() }
 }
 
-/// Decoder for [`CommandString`].
-#[derive(Debug, Default, Clone)]
-pub struct CommandStringDecoder {
-    inner: encoding::ArrayDecoder<12>,
-}
-
 impl encoding::Decoder for CommandStringDecoder {
     type Output = CommandString;
     type Error = CommandStringDecoderError;
 
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
-        self.inner.push_bytes(bytes).map_err(CommandStringDecoderError::UnexpectedEof)
+        self.0.push_bytes(bytes).map_err(CommandStringDecoderError::UnexpectedEof)
     }
 
     fn end(self) -> Result<Self::Output, Self::Error> {
-        let rawbytes = self.inner.end().map_err(CommandStringDecoderError::UnexpectedEof)?;
-        // Trim null padding from the end.
-        let trimmed =
-            rawbytes.iter().rposition(|&b| b != 0).map_or(&rawbytes[..0], |i| &rawbytes[..=i]);
-
-        if !trimmed.is_ascii() {
-            return Err(CommandStringDecoderError::NotAscii);
-        }
-
-        Ok(CommandString(Cow::Owned(unsafe { String::from_utf8_unchecked(trimmed.to_vec()) })))
+        let cmd = self.0.end().map_err(CommandStringDecoderError::UnexpectedEof)?;
+        Ok(CommandString(cmd))
     }
 
-    fn read_limit(&self) -> usize { self.inner.read_limit() }
+    fn read_limit(&self) -> usize { self.0.read_limit() }
 }
 
 /// A v1 message header used to describe the incoming payload.
@@ -205,10 +184,11 @@ impl V1MessageHeader {
     /// # Panics
     ///
     /// Panics if the payload length exceeds `u32::MAX`.
-    pub fn new<T: encoding::Encode>(magic: Magic, message: &T, command: &'static str) -> Self {
+    pub fn new<T: encoding::Encode>(magic: Magic, message: &T, command: &str) -> Self {
         let (bytes_hashed, checksum) = sha2_checksum(message);
         let payload_len = u32::try_from(bytes_hashed).expect("network message use u32 as length");
-        let command = CommandString::try_from_static(command).unwrap();
+        let command: CommandString = CommandString::try_from(command).unwrap();
+        //let command = CommandString(*command);
 
         Self { magic, command, length: payload_len, checksum }
     }
