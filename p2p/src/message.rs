@@ -1127,9 +1127,6 @@ enum NetworkMessageDecoderInner {
     Reject(message_network::RejectDecoder),
     FeeFilter(FeeFilterDecoder),
     AddrV2(AddrV2PayloadDecoder),
-    /// Zero-payload messages: verack, mempool, sendheaders, getaddr, wtxidrelay,
-    /// filterclear, sendaddrv2.
-    Empty(CommandString),
     /// Unknown message — must buffer since type is unknown at compile time.
     Unknown {
         command: CommandString,
@@ -1143,8 +1140,6 @@ impl NetworkMessageDecoderInner {
         use encoding::Decode as _;
         match command.as_ref() {
             "version" => Self::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "mempool" | "getaddr" | "wtxidrelay" | "filterclear"
-            | "sendaddrv2" => Self::Empty(command),
             "addr" => Self::Addr(AddrPayload::decoder()),
             "inv" => Self::Inv(InventoryPayload::decoder()),
             "getdata" => Self::GetData(InventoryPayload::decoder()),
@@ -1218,7 +1213,6 @@ impl encoding::Decoder for NetworkMessageDecoderInner {
             Self::Reject(d) => d.push_bytes(bytes).map_err(|_| err),
             Self::FeeFilter(d) => d.push_bytes(bytes).map_err(|_| err),
             Self::AddrV2(d) => d.push_bytes(bytes).map_err(|_| err),
-            Self::Empty(_) => Ok(false),
             Self::Unknown { remaining, buffer, .. } => {
                 let copy_len = bytes.len().min(*remaining);
                 let (to_copy, rest) = bytes.split_at(copy_len);
@@ -1263,16 +1257,6 @@ impl encoding::Decoder for NetworkMessageDecoderInner {
             Self::Reject(d) => Ok(NetworkMessage::Reject(d.end().map_err(|_| err)?)),
             Self::FeeFilter(d) => Ok(NetworkMessage::FeeFilter(d.end().map_err(|_| err)?)),
             Self::AddrV2(d) => Ok(NetworkMessage::AddrV2(d.end().map_err(|_| err)?)),
-            Self::Empty(cmd) => match cmd.as_ref() {
-                "verack" => Ok(NetworkMessage::Verack),
-                "mempool" => Ok(NetworkMessage::MemPool),
-                "sendheaders" => Ok(NetworkMessage::SendHeaders),
-                "getaddr" => Ok(NetworkMessage::GetAddr),
-                "wtxidrelay" => Ok(NetworkMessage::WtxidRelay),
-                "filterclear" => Ok(NetworkMessage::FilterClear),
-                "sendaddrv2" => Ok(NetworkMessage::SendAddrV2),
-                _ => Err(err),
-            },
             Self::Unknown { command, buffer, remaining } => {
                 if remaining != 0 {
                     return Err(err);
@@ -1312,7 +1296,6 @@ impl encoding::Decoder for NetworkMessageDecoderInner {
             Self::Reject(d) => d.read_limit(),
             Self::FeeFilter(d) => d.read_limit(),
             Self::AddrV2(d) => d.read_limit(),
-            Self::Empty(_) => 0,
             Self::Unknown { remaining, .. } => *remaining,
         }
     }
@@ -1751,9 +1734,6 @@ impl V2NetworkMessageDecoder {
         use encoding::Decode as _;
         use NetworkMessageDecoderInner as E;
 
-        let err = V2NetworkMessageDecoderError::Payload(V1NetworkMessageDecoderError(
-            V1NetworkMessageDecoderErrorInner::Payload,
-        ));
         (match short_id {
             1u8 => Ok(E::Addr(AddrPayload::decoder())),
             2u8 => Ok(E::Block(block::Block::decoder())),
@@ -1761,7 +1741,6 @@ impl V2NetworkMessageDecoder {
             4u8 => Ok(E::CmpctBlock(bip152::HeaderAndShortIds::decoder())),
             5u8 => Ok(E::FeeFilter(FeeFilter::decoder())),
             6u8 => Ok(E::FilterAdd(message_bloom::FilterAdd::decoder())),
-            7u8 => Ok(E::Empty(CommandString::try_from_static("filterclear").map_err(|_| err)?)),
             8u8 => Ok(E::FilterLoad(message_bloom::FilterLoad::decoder())),
             9u8 => Ok(E::GetBlocks(message_blockdata::GetBlocksMessage::decoder())),
             10u8 => Ok(E::GetBlockTxn(bip152::BlockTransactionsRequest::decoder())),
@@ -1769,7 +1748,6 @@ impl V2NetworkMessageDecoder {
             12u8 => Ok(E::GetHeaders(message_blockdata::GetHeadersMessage::decoder())),
             13u8 => Ok(E::Headers(HeadersMessage::decoder())),
             14u8 => Ok(E::Inv(InventoryPayload::decoder())),
-            15u8 => Ok(E::Empty(CommandString::try_from_static("mempool").map_err(|_| err)?)),
             16u8 => Ok(E::MerkleBlock(MerkleBlock::decoder())),
             17u8 => Ok(E::NotFound(InventoryPayload::decoder())),
             18u8 => Ok(E::Ping(Ping::decoder())),
@@ -1795,7 +1773,6 @@ impl V2NetworkMessageDecoder {
 
         NetworkMessageDecoder::from_inner(match command.as_ref() {
             "version" => E::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "getaddr" | "wtxidrelay" | "sendaddrv2" => E::Empty(command),
             "alert" => E::Alert(message_network::Alert::decoder()),
             "reject" => E::Reject(message_network::Reject::decoder()),
             _ => E::Unknown {
@@ -2854,6 +2831,14 @@ mod test {
         } else {
             panic!("wrong message type");
         }
+    }
+
+    #[test]
+    fn header_only_message() {
+        // Zero-payload messages: verack, mempool, sendheaders, getaddr, wtxidrelay,
+        // filterclear, sendaddrv2.
+
+        //let version_message = message::V1NetworkMessage::new(magic, version_message);
     }
 
     #[test]
