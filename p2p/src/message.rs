@@ -76,6 +76,10 @@ impl CommandString {
     }
 }
 
+impl Default for CommandString {
+    fn default() -> Self { Self([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) }
+}
+
 impl TryFrom<String> for CommandString {
     type Error = CommandStringError;
 
