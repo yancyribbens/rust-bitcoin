@@ -196,6 +196,17 @@ pub struct V1MessageHeader {
     pub checksum: [u8; 4],
 }
 
+impl Default for V1MessageHeader {
+    fn default() -> Self {
+        Self { 
+            magic: Magic::BITCOIN,
+            command: CommandString::default(),
+            length: 0,
+            checksum: [0, 0, 0, 0]
+        }
+    }
+}
+
 impl V1MessageHeader {
     /// Constructs a new [`V1MessageHeader`] with computed 4 byte checksum.
     ///
@@ -1122,9 +1133,6 @@ enum NetworkMessageDecoderInner {
     Reject(message_network::RejectDecoder),
     FeeFilter(FeeFilterDecoder),
     AddrV2(AddrV2PayloadDecoder),
-    /// Zero-payload messages: verack, mempool, sendheaders, getaddr, wtxidrelay,
-    /// filterclear, sendaddrv2.
-    Empty(CommandString),
     /// Unknown message — must buffer since type is unknown at compile time.
     Unknown {
         command: CommandString,
@@ -1138,8 +1146,6 @@ impl NetworkMessageDecoderInner {
         use encoding::Decode as _;
         match command.as_ref() {
             "version" => Self::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "mempool" | "getaddr" | "wtxidrelay" | "filterclear"
-            | "sendaddrv2" => Self::Empty(command),
             "addr" => Self::Addr(AddrPayload::decoder()),
             "inv" => Self::Inv(InventoryPayload::decoder()),
             "getdata" => Self::GetData(InventoryPayload::decoder()),
@@ -1213,7 +1219,6 @@ impl encoding::Decoder for NetworkMessageDecoderInner {
             Self::Reject(d) => d.push_bytes(bytes).map_err(|_| err),
             Self::FeeFilter(d) => d.push_bytes(bytes).map_err(|_| err),
             Self::AddrV2(d) => d.push_bytes(bytes).map_err(|_| err),
-            Self::Empty(_) => Ok(false),
             Self::Unknown { remaining, buffer, .. } => {
                 let copy_len = bytes.len().min(*remaining);
                 let (to_copy, rest) = bytes.split_at(copy_len);
@@ -1258,16 +1263,6 @@ impl encoding::Decoder for NetworkMessageDecoderInner {
             Self::Reject(d) => Ok(NetworkMessage::Reject(d.end().map_err(|_| err)?)),
             Self::FeeFilter(d) => Ok(NetworkMessage::FeeFilter(d.end().map_err(|_| err)?)),
             Self::AddrV2(d) => Ok(NetworkMessage::AddrV2(d.end().map_err(|_| err)?)),
-            Self::Empty(cmd) => match cmd.as_ref() {
-                "verack" => Ok(NetworkMessage::Verack),
-                "mempool" => Ok(NetworkMessage::MemPool),
-                "sendheaders" => Ok(NetworkMessage::SendHeaders),
-                "getaddr" => Ok(NetworkMessage::GetAddr),
-                "wtxidrelay" => Ok(NetworkMessage::WtxidRelay),
-                "filterclear" => Ok(NetworkMessage::FilterClear),
-                "sendaddrv2" => Ok(NetworkMessage::SendAddrV2),
-                _ => Err(err),
-            },
             Self::Unknown { command, buffer, remaining } => {
                 if remaining != 0 {
                     return Err(err);
@@ -1307,7 +1302,6 @@ impl encoding::Decoder for NetworkMessageDecoderInner {
             Self::Reject(d) => d.read_limit(),
             Self::FeeFilter(d) => d.read_limit(),
             Self::AddrV2(d) => d.read_limit(),
-            Self::Empty(_) => 0,
             Self::Unknown { remaining, .. } => *remaining,
         }
     }
@@ -1374,6 +1368,7 @@ impl encoding::Decoder for NetworkMessageDecoder {
 #[derive(Debug, Clone)]
 enum DecoderState {
     ReadingHeader {
+        header: V1MessageHeader,
         header_decoder: V1MessageHeaderDecoder,
     },
     ReadingPayload {
@@ -1386,7 +1381,10 @@ enum DecoderState {
 
 impl Default for DecoderState {
     fn default() -> Self {
-        Self::ReadingHeader { header_decoder: V1MessageHeaderDecoder::default() }
+        Self::ReadingHeader {
+            header_decoder: V1MessageHeaderDecoder::default(),
+            header: V1MessageHeader::default()
+        }
     }
 }
 
@@ -1406,42 +1404,47 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
         match &mut self.state {
-            DecoderState::ReadingHeader { header_decoder } => {
+            DecoderState::ReadingHeader { header_decoder, .. } => {
                 let need_more = header_decoder.push_bytes(bytes).map_err(|e| {
                     V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Header(e))
                 })?;
 
                 if !need_more {
+                    let header = header_decoder.clone().end().map_err(|e| {
+                        V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Header(e))
+                    })?;
+
                     // Header complete, extract values and transition to payload state.
                     let old_state = core::mem::replace(
                         &mut self.state,
                         DecoderState::ReadingHeader {
                             header_decoder: <V1MessageHeader as encoding::Decode>::decoder(),
+                            header: header.clone()
                         },
                     );
 
-                    let DecoderState::ReadingHeader { header_decoder } = old_state else {
+                    let DecoderState::ReadingHeader { .. } = old_state else {
                         unreachable!("we are in ReadingHeader state")
                     };
 
-                    let header = header_decoder.end().map_err(|e| {
-                        V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Header(e))
-                    })?;
                     let payload_len = usize::try_from(header.length)
                         .expect("u32 -> usize cast ok for >= 32-bit platforms");
+
                     if payload_len > MAX_MSG_SIZE {
                         return Err(V1NetworkMessageDecoderError(
                             V1NetworkMessageDecoderErrorInner::PayloadTooLarge,
                         ));
+                    } else if payload_len == 0 {
+                        return self.push_bytes(bytes);
+                    } else {
+                        let payload_decoder = NetworkMessageDecoder::new(header.command, payload_len);
+                        self.state = DecoderState::ReadingPayload {
+                            magic: header.magic,
+                            length: header.length,
+                            checksum: header.checksum,
+                            payload_decoder,
+                        };
                     }
-
-                    let payload_decoder = NetworkMessageDecoder::new(header.command, payload_len);
-                    self.state = DecoderState::ReadingPayload {
-                        magic: header.magic,
-                        length: header.length,
-                        checksum: header.checksum,
-                        payload_decoder,
-                    };
 
                     // Continue with any remaining bytes.
                     return self.push_bytes(bytes);
@@ -1456,11 +1459,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn end(self) -> Result<Self::Output, Self::Error> {
         match self.state {
-            DecoderState::ReadingHeader { header_decoder } => Err(header_decoder
-                .end()
-                .map_err(V1NetworkMessageDecoderErrorInner::Header)
-                .map_err(V1NetworkMessageDecoderError)
-                .expect_err("push_bytes() moves to ReadingPayload on header_decoder completion")),
+            DecoderState::ReadingHeader { header_decoder, .. } => panic!("oops {:?}", header_decoder),
             DecoderState::ReadingPayload { magic, length, checksum, payload_decoder, .. } => {
                 let payload = payload_decoder.end()?;
                 let (_, expected_checksum) = sha2_checksum(&payload);
@@ -1480,7 +1479,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn read_limit(&self) -> usize {
         match &self.state {
-            DecoderState::ReadingHeader { header_decoder } => header_decoder.read_limit(),
+            DecoderState::ReadingHeader { header_decoder, .. } => header_decoder.read_limit(),
             DecoderState::ReadingPayload { payload_decoder, .. } => payload_decoder.read_limit(),
         }
     }
@@ -1748,17 +1747,13 @@ impl V2NetworkMessageDecoder {
         use encoding::Decode as _;
         use NetworkMessageDecoderInner as E;
 
-        let err = V2NetworkMessageDecoderError::Payload(V1NetworkMessageDecoderError(
-            V1NetworkMessageDecoderErrorInner::Payload,
-        ));
-        (match short_id {
+        match short_id {
             1u8 => Ok(E::Addr(AddrPayload::decoder())),
             2u8 => Ok(E::Block(block::Block::decoder())),
             3u8 => Ok(E::BlockTxn(bip152::BlockTransactions::decoder())),
             4u8 => Ok(E::CmpctBlock(bip152::HeaderAndShortIds::decoder())),
             5u8 => Ok(E::FeeFilter(FeeFilter::decoder())),
             6u8 => Ok(E::FilterAdd(message_bloom::FilterAdd::decoder())),
-            7u8 => Ok(E::Empty(CommandString::try_from("filterclear").map_err(|_| err)?)),
             8u8 => Ok(E::FilterLoad(message_bloom::FilterLoad::decoder())),
             9u8 => Ok(E::GetBlocks(message_blockdata::GetBlocksMessage::decoder())),
             10u8 => Ok(E::GetBlockTxn(bip152::BlockTransactionsRequest::decoder())),
@@ -1766,7 +1761,6 @@ impl V2NetworkMessageDecoder {
             12u8 => Ok(E::GetHeaders(message_blockdata::GetHeadersMessage::decoder())),
             13u8 => Ok(E::Headers(HeadersMessage::decoder())),
             14u8 => Ok(E::Inv(InventoryPayload::decoder())),
-            15u8 => Ok(E::Empty(CommandString::try_from("mempool").map_err(|_| err)?)),
             16u8 => Ok(E::MerkleBlock(MerkleBlock::decoder())),
             17u8 => Ok(E::NotFound(InventoryPayload::decoder())),
             18u8 => Ok(E::Ping(Ping::decoder())),
@@ -1781,7 +1775,7 @@ impl V2NetworkMessageDecoder {
             27u8 => Ok(E::CFCheckpt(message_filter::CFCheckpt::decoder())),
             28u8 => Ok(E::AddrV2(AddrV2Payload::decoder())),
             id => Err(V2NetworkMessageDecoderError::UnknownShortId(id)),
-        })
+        }
         .map(NetworkMessageDecoder::from_inner)
     }
 
@@ -1792,7 +1786,6 @@ impl V2NetworkMessageDecoder {
 
         NetworkMessageDecoder::from_inner(match command.as_ref() {
             "version" => E::Version(message_network::VersionMessage::decoder()),
-            "verack" | "sendheaders" | "getaddr" | "wtxidrelay" | "sendaddrv2" => E::Empty(command),
             "alert" => E::Alert(message_network::Alert::decoder()),
             "reject" => E::Reject(message_network::Reject::decoder()),
             _ => E::Unknown {
