@@ -48,7 +48,7 @@ pub const MAX_INV_SIZE: usize = 50_000;
 pub const MAX_MSG_SIZE: usize = 5_000_000;
 
 /// Contains the message command.
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct CommandString([u8; 12]);
 
 impl CommandString {
@@ -156,7 +156,7 @@ impl encoding::Encode for CommandString {
 }
 
 /// Decoder for the [`CommandString`] type
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct CommandStringDecoder(ArrayDecoder<12>);
 
 impl encoding::Decoder for CommandStringDecoder {
@@ -184,7 +184,7 @@ impl CommandStringDecoder {
 }
 
 /// A v1 message header used to describe the incoming payload.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct V1MessageHeader {
     /// The network magic, a unique 4 byte sequence.
     pub magic: Magic,
@@ -1368,7 +1368,7 @@ impl encoding::Decoder for NetworkMessageDecoder {
 #[derive(Debug, Clone)]
 enum DecoderState {
     ReadingHeader {
-        header: V1MessageHeader,
+        header: V1MessageHeader,  //TODO could this just be a NetworkMessageDecoder too?
     },
     ReadingPayload {
         magic: Magic,
@@ -1409,7 +1409,17 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                 })?;
 
                 if !need_more {
-                    let header = header_decoder.clone().end().map_err(|e| {
+                    // header we now can match to find what type of network message we need.
+                    // this shoud be the priority to test that  this works by matching on the
+                    // resulting command field in the header.
+                    //
+                    // I suspect the clone must be needed due to needing to a a alloc?
+                    //
+                    // This begs the question, is V1MessageHeaderDecoder compased of types that
+                    // need an alloc.  Stranglely all of the decoders seem to be ArrayDecoder<N>
+                    //
+                    // Interesting this now comiles fine when removing clone()
+                    let header: V1MessageHeader = header_decoder.end().map_err(|e| {
                         V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Header(e))
                     })?;
 
@@ -1417,7 +1427,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                     let old_state = core::mem::replace(
                         &mut self.state,
                         DecoderState::ReadingHeader {
-                            header: header.clone()
+                            header
                         },
                     );
 
@@ -1457,7 +1467,8 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn end(self) -> Result<Self::Output, Self::Error> {
         match self.state {
-            DecoderState::ReadingHeader { .. } => panic!("oops"),
+            DecoderState::ReadingHeader { .. } =>
+                todo!("match different empty headers finding which of the empty (no body) decoders to return as payload decoder."),
             DecoderState::ReadingPayload { magic, length, checksum, payload_decoder, .. } => {
                 let payload = payload_decoder.end()?;
                 let (_, expected_checksum) = sha2_checksum(&payload);
@@ -1477,7 +1488,8 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn read_limit(&self) -> usize {
         match &self.state {
-            DecoderState::ReadingHeader { header } => header.length.try_into().unwrap(),
+            DecoderState::ReadingHeader { header } =>
+                todo!("this shoudl be the read_limit of the header decoder. try V1MessageHeaderDecoder::default().read_limit().  Maybe instead it's best to keep the decoder that has been read, sionce I think the read_limit will be the bytes actuaulyy read?  Would be a good qeustion to answer for myself, though."),
             DecoderState::ReadingPayload { payload_decoder, .. } => payload_decoder.read_limit(),
         }
     }
