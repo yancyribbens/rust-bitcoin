@@ -1488,8 +1488,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn read_limit(&self) -> usize {
         match &self.state {
-            DecoderState::ReadingHeader { header } =>
-                todo!("this shoudl be the read_limit of the header decoder. try V1MessageHeaderDecoder::default().read_limit().  Maybe instead it's best to keep the decoder that has been read, sionce I think the read_limit will be the bytes actuaulyy read?  Would be a good qeustion to answer for myself, though."),
+            DecoderState::ReadingHeader { .. } => V1MessageHeaderDecoder::default().read_limit(),
             DecoderState::ReadingPayload { payload_decoder, .. } => payload_decoder.read_limit(),
         }
     }
