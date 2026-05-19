@@ -1466,9 +1466,24 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
     }
 
     fn end(self) -> Result<Self::Output, Self::Error> {
+        let err = V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Payload);
         match self.state {
-            DecoderState::ReadingHeader { .. } =>
-                todo!("match different empty headers finding which of the empty (no body) decoders to return as payload decoder."),
+            DecoderState::ReadingHeader { header } => {
+
+                let payload = match header.command.as_ref() {
+                    "verack" => Ok(NetworkMessage::Verack),
+                    "mempool" => Ok(NetworkMessage::MemPool),
+                    "sendheaders" => Ok(NetworkMessage::SendHeaders),
+                    "getaddr" => Ok(NetworkMessage::GetAddr),
+                    "wtxidrelay" => Ok(NetworkMessage::WtxidRelay),
+                    "filterclear" => Ok(NetworkMessage::FilterClear),
+                    "sendaddrv2" => Ok(NetworkMessage::SendAddrV2),
+                    _ => Err(err)
+                }?;
+
+            Ok(V1NetworkMessage { magic: header.magic, payload, payload_len: header.length, checksum: header.checksum })
+
+            },
             DecoderState::ReadingPayload { magic, length, checksum, payload_decoder, .. } => {
                 let payload = payload_decoder.end()?;
                 let (_, expected_checksum) = sha2_checksum(&payload);
