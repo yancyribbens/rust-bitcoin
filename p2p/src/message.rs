@@ -216,6 +216,17 @@ impl V1MessageHeader {
     }
 }
 
+impl Default for V1MessageHeader {
+    fn default() -> Self {
+        Self {
+            magic: Magic::REGTEST,
+            command: CommandString::default(),
+            length: 0,
+            checksum: [0; 4]
+        }
+    }
+}
+
 impl encoding::Encode for V1MessageHeader {
     type Encoder<'e>
         = V1MessageHeaderEncoder<'e>
