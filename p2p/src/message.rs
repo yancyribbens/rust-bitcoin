@@ -184,7 +184,7 @@ impl CommandStringDecoder {
 }
 
 /// A v1 message header used to describe the incoming payload.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct V1MessageHeader {
     /// The network magic, a unique 4 byte sequence.
     pub magic: Magic,
