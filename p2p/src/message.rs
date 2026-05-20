@@ -1385,8 +1385,7 @@ impl encoding::Decoder for NetworkMessageDecoder {
 #[derive(Debug, Clone)]
 enum DecoderState {
     ReadingHeader {
-        header_decoder: V1MessageHeaderDecoder,
-        header: V1MessageHeader,
+        header: V1MessageHeader
     },
     ReadingPayload {
         magic: Magic,
@@ -1399,8 +1398,7 @@ enum DecoderState {
 impl Default for DecoderState {
     fn default() -> Self {
         Self::ReadingHeader {
-            header_decoder: V1MessageHeaderDecoder::default(),
-            header: V1MessageHeader::default(),
+            header: V1MessageHeader::default()
         }
     }
 }
@@ -1421,13 +1419,14 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
         match &mut self.state {
-            DecoderState::ReadingHeader { header_decoder, .. } => {
+            DecoderState::ReadingHeader { .. } => {
+                let mut header_decoder = V1MessageHeaderDecoder::default();
                 let need_more = header_decoder.push_bytes(bytes).map_err(|e| {
                     V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Header(e))
                 })?;
 
                 if !need_more {
-                    let header: V1MessageHeader = header_decoder.clone().end().map_err(|e| {
+                    let header = header_decoder.end().map_err(|e| {
                         V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Header(e))
                     })?;
 
@@ -1435,18 +1434,14 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
                     let old_state = core::mem::replace(
                         &mut self.state,
                         DecoderState::ReadingHeader {
-                            header_decoder: <V1MessageHeader as encoding::Decode>::decoder(),
                             header 
                         },
                     );
 
-                    let DecoderState::ReadingHeader { header_decoder, .. } = old_state else {
+                    let DecoderState::ReadingHeader { .. } = old_state else {
                         unreachable!("we are in ReadingHeader state")
                     };
 
-                    let header = header_decoder.end().map_err(|e| {
-                        V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Header(e))
-                    })?;
                     let payload_len = usize::try_from(header.length)
                         .expect("u32 -> usize cast ok for >= 32-bit platforms");
                     if payload_len > MAX_MSG_SIZE {
@@ -1476,11 +1471,15 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn end(self) -> Result<Self::Output, Self::Error> {
         match self.state {
-            DecoderState::ReadingHeader { header_decoder, .. } => Err(header_decoder
-                .end()
-                .map_err(V1NetworkMessageDecoderErrorInner::Header)
-                .map_err(V1NetworkMessageDecoderError)
-                .expect_err("push_bytes() moves to ReadingPayload on header_decoder completion")),
+            DecoderState::ReadingHeader { .. } =>
+                panic!("oops"),
+
+                // TODO add placeholder error
+                //Err(header_decoder
+                //.end()
+                //.map_err(V1NetworkMessageDecoderErrorInner::Header)
+                //.map_err(V1NetworkMessageDecoderError)
+                //.expect_err("push_bytes() moves to ReadingPayload on header_decoder completion")),
             DecoderState::ReadingPayload { magic, length, checksum, payload_decoder, .. } => {
                 let payload = payload_decoder.end()?;
                 let (_, expected_checksum) = sha2_checksum(&payload);
@@ -1500,7 +1499,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn read_limit(&self) -> usize {
         match &self.state {
-            DecoderState::ReadingHeader { header_decoder, .. } => header_decoder.read_limit(),
+            DecoderState::ReadingHeader { .. } => V1MessageHeaderDecoder::default().read_limit() ,
             DecoderState::ReadingPayload { payload_decoder, .. } => payload_decoder.read_limit(),
         }
     }
