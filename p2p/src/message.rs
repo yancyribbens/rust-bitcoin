@@ -1386,6 +1386,7 @@ impl encoding::Decoder for NetworkMessageDecoder {
 enum DecoderState {
     ReadingHeader {
         header_decoder: V1MessageHeaderDecoder,
+        header: V1MessageHeader,
     },
     ReadingPayload {
         magic: Magic,
@@ -1397,7 +1398,10 @@ enum DecoderState {
 
 impl Default for DecoderState {
     fn default() -> Self {
-        Self::ReadingHeader { header_decoder: V1MessageHeaderDecoder::default() }
+        Self::ReadingHeader {
+            header_decoder: V1MessageHeaderDecoder::default(),
+            header: V1MessageHeader::default(),
+        }
     }
 }
 
@@ -1417,21 +1421,26 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn push_bytes(&mut self, bytes: &mut &[u8]) -> Result<bool, Self::Error> {
         match &mut self.state {
-            DecoderState::ReadingHeader { header_decoder } => {
+            DecoderState::ReadingHeader { header_decoder, .. } => {
                 let need_more = header_decoder.push_bytes(bytes).map_err(|e| {
                     V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Header(e))
                 })?;
 
                 if !need_more {
+                    let header: V1MessageHeader = header_decoder.clone().end().map_err(|e| {
+                        V1NetworkMessageDecoderError(V1NetworkMessageDecoderErrorInner::Header(e))
+                    })?;
+
                     // Header complete, extract values and transition to payload state.
                     let old_state = core::mem::replace(
                         &mut self.state,
                         DecoderState::ReadingHeader {
                             header_decoder: <V1MessageHeader as encoding::Decode>::decoder(),
+                            header 
                         },
                     );
 
-                    let DecoderState::ReadingHeader { header_decoder } = old_state else {
+                    let DecoderState::ReadingHeader { header_decoder, .. } = old_state else {
                         unreachable!("we are in ReadingHeader state")
                     };
 
@@ -1467,7 +1476,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn end(self) -> Result<Self::Output, Self::Error> {
         match self.state {
-            DecoderState::ReadingHeader { header_decoder } => Err(header_decoder
+            DecoderState::ReadingHeader { header_decoder, .. } => Err(header_decoder
                 .end()
                 .map_err(V1NetworkMessageDecoderErrorInner::Header)
                 .map_err(V1NetworkMessageDecoderError)
@@ -1491,7 +1500,7 @@ impl encoding::Decoder for V1NetworkMessageDecoder {
 
     fn read_limit(&self) -> usize {
         match &self.state {
-            DecoderState::ReadingHeader { header_decoder } => header_decoder.read_limit(),
+            DecoderState::ReadingHeader { header_decoder, .. } => header_decoder.read_limit(),
             DecoderState::ReadingPayload { payload_decoder, .. } => payload_decoder.read_limit(),
         }
     }
