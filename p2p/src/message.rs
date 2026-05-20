@@ -156,7 +156,7 @@ impl encoding::Encode for CommandString {
 }
 
 /// Decoder for the [`CommandString`] type
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct CommandStringDecoder(ArrayDecoder<12>);
 
 impl encoding::Decoder for CommandStringDecoder {
