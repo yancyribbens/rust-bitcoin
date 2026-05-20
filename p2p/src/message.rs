@@ -48,7 +48,7 @@ pub const MAX_INV_SIZE: usize = 50_000;
 pub const MAX_MSG_SIZE: usize = 5_000_000;
 
 /// Contains the message command.
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct CommandString([u8; 12]);
 
 impl CommandString {
