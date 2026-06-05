@@ -2491,7 +2491,7 @@ mod test {
                 vec![0, 1, 2, 3, 10, 3002],
             )),
             NetworkMessage::BlockTxn(blocktxn),
-            NetworkMessage::SendCmpct(SendCmpct { send_compact: true, version: 8333 }),
+            NetworkMessage::SendCmpct(SendCmpct { send_compact: 1, version: 8333 }),
             NetworkMessage::SendTxRcnCl(SendTxRcnCl::from_salt(224)),
         ];
 

@@ -15,7 +15,7 @@ pub use self::error::SendCmpctDecoderError;
 #[derive(PartialEq, Eq, Clone, Debug, Copy, PartialOrd, Ord, Hash)]
 pub struct SendCmpct {
     /// Request to be sent compact blocks.
-    pub send_compact: bool,
+    pub send_compact: u8,
     /// Compact Blocks protocol version number.
     pub version: u64,
 }
@@ -48,7 +48,7 @@ crate::decoder_newtype! {
         result: Result<([u8; 1], [u8; 8]), <SendCmpctInnerDecoder as encoding::Decoder>::Error>
     ) -> Result<SendCmpct, SendCmpctDecoderError> {
         let (send_cmpct, version) = result.map_err(SendCmpctDecoderError)?;
-        let send_compact = u8::from_le_bytes(send_cmpct) != 0;
+        let send_compact = send_cmpct[0];
         Ok(SendCmpct { send_compact, version: u64::from_le_bytes(version) })
     }
 }
