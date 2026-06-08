@@ -301,7 +301,7 @@ where
 }
 
 /// Not enough bytes given to decoder.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct UnexpectedEofError {
     /// Number of bytes missing to complete decoder.
     pub(crate) missing: usize,
